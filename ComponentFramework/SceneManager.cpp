@@ -68,14 +68,17 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 
 
 void SceneManager::Run() {
-	timer->Start();
+	
+	timer->Initialize(fps);
 	isRunning = true;
-	while (isRunning) {
-		timer->UpdateFrameTicks();
-		currentScene->Update(timer->GetDeltaTime());
+	while (isRunning) {		
+		timer->StartFrameTime();	
+
+		currentScene->Update(timer->getDeltaTime());		
 		currentScene->Render();
-		GetEvents();
-		SDL_Delay(timer->GetSleepTime(fps));	
+
+		GetEvents();		
+		timer->EndFrameTime();
 	}
 }
 
@@ -118,7 +121,7 @@ void SceneManager::GetEvents() {
 				break;
 
 			default:
-				BuildScene(SCENE0);
+				//BuildScene(SCENE0);
 				break;
 			}
 		}

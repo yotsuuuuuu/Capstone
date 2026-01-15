@@ -11,14 +11,36 @@ public:
 	Timer& operator=(const Timer&) = delete;
 	Timer& operator=(Timer&&) = delete;
 
-	void Start();
-	void UpdateFrameTicks();
-	float GetDeltaTime() const;
-	unsigned int GetSleepTime(const unsigned int fps_) const;
-	float GetCurrentTicks() const;
+	/// <summary>
+	/// Initialize the timer with the target frames per second
+	/// </summary>
+	/// <param name="fps_"></param>
+	void Initialize(unsigned int fps_);	
+	/// <summary>
+	/// Returns the time elapsed since the last update/frame.
+	/// </summary>
+	/// <returns>The elapsed time (delta time) as a float, in seconds.</returns>
+	float getDeltaTime() { return dt; }
+	/// <summary>
+	/// Call at the start of each frame to begin timing
+	/// </summary>
+	void StartFrameTime();
+	/// <summary>
+	/// Call at the end of each frame to cap the frame rate
+	/// if necessary it sleeps the remaining time to hit the target frame time
+	/// </summary>
+	void EndFrameTime();	
+	
 private:
-	unsigned int prevTicks;
-	unsigned int currTicks;
+		
+	uint64_t targetFrameTime;
+	unsigned int fps;
+	uint64_t prevFrame;
+	uint64_t currFrame;
+	uint64_t frequency;
+	float dt;
+
+	
 };
 
 #endif

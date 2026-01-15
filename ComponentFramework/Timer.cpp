@@ -1,37 +1,40 @@
 #include "SDL3/SDL.h"
 #include "Timer.h"
+#include <algorithm>
 
-Timer::Timer() {
-	prevTicks = 0;
-	currTicks = 0;
-}
-
+Timer::Timer():targetFrameTime (0), fps(0),prevFrame(0), currFrame(0),frequency(0),dt(0){}
 Timer::~Timer() {}
+void Timer::Initialize(unsigned int fps_)
+{
+	fps = fps_;
+	frequency = SDL_GetPerformanceFrequency();
+	targetFrameTime = frequency / static_cast<uint64_t>(fps);
+	prevFrame = SDL_GetPerformanceCounter();
 
-void Timer::UpdateFrameTicks() {
-	prevTicks = currTicks;
-	currTicks = SDL_GetTicks();
 }
 
-void Timer::Start() {
-	prevTicks = SDL_GetTicks();
-	currTicks = SDL_GetTicks();
+void Timer::StartFrameTime()
+{
+	currFrame = SDL_GetPerformanceCounter();
+
+	dt = static_cast<float>(currFrame - prevFrame) / static_cast<float>(frequency);
+	// Capped dt should change the max to a variable later
+	// Calculate dt and cache it for this frame
+	dt = SDL_clamp(dt, 0.0f, 0.03f);
+	prevFrame = currFrame;
 }
 
-float Timer::GetDeltaTime() const {
-	return (float(currTicks - prevTicks)) / 1000.0f;
-}
+void Timer::EndFrameTime()
+{
 
-unsigned int Timer::GetSleepTime(const unsigned int fps) const {
-	unsigned int milliSecsPerFrame = 1000 / fps;
-	if (milliSecsPerFrame == 0) {
-		return 0;
-	}
+	uint64_t frameTime = SDL_GetPerformanceCounter() - currFrame;
 
-	unsigned int sleepTime = milliSecsPerFrame - (SDL_GetTicks() - currTicks);
-	if (sleepTime > milliSecsPerFrame) {
-		return milliSecsPerFrame;
-	}
+	uint64_t sleepTime = std::max<int64_t>(0, targetFrameTime - frameTime);
 
-	return sleepTime;
+	//conversion form ticks to milliseconds
+	sleepTime = (sleepTime * 1000) / frequency; 
+
+	if( sleepTime > 0 )
+		SDL_Delay(static_cast<uint32_t>(sleepTime));
+
 }
