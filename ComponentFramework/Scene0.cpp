@@ -6,6 +6,7 @@
 #include "Debug.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
+#include "AssetManager.h"
 
 Scene0::Scene0(Renderer *renderer_): 
 	Scene(nullptr),renderer(renderer_) {
@@ -18,7 +19,8 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-
+	AssetManager assetManager; 
+	assetManager.Write("./test.json");
 	switch (renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -85,6 +87,7 @@ void Scene0::Update(const float deltaTime) {
 	static float elapsedTime = 0.0f;
 	elapsedTime += deltaTime;
 	mariosModelMatrix = MMath::rotate(elapsedTime * 90.0f, Vec3(0.0f, 1.0f, 0.0f)) ;
+	luigisModelMatrix =  MMath::translate(2.0, 0.0f,0.0f) * MMath::rotate(elapsedTime * 90.0f, Vec3(1.0f, 0.0f, 0.0f)) ;
 	luigisModelMatrix =  MMath::translate(2.0, 0.0f,0.0f) * MMath::rotate(elapsedTime * 90.0f, Vec3(1.0f, 0.0f, 0.0f)) ;
 }
 
