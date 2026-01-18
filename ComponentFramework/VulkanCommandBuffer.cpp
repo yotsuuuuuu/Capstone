@@ -31,6 +31,10 @@ void VulkanRenderer::CreateCommandBuffers() {
 void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
     if (start_stop == Recording::START) {
         vkDeviceWaitIdle(device); /// This is bad
+        imGuiSystem->BeginFrame();
+		imGuiSystem->TestUI();
+		imGuiSystem->EndFrame();
+
         for (size_t i = 0; i < primaryCommandBuffer.commandBuffers.size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -57,6 +61,7 @@ void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
     }
     else if (start_stop == Recording::STOP) {
         for (size_t i = 0; i < primaryCommandBuffer.commandBuffers.size(); i++) {
+			imGuiSystem->RecordCMDBuffer(primaryCommandBuffer.commandBuffers[i]);
             vkCmdEndRenderPass(primaryCommandBuffer.commandBuffers[i]);
             if (vkEndCommandBuffer(primaryCommandBuffer.commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");

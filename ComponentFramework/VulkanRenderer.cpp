@@ -1,6 +1,6 @@
 #include "VulkanRenderer.h"
 #include "DescriptorSetBuilder.h"
-
+#include "Debug.h"
 
 
 VulkanRenderer::VulkanRenderer(): /// Initialize all the variables
@@ -42,7 +42,11 @@ bool VulkanRenderer::OnCreate(){
     createCommandPool();
     CreateCommandBuffers();
     createSyncObjects();
-    
+
+	imGuiSystem = new VkImGUISystem();
+    auto cntx = GetImGuiContext();
+	imGuiSystem->Initialize(cntx);
+
     return true;
 }
 
@@ -50,7 +54,10 @@ void VulkanRenderer::OnDestroy() {
     vkDeviceWaitIdle(device); /// Wait for all commands to clear
     destroySwapChain();
 
+    delete imGuiSystem;
+    imGuiSystem = nullptr;
 
+    DestroyCommandBuffers();
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -83,7 +90,7 @@ void VulkanRenderer::RecreateSwapChain() {
     createRenderPass();
     createDepthResources();
     createFramebuffers();
-    CreateCommandBuffers();
+    //CreateCommandBuffers();
 }
 
 
@@ -824,6 +831,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRenderer::debugCallback(VkDebugUtilsMessage
 }
 
 
+
 VkResult VulkanRenderer::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr) {
@@ -888,10 +896,11 @@ void VulkanRenderer::BindDescriptorSet(VkPipelineLayout pipelineLayout, std::vec
 void VulkanRenderer::SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_) {
     ModelMatrixPushConst modelMatrixPushConst;
     modelMatrixPushConst.modelMatrix = modelMatrix_;
-    Matrix3 normalMatrix = Matrix3(MMath::transpose(MMath::inverse(modelMatrix_)));
+    modelMatrixPushConst.normalMatrix = MMath::transpose(MMath::inverse(modelMatrix_));
+   /* Matrix3 normalMatrix = Matrix3(MMath::transpose(MMath::inverse(modelMatrix_)));*/
 
     /// See the header file for an explanation of how I laid out this out in memory
-    modelMatrixPushConst.normalMatrix[0].x = normalMatrix[0];
+   /* modelMatrixPushConst.normalMatrix[0].x = normalMatrix[0];
     modelMatrixPushConst.normalMatrix[1].x = normalMatrix[1];
     modelMatrixPushConst.normalMatrix[2].x = normalMatrix[2];
 
@@ -901,10 +910,10 @@ void VulkanRenderer::SetPushConstant(const PipelineInfo pipelineInfo, const Matr
 
     modelMatrixPushConst.normalMatrix[0].z = normalMatrix[6];
     modelMatrixPushConst.normalMatrix[1].z = normalMatrix[7];
-    modelMatrixPushConst.normalMatrix[2].z = normalMatrix[8];
+    modelMatrixPushConst.normalMatrix[2].z = normalMatrix[8];*/
 
     for (uint32_t i = 0; i < getNumSwapchains(); i++) {
-        vkCmdPushConstants(primaryCommandBuffer.commandBuffers[i], pipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelMatrixPushConst), modelMatrix_);
+        vkCmdPushConstants(primaryCommandBuffer.commandBuffers[i], pipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelMatrixPushConst), &modelMatrixPushConst);
     }
 }
 
@@ -914,4 +923,40 @@ void VulkanRenderer::DestroyDescriptorSet(DescriptorSetInfo& descriptorSetInfo) 
     vkDestroyDescriptorSetLayout(device, descriptorSetInfo.descriptorSetLayout, nullptr);
     vkDestroyDescriptorPool(device, descriptorSetInfo.descriptorPool, nullptr);
     descriptorSetInfo.descriptorSet.clear();
+}
+
+
+
+ImGuiContex VulkanRenderer::GetImGuiContext()
+{
+    int count = 0 ;
+
+    SDL_DisplayID* dis = SDL_GetDisplays(&count);
+	float scale = SDL_GetDisplayContentScale(dis[0]);
+    if (scale <= 0.0f) {
+        Debug::Error("Failed to get display scale, defaulting to 1.0f", __FILE__, __LINE__);
+		scale = 1.0f;
+    }
+    if(dis)
+	    SDL_free(dis);
+
+	ImGuiContex c;
+	c.device = device;
+	c.framesInFlight = MAX_FRAMES_IN_FLIGHT;
+	c.numberofSwapchains = getNumSwapchains();
+	c.instance = instance;
+	c.mainPass = renderPass;
+	c.main_scale = scale;
+	c.physicalDevice = physicalDevice;
+	c.queue = graphicsQueue;
+	c.queueFamily = findQueueFamilies(physicalDevice).graphicsFamily.value();
+	c.window = window;
+	c.windowExtents = swapChainExtent;
+    
+    return c;
+}
+
+void VulkanRenderer::ImGUIHandelEvents(const SDL_Event& event)
+{
+	imGuiSystem->ImGUIHandelEvents(event);
 }

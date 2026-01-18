@@ -13,8 +13,7 @@ layout(binding = 0) uniform CameraUBO {
 
 layout(push_constant) uniform Push {
 	mat4 modelMatrix;
-	mat3x4 normalMatrix; 
-	vec4 pad;
+	mat4 normalMatrix; 
 } push;
 
 layout(binding = 1) uniform LightsUBO {
@@ -33,7 +32,7 @@ layout (location = 3) out vec3 lightDir[MAX_LIGHTS];
 
 void main() {
 	fragTexCoords = texCoords;
-	mat3 normalMatrix = mat3(transpose(inverse(push.modelMatrix)));
+	mat3 normalMatrix = mat3(push.modelMatrix);
 
 	vertNormal = normalize(normalMatrix * vNormal.xyz); /// Rotate the normal to the correct orientation 
 	vec3 vertPos = vec3(camera.viewMatrix * push.modelMatrix * vVertex); /// This is the position of the vertex from the origin

@@ -22,11 +22,13 @@
 #include "CoreStructs.h"
 #include "Renderer.h"
 #include "DescriptorSetBuilder.h"
+#include "VkImGUISystem.h"
 
 #include <Vector.h>
 #include <VMath.h>
 #include <MMath.h>
 #include <Hash.h>
+#include <memory>
 using namespace MATH;
 
 
@@ -159,21 +161,25 @@ public: /// Member functions
     /// See VulkanPipeline.cpp
     PipelineInfo CreateGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
-    void BindPipeline(VkPipeline pipeline);
     void DestroyPipeline(PipelineInfo pipeline);
     static std::vector<char> readFile(const std::string& filename);
 
 
     /// See VulkanMesh.cpp
     IndexedVertexBuffer LoadModelIndexed(const char* filename);
+	// Recording Fuctions
+	void RecordCommandBuffers(Recording start_stop); // located in VulkanCommandBuffer.cpp
     void BindMesh(IndexedVertexBuffer mesh);
+    void BindPipeline(VkPipeline pipeline);
     void DrawIndexed(IndexedVertexBuffer mesh);
+    void SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_);
+    //
     void DestroyIndexedMesh(IndexedVertexBuffer mesh_);
 private:
     void CreateVertexBuffer(IndexedVertexBuffer& indexedVertexBuffer, const std::vector<Vertex>& vertices);
     void CreateIndexBuffer(IndexedVertexBuffer& indexedVertexBuffer, const std::vector<uint32_t>& indices);
-        /// A helper function for createVertexBuffer()
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+   /// A helper function for createVertexBuffer()
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     
 
@@ -182,8 +188,6 @@ public:
     void createCommandPool();
     void CreateCommandBuffers();
     void DestroyCommandBuffers();
-    void RecordCommandBuffers(Recording start_stop);
-    void SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_);
     
     /// Some inlined getter and setters 
     SDL_Window* getWindow() { return window; }
@@ -335,6 +339,13 @@ private:
         }
     }
 
+
+    //ImGUI system
+	VkImGUISystem* imGuiSystem;
+    public:
+
+    ImGuiContex GetImGuiContext();
+	void ImGUIHandelEvents(const SDL_Event& event);
 };
 #endif 
 
