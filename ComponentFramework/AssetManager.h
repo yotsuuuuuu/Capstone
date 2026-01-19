@@ -3,7 +3,7 @@
 #include <memory>
 #include <map>
 #include <string>
-#include <json.hpp>
+#include "json.hpp"
 // link to examples and documantation https://github.com/nlohmann/json?tab=readme-ov-file#examples
 //link to exception list https://json.nlohmann.me/home/exceptions/
 //helpful video https://www.youtube.com/watch?v=NuWQp_uAvwo&t=119s
