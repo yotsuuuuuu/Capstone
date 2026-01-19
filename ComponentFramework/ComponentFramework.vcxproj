@@ -70,10 +70,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\fmod\FMOD Studio API Windows\api\core\inc;C:\fmod\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\fmod\FMOD Studio API Windows\api\core\inc;C:\fmod\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(IncludePath)</IncludePath>
@@ -90,7 +90,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib32;$(ProjectDir)third_party\SDL3\Lib32;$(ProjectDir)third_party\Vulkan\Lib32;C:\fmod\FMOD Studio API Windows\api\core\lib\x86;C:\fmod\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib32;$(ProjectDir)third_party\SDL3\Lib32;$(ProjectDir)third_party\Vulkan\Lib32;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x86;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;glew32.lib;glew32s.lib;opengl32.lib;vulkan-1.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -104,7 +104,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib64;$(ProjectDir)third_party\SDL3\Lib64;$(ProjectDir)third_party\Vulkan\Lib64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib64;$(ProjectDir)third_party\SDL3\Lib64;$(ProjectDir)third_party\Vulkan\Lib64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;glew32.lib;glew32s.lib;opengl32.lib;vulkan-1.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -122,7 +122,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib32;$(ProjectDir)third_party\SDL3\Lib32;$(ProjectDir)third_party\Vulkan\Lib32;C:\fmod\FMOD Studio API Windows\api\core\lib\x86;C:\fmod\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib32;$(ProjectDir)third_party\SDL3\Lib32;$(ProjectDir)third_party\Vulkan\Lib32;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x86;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;glew32.lib;glew32s.lib;opengl32.lib;vulkan-1.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -139,7 +139,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib64;$(ProjectDir)third_party\SDL3\Lib64;$(ProjectDir)third_party\Vulkan\Lib64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)third_party\OpenGL\Lib64;$(ProjectDir)third_party\SDL3\Lib64;$(ProjectDir)third_party\Vulkan\Lib64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;glew32.lib;glew32s.lib;opengl32.lib;vulkan-1.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
