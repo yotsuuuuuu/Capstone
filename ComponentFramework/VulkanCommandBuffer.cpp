@@ -30,6 +30,9 @@ void VulkanRenderer::CreateCommandBuffers() {
 
 void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
     if (start_stop == Recording::START) {
+        // need to fix this
+        // need ot wait on the current recording frame
+        // not the whole device
         vkDeviceWaitIdle(device); /// This is bad
         imGuiSystem->BeginFrame();
 		imGuiSystem->TestUI();

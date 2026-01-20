@@ -144,6 +144,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CActor.cpp" />
+    <ClCompile Include="CCameraActor.cpp" />
+    <ClCompile Include="CMaterial.cpp" />
+    <ClCompile Include="CMesh.cpp" />
+    <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -169,7 +174,13 @@
     <ClCompile Include="VulkanUniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CActor.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CCameraActor.h" />
+    <ClInclude Include="CMaterial.h" />
+    <ClInclude Include="CMesh.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="CTransform.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DescriptorSetBuilder.h" />
     <ClInclude Include="imconfig.h" />
