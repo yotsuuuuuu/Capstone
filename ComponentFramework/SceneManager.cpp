@@ -97,7 +97,7 @@ void SceneManager::GetEvents() {
 				return;
 
 			case SDL_SCANCODE_F1:
-				///BuildScene(SCENE1);
+					BuildScene(SCENE0);
 				break;
 
 			case SDL_SCANCODE_F2:
@@ -130,7 +130,7 @@ void SceneManager::GetEvents() {
 			isRunning = false;
 			return;
 		}
-		
+		static_cast<VulkanRenderer*>(renderer)->ImGUIHandelEvents(sdlEvent);
 		currentScene->HandleEvents(sdlEvent);
 	}
 }
@@ -139,6 +139,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 	bool status; 
 
 	if (currentScene != nullptr) {
+		currentScene->OnDestroy();
 		delete currentScene;
 		currentScene = nullptr;
 	}

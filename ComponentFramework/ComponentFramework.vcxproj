@@ -70,10 +70,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)third_party\OpenGL\include;$(ProjectDir)third_party\SDL3\Include;$(ProjectDir)third_party\Vulkan\Include;$(ProjectDir)third_party\MathLibrary\include;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\Program Files (x86)\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(IncludePath)</IncludePath>
@@ -144,7 +144,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="CActor.cpp" />
+    <ClCompile Include="CCameraActor.cpp" />
+    <ClCompile Include="CMaterial.cpp" />
+    <ClCompile Include="CMesh.cpp" />
+    <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -156,6 +160,7 @@
     <ClCompile Include="imgui_impl_vulkan.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="VkImGUISystem.cpp" />
     <ClCompile Include="VulkanCommandBuffer.cpp" />
     <ClCompile Include="OpenGLRenderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -169,8 +174,13 @@
     <ClCompile Include="VulkanUniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="CActor.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CCameraActor.h" />
+    <ClInclude Include="CMaterial.h" />
+    <ClInclude Include="CMesh.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="CTransform.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DescriptorSetBuilder.h" />
     <ClInclude Include="imconfig.h" />
@@ -183,8 +193,6 @@
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
-    <ClInclude Include="json.hpp" />
-    <ClInclude Include="json_fwd.hpp" />
     <ClInclude Include="OpenGLRenderer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene0.h" />
@@ -194,13 +202,13 @@
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="CoreStructs.h" />
     <ClInclude Include="UBO_Padding.h" />
+    <ClInclude Include="VkImGUISystem.h" />
     <ClInclude Include="VulkanRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Graphics Game Engine_Log.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="matrixs.json" />
     <None Include="shaders\multiPhong.frag" />
     <None Include="shaders\multiPhong.vert" />
     <None Include="shaders\phong.frag" />
@@ -209,7 +217,6 @@
     <None Include="shaders\simplePhong.vert" />
     <None Include="shaders\simpleTexture.frag" />
     <None Include="shaders\simpleTexture.vert" />
-    <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

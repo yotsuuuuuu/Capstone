@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <SDL3/SDL.h>
 #include <Vector.h>
 #include <VMath.h>
 #include <MMath.h>
@@ -53,10 +54,9 @@ struct LightsData {
 ///	Vec4    0(x)	3(y)	6(z)    0(w)			
 ///	Vec4    1(x)	4(y)	7(z)    0(w)		
 ///	Vec4    2(x)	5(y)	9(z)    0(w)		
-struct ModelMatrixPushConst {
+struct ModelMatrixPushConst { // adjust for ease of use in the shader vert file.
     Matrix4 modelMatrix;
-    Vec4 normalMatrix[3];
-    Vec4 pad;/// padding for right now
+    Matrix4 normalMatrix;
 };
 
 
@@ -88,5 +88,21 @@ struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
+};
+
+
+struct ImGuiContex {
+    uint32_t version = VK_API_VERSION_1_0;
+    VkInstance instance;
+    VkDevice device;
+    VkPhysicalDevice physicalDevice;
+    uint32_t queueFamily = (uint32_t)-1;
+    VkQueue queue;
+    VkRenderPass mainPass;
+    SDL_Window* window;
+    uint32_t framesInFlight;
+    uint32_t numberofSwapchains;
+    VkExtent2D windowExtents;
+    float main_scale;
 };
 

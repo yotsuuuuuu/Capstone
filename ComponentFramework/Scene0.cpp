@@ -97,7 +97,18 @@ void Scene0::Render() const {
 	case RendererType::VULKAN:
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-		
+		// notes for me:
+		// UBO should be only updated when it is not being worked on by the GPU
+		// we should use fences to ensure that
+		// thought: maybe we can wait for fence for like fractions of an ms 
+		// and see it vulkan can give be a success for the wait or not.
+		// apperently we can get the status on a fence using vkGetFenceStatus 
+		// but probly best idea to wait for fence for the current frame to be finished before updating UBOs
+		// todo : 1 implement function that waits for current frame and return a stuct with context info for that frame
+		// 2 use cntx to update UBOs
+		// 3 record on the right cmd buffer
+		// 4 submit the cmd buffer for that frame only
+
 		
 		vRenderer->RecordCommandBuffers(Recording::START);
 		vRenderer->BindMesh(mariosMesh);
@@ -130,7 +141,15 @@ void Scene0::OnDestroy() {
 	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());
-		vRenderer->DestroyCommandBuffers();
+		// the life time of the cmd buffers is bound to the cmd pool
+		// and i don't think the life time should be tied to the scene
+		// so commeted out and moved the destruction of primary cmd and the pool
+		// to the OnDestroy of the VulkanRenderer
+		// On the Same note: in recreate swapchains
+		// I removed the creation on of new cmd buffers
+		// 
+		//vRenderer->DestroyCommandBuffers(); 
+
 		vRenderer->DestroyPipeline(pipelineInfo);
 		vRenderer->DestroyDescriptorSet(mariosdescriptorSetInfo);
 		vRenderer->DestroyUBO(lightsUBO);

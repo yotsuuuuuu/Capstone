@@ -6,7 +6,7 @@
 #include "Debug.h"
 #include "MMath.h"
 
-using namespace MATH;
+
  
 int main(int argc, char* args[]) {
 /***	
@@ -15,6 +15,11 @@ int main(int argc, char* args[]) {
 		std::cout << "Your PATH is: " << env_p << '\n';
 	}
 ***/
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif 
+
+	
 	std::string name = { "Graphics Game Engine" };
 	Debug::DebugInit(name + "_Log");
 	Debug::Info("Starting the GameSceneManager", __FILE__, __LINE__);
@@ -23,8 +28,8 @@ int main(int argc, char* args[]) {
 		gsm->Run();
 	} 
 	delete gsm;
+
 	
-	_CrtDumpMemoryLeaks();
-	exit(0);
+	return 0;
 
 }
