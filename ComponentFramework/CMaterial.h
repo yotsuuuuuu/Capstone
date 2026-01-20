@@ -1,10 +1,14 @@
 #pragma once
 #include "Component.h"
 #include "CoreStructs.h"
+
+class Renderer;
+
 class CMaterial : public Component
 {
 	const char* textureFile;
 	Sampler2D texture;
+	Renderer* renderer;
 	//not sure
 	// if the Material should own the descriptor set info
 	// or the renderer should manage it
@@ -13,8 +17,8 @@ class CMaterial : public Component
 	DescriptorSetInfo descriptorSetInfo;
 
 public:
-	CMaterial(Ref<Component> parent_ = nullptr, const char* textureFile_ = nullptr)
-		: Component(parent_), textureFile(textureFile_), texture({}), descriptorSetInfo({}) {
+	CMaterial(Ref<Component> parent_,Renderer* renderer_, const char* textureFile_ = nullptr)
+		: Component(parent_),renderer(renderer_), textureFile(textureFile_), texture({}), descriptorSetInfo({}) {
 	}
 	virtual ~CMaterial() {}
 

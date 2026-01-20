@@ -2,13 +2,16 @@
 #include "Component.h"
 #include "CoreStructs.h"
 
+class Renderer;
+
 class CMesh : public Component
 {
 	const char* meshFile;
+	Renderer* renderer;
 	IndexedVertexBuffer mesh;
 public:
-	CMesh(Ref<Component> parent_ = nullptr, const char* meshFile_ = nullptr)
-		: Component(parent_), meshFile(meshFile_), mesh({}) {
+	CMesh(Ref<Component> parent_,Renderer* renderer_, const char* meshFile_ = nullptr)
+		: Component(parent_),renderer(renderer_), meshFile(meshFile_), mesh({}) {
 	}
 	virtual ~CMesh() {}
 	

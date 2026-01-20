@@ -1,6 +1,7 @@
 #include "CCameraActor.h"
-#include <SDL3/SDL.h>
 #include "CTransform.h"
+#include "VulkanRenderer.h"
+
 void CCameraActor::UpdateProjectionMatrix(const float& FOVY, const float& aspectRatio, const float& nearClip, const float& farClip)
 {
 	projectionMatrix = MATH::MMath::perspective(FOVY, aspectRatio, nearClip, farClip);
@@ -23,11 +24,74 @@ void CCameraActor::UpdateViewMatrix()
 bool CCameraActor::OnCreate()
 {
 	//TODO: implement camera UBO creation and initialization
+	if (isCreated) 
+		return true;
+	if(!renderer)
+		return false;
+
+	switch (renderer->getRendererType()) {
+	case RendererType::VULKAN:
+	{
+		VulkanRenderer* vRenderer;
+		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		cameraUBO = vRenderer->CreateUniformBuffers<CameraData>();
+		isCreated = true;
+		return true;
+	}
+	break;
+	}
+
 	return false;
 }
 
 void CCameraActor::OnDestroy()
 {
 	//TODO: implement camera UBO destruction
+	if(!isCreated)
+		return;
+
+	if(!renderer)
+		return;
+
+	switch (renderer->getRendererType()) {
+	case RendererType::VULKAN:
+	{
+		VulkanRenderer* vRenderer;
+		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		vkDeviceWaitIdle(vRenderer->getDevice());
+		vRenderer->DestroyUBO(cameraUBO);
+		isCreated = false;
+	}
+	break;
+	}
+}
+
+void CCameraActor::UpdateUBO()
+{
+	if(!isCreated)
+		return;
+	if (!renderer)
+		return;
+	UpdateViewMatrix();
+	switch (renderer->getRendererType()) {
+	case RendererType::VULKAN:
+	{
+		VulkanRenderer* vRenderer;
+		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+
+		vRenderer->UpdateUniformBuffer<CameraData>(GetCamDataUBO(), cameraUBO);
+
+
+	}break;
+	}
+}
+
+CameraData CCameraActor::GetCamDataUBO()
+{
+	CameraData ubo = {};
+	ubo.projectionMatrix = projectionMatrix;
+	ubo.viewMatrix = viewMatrix;
+
+	return ubo;
 }
 
