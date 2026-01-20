@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="CActor.cpp" />
     <ClCompile Include="CCameraActor.cpp" />
     <ClCompile Include="CMaterial.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="VulkanUniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetManager.h" />
     <ClInclude Include="CActor.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CCameraActor.h" />
@@ -193,6 +195,8 @@
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="json_fwd.hpp" />
     <ClInclude Include="OpenGLRenderer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene0.h" />
