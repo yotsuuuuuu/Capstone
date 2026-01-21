@@ -960,3 +960,148 @@ void VulkanRenderer::ImGUIHandelEvents(const SDL_Event& event)
 {
 	imGuiSystem->ImGUIHandelEvents(event);
 }
+
+void VulkanRenderer::AddToDescrisptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count)
+{
+ 
+    SingleDescriptorSetLayoutInfo singleDesInfo{};
+	singleDesInfo.binding = binding;
+	singleDesInfo.descriptorCount = count;
+	singleDesInfo.descriptorType = desType;
+	singleDesInfo.pImmutableSamplers = nullptr;
+	singleDesInfo.stageFlags = stageFlags;
+
+	desinfo.push_back(singleDesInfo);
+}
+
+
+VkDescriptorSetLayout VulkanRenderer::CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo)
+{
+	VkDescriptorSetLayout descriptorSetLayout;
+    std::vector<VkDescriptorSetLayoutBinding> bindings{};
+    for(auto& desc : descriptorInfo)
+    {
+        VkDescriptorSetLayoutBinding layoutBinding{};
+        layoutBinding.binding = desc.binding;
+        layoutBinding.descriptorCount = desc.descriptorCount;
+        layoutBinding.descriptorType = desc.descriptorType;
+        layoutBinding.pImmutableSamplers = desc.pImmutableSamplers;
+        layoutBinding.stageFlags = desc.stageFlags;
+        bindings.push_back(layoutBinding);
+	}
+	uint32_t numberOfDescriptors = static_cast<uint32_t>(descriptorInfo.size());
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = numberOfDescriptors;
+	layoutInfo.pBindings = bindings.data();
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor set layout!");
+    }
+    return descriptorSetLayout;
+}
+// When allocation form this function
+// we must allocate descriptor sets equal to the number of swapchains
+VkDescriptorPool VulkanRenderer::CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count)
+{
+    VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorPoolSize> poolSizes{};
+    for (auto& desc : descriptorInfo)
+    {
+        VkDescriptorPoolSize poolSize{};
+        poolSize.type = desc.descriptorType;
+        poolSize.descriptorCount = desc.descriptorCount * count * getNumSwapchains();
+        poolSizes.push_back(poolSize);
+    }
+
+	VkDescriptorPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+	poolInfo.pPoolSizes = poolSizes.data();
+	poolInfo.maxSets = count * getNumSwapchains();
+	poolInfo.flags = 0;
+
+    if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor pool!");
+    }
+
+    return descriptorPool;
+}
+
+std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
+{
+	std::vector<VkDescriptorSet> descriptorSets(getNumSwapchains());
+	std::vector<VkDescriptorSetLayout> layouts(getNumSwapchains(), descriptorSetLayout);
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = descriptorPool;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(getNumSwapchains());
+	allocInfo.pSetLayouts = layouts.data();
+    
+    if(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+    return descriptorSets;
+}
+
+void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets, std::vector<DescriptorWriteInfo>& writeInfo)
+{
+	std::vector<VkWriteDescriptorSet> descriptorWrites(writeInfo.size());
+	std::vector<VkDescriptorBufferInfo> bufferInfos;
+	std::vector<VkDescriptorImageInfo> imageInfos;
+
+    for (size_t i = 0; i < getNumSwapchains(); i++) { // loop for each set
+
+		for (const auto& b : writeInfo) { // gather all buffer and image infos handels for the write 
+            if (b.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
+                VkDescriptorBufferInfo bufferInfo{};
+                bufferInfo.buffer = b.bufferMem[i].bufferID;
+                bufferInfo.offset = b.offset;
+                bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
+                bufferInfos.push_back(bufferInfo);
+            }
+            else if (b.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+                VkDescriptorImageInfo imageInfo{};
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = b.pImageMem->imageView;
+                imageInfo.sampler = b.pImageMem->sampler;
+                imageInfos.push_back(imageInfo);
+            }
+        }
+		size_t bufferInfoIndex = 0;
+		size_t imageInfoIndex = 0;
+		size_t writeIndex = 0;
+		for (const auto& b : writeInfo) { // fill in the write forms for the descriptor set
+            if (b.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
+				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
+				descriptorWrites[writeIndex].dstBinding = b.binding;
+				descriptorWrites[writeIndex].dstArrayElement = 0;
+				descriptorWrites[writeIndex].descriptorType = b.descriptorType;
+				descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
+				descriptorWrites[writeIndex].pBufferInfo = &bufferInfos[bufferInfoIndex];
+
+                bufferInfoIndex++;
+                writeIndex++;
+			}
+            else if (b.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
+                descriptorWrites[writeIndex].dstBinding = b.binding;
+                descriptorWrites[writeIndex].dstArrayElement = 0;
+                descriptorWrites[writeIndex].descriptorType = b.descriptorType;
+                descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
+
+                descriptorWrites[writeIndex].pImageInfo = &imageInfos[imageInfoIndex];
+                writeIndex++;
+                imageInfoIndex++;
+            }
+        }
+        // write to the descriptor set
+		vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+        // clear for next set
+        imageInfos.clear();
+        bufferInfos.clear();
+    }
+}

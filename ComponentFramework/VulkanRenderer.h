@@ -346,6 +346,15 @@ private:
 
     ImGuiContex GetImGuiContext();
 	void ImGUIHandelEvents(const SDL_Event& event);
+
+	//Descriptor Set Builder
+    void AddToDescrisptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,
+        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);
+   
+	VkDescriptorSetLayout CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo);
+	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
+	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout);
+    void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,std::vector<DescriptorWriteInfo>& writeInfo);
 };
 #endif 
 

@@ -18,73 +18,28 @@ void CCameraActor::UpdateViewMatrix()
 		MATH::Matrix4 T_Inv = MATH::MMath::translate(-pos);
 		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(rot));
 		viewMatrix = R_Inv * T_Inv;
+		uboNeedsUpdate = true;
 	}
 }
 
 bool CCameraActor::OnCreate()
 {
-	//TODO: implement camera UBO creation and initialization
+	
 	if (isCreated) 
 		return true;
-	if(!renderer)
-		return false;
-
-	switch (renderer->getRendererType()) {
-	case RendererType::VULKAN:
-	{
-		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-		cameraUBO = vRenderer->CreateUniformBuffers<CameraData>();
-		isCreated = true;
-		return true;
-	}
-	break;
-	}
+	
 
 	return false;
 }
 
 void CCameraActor::OnDestroy()
 {
-	//TODO: implement camera UBO destruction
+	
 	if(!isCreated)
 		return;
 
-	if(!renderer)
-		return;
-
-	switch (renderer->getRendererType()) {
-	case RendererType::VULKAN:
-	{
-		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-		vkDeviceWaitIdle(vRenderer->getDevice());
-		vRenderer->DestroyUBO(cameraUBO);
-		isCreated = false;
-	}
-	break;
-	}
 }
 
-void CCameraActor::UpdateUBO()
-{
-	if(!isCreated)
-		return;
-	if (!renderer)
-		return;
-	UpdateViewMatrix();
-	switch (renderer->getRendererType()) {
-	case RendererType::VULKAN:
-	{
-		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-
-		vRenderer->UpdateUniformBuffer<CameraData>(GetCamDataUBO(), cameraUBO);
-
-
-	}break;
-	}
-}
 
 CameraData CCameraActor::GetCamDataUBO()
 {

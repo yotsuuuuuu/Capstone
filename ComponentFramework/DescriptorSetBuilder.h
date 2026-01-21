@@ -22,29 +22,7 @@
 /// data collection. Map the binding point with the data so the reusing a binding can easily be found, 
 /// see unordered_map count().
 
-struct SingleDescriptorInfoCollection {
-    uint32_t binding; /// Set the binding point - this must be an unique uint
-    uint32_t descriptorCount;
-    VkDescriptorType descriptorType;
-    VkSampler *pImmutableSamplers;
-    VkShaderStageFlags stageFlags; /// 
 
-    /// If it's a UBO use these 
-    VkBuffer buffer;
-    VkDeviceSize offset;
-    VkDeviceSize range;
-
-    /// OR, if it's a sampler use these
-    VkImageLayout imageLayout;
-    VkImageView imageView;
-    VkSampler sampler;
-
-    /// There must be a swapchain number of UBO data
-    std::vector<BufferMemory> bufferMem;
-
-    /// OR just the one sampler data
-    Sampler2D *pImageMem;
-};
 
 class DescriptorSetBuilder {
     /// C11 precautions 

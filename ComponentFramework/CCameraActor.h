@@ -12,21 +12,22 @@ class CCameraActor :
 	// be a ubo component
 	MATH::Matrix4 viewMatrix;
 	MATH::Matrix4 projectionMatrix;
-	Renderer* renderer;
+	
 	std::vector<BufferMemory> cameraUBO;
+	bool uboNeedsUpdate = false;
 
 public:
-	CCameraActor(Ref<Component> parent_,Renderer* renderer_) : CActor(parent_),renderer(renderer_) {}
+	CCameraActor(Ref<Component> parent_) : CActor(parent_){}
 
 	void UpdateProjectionMatrix(const float& FOVY, const float& aspectRatio, const float& nearClip, const float& farClip);
 	void UpdateViewMatrix();
+	void SetCameraUBO(const std::vector<BufferMemory>& ubo_) { cameraUBO = ubo_; }
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
 	virtual void Update(const float dt) override {}
 	MATH::Matrix4 GetViewMatrix() const { return viewMatrix; }
 	MATH::Matrix4 GetProjectionMatrix() const { return projectionMatrix; }
-	void UpdateUBO();
-private:
 	CameraData GetCamDataUBO();
+	bool IsUBOOutDated() const { return uboNeedsUpdate; }
 };
 
