@@ -1,4 +1,5 @@
 #include "CMaterial.h"
+#include "CShader.h"
 
 bool CMaterial::OnCreate()
 {
@@ -7,4 +8,13 @@ bool CMaterial::OnCreate()
 
 void CMaterial::OnDestroy()
 {
+}
+
+PipelineInfo CMaterial::GetPipelineInfo()
+{
+    if (Ref<CShader> s = shader.lock()) {
+       
+        return s->GetPipelineInfo();
+    }
+    return PipelineInfo();
 }

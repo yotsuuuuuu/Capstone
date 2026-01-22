@@ -17,7 +17,7 @@ public:
 		fragShaderFile(fragShaderFile_),geomShaderFile(geomShaderFile_),
 		tesCShaderFile(tesCShaderFile_),tesEShaderFile(tesEShaderFile_) {
 	}
-	virtual ~CShader();
+	virtual ~CShader() {}
 
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;

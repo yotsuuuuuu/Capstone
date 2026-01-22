@@ -350,7 +350,11 @@ private:
 	//Descriptor Set Builder
     void AddToDescrisptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,
         uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);
-   
+    void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
+        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count,Sampler2D* data);
+    void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
+        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data);
+
 	VkDescriptorSetLayout CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo);
 	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
 	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout);

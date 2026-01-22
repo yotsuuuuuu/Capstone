@@ -5,6 +5,12 @@
 #include "Renderer.h"
 //#include "Camera.h"
 #include "CoreStructs.h"
+//temp for testing
+#include "CActor.h"
+#include "CShader.h"
+#include "CMesh.h"
+#include "CMaterial.h"
+#include "CTransform.h"
 using namespace MATH;
 
 /// Forward declarations 
@@ -30,7 +36,14 @@ private:
 	DescriptorSetInfo mariosdescriptorSetInfo;
 
 	PipelineInfo pipelineInfo;
-	CommandBufferData commandBufferData;
+	
+	//Components
+	Ref<CActor> actor;
+	Ref<CActor> actor1;
+	Ref<CMesh> mesh;
+	Ref<CMaterial> texture;
+	Ref<CMaterial> texture1;
+	Ref<CShader> shader;
 
 public:
 

@@ -59,7 +59,7 @@ inline void CActor::AddComponent(TArgs&&... args)
 
 template<typename T>
 inline void CActor::AddComponent(Ref<T> comp) {
-	if (comp) {
+	if (!comp) {
 #ifdef _DEBUG
 		Debug::Error("Not valid component", __FILE__, __LINE__);
 #endif 

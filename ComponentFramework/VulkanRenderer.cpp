@@ -974,6 +974,31 @@ void VulkanRenderer::AddToDescrisptorLayoutCollection(std::vector<SingleDescript
 	desinfo.push_back(singleDesInfo);
 }
 
+void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, Sampler2D* data)
+{
+    std::vector<BufferMemory> empty;
+    DescriptorWriteInfo write{};
+    write.binding = binding;
+    write.descriptorCount = count;
+    write.descriptorType = desType;
+    write.pImageMem = data;
+    write.bufferMem = empty;
+    write.offset = 0;
+    desinfo.push_back(write);
+}
+
+void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data)
+{
+    DescriptorWriteInfo write{};
+    write.binding = binding;
+    write.descriptorCount = count;
+    write.descriptorType = desType;
+    write.pImageMem = nullptr;
+    write.bufferMem = data;
+    write.offset = 0;
+    desinfo.push_back(write);
+}
+
 
 VkDescriptorSetLayout VulkanRenderer::CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo)
 {
@@ -1099,7 +1124,7 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
             }
         }
         // write to the descriptor set
-		vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         // clear for next set
         imageInfos.clear();
         bufferInfos.clear();

@@ -14,12 +14,12 @@ public:
 		: Component(parent_), meshFile(meshFile_), mesh({}) {
 	}
 	virtual ~CMesh() {}
-	void SetMesh(const IndexedVertexBuffer& mesh_) { mesh = mesh_; }
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
 	virtual void Update(const float dt) override {}
 
+	void SetMesh(const IndexedVertexBuffer& mesh_) { mesh = mesh_; }
 	IndexedVertexBuffer GetMesh() const { return mesh; }
-
+	
 };
 

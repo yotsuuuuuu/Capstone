@@ -142,9 +142,7 @@ struct DescriptorWriteInfo {
     uint32_t binding;
 	VkDescriptorType descriptorType;
     uint32_t descriptorCount;
-	VkBuffer buffer;
     VkDeviceSize offset;
-	VkDeviceSize range;
     std::vector<BufferMemory> bufferMem;
     Sampler2D* pImageMem;
 };

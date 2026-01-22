@@ -47,18 +47,41 @@ bool Scene0::OnCreate() {
 		mariosPants = vRenderer->Create2DTextureImage("./textures/mario_fire.png");
 		mariosMesh = vRenderer->LoadModelIndexed("./meshes/Mario.obj");
 
-		DescriptorSetBuilder descriptorSetBuilder(vRenderer->getDevice());
-		descriptorSetBuilder.add(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
-		
+		/*DescriptorSetBuilder descriptorSetBuilder(vRenderer->getDevice());
+		descriptorSetBuilder.add(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);		
 		descriptorSetBuilder.add(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
-
 		descriptorSetBuilder.add(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &mariosPants);
-		mariosdescriptorSetInfo = descriptorSetBuilder.BuildDescriptorSet(vRenderer->getNumSwapchains());
+		mariosdescriptorSetInfo = descriptorSetBuilder.BuildDescriptorSet(vRenderer->getNumSwapchains());*/
+		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		mariosdescriptorSetInfo.descriptorSetLayout = vRenderer->CreateDescriptorSetLayout(layoutInfo);
+		
+		mariosdescriptorSetInfo.descriptorPool = vRenderer->CreateDescriptorPool(layoutInfo, 1);
+		
+		mariosdescriptorSetInfo.descriptorSet = vRenderer->AllocateDescriptorSets(mariosdescriptorSetInfo.descriptorPool, mariosdescriptorSetInfo.descriptorSetLayout);
+		std::vector<DescriptorWriteInfo> writeInfo;
+		vRenderer->AddToDescrisptorLayoutWrite(writeInfo, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
+		vRenderer->AddToDescrisptorLayoutWrite(writeInfo, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
+		vRenderer->AddToDescrisptorLayoutWrite(writeInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1,&mariosPants);		
+		vRenderer->WriteDescriptorSets(mariosdescriptorSetInfo.descriptorSet, writeInfo);
 
 		pipelineInfo = vRenderer->CreateGraphicsPipeline(mariosdescriptorSetInfo.descriptorSetLayout,"shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		//Components
+		shader = std::make_shared<CShader>(nullptr, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		shader->SetPipelineInfo(pipelineInfo);
+		mesh = std::make_shared<CMesh>(nullptr, "./meshes/Mario.obj");
+		mesh->SetMesh(mariosMesh);
+		texture = std::make_shared<CMaterial>(nullptr, "./textures/mario_fire.png");
+		texture->SetShader(shader);
+		texture->SetDescriptorSet(mariosdescriptorSetInfo.descriptorSet);
 	
-	
+		actor = std::make_shared<CActor>(nullptr);
+		actor->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr,Vec3(2,0,0),Quaternion(),Vec3(1,1,1)));
+		actor->AddComponent<CMaterial>(texture);
+		actor->AddComponent<CMesh>(mesh);
 	}
 		break;
 
@@ -116,6 +139,13 @@ void Scene0::Render() const {
 		vRenderer->BindPipeline(pipelineInfo.pipeline);
 		vRenderer->SetPushConstant(pipelineInfo, mariosModelMatrix);
 		vRenderer->DrawIndexed(mariosMesh);
+		
+		vRenderer->BindPipeline(actor->GetComponent<CMaterial>()->GetPipelineInfo().pipeline);
+		vRenderer->BindDescriptorSet(actor->GetComponent<CMaterial>()->GetPipelineInfo().pipelineLayout, actor->GetComponent<CMaterial>()->GetDescriptorSet());
+		vRenderer->BindMesh(actor->GetComponent<CMesh>()->GetMesh());
+		vRenderer->SetPushConstant(actor->GetComponent<CMaterial>()->GetPipelineInfo(), actor->GetModelMatrix());
+		vRenderer->DrawIndexed(actor->GetComponent<CMesh>()->GetMesh());
+
 		vRenderer->RecordCommandBuffers(Recording::STOP);
 		vRenderer->Render();
 		break;
