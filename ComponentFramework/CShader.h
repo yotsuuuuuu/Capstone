@@ -1,19 +1,24 @@
 #pragma once
 #include "Component.h"
 #include "CoreStructs.h"
+
+class Renderer;
+
 class CShader : public Component
 {
-	PipelineInfo pipelineInfo;
 	const char* vertShaderFile;
 	const char* fragShaderFile;
 	const char* geomShaderFile;
 	const char* tesCShaderFile;
 	const char* tesEShaderFile;
+	Renderer* render;
 
+	PipelineInfo pipelineInfo;
+	VkDescriptorSetLayout pipeLineLayout;
 public:
-	CShader(Ref<Component> parent_, const char* vertShaderFile_, const char* fragShaderFile_
+	CShader(Ref<Component> parent_, Renderer* render_, VkDescriptorSetLayout pipelay ,const char* vertShaderFile_, const char* fragShaderFile_
 		,const char* geomShaderFile_ = nullptr,const char* tesCShaderFile_ = nullptr,const char* tesEShaderFile_ = nullptr)
-		: Component(parent_),pipelineInfo({}),vertShaderFile(vertShaderFile_),
+		: Component(parent_),render(render_),pipeLineLayout(pipelay), pipelineInfo({}), vertShaderFile(vertShaderFile_),
 		fragShaderFile(fragShaderFile_),geomShaderFile(geomShaderFile_),
 		tesCShaderFile(tesCShaderFile_),tesEShaderFile(tesEShaderFile_) {
 	}
@@ -26,6 +31,7 @@ public:
 	PipelineInfo GetPipelineInfo() const { return pipelineInfo; }	
 	void SetPipelineInfo(const PipelineInfo& pipelineInfo_) { pipelineInfo = pipelineInfo_; }
 
+	void RecreatePipeLine();
 
 };
 

@@ -4,7 +4,7 @@
 
 
 class CShader; 
-
+class Renderer;
 
 class CMaterial : public Component
 {
@@ -17,10 +17,12 @@ class CMaterial : public Component
 	// or have a dedicated material manager
 	// or have a rendering component that has the descriptor set info
 	std::vector<VkDescriptorSet> descriptionSet;
+	Renderer* render;
+	uint32_t setId;
 
 public:
-	CMaterial(Ref<Component> parent_, const char* textureFile_ = nullptr)
-		: Component(parent_), textureFile(textureFile_), texture({}) {
+	CMaterial(Ref<Component> parent_,Renderer* render_, const char* textureFile_ = nullptr)
+		: Component(parent_), render(render_), textureFile(textureFile_), texture({}),setId(1) {
 	}
 	virtual ~CMaterial() {}
 
@@ -32,7 +34,13 @@ public:
 	std::vector<VkDescriptorSet> GetDescriptorSet() { return descriptionSet; }
 	void SetShader(Ref<CShader> shade) { shader = shade; }
 	PipelineInfo GetPipelineInfo();
+	
 	void SetTextureSampler(const Sampler2D& text) {	texture = text;	}
 	Sampler2D GetTextureSampler() { return texture; }
+
+
+
+	void SetRenderSetValue(uint32_t id) { setId = id; }
+	uint32_t GetRednerSetValue() { return setId; }
 };
 

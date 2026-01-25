@@ -21,22 +21,59 @@ void CCameraActor::UpdateViewMatrix()
 		uboNeedsUpdate = true;
 	}
 }
-
+/// <summary>
+/// Creates the Cameras UBO
+/// </summary>
+/// <returns></returns>
 bool CCameraActor::OnCreate()
 {
 	
 	if (isCreated) 
 		return true;
+	if (!render)
+		return false;
 	
+	switch (render->getRendererType())
+	{
+	case RendererType::VULKAN: {
+		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+		cameraUBO = vkrender->CreateUniformBuffers<CameraData>();
+		isCreated = true;
+		return true;
+		break;
+	}
+	default:
+
+		break;
+	}
 
 	return false;
 }
+/// <summary>
+/// Destroys the Cameras UBO
+/// </summary>
 
 void CCameraActor::OnDestroy()
 {
 	
 	if(!isCreated)
 		return;
+	if (!render)
+		return;
+
+	switch (render->getRendererType())
+	{
+	case RendererType::VULKAN: {
+		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+		vkrender->DestroyUBO(cameraUBO);
+		isCreated = false;
+		
+		break;
+	}
+	default:
+
+		break;
+	}
 
 }
 
@@ -48,5 +85,33 @@ CameraData CCameraActor::GetCamDataUBO()
 	ubo.viewMatrix = viewMatrix;
 
 	return ubo;
+}
+
+/// <summary>
+/// This currently updates all three UBOs at the same time
+/// needs to be update to use param to only update for current frame.
+/// </summary>
+/// <param name="uboindex"></param>
+void CCameraActor::UpdateUBO(uint32_t uboindex)
+{
+
+	if (!isCreated || !IsUBOOutDated())
+		return;
+	if (!render)
+		return;
+
+	switch (render->getRendererType())
+	{
+	case RendererType::VULKAN: {
+		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+		auto data = GetCamDataUBO();
+		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO);
+		uboNeedsUpdate = false;
+		break;
+	}
+	default:
+
+		break;
+	}
 }
 

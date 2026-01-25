@@ -3,15 +3,16 @@
 #include "CoreStructs.h"
 
 
-
+class Renderer;
 class CMesh : public Component
 {
 	const char* meshFile;
 
 	IndexedVertexBuffer mesh;
+	Renderer* render;
 public:
-	CMesh(Ref<Component> parent_, const char* meshFile_ = nullptr)
-		: Component(parent_), meshFile(meshFile_), mesh({}) {
+	CMesh(Ref<Component> parent_, Renderer* render_, const char* meshFile_ = nullptr)
+		: Component(parent_),render(render_), meshFile(meshFile_), mesh({}) {
 	}
 	virtual ~CMesh() {}
 	virtual bool OnCreate() override;
