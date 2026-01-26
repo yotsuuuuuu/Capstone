@@ -1,17 +1,18 @@
 #pragma once
 #include "Component.h"
 #include "CoreStructs.h"
+#include <string>
 
 
 class Renderer;
 class CMesh : public Component
 {
-	const char* meshFile;
+	std::string meshFile;
 
 	IndexedVertexBuffer mesh;
 	Renderer* render;
 public:
-	CMesh(Ref<Component> parent_, Renderer* render_, const char* meshFile_ = nullptr)
+	CMesh(Ref<Component> parent_, Renderer* render_, std::string meshFile_ = nullptr)
 		: Component(parent_),render(render_), meshFile(meshFile_), mesh({}) {
 	}
 	virtual ~CMesh() {}

@@ -25,8 +25,7 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	AssetManager assetManager; 
-	assetManager.Write("./test.json");
+	AssetManager assetManager(static_cast<VulkanRenderer*>(renderer));
 	switch (renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -57,7 +56,9 @@ bool Scene0::OnCreate() {
 		cam->UpdateUBO(0);
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 		// step 1.1 meshs
-		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
+		/*Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );*/
+		assetManager.LoadAsset("test.json");
+		Ref<CMesh> mesh = assetManager.GetMesh("mario");
 		mesh->OnCreate();		
 		// step 1.2 shaders
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;

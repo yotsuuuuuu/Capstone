@@ -223,6 +223,7 @@
     <None Include="shaders\simplePhong.vert" />
     <None Include="shaders\simpleTexture.frag" />
     <None Include="shaders\simpleTexture.vert" />
+    <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

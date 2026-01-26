@@ -18,7 +18,7 @@ bool CMesh::OnCreate()
     {
     case RendererType::VULKAN: {
         VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
-        mesh = vkrender->LoadModelIndexed(meshFile);
+        mesh = vkrender->LoadModelIndexed(meshFile.c_str());
         isCreated = true;
         return true;
         break;
