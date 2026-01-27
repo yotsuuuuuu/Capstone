@@ -39,9 +39,9 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
     std::pair<std::string, std::string> shaderPaths;
     shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
     shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
-    //Ref<CMesh> shader = std::make_shared<CShader>(nullptr,renderer, nullptr ,shaderPaths.second,shaderPaths.first);
-    //shaderMap[id] = shader;
-    return nullptr; //shader;
+    Ref<CMesh> shader = std::make_shared<CShader>(nullptr,renderer, nullptr ,shaderPaths.second,shaderPaths.first);
+    shaderMap[id] = shader;
+    return shader;
 }
 
 Ref<CMaterial> AssetManager::GetMat(const std::string& id)
