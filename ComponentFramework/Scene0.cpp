@@ -66,20 +66,21 @@ bool Scene0::OnCreate() {
 		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);	
 		desSetInfo.descriptorSetLayout = vRenderer->CreateDescriptorSetLayout(layoutInfo);
-		
+
+		// step 1.3.1 count  how many materials for which shader to size the pool correctly
+		desSetInfo.descriptorPool = vRenderer->CreateDescriptorPool(layoutInfo, 2);
+		// SHADERS NEEDS LayoutInfo, paths, and renderer
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, desSetInfo.descriptorSetLayout, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
 		cshade->OnCreate();
 		
 		//step 1.3 material
+		std::vector<std::pair<std::string, SingleDescriptorSetLayoutInfo>> array; // need this form vicent filled with the write data in the material
 		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_mime.png");
 		mat->OnCreate();
 		mat->SetShader(cshade);
 		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_fire.png");
 		mat1->OnCreate();
 		mat1->SetShader(cshade);
-
-		// step 1.3.1 count  how many materials for which shader to size the pool correctly
-		desSetInfo.descriptorPool = vRenderer->CreateDescriptorPool(layoutInfo, 2);
 		// step 1.3.2 allocate form the pool
 		auto set = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);
 		auto set1 = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);

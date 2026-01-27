@@ -1130,3 +1130,4 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
         bufferInfos.clear();
     }
 }
+

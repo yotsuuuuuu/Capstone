@@ -342,7 +342,7 @@ private:
 
     //ImGUI system
 	VkImGUISystem* imGuiSystem;
-    public:
+public:
 
     ImGuiContex GetImGuiContext();
 	void ImGUIHandelEvents(const SDL_Event& event);
@@ -359,6 +359,9 @@ private:
 	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
 	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout);
     void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,std::vector<DescriptorWriteInfo>& writeInfo);
+
+    // ECS Rendering
+    struct ECSRenderer;
 };
 #endif 
 

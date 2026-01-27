@@ -33,4 +33,5 @@ public:
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);
+	//oncreate call actor oncreate
 };
