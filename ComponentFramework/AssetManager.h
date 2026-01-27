@@ -25,6 +25,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<CMaterial>> materialMap;
 	std::unordered_map<std::string, std::shared_ptr<CShader>> shaderMap;
 	std::unordered_map<std::string, std::shared_ptr<CActor>> actorMap;
+	std::unordered_map<std::string, DescriptorSetInfo> descriptorMap;
 public:
 	AssetManager(VulkanRenderer* renderer_):renderer(renderer_) {};
 	bool LoadAsset(const std::string& filepath_);

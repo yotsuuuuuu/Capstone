@@ -49,6 +49,8 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
 
 Ref<CShader> AssetManager::GetShader(const std::string& id)
 {
+    //grab thje vert and frag seprately based on what shader they want
+    //so if they say phong itll filter phong first then look for its vert and frag and combo that
     return Ref<CShader>();
 }
 
