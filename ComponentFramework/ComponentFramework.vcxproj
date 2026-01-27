@@ -147,6 +147,7 @@
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="CActor.cpp" />
     <ClCompile Include="CCameraActor.cpp" />
+    <ClCompile Include="ChunkBuilder.cpp" />
     <ClCompile Include="CMaterial.cpp" />
     <ClCompile Include="CMesh.cpp" />
     <ClCompile Include="CTransform.cpp" />
@@ -161,6 +162,8 @@
     <ClCompile Include="imgui_impl_vulkan.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="TerrainNoise.cpp" />
+    <ClCompile Include="TerrainRenderer.cpp" />
     <ClCompile Include="VkImGUISystem.cpp" />
     <ClCompile Include="VulkanCommandBuffer.cpp" />
     <ClCompile Include="OpenGLRenderer.cpp" />
@@ -173,12 +176,15 @@
     <ClCompile Include="VulkanRenderer.cpp" />
     <ClCompile Include="VulkanSampler.cpp" />
     <ClCompile Include="VulkanUniformBuffer.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="CActor.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CCameraActor.h" />
+    <ClInclude Include="Chunk.h" />
+    <ClInclude Include="ChunkBuilder.h" />
     <ClInclude Include="CMaterial.h" />
     <ClInclude Include="CMesh.h" />
     <ClInclude Include="Component.h" />
@@ -202,12 +208,17 @@
     <ClInclude Include="Scene0.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="TerrainNoise.h" />
+    <ClInclude Include="TerrainPreset.h" />
+    <ClInclude Include="TerrainRenderer.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="CoreStructs.h" />
     <ClInclude Include="UBO_Padding.h" />
     <ClInclude Include="VkImGUISystem.h" />
     <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="World.h" />
+    <ClInclude Include="WorldConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Graphics Game Engine_Log.txt" />
