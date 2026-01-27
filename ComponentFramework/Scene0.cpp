@@ -56,9 +56,9 @@ bool Scene0::OnCreate() {
 		cam->UpdateUBO(0);
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 		// step 1.1 meshs
-		/*Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );*/
-		assetManager.LoadAsset("test.json");
-		Ref<CMesh> mesh = assetManager.GetMesh("mario");
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
+		//assetManager.LoadAsset("test.json");
+		//Ref<CMesh> mesh = assetManager.GetMesh("mario");
 		mesh->OnCreate();		
 		// step 1.2 shaders
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;

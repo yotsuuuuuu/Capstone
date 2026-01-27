@@ -1,7 +1,7 @@
 {
   "Meshes": {
     "mario": "./meshes/Mario.obj"
-  },
+  }
   "Shaders": {
     "Phong": {
       "frag": "shaders/multiPhong.frag.spv",
@@ -12,10 +12,10 @@
       //vertex shader flag , int
       //how many des,int
     }
-  },
+  }
   "Material": {
     //mariotexture, phong,patrh1 , path2
-  },
+  }
   "Actor": {
     "mario":{
       //mat
