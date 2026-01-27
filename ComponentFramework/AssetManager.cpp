@@ -30,18 +30,19 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
         return checker->second;
     }
 
-    if (!jsonLoader.contains("Shaders") || !jsonLoader["Shaders"].contains(id))
+    if (!jsonLoader.contains("Meshes") || !jsonLoader["Meshes"].contains(id))
     {
         std::cout << "json does not contain Shader" << id << "\n";
         return nullptr;
     }
 
-    std::pair<std::string, std::string> shaderPaths;
-    shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
-    shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
-    Ref<CMesh> shader = std::make_shared<CShader>(nullptr,renderer, nullptr ,shaderPaths.second,shaderPaths.first);
-    shaderMap[id] = shader;
-    return shader;
+    //std::pair<std::string, std::string> shaderPaths;
+   // shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
+    //shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
+    std::string meshpath = jsonLoader["Meshes"][id].get<std::string>();
+    Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr,renderer, nullptr ,meshpath);
+    meshMap[id] = mesh;
+    return mesh;
 }
 
 Ref<CMaterial> AssetManager::GetMat(const std::string& id)

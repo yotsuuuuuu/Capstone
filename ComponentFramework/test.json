@@ -12,12 +12,12 @@
       //vertex shader flag , int
       //how many des,int
     }
-  }
+  },
   "Material": {
     //mariotexture, phong,patrh1 , path2
-  }
-  "Actor" {
-    "mario" {
+  },
+  "Actor": {
+    "mario":{
       //mat
       //mesh
       //transform
