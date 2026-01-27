@@ -14,9 +14,9 @@ class CShader : public Component
 	Renderer* render;
 
 	PipelineInfo pipelineInfo;
-	VkDescriptorSetLayout pipeLineLayout;
+	std::vector<VkDescriptorSetLayout> pipeLineLayout;
 public:
-	CShader(Ref<Component> parent_, Renderer* render_, VkDescriptorSetLayout pipelay ,const char* vertShaderFile_, const char* fragShaderFile_
+	CShader(Ref<Component> parent_, Renderer* render_, std::vector<VkDescriptorSetLayout> pipelay ,const char* vertShaderFile_, const char* fragShaderFile_
 		,const char* geomShaderFile_ = nullptr,const char* tesCShaderFile_ = nullptr,const char* tesEShaderFile_ = nullptr)
 		: Component(parent_),render(render_),pipeLineLayout(pipelay), pipelineInfo({}), vertShaderFile(vertShaderFile_),
 		fragShaderFile(fragShaderFile_),geomShaderFile(geomShaderFile_),
