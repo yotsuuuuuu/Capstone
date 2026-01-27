@@ -1,4 +1,5 @@
 #include "TerrainNoise.h"
+#include <algorithm>
 
 static FastNoiseLite::NoiseType ConvertNoiseType(NoiseType type)
 {
@@ -60,15 +61,58 @@ TerrainNoise::TerrainNoise(const TerrainPreset& preset)
 	InitializeNoiseLayer(mountainPreset, mountainNoise);
 	InitializeNoiseLayer(detailPreset, detailNoise);
 }
-{
-}
+
 
 float TerrainNoise::sample(float wX, float wZ) const
 {
-	return 0.0f;
+
+	float base = evalLayer(basePreset, baseNoise, wX, wZ);
+	float mountains = evalLayer(mountainPreset, mountainNoise, wX, wZ);
+	float detail = evalLayer(detailPreset, detailNoise, wX, wZ);
+
+	float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
+	
+	float h = base;
+	h += mountains * mask; // apply mountains modulated by base mask
+	h += detail * 0.25f; // add some detail
+
+	return h *= globalHeightScale;
+
 }
 
-float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, FastNoiseLite& noiseGen, float x, float z) const
+float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, const FastNoiseLite& noiseGen, float x, float z) const
 {
-	return 0.0f;
+	float height = 0.0f;
+	float amplitude = layerP.amplitude;
+	float frequency = layerP.frequency;
+
+	for (int i = 0; i < layerP.octaves; i++) { // do this for each octave (compounds the noise each time)
+		float nx = x * frequency;
+		float nz = z * frequency;
+
+		if (layerP.useDomainWarp) {
+			float warp = noiseGen.GetNoise(nx * layerP.warpFrequency, nz * layerP.warpFrequency);
+			nx += warp * layerP.warpAmplitude;
+			nz += warp * layerP.warpAmplitude;
+		}
+
+		float noiseValue = noiseGen.GetNoise(nx, nz); // sample the noise
+		if (layerP.fractal == FractalType::Ridged) {
+			noiseValue = 1.0f - fabs(noiseValue); // make ridges
+			noiseValue *= noiseValue; // square to sharpen
+			noiseValue *= layerP.ridge; // apply ridge factor
+		}
+		else if (layerP.fractal == FractalType::PingPong) {
+			noiseValue = noiseValue * 2.0f; // 
+			if (noiseValue < 0.0f) noiseValue = -noiseValue;
+			if (noiseValue > 1.0f) noiseValue = 2.0f - noiseValue;
+			noiseValue *= layerP.bias;
+		}// if fractal is fBm do nothing special
+
+		height += noiseValue * amplitude;
+		amplitude *= layerP.gain;
+		frequency *= layerP.lacunarity;
+	}
+
+	return height;
 }

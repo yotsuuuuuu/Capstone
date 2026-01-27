@@ -10,7 +10,7 @@ public:
 
 private:
 	float evalLayer(const NoiseLayerPreset& layerP,
-					FastNoiseLite& noiseGen,
+					const FastNoiseLite& noiseGen,
 					float x, float z) const;
 
 	NoiseLayerPreset basePreset, mountainPreset, detailPreset; // different noise layers

@@ -106,3 +106,12 @@ struct ImGuiContex {
     float main_scale;
 };
 
+
+// terrain structs
+// maybe add chunks here
+
+struct TerrainRenderData { // shared terrain mesh topology data
+    VkBuffer vertexBuffer;
+    VkBuffer indexBuffer;
+    uint32_t indexCount;
+};

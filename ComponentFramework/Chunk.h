@@ -1,7 +1,6 @@
 #pragma once
 #include "Vector.h"
 #include "CoreStructs.h"
-constexpr int CHUNK_SIZE_X = 64;
 using namespace MATH;
 
 class Chunk

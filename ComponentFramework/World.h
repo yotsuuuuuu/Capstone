@@ -1,34 +1,30 @@
 #pragma once
-//#include "Chunk.h"
-//include "Camera.h" // need to adjust for camera actor
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <string>
+#include <unordered_map>
+#include "Vector.h"
+#include "WorldConstants.h"
+#include "CoreStructs.h"
+#include "TerrainPreset.h"
+#include "TerrainNoise.h"
+#include "TerrainRenderer.h"
+#include "ChunkBuilder.h"
+#include "Chunk.h"
 
-//const int WORLD_SIZE_X = 64;
-//const int WORLD_SIZE_Y = 16;
-//const int WORLD_SIZE_Z = 64;
+using namespace MATH;
 
-// will need different "seeds" to change the world generation based on the song
-// 
-// 
-
-
-//class Renderer;
-
-class World
-{
-private:
-
+class World {
 public:
-	World();
-	~World();
+	void createWorld(const TerrainPreset& preset); // creates a world based on the terrain preset
+	void update(Vec3 playerPosition); // updates the world based on player position
+	void renderWorld(VkCommandBuffer commandBuffer); // renders the world. must figure out how this happens and how.if it needs a ref to the renderer
 
-	Chunk* chunk;
-	// Camera* camera; (fix for camera actor)
-	//bool OnCreate(/*Renderer* renderer*/);
-	//void OnDestroy();
+private:
+	int64_t hashChunkCoord(const Vec2& coord) const; // hashes chunk coordinates for storage in unordered map
 
+	TerrainNoise* terrainNoise = nullptr; // pointer to terrain noise generator
+	ChunkBuilder chunkBuilder; // chunk builder instance
+
+	TerrainRenderer terrainRenderer; // terrain renderer instance
+	TerrainRenderData renderData; // terrain mesh data
+
+	std::unordered_map<int64_t, Chunk> chunks; // map of chunks using hashed coordinates
 };
-
