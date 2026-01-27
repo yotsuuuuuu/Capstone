@@ -18,8 +18,8 @@ static FastNoiseLite::DomainWarpType ConvertWarpType(WarpType type)
 	switch (type) {
 	case WarpType::OpenSimplex2:		return FastNoiseLite::DomainWarpType_OpenSimplex2;
 	case WarpType::BasicGrid:			return FastNoiseLite::DomainWarpType_BasicGrid;
-	case WarpType::None:				return FastNoiseLite::DomainWarpType_OpenSimplex2; // no warp default to something || this shouldnt ever be used
-	default:							return FastNoiseLite::DomainWarpType_OpenSimplex2;
+	case WarpType::None:				return FastNoiseLite::DomainWarpType_OpenSimplex2; // no warp default to something. this should never be used
+	default:							return FastNoiseLite::DomainWarpType_OpenSimplex2; // same with this
 	}
 }
 
@@ -82,6 +82,8 @@ float TerrainNoise::sample(float wX, float wZ) const
 
 float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, const FastNoiseLite& noiseGen, float x, float z) const
 {
+
+	// all of this is temporary filler, can be adjusted later for what style() we are looking for. handles different behaviours and landscapes by modifying the sampled noise value
 	float height = 0.0f;
 	float amplitude = layerP.amplitude;
 	float frequency = layerP.frequency;

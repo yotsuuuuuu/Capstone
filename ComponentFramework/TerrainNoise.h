@@ -13,8 +13,8 @@ private:
 					const FastNoiseLite& noiseGen,
 					float x, float z) const;
 
-	NoiseLayerPreset basePreset, mountainPreset, detailPreset; // different noise layers
-	FastNoiseLite baseNoise, mountainNoise, detailNoise;
+	NoiseLayerPreset basePreset, mountainPreset, detailPreset;	// different noise layers
+	FastNoiseLite baseNoise, mountainNoise, detailNoise;		// unique noise generators for each layer
 	float globalHeightScale;
 };
 

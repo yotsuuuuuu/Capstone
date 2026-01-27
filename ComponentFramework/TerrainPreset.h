@@ -46,10 +46,10 @@ struct NoiseLayerPreset {
 };
 
 struct TerrainPreset {
+	// can be adjusted based on desired terrain features/ song style etc (+/- layers)
     NoiseLayerPreset base;
     NoiseLayerPreset mountains;
     NoiseLayerPreset detail;
 
     float globalHeightScale;
-    //float waterLevel;
 };

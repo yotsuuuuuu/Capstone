@@ -15,7 +15,7 @@ class World {
 public:
 	void createWorld(const TerrainPreset& preset); // creates a world based on the terrain preset
 	void update(Vec3 playerPosition); // updates the world based on player position
-	void renderWorld(VkCommandBuffer commandBuffer); // renders the world. must figure out how this happens and how.if it needs a ref to the renderer
+	void renderWorld(VkCommandBuffer commandBuffer); // renders the world. must figure out how this happens and how/if it needs a ref to the renderer
 
 private:
 	int64_t hashChunkCoord(const Vec2& coord) const; // hashes chunk coordinates for storage in unordered map
