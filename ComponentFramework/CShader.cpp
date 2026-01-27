@@ -10,8 +10,8 @@ bool CShader::OnCreate()
     switch (render->getRendererType()) {
     case RendererType::VULKAN :{
         VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
-        pipelineInfo = vkrender->CreateGraphicsPipeline(pipeLineLayout, vertShaderFile, fragShaderFile,
-            tesCShaderFile, tesEShaderFile, geomShaderFile);
+       // pipelineInfo = vkrender->CreateGraphicsPipeline(pipeLineLayout, vertShaderFile, fragShaderFile,
+       //     tesCShaderFile, tesEShaderFile, geomShaderFile);
         isCreated = true;
         return true;
         break;
