@@ -40,7 +40,7 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
    // shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
     //shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
     std::string meshpath = jsonLoader["Meshes"][id].get<std::string>();
-    Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr,renderer, nullptr ,meshpath);
+    Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr,renderer,meshpath);
     meshMap[id] = mesh;
     return mesh;
 }
