@@ -5,6 +5,8 @@
 #include "Renderer.h"
 //#include "Camera.h"
 #include "CoreStructs.h"
+//temp for testing
+#include "Component.h"
 using namespace MATH;
 
 /// Forward declarations 
@@ -16,21 +18,21 @@ private:
 	
 	Renderer *renderer;
 	//Camera *camera;
-	Matrix4 mariosModelMatrix;
-	Matrix4 luigisModelMatrix;
-	Sampler2D  mariosPants;
-	IndexedVertexBuffer mariosMesh;
 
-	std::vector<BufferMemory> cameraUBO;
-	CameraData camera;
+	
 	std::vector<BufferMemory> lightsUBO;
 	LightsData lights;
 
 
-	DescriptorSetInfo mariosdescriptorSetInfo;
+	DescriptorSetInfo desSetInfo;
 
-	PipelineInfo pipelineInfo;
-	CommandBufferData commandBufferData;
+	
+	
+	//Components
+	Ref<Component> camera;
+	Ref<Component> actor;
+	Ref<Component> actor1;	
+	Ref<Component> shader;
 
 public:
 

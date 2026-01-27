@@ -2,45 +2,54 @@
 #include "Debug.h"
 #include "VulkanRenderer.h"
 
+/// <summary>
+/// Loads mesh data obj file to gpu memory.
+/// 
+/// </summary>
+/// <returns>True : assested was loaded , False: failed to load</returns>
 bool CMesh::OnCreate()
 {
     if( isCreated)
 		return true;
-    if (!renderer)
+ 
+    if (!render)
         return false;
-
-    switch (renderer->getRendererType()) {
+    switch (render->getRendererType())
+    {
     case RendererType::VULKAN: {
-		// this loads the model to the GPU and returns the indexed vertex buffer
-		VulkanRenderer* vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-        mesh = vRenderer->LoadModelIndexed(meshFile);
+        VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+        mesh = vkrender->LoadModelIndexed(meshFile.c_str());
         isCreated = true;
-		return isCreated;
-    }break;
+        return true;
+        break;
+    }
     default:
-        Debug::Error("Unsupported renderer type in CMesh::OnCreate()", __FILE__, __LINE__);
-		return false;
+
+        break;
     }
 
     return false;
 }
 
+/// <summary>
+/// Deloads mesh form memory assumes gpu is idle when this is called.
+/// </summary>
 void CMesh::OnDestroy()
 {
     if (!isCreated)
 		return;
-    if (!renderer)
-		return;
-    switch (renderer->getRendererType())
+    if (!render)
+        return;
+    switch (render->getRendererType())
     {
-    case RendererType::VULKAN:
-    {
-        VulkanRenderer* vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-        vRenderer->DestroyIndexedMesh(mesh);
-        isCreated = false;
-    }
-    default:
-		Debug::Error("Unsupported renderer type in CMesh::OnDestroy()", __FILE__, __LINE__);
+    case RendererType::VULKAN: {
+        VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+        vkrender->DestroyIndexedMesh(mesh);
         break;
     }
+    default:
+        break;
+    }
+
+    isCreated = false;
 }

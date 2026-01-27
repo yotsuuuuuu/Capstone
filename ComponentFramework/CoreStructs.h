@@ -106,6 +106,46 @@ struct ImGuiContex {
     float main_scale;
 };
 
+struct SingleDescriptorInfoCollection {
+    uint32_t binding; /// Set the binding point - this must be an unique uint
+    uint32_t descriptorCount;
+    VkDescriptorType descriptorType;
+    VkSampler* pImmutableSamplers;
+    VkShaderStageFlags stageFlags; /// 
+
+    /// If it's a UBO use these 
+    VkBuffer buffer;
+    VkDeviceSize offset;
+    VkDeviceSize range;
+
+    /// OR, if it's a sampler use these
+    VkImageLayout imageLayout;
+    VkImageView imageView;
+    VkSampler sampler;
+
+    /// There must be a swapchain number of UBO data
+    std::vector<BufferMemory> bufferMem;
+
+    /// OR just the one sampler data
+    Sampler2D* pImageMem;
+};
+
+struct SingleDescriptorSetLayoutInfo {
+    uint32_t binding; 
+    uint32_t descriptorCount;
+    VkDescriptorType descriptorType;
+    VkSampler* pImmutableSamplers;
+    VkShaderStageFlags stageFlags; 
+};
+
+struct DescriptorWriteInfo {
+    uint32_t binding;
+	VkDescriptorType descriptorType;
+    uint32_t descriptorCount;
+    VkDeviceSize offset;
+    std::vector<BufferMemory> bufferMem;
+    Sampler2D* pImageMem;
+};
 
 // terrain structs
 // maybe add chunks here

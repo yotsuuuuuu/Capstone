@@ -21,7 +21,10 @@ bool CActor::OnCreate()
 
 void CActor::OnDestroy()
 {
-	DeleteComponents();
+    for (const auto& comp : components)
+    {
+        comp->OnDestroy();
+    }
 	isCreated = false;
 }
 

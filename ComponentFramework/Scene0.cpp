@@ -4,6 +4,12 @@
 #include "Scene0.h"
 #include <MMath.h>
 #include "Debug.h"
+#include "CActor.h"
+#include "CShader.h"
+#include "CMesh.h"
+#include "CMaterial.h"
+#include "CTransform.h"
+#include "CCameraActor.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
@@ -19,8 +25,7 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	AssetManager assetManager; 
-	assetManager.Write("./test.json");
+	AssetManager assetManager(static_cast<VulkanRenderer*>(renderer));
 	switch (renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -28,37 +33,96 @@ bool Scene0::OnCreate() {
 		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 		
 		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
-		cameraUBO = vRenderer->CreateUniformBuffers<CameraData>();
-
-		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
-		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-		camera.projectionMatrix = MMath::perspective(45.0f, aspectRatio, 0.5f, 100.0f);
-		camera.projectionMatrix[5] *= -1.0f;
-		camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
-		
 		lights.diffuse[0] = Vec4(0.5, 0.6, 0.0, 0.0);
 		lights.specular[0] = Vec4(0.0, 0.3, 0.0, 0.0);
 		lights.ambient = Vec4(0.1, 0.1, 0.1, 0.0);
 		lights.numLights = 1;
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
 		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
-		vRenderer->UpdateUniformBuffer<CameraData>(camera, cameraUBO);
-
-		mariosPants = vRenderer->Create2DTextureImage("./textures/mario_fire.png");
-		mariosMesh = vRenderer->LoadModelIndexed("./meshes/Mario.obj");
-
-		DescriptorSetBuilder descriptorSetBuilder(vRenderer->getDevice());
-		descriptorSetBuilder.add(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
 		
-		descriptorSetBuilder.add(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
 
-		descriptorSetBuilder.add(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &mariosPants);
-		mariosdescriptorSetInfo = descriptorSetBuilder.BuildDescriptorSet(vRenderer->getNumSwapchains());
+		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
+		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+		//camera.projectionMatrix = MMath::perspective(45.0f, aspectRatio, 0.5f, 100.0f);
+		//camera.projectionMatrix[5] *= -1.0f;
+		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
+		
+		// step 1 Create the componetes
+		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), Quaternion(),Vec3()));
+		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
+		cam->UpdateViewMatrix();
+		cam->OnCreate();
+		cam->UpdateUBO(0);
+		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
+		// step 1.1 meshs
+		/*Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );*/
+		assetManager.LoadAsset("test.json");
+		Ref<CMesh> mesh = assetManager.GetMesh("mario");
+		mesh->OnCreate();		
+		// step 1.2 shaders
+		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);	
+		desSetInfo.descriptorSetLayout = vRenderer->CreateDescriptorSetLayout(layoutInfo);
 
-		pipelineInfo = vRenderer->CreateGraphicsPipeline(mariosdescriptorSetInfo.descriptorSetLayout,"shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
-	
-	
+		// step 1.3.1 count  how many materials for which shader to size the pool correctly
+		desSetInfo.descriptorPool = vRenderer->CreateDescriptorPool(layoutInfo, 2);
+		// SHADERS NEEDS LayoutInfo, paths, and renderer
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, desSetInfo.descriptorSetLayout, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		cshade->OnCreate();
+		
+		//step 1.3 material
+		std::vector<std::pair<std::string, SingleDescriptorSetLayoutInfo>> array; // need this form vicent filled with the write data in the material
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_mime.png");
+		mat->OnCreate();
+		mat->SetShader(cshade);
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_fire.png");
+		mat1->OnCreate();
+		mat1->SetShader(cshade);
+		// step 1.3.2 allocate form the pool
+		auto set = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);
+		auto set1 = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);
+		// step 1.3.4 write to set
+		std::vector<DescriptorWriteInfo> write;
+		vRenderer->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
+		auto matrefence = mat->GetTextureSampler(); // getting the handle form the loaded texture to add as a descriptor
+		vRenderer->AddToDescrisptorLayoutWrite(write, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &matrefence);		
+		vRenderer->WriteDescriptorSets(set, write);
+		// step 1.3.5 set set to Matrial
+		mat->SetDescriptorSet(set);
+		write.clear();
+		// step 1.3.6 do the same for all materials that share the layout
+		vRenderer->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
+		matrefence = mat1->GetTextureSampler();
+		vRenderer->AddToDescrisptorLayoutWrite(write, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &matrefence);		
+		vRenderer->WriteDescriptorSets(set1, write);
+
+		mat1->SetDescriptorSet(set1);
+
+
+		// step 2 create actors
+		Ref<CActor> act = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1,1,1));
+		act->AddComponent<CTransform>(t);
+		act->AddComponent<CMesh>(mesh);
+		act->AddComponent<CMaterial>(mat);
+
+		Ref<CActor> act1 = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1, 0, 0),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
+		act1->AddComponent<CTransform>(t1);
+		act1->AddComponent<CMesh>(mesh);
+		act1->AddComponent<CMaterial>(mat1);
+		
+		//step 3 Actors being added to the scene.
+		actor = act;
+		actor1 = act1;
+		camera = cam;
+		shader = cshade;
+		
 	}
 		break;
 
@@ -84,11 +148,7 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 	
 }
 void Scene0::Update(const float deltaTime) {
-	static float elapsedTime = 0.0f;
-	elapsedTime += deltaTime;
-	mariosModelMatrix = MMath::rotate(elapsedTime * 90.0f, Vec3(0.0f, 1.0f, 0.0f)) ;
-	luigisModelMatrix =  MMath::translate(2.0, 0.0f,0.0f) * MMath::rotate(elapsedTime * 90.0f, Vec3(1.0f, 0.0f, 0.0f)) ;
-	luigisModelMatrix =  MMath::translate(2.0, 0.0f,0.0f) * MMath::rotate(elapsedTime * 90.0f, Vec3(1.0f, 0.0f, 0.0f)) ;
+	
 }
 
 void Scene0::Render() const {
@@ -111,11 +171,33 @@ void Scene0::Render() const {
 
 		
 		vRenderer->RecordCommandBuffers(Recording::START);
-		vRenderer->BindMesh(mariosMesh);
-		vRenderer->BindDescriptorSet(pipelineInfo.pipelineLayout, mariosdescriptorSetInfo.descriptorSet);
-		vRenderer->BindPipeline(pipelineInfo.pipeline);
-		vRenderer->SetPushConstant(pipelineInfo, mariosModelMatrix);
-		vRenderer->DrawIndexed(mariosMesh);
+		//actor 1
+		{
+			auto a = std::dynamic_pointer_cast<CActor>(actor);
+			auto mesh = a->GetComponent<CMesh>();
+			auto mat = a->GetComponent<CMaterial>();
+			auto info = mat->GetPipelineInfo();
+			vRenderer->BindPipeline(info.pipeline);		
+			vRenderer->BindDescriptorSet(info.pipelineLayout, mat->GetDescriptorSet());
+			vRenderer->SetPushConstant(info, a->GetModelMatrix());
+			vRenderer->BindMesh(mesh->GetMesh());
+			vRenderer->DrawIndexed(mesh->GetMesh());
+		}
+
+		//actor 2
+		{
+			auto a = std::dynamic_pointer_cast<CActor>(actor1);
+			auto mesh = a->GetComponent<CMesh>();
+			auto mat = a->GetComponent<CMaterial>();
+			auto info = mat->GetPipelineInfo();
+			vRenderer->BindPipeline(info.pipeline);
+			vRenderer->BindDescriptorSet(info.pipelineLayout, mat->GetDescriptorSet());
+			vRenderer->SetPushConstant(info, a->GetModelMatrix());
+			vRenderer->BindMesh(mesh->GetMesh());
+			vRenderer->DrawIndexed(mesh->GetMesh());
+		}
+	
+
 		vRenderer->RecordCommandBuffers(Recording::STOP);
 		vRenderer->Render();
 		break;
@@ -150,13 +232,14 @@ void Scene0::OnDestroy() {
 		// 
 		//vRenderer->DestroyCommandBuffers(); 
 
-		vRenderer->DestroyPipeline(pipelineInfo);
-		vRenderer->DestroyDescriptorSet(mariosdescriptorSetInfo);
-		vRenderer->DestroyUBO(lightsUBO);
-		vRenderer->DestroyUBO(cameraUBO);
 		
-		vRenderer->DestroySampler2D(mariosPants);
-		vRenderer->DestroyIndexedMesh(mariosMesh);
+		vRenderer->DestroyDescriptorSet(desSetInfo);
+		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
+		vRenderer->DestroyUBO(lightsUBO);
+		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();
+
+		actor->OnDestroy();
+		actor1->OnDestroy();
 		
 		
 		}

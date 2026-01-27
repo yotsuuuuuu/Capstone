@@ -1,1 +1,26 @@
-this is a test for json
+{
+  "Meshes": {
+    "mario": "./meshes/Mario.obj"
+  },
+  "Shaders": {
+    "Phong": {
+      "frag": "shaders/multiPhong.frag.spv",
+      "vert": "shaders/multiPhong.vert.spv"
+      //desciptor
+      //binding, uint 0
+      //descirptor type, takes int to then convert tp enum
+      //vertex shader flag , int
+      //how many des,int
+    }
+  }
+  "Material": {
+    //mariotexture, phong,patrh1 , path2
+  }
+  "Actor" {
+    "mario" {
+      //mat
+      //mesh
+      //transform
+    }
+  }
+}
