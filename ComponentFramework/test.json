@@ -1,7 +1,7 @@
 {
   "Meshes": {
     "mario": "./meshes/Mario.obj"
-  }
+  },
   "Shaders": {
     "Phong": {
       "frag": "shaders/multiPhong.frag.spv",
