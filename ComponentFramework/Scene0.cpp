@@ -32,13 +32,6 @@ bool Scene0::OnCreate() {
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 		
-		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
-		lights.diffuse[0] = Vec4(0.5, 0.6, 0.0, 0.0);
-		lights.specular[0] = Vec4(0.0, 0.3, 0.0, 0.0);
-		lights.ambient = Vec4(0.1, 0.1, 0.1, 0.0);
-		lights.numLights = 1;
-		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
-		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
 		
 
 		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
@@ -47,62 +40,50 @@ bool Scene0::OnCreate() {
 		//camera.projectionMatrix[5] *= -1.0f;
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
-		// step 1 Create the componetes
+		// step 1 Create the  GLOBAL componetes
 		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
 		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), Quaternion(),Vec3()));
 		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
 		cam->UpdateViewMatrix();
 		cam->OnCreate();
 		cam->UpdateUBO(0);
+		
+		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
+		lights.diffuse[0] = Vec4(0.5, 0.6, 0.0, 0.0);
+		lights.specular[0] = Vec4(0.0, 0.3, 0.0, 0.0);
+		lights.ambient = Vec4(0.1, 0.1, 0.1, 0.0);
+		lights.numLights = 1;
+		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
+		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
+		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
+		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		std::vector<DescriptorWriteInfo> writeGlobal;
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
+		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
+
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
-		// step 1.1 meshs
+		// step 1.1 Meshs
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
 		//assetManager.LoadAsset("test.json");
 		//Ref<CMesh> mesh = assetManager.GetMesh("mario");
-		mesh->OnCreate();		
+		mesh->OnCreate();	
+
 		// step 1.2 shaders
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);	
-		desSetInfo.descriptorSetLayout = vRenderer->CreateDescriptorSetLayout(layoutInfo);
-
-		// step 1.3.1 count  how many materials for which shader to size the pool correctly
-		desSetInfo.descriptorPool = vRenderer->CreateDescriptorPool(layoutInfo, 2);
-		// SHADERS NEEDS LayoutInfo, paths, and renderer
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, desSetInfo.descriptorSetLayout, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
 		cshade->OnCreate();
 		
-		//step 1.3 material
-		std::vector<std::pair<std::string, SingleDescriptorSetLayoutInfo>> array; // need this form vicent filled with the write data in the material
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_mime.png");
+		//step 1.3 Materials
+		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);
 		mat->OnCreate();
-		mat->SetShader(cshade);
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, "./textures/mario_fire.png");
+
+		filepaths = { "./textures/mario_fire.png" };
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
 		mat1->OnCreate();
-		mat1->SetShader(cshade);
-		// step 1.3.2 allocate form the pool
-		auto set = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);
-		auto set1 = vRenderer->AllocateDescriptorSets(desSetInfo.descriptorPool, desSetInfo.descriptorSetLayout);
-		// step 1.3.4 write to set
-		std::vector<DescriptorWriteInfo> write;
-		vRenderer->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
-		vRenderer->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
-		auto matrefence = mat->GetTextureSampler(); // getting the handle form the loaded texture to add as a descriptor
-		vRenderer->AddToDescrisptorLayoutWrite(write, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &matrefence);		
-		vRenderer->WriteDescriptorSets(set, write);
-		// step 1.3.5 set set to Matrial
-		mat->SetDescriptorSet(set);
-		write.clear();
-		// step 1.3.6 do the same for all materials that share the layout
-		vRenderer->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
-		vRenderer->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, lightsUBO);
-		matrefence = mat1->GetTextureSampler();
-		vRenderer->AddToDescrisptorLayoutWrite(write, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, &matrefence);		
-		vRenderer->WriteDescriptorSets(set1, write);
-
-		mat1->SetDescriptorSet(set1);
-
 
 		// step 2 create actors
 		Ref<CActor> act = std::make_shared<CActor>(nullptr);
@@ -171,30 +152,33 @@ void Scene0::Render() const {
 
 		
 		vRenderer->RecordCommandBuffers(Recording::START);
-		//actor 1
 		{
 			auto a = std::dynamic_pointer_cast<CActor>(actor);
-			auto mesh = a->GetComponent<CMesh>();
 			auto mat = a->GetComponent<CMaterial>();
-			auto info = mat->GetPipelineInfo();
-			vRenderer->BindPipeline(info.pipeline);		
-			vRenderer->BindDescriptorSet(info.pipelineLayout, mat->GetDescriptorSet());
-			vRenderer->SetPushConstant(info, a->GetModelMatrix());
-			vRenderer->BindMesh(mesh->GetMesh());
-			vRenderer->DrawIndexed(mesh->GetMesh());
-		}
+			auto mesh = a->GetComponent<CMesh>();
+			auto meshdata = mesh->GetMesh();
+			auto pipelineinfo = mat->GetPipelineInfo();
 
-		//actor 2
+			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout,vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
+			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetRednerSetValue());// 3 bind local discriptor
+			vRenderer->BindMesh(meshdata);// 4 bind mesh
+			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+			vRenderer->DrawIndexed(meshdata);// 6 draw
+		}
 		{
 			auto a = std::dynamic_pointer_cast<CActor>(actor1);
-			auto mesh = a->GetComponent<CMesh>();
 			auto mat = a->GetComponent<CMaterial>();
-			auto info = mat->GetPipelineInfo();
-			vRenderer->BindPipeline(info.pipeline);
-			vRenderer->BindDescriptorSet(info.pipelineLayout, mat->GetDescriptorSet());
-			vRenderer->SetPushConstant(info, a->GetModelMatrix());
-			vRenderer->BindMesh(mesh->GetMesh());
-			vRenderer->DrawIndexed(mesh->GetMesh());
+			auto mesh = a->GetComponent<CMesh>();
+			auto meshdata = mesh->GetMesh();
+			auto pipelineinfo = mat->GetPipelineInfo();
+
+			// no need to re bind the global set
+			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetRednerSetValue());// 3 bind local discriptor
+			vRenderer->BindMesh(meshdata);// 4 bind mesh
+			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+			vRenderer->DrawIndexed(meshdata);// 6 draw
 		}
 	
 
@@ -233,7 +217,7 @@ void Scene0::OnDestroy() {
 		//vRenderer->DestroyCommandBuffers(); 
 
 		
-		vRenderer->DestroyDescriptorSet(desSetInfo);
+		vRenderer->DestroyGlobalDescriptionSet();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
 		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();

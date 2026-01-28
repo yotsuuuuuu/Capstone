@@ -358,10 +358,27 @@ public:
 	VkDescriptorSetLayout CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo);
 	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
 	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout);
-    void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,std::vector<DescriptorWriteInfo>& writeInfo);
+    void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo);
 
     // ECS Rendering
     struct ECSRenderer;
+
+    //Global Descriptorset
+private:
+    DescriptorSetInfo GlobalSet;
+
+public:
+    void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
+    void DestroyGlobalDescriptionSet();
+    DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
+
+
+
+    void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
+    
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
+        const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
+
 };
 #endif 
 

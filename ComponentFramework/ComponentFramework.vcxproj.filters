@@ -103,6 +103,9 @@
     <ClCompile Include="World.cpp">
       <Filter>CPP\TerrainGeneration</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanECS.cpp">
+      <Filter>CPP\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">

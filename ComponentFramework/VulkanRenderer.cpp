@@ -892,6 +892,13 @@ void VulkanRenderer::BindDescriptorSet(VkPipelineLayout pipelineLayout, std::vec
             pipelineLayout, 0, 1, &descriptorSet[i], 0, nullptr);
     }
 }
+void VulkanRenderer::BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet, uint32_t setID)
+{
+    for (uint32_t i = 0; i < numSwapchains; i++) {
+        vkCmdBindDescriptorSets(primaryCommandBuffer.commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout, setID, 1, &descriptorSet[i], 0, nullptr);
+    }
+}
 
 void VulkanRenderer::SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_) {
     ModelMatrixPushConst modelMatrixPushConst;
@@ -1070,7 +1077,7 @@ std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptor
     return descriptorSets;
 }
 
-void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets, std::vector<DescriptorWriteInfo>& writeInfo)
+void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo)
 {
 	std::vector<VkWriteDescriptorSet> descriptorWrites(writeInfo.size());
 	std::vector<VkDescriptorBufferInfo> bufferInfos;

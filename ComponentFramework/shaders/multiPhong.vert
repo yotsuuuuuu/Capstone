@@ -1,28 +1,30 @@
 #version 450
-#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_separate_shader_objects : enable // need for openGL
+
 #define MAX_LIGHTS 4
 
 layout (location = 0) in  vec4 vVertex;
 layout (location = 1) in  vec4 vNormal;
 layout (location = 2) in  vec2 texCoords;
 
-layout(binding = 0) uniform CameraUBO {
+layout(set = 0 , binding = 0) uniform CameraUBO {
     mat4 projectionMatrix;
 	mat4 viewMatrix;
 } camera;
 
-layout(push_constant) uniform Push {
-	mat4 modelMatrix;
-	mat4 normalMatrix; 
-} push;
 
-layout(binding = 1) uniform LightsUBO {
+layout(set = 0 ,binding = 1) uniform LightsUBO {
  vec4 pos[MAX_LIGHTS];
  vec4 diffuse[MAX_LIGHTS];
  vec4 specular[MAX_LIGHTS];
  vec4 ambient;
  uint numLights;
 } lights;
+
+layout(push_constant) uniform Push {
+	mat4 modelMatrix;
+	mat4 normalMatrix; 
+} push;
 
 layout (location = 0) out vec3 vertNormal;
 layout (location = 1) out vec3 eyeDir;

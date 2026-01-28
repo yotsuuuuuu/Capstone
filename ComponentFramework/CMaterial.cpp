@@ -15,7 +15,19 @@ bool CMaterial::OnCreate()
     switch (render->getRendererType()) {
     case RendererType::VULKAN: {
         VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
-        texture = vkrender->Create2DTextureImage(textureFile);   
+        for (const auto& file : textureFilePaths) { // owned by the mat class
+            auto texture = vkrender->Create2DTextureImage(file.c_str());
+            textures.push_back(texture);
+        }
+
+        if (Ref<CShader> s = shader.lock()) {
+        descriptionSet = s->AllocateDescriptorSet(textures);
+        }
+        else {
+            return false;
+        }
+
+
         isCreated = true;
         return true;
         break;
@@ -36,7 +48,11 @@ void CMaterial::OnDestroy()
     switch (render->getRendererType()) {
     case RendererType::VULKAN: {
         VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
-        vkrender->DestroySampler2D(texture);      
+        for (auto& texture : textures) {
+            vkrender->DestroySampler2D(texture);
+        }
+        textures.clear();
+        descriptionSet.clear();
         break;
     }
     }

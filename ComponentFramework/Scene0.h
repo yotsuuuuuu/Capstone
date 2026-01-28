@@ -24,7 +24,7 @@ private:
 	LightsData lights;
 
 
-	DescriptorSetInfo desSetInfo;
+
 
 	
 	

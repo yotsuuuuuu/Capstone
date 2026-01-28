@@ -6,6 +6,19 @@
 #include "CTransform.h"
 
 
+void VulkanRenderer::CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo, const std::vector<DescriptorWriteInfo>& WriteInfo)
+{
+    GlobalSet.descriptorSetLayout = CreateDescriptorSetLayout(LayOutInfo);
+    GlobalSet.descriptorPool = CreateDescriptorPool(LayOutInfo, 2);
+    GlobalSet.descriptorSet = AllocateDescriptorSets(GlobalSet.descriptorPool, GlobalSet.descriptorSetLayout);
+    WriteDescriptorSets(GlobalSet.descriptorSet, WriteInfo);
+}
+
+void VulkanRenderer::DestroyGlobalDescriptionSet()
+{
+    DestroyDescriptorSet(GlobalSet);
+}
+
 
 struct VulkanRenderer::ECSRenderer {
 

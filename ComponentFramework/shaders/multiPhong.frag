@@ -1,5 +1,6 @@
 #version 450
-#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_separate_shader_objects : enable // need for openGL
+
 #define MAX_LIGHTS 4
 layout (location = 0) in vec3 vertNormal;
 layout (location = 1) in vec3 eyeDir;
@@ -7,7 +8,7 @@ layout (location = 2) in vec2 fragTexCoords;
 layout (location = 3) in vec3 lightDir[MAX_LIGHTS];
 
 
-layout(binding = 1) uniform LightsUBO {
+layout(set = 0 , binding = 1) uniform LightsUBO {
  vec4 pos[MAX_LIGHTS];
  vec4 diffuse[MAX_LIGHTS];
  vec4 specular[MAX_LIGHTS];
@@ -17,7 +18,7 @@ layout(binding = 1) uniform LightsUBO {
 
 layout (location = 0) out vec4 fragColor;
 
-layout(binding = 2) uniform sampler2D texSampler;
+layout(set = 1, binding = 2) uniform sampler2D texSampler;
 
 void main() { 
 	vec3 reflection[MAX_LIGHTS];
