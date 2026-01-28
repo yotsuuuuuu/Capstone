@@ -32,7 +32,7 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
 
     if (!jsonLoader.contains("Meshes") || !jsonLoader["Meshes"].contains(id))
     {
-        std::cout << "json does not contain Shader" << id << "\n";
+        std::cout << "json does not contain meshes" << id << "\n";
         return nullptr;
     }
 
