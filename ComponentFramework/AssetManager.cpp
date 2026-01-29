@@ -35,10 +35,6 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
         std::cout << "json does not contain meshes" << id << "\n";
         return nullptr;
     }
-
-    //std::pair<std::string, std::string> shaderPaths;
-   // shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
-    //shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
     std::string meshpath = jsonLoader["Meshes"][id].get<std::string>();
     Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr,renderer,meshpath);
     meshMap[id] = mesh;
@@ -47,6 +43,19 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
 
 Ref<CMaterial> AssetManager::GetMat(const std::string& id)
 {
+    auto checker = materialMap.find(id);
+    if (checker != materialMap.end())
+    {
+        return checker->second;
+    }
+
+    if (!jsonLoader.contains("Material") || !jsonLoader["Material"].contains(id))
+    {
+        std::cout << "json does not contain meshes" << id << "\n";
+        return nullptr;
+    }
+
+
     return Ref<CMaterial>();
 }
 
@@ -60,12 +69,24 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
         return checker->second;
     }
 
-    if (!jsonLoader.contains("Meshes") || !jsonLoader["Meshes"].contains(id))
+    if (!jsonLoader.contains("Shaders") || !jsonLoader["Shaders"].contains(id))
     {
         std::cout << "json does not contain Mesh" << id << "\n";
         return nullptr;
     }
 
-    return Ref<CShader>();
+    std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+    std::pair<std::string, std::string> shaderPaths;
+    shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
+    shaderPaths.second = jsonLoader["Shaders"][id]["vert"].get<std::string>();
+
+    int shaderBinding = jsonLoader["Shaders"][id]["binding"].get<int>();
+    int shaderType = jsonLoader["Shaders"][id]["type"].get<int>();
+    int shaderStage = jsonLoader["Shaders"][id]["stage"].get<int>();
+
+    renderer->AddToDescrisptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
+    Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
+    shaderMap[id] = cshade;
+    return cshade;
 }
 

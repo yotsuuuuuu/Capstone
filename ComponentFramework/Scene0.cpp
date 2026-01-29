@@ -64,10 +64,10 @@ bool Scene0::OnCreate() {
 		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
-		// step 1.1 Meshs
-		//Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
-		assetManager.LoadAsset("./test.json");
-		Ref<CMesh> mesh = assetManager.GetMesh("mario");
+	/*	 step 1.1 Meshs*/
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
+	/*	assetManager.LoadAsset("./test.json");
+		Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
 
 		// step 1.2 shaders

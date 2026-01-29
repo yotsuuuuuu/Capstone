@@ -3,18 +3,30 @@
     "mario": "./meshes/Mario.obj"
   },
   "Shaders": {
-    "Phong": {
+    "phong": {
       "frag": "shaders/multiPhong.frag.spv",
-      "vert": "shaders/multiPhong.vert.spv"
- 
+      "vert": "shaders/multiPhong.vert.spv",
+      //desciptor
+      "binding": 1,
+      "type": 1,
+      "stage": 16,
+
+      //descirptor type, takes int to then convert tp enum
+      //vertex shader flag , int
+      //how many des,int
     }
   },
   "Material": {
-  
+    "mario" {
+      "texture": "./textures/mario_mime.png"
+      "shader": "phong"
+    },
   },
   "Actor": {
-    "mario":{
-     
+    "mario": {
+      //mat
+      //mesh
+      //transform
     }
   }
 }
