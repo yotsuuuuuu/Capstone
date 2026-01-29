@@ -23,6 +23,7 @@
 #include "Renderer.h"
 #include "DescriptorSetBuilder.h"
 #include "VkImGUISystem.h"
+#include "Component.h"
 
 #include <Vector.h>
 #include <VMath.h>
@@ -212,7 +213,8 @@ public:
     template <class T>
     void UpdateUniformBuffer(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
         void* data;
-        for (int i = 0; i < numSwapchains; ++i) {
+        int num = static_cast<int>(numSwapchains);
+        for (int i = 0; i < num; ++i) {
             vkMapMemory(device, bufferMemory[i].bufferMemoryID, 0, sizeof(T), 0, &data);
             memcpy(data, &srcData, bufferMemory[i].bufferMemoryLength);
             vkUnmapMemory(device, bufferMemory[i].bufferMemoryID);
@@ -361,7 +363,37 @@ public:
     void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo);
 
     // ECS Rendering
+private:
+    struct FrameContext
+    {
+        VkSemaphore waitSemaphores;
+        VkSemaphore signalSemaphores;
+        VkFence currentframeFence;
+        VkCommandBuffer CMDBuffer;
+        VkRenderPass Renderpass;
+        uint32_t targetFrameIndex;
+        VkFramebuffer currentFrameBuffer;
+        VkExtent2D extent;
+    };
+
+    VulkanRenderer::FrameContext GetCurrentFrameContext();
+    void CMDBeginRecord(const VkCommandBuffer&);
+    void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPassBeginInfo&);
+    // proble this one needs bit of rework
+    void CMDRecordPushConstant(const VkCommandBuffer&, const VkPipelineLayout&,const VkShaderStageFlagBits&  ,const ModelMatrixPushConst&);
+    void CMDRecordBindPipeline(const VkCommandBuffer&, const VkPipeline&, const VkPipelineBindPoint&);
+    void CMDRecordDescriptorSet(const VkCommandBuffer&, const VkPipelineLayout&, VkPipelineBindPoint flag, const VkDescriptorSet*, uint32_t fristSet = 0, uint32_t count = 1, uint32_t desOffset = 0, const uint32_t* DynamicOffset = nullptr);
+    void CMDRecordBindIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
+    void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
+    void CMDEndRenderPass(const VkCommandBuffer&);
+    void CMDEndRecord(const VkCommandBuffer&);
+
+    void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
+    void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
+
     struct ECSRenderer;
+public:
+    void RenderECS(const std::vector<Ref<Component>>& drawlist);
 
     //Global Descriptorset
 private:

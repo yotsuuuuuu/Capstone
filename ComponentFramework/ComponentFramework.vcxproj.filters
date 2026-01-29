@@ -266,9 +266,6 @@
     <Filter Include="Headers">
       <UniqueIdentifier>{2ce95ea9-bdb2-47bc-9e70-b9e5ef6fa95d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP">
-      <UniqueIdentifier>{282b3588-fdab-4fac-813d-357b2c530a4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\IMGUI">
       <UniqueIdentifier>{dcd0bd0c-b354-4e3b-85f8-a9657e5f1181}</UniqueIdentifier>
     </Filter>
@@ -277,6 +274,18 @@
     </Filter>
     <Filter Include="Headers\Scenes">
       <UniqueIdentifier>{2e812378-c40e-4e4d-b0d9-d84e3f1f1308}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\TerrainGeneration">
+      <UniqueIdentifier>{3dd6e64d-cb5b-49b0-81d6-3c5ad84e3f54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Component">
+      <UniqueIdentifier>{9abbf14c-ff9b-4b5a-8c10-2b5c3df0acab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Vulkan">
+      <UniqueIdentifier>{2c637658-2afe-421e-b3a9-36496aaaf236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CPP">
+      <UniqueIdentifier>{282b3588-fdab-4fac-813d-357b2c530a4d}</UniqueIdentifier>
     </Filter>
     <Filter Include="CPP\Scenes">
       <UniqueIdentifier>{a8bf67aa-38fd-442f-be6f-7df123eead96}</UniqueIdentifier>
@@ -287,20 +296,11 @@
     <Filter Include="CPP\TerrainGeneration">
       <UniqueIdentifier>{3d05b503-eb8c-463b-9645-b5f30777a251}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\TerrainGeneration">
-      <UniqueIdentifier>{3dd6e64d-cb5b-49b0-81d6-3c5ad84e3f54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Component">
-      <UniqueIdentifier>{9abbf14c-ff9b-4b5a-8c10-2b5c3df0acab}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CPP\Components">
       <UniqueIdentifier>{55a72f4b-d4ca-4f54-abb9-b1823d5359d2}</UniqueIdentifier>
     </Filter>
     <Filter Include="CPP\Vulkan">
       <UniqueIdentifier>{af99d9c7-4d24-4b1f-ac97-0042a0a7688e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Vulkan">
-      <UniqueIdentifier>{2c637658-2afe-421e-b3a9-36496aaaf236}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

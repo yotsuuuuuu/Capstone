@@ -104,7 +104,7 @@
 
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
 		descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		descriptorPoolInfo.poolSizeCount = poolSizes.size();
+		descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 		descriptorPoolInfo.pPoolSizes = poolSizes.data();
 		descriptorPoolInfo.maxSets = numSwapChains;
 		descriptorPoolInfo.flags = 0;

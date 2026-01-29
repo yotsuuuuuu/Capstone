@@ -769,8 +769,8 @@ std::vector<const char*> VulkanRenderer::getRequiredExtensions() {
     if (!instance_extensions) {
         throw std::runtime_error("failed to get required SDL extensions!");
     }
-
-    for (int i = 0; i < extensionCount; ++i) {
+    int count = static_cast<int>(extensionCount);
+    for (int i = 0; i < count; ++i) {
         extensions.push_back(instance_extensions[i]);
     }
 

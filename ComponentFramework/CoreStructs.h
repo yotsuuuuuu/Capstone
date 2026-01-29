@@ -130,6 +130,14 @@ struct SingleDescriptorInfoCollection {
     Sampler2D* pImageMem;
 };
 
+struct Drawitem {
+    PipelineInfo pipe;
+    VkDescriptorSet set;
+    uint32_t setId;
+    IndexedVertexBuffer mesh;
+    ModelMatrixPushConst push;
+};
+
 struct SingleDescriptorSetLayoutInfo {
     uint32_t binding; 
     uint32_t descriptorCount;
