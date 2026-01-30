@@ -95,7 +95,7 @@ CameraData CCameraActor::GetCamDataUBO()
 void CCameraActor::UpdateUBO(uint32_t uboindex)
 {
 
-	if (!isCreated || IsUBOOutDated())
+	if (!isCreated || !IsUBOOutDated())
 		return;
 	if (!render)
 		return;

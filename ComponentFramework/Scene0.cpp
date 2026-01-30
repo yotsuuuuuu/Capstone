@@ -133,7 +133,7 @@ void Scene0::Update(const float deltaTime) {
 }
 
 void Scene0::Render() const {
-		switch (renderer->getRendererType()) {
+	switch (renderer->getRendererType()) {
 
 	case RendererType::VULKAN:
 		VulkanRenderer* vRenderer;
@@ -150,40 +150,46 @@ void Scene0::Render() const {
 		// 3 record on the right cmd buffer
 		// 4 submit the cmd buffer for that frame only
 
-		
-		vRenderer->RecordCommandBuffers(Recording::START);
-		{
-			auto a = std::dynamic_pointer_cast<CActor>(actor);
-			auto mat = a->GetComponent<CMaterial>();
-			auto mesh = a->GetComponent<CMesh>();
-			auto meshdata = mesh->GetMesh();
-			auto pipelineinfo = mat->GetPipelineInfo();
+		//
+		//vRenderer->RecordCommandBuffers(Recording::START);
+		//{
+		//	auto a = std::dynamic_pointer_cast<CActor>(actor);
+		//	auto mat = a->GetComponent<CMaterial>();
+		//	auto mesh = a->GetComponent<CMesh>();
+		//	auto meshdata = mesh->GetMesh();
+		//	auto pipelineinfo = mat->GetPipelineInfo();
 
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout,vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
-			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetRednerSetValue());// 3 bind local discriptor
-			vRenderer->BindMesh(meshdata);// 4 bind mesh
-			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-			vRenderer->DrawIndexed(meshdata);// 6 draw
-		}
-		{
-			auto a = std::dynamic_pointer_cast<CActor>(actor1);
-			auto mat = a->GetComponent<CMaterial>();
-			auto mesh = a->GetComponent<CMesh>();
-			auto meshdata = mesh->GetMesh();
-			auto pipelineinfo = mat->GetPipelineInfo();
+		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout,vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
+		//	vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
+		//	vRenderer->BindMesh(meshdata);// 4 bind mesh
+		//	vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+		//	vRenderer->DrawIndexed(meshdata);// 6 draw
+		//}
+		//{
+		//	auto a = std::dynamic_pointer_cast<CActor>(actor1);
+		//	auto mat = a->GetComponent<CMaterial>();
+		//	auto mesh = a->GetComponent<CMesh>();
+		//	auto meshdata = mesh->GetMesh();
+		//	auto pipelineinfo = mat->GetPipelineInfo();
 
-			// no need to re bind the global set
-			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetRednerSetValue());// 3 bind local discriptor
-			vRenderer->BindMesh(meshdata);// 4 bind mesh
-			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-			vRenderer->DrawIndexed(meshdata);// 6 draw
-		}
+		//	// no need to re bind the global set
+		//	vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
+		//	vRenderer->BindMesh(meshdata);// 4 bind mesh
+		//	vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+		//	vRenderer->DrawIndexed(meshdata);// 6 draw
+		//}
 	
 
-		vRenderer->RecordCommandBuffers(Recording::STOP);
-		vRenderer->Render();
+		//vRenderer->RecordCommandBuffers(Recording::STOP);
+		//vRenderer->Render();
+		{
+			std::vector<Ref<Component>> drawlist;
+			drawlist.push_back(actor);
+			drawlist.push_back(actor1);
+			vRenderer->RenderECS(drawlist);
+		}
 		break;
 
 	case RendererType::OPENGL:

@@ -149,7 +149,9 @@ void VulkanRenderer::Render() {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image!");
     }
+    //printf("%d curreframe pre ", currentFrame);
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    //printf("%d curreframe pre ", currentFrame);
 }
 
 void VulkanRenderer::DestroyUBO(std::vector<BufferMemory> ubo){
