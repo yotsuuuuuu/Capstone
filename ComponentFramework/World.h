@@ -5,26 +5,24 @@
 #include "CoreStructs.h"
 #include "TerrainPreset.h"
 #include "TerrainNoise.h"
-#include "TerrainRenderer.h"
-#include "ChunkBuilder.h"
+#include "VulkanRenderer.h"
 #include "Chunk.h"
 
 using namespace MATH;
 
 class World {
-public:
-	void createWorld(const TerrainPreset& preset); // creates a world based on the terrain preset
-	void update(Vec3 playerPosition); // updates the world based on player position
-	void renderWorld(VkCommandBuffer commandBuffer); // renders the world. must figure out how this happens and how/if it needs a ref to the renderer
-
 private:
-	int64_t hashChunkCoord(const Vec2& coord) const; // hashes chunk coordinates for storage in unordered map
+	Renderer* renderer;
+	TerrainNoise* terrainNoise;
+	//std::unique_ptr<PipelineInfo> terrainPipeline; // pipeline for rendering terrain chunks
+	std::vector<std::unique_ptr<Chunk>> chunks; // vector of chunks
+	Matrix4 projectionMatrix;
+	//int64_t hashChunkCoord(const Vec2& coord) const;
 
-	TerrainNoise* terrainNoise = nullptr; // pointer to terrain noise generator
-	ChunkBuilder chunkBuilder; // chunk builder instance
-
-	TerrainRenderer terrainRenderer; // terrain renderer instance
-	TerrainRenderData renderData; // terrain mesh data
-
-	std::unordered_map<int64_t, Chunk> chunks; // map of chunks using hashed coordinates
+public:
+	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
+	~World();
+	void Initialize(TerrainPreset* t_);
+	void Render();
+	void Update(Vec3 playerPosition); // either pass it deltatime or player position or both, probably both
 };

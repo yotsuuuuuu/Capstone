@@ -1,17 +1,49 @@
 #ifndef SCENE2_H
 #define SCENE2_H
 #include "Scene.h"
+#include "Vector.h"
+#include "Renderer.h"
+//#include "Camera.h"
+#include "CoreStructs.h"
+//temp for testing
+#include "Component.h"
+using namespace MATH;
+
+/// Forward declarations 
 union SDL_Event;
+
+
 class Scene2 : public Scene {
+private:
+	
+	Renderer *renderer;
+	//Camera *camera;
+
+	
+	std::vector<BufferMemory> lightsUBO;
+	LightsData lights;
+
+
+
+
+	
+	
+	//Components
+	Ref<Component> camera;
+	Ref<Component> actor;
+	Ref<Component> actor1;	
+	Ref<Component> shader;
+
 public:
-	explicit Scene2();
+
+	explicit Scene2(Renderer* renderer_);
 	virtual ~Scene2();
 
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
-	virtual void HandleEvents(const SDL_Event &sdlEvent) override;
 	virtual void Update(const float deltaTime) override;
 	virtual void Render() const override;
+	virtual void HandleEvents(const SDL_Event &sdlEvent) override;
 };
 
 

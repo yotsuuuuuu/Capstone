@@ -1,35 +1,17 @@
 #include "World.h"
 
-void World::createWorld(const TerrainPreset& preset)
+
+void World::Initialize(TerrainPreset* t_)
 {
-	terrainNoise = new TerrainNoise(preset);
-	//create terrain mesh here
+	terrainNoise = new TerrainNoise(*t_);
 }
 
-void World::update(Vec3 playerPosition)
+World::~World()
 {
-	//// determine which chunks to load/generate based on player position
-	//Vec2 centerChunkCoord = {int(std::floor(playerPosition.x / CHUNK_WORLD_SIZE)),
-	//						  int(std::floor(playerPosition.z / CHUNK_WORLD_SIZE)) };
-
-	//constexpr int RENDER_DISTANCE = 4; // number of chunks to load in each direction
-
-	//for (int z = -RENDER_DISTANCE; z <= RENDER_DISTANCE; z++) {
-	//	for (int x = -RENDER_DISTANCE; x <= RENDER_DISTANCE; x++) {
-	//		Vec2 chunkCoord = centerChunkCoord + Vec2(float(x), float(z));
-	//		
-	//		// logic for loading/generating chunks
-
-	//	}
-	//}
+	chunks.clear();
+	// delete pipeline if created
+	delete terrainNoise;
 }
 
-void World::renderWorld(VkCommandBuffer commandBuffer)
-{
-	//render generated chunks here
-}
 
-int64_t World::hashChunkCoord(const Vec2& coord) const
-{
-	return (int64_t(coord.x) <<32) | uint32_t(coord.y);
-}
+

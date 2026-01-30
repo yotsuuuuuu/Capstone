@@ -6,7 +6,6 @@
 #include "Scene0.h"
 #include "Debug.h"
 
-
 SceneManager::SceneManager(): 
 	currentScene(nullptr), timer(nullptr),
 	fps(60), isRunning(false), rendererType(RendererType::VULKAN),
