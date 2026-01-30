@@ -10,7 +10,8 @@
       "binding": 1,
       "type": 1,
       "stage": 16,
-
+      "pass": 1,
+      "opaque": 0
       //descirptor type, takes int to then convert tp enum
       //vertex shader flag , int
       //how many des,int
@@ -18,8 +19,12 @@
   },
   "Material": {
     "mario" {
-      "texture": "./textures/mario_mime.png"
-      "shader": "phong"
+      "texture": "./textures/mario_mime.png",
+        "shader": "phong",
+        "cast shadow": "true",
+        "recieve shadow": "false"
+
+
     },
   },
   "Actor": {

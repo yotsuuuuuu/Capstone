@@ -55,8 +55,12 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
         return nullptr;
     }
 
+    std::string filepathtexture = jsonLoader["Material"][id]["texture"].get<std::string>();
+    Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepathtexture, GetShader(id));
+    materialMap[id] = mat1;
+    mat1->OnCreate();
 
-    return Ref<CMaterial>();
+    return mat1;
 }
 
 Ref<CShader> AssetManager::GetShader(const std::string& id)
