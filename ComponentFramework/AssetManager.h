@@ -31,6 +31,7 @@ public:
 	AssetManager(VulkanRenderer* renderer_):renderer(renderer_) {};
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
+	bool LoadActorsInScene();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);

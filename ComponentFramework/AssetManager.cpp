@@ -22,6 +22,11 @@ bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref
     return false;
 }
 
+bool AssetManager::LoadActorsInScene()
+{
+    return false;
+}
+
 Ref<CMesh> AssetManager::GetMesh(const std::string& id)
 {
     auto checker = meshMap.find(id);
