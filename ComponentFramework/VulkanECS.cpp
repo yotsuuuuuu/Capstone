@@ -185,6 +185,7 @@ void VulkanRenderer::DestroySampler(VkSampler& sampler)
     }
 }
 
+
 void VulkanRenderer::DestroyImageView(VkImageView& imageView)
 {
     if (imageView != VK_NULL_HANDLE) {

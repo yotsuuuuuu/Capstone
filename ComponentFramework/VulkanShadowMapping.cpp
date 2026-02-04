@@ -1,7 +1,7 @@
 #include "VulkanRenderer.h"
 
 
-void VulkanRenderer::CreateShadowMappingResources(uint32_t width, uint32_t height, VkFormat format, 
+void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format, 
 	VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
 	VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout)
 {
@@ -63,6 +63,14 @@ void VulkanRenderer::CreateShadowMappingResources(uint32_t width, uint32_t heigh
 	}
 
 	// step 6 create command buffers for each frame in flight? maybe not need maybe use the main command buffers
+
+}
+
+void VulkanRenderer::CreateGlobalShadowPipeline(Ref<Component> Shader, Ref<Component> globaLight)
+{
+	// i dont knwo if we need shader component or just make the pipepine with in this 
+	// function
+	// if  used the shader ref it can only make a graphics pipeline with the 
 	
 	// idea the descriptor set need info aobut the light in the scene
 	// so delay creation of the set and piepeline till scene objects are known
@@ -73,5 +81,26 @@ void VulkanRenderer::CreateShadowMappingResources(uint32_t width, uint32_t heigh
 
 void VulkanRenderer::DestroyShadowMappingResources()
 {
+	// need to destroy in reverse order
+	// step 5
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		DestroySemaphore(shadowMappingInfo.WaitSemaphores[i]);
+		DestroySemaphore(shadowMappingInfo.SignalSemaphores[i]);
+		DestroyFence(shadowMappingInfo.InFlightFences[i]);
+	}
 
+	// step 4
+	for (size_t i = 0; i < shadowMappingInfo.FrameBuffers.size(); i++) {
+		DestroyFrameBuffer(shadowMappingInfo.FrameBuffers[i]);
+	}
+
+	// step 3 
+	DestroyRenderPass(shadowMappingInfo.RenderPass);
+	// step 2	
+	// step 1
+	for (auto& sampler : shadowMappingInfo.ShadowTextures2D) {
+		DestroySampler(sampler.sampler);
+		DestroyImageView(sampler.imageView);
+		DestroyImage(sampler.image, sampler.imageDeviceMemory);
+	}
 }

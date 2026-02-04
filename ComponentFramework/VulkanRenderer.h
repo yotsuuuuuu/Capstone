@@ -451,11 +451,14 @@ private:
     };
 
 	GlobalShadowMappingInfo shadowMappingInfo;
+
 public:
 
-    void CreateShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
+    void CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
+
+    void CreateGlobalShadowPipeline(Ref<Component> Shader, Ref<Component> globaLight);
 
 	void DestroyShadowMappingResources();
 
