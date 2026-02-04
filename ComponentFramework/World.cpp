@@ -4,6 +4,7 @@
 void World::Initialize(TerrainPreset* t_)
 {
 	terrainNoise = new TerrainNoise(*t_);
+	Worl
 }
 
 World::~World()

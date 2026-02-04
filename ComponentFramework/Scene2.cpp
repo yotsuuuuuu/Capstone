@@ -116,7 +116,7 @@ bool Scene2::OnCreate() {
 
 		preset.globalHeightScale = 10.0f;
 		World world(renderer);
-		world.CreateWorld(&preset);
+		world.Initialize(&preset);
 
 
 	}

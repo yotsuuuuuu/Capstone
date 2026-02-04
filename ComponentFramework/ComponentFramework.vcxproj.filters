@@ -91,13 +91,7 @@
     <ClCompile Include="VulkanUniformBuffer.cpp">
       <Filter>CPP\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="ChunkBuilder.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
-    </ClCompile>
     <ClCompile Include="TerrainNoise.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainRenderer.cpp">
       <Filter>CPP\TerrainGeneration</Filter>
     </ClCompile>
     <ClCompile Include="World.cpp">
@@ -105,6 +99,15 @@
     </ClCompile>
     <ClCompile Include="VulkanECS.cpp">
       <Filter>CPP\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene2.cpp">
+      <Filter>CPP\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>CPP\TerrainGeneration</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainGenerator.cpp">
+      <Filter>CPP\TerrainGeneration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,25 +180,13 @@
     <ClInclude Include="CTransform.h">
       <Filter>Headers\Component</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainNoise.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
     <ClInclude Include="TerrainPreset.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainRenderer.h">
       <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
     <ClInclude Include="World.h">
       <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
     <ClInclude Include="WorldConstants.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="Chunk.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="ChunkBuilder.h">
       <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
     <ClInclude Include="CShader.h">
@@ -230,6 +221,18 @@
     </ClInclude>
     <ClInclude Include="imconfig.h">
       <Filter>Headers\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene2.h">
+      <Filter>Headers\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainNoise.h">
+      <Filter>Headers\TerrainGeneration</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Headers\TerrainGeneration</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGenerator.h">
+      <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

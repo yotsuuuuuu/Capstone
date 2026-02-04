@@ -9,7 +9,7 @@ class Chunk
 	IndexedVertexBuffer mesh; 
 
 	Vec2 position; // x,z position in world space. y comes from heightmap
-	Matrix4 modelMatrix; // model matrix for chunk position
+	// mesh component;
 
 	//chunk size defined in WorldConstants.h  = 64 (8x8)
 
