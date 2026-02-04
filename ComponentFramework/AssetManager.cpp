@@ -2,6 +2,7 @@
 #include "CActor.h"
 #include "CMesh.h"
 #include "CMaterial.h"
+#include "CShader.h"
 
 using json = nlohmann::json;
 
@@ -60,8 +61,9 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
         return nullptr;
     }
 
-    std::string filepathtexture = jsonLoader["Material"][id]["texture"].get<std::string>();
-    Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepathtexture, GetShader(id));
+    std::vector<std::string> filepathtexture;
+    filepathtexture.push_back(jsonLoader["Material"][id]["texture"].get<std::string>());
+    Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepathtexture, GetShader(jsonLoader["Material"][id]["shader"]));
     materialMap[id] = mat1;
     mat1->OnCreate();
 
@@ -80,7 +82,7 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
 
     if (!jsonLoader.contains("Shaders") || !jsonLoader["Shaders"].contains(id))
     {
-        std::cout << "json does not contain Mesh" << id << "\n";
+        std::cout << "json does not contain shader" << id << "\n";
         return nullptr;
     }
 

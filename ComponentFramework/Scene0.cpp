@@ -71,9 +71,11 @@ bool Scene0::OnCreate() {
 		mesh->OnCreate();	
 
 		// step 1.2 shaders
-		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+		/*std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");*/
+		
+		Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
 		//step 1.3 Materials
