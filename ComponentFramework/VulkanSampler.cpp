@@ -33,6 +33,33 @@ Sampler2D VulkanRenderer::Create2DTextureImage(const char* textureFile) {
     return texture2D;
 }
 
+void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor)
+{
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+
+	VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = filter;
+    samplerInfo.minFilter = filter;
+	samplerInfo.addressModeU = samplerMode;
+    samplerInfo.addressModeV = samplerMode;
+    samplerInfo.addressModeW = samplerMode;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+	samplerInfo.borderColor = borderColor;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+    if (vkCreateSampler(device, &samplerInfo, nullptr, &sampler) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create texture sampler!");
+    }
+}
+
 
 /// Configure how this image is to be sampled - this is same a the openGl texture filtering
 void VulkanRenderer::createTextureSampler(Sampler2D& texture2D) {

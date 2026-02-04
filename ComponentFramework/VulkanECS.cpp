@@ -49,6 +49,156 @@ VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
     return context;
    
 }
+void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD)
+{
+    //VkAttachmentDescription colorAttachment{};
+    //colorAttachment.format = swapChainImageFormat;
+    //colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    //colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    //colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    //colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    //colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    //colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    //colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    
+	uint32_t ColorAttachmentCount = static_cast<uint32_t>(colorAD.size());
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = ColorAttachmentCount;
+	
+
+
+    std::vector<VkAttachmentReference> ColorAttachmentsRefeneces;
+    VkAttachmentReference depthAttachmentRef{};
+    for (uint32_t i = 0; i < ColorAttachmentCount; i++) {
+        VkAttachmentReference colorAttachmentRef{};
+        colorAttachmentRef.attachment = i;
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		ColorAttachmentsRefeneces.push_back(colorAttachmentRef);
+
+    }
+    if (depthAD) {
+		depthAttachmentRef.attachment = ColorAttachmentCount;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+		colorAD.push_back(depthAD.value());
+    }
+    else {
+        subpass.pDepthStencilAttachment = nullptr;
+    }
+      
+   
+    subpass.pColorAttachments = ColorAttachmentsRefeneces.data();
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(colorAD.size());
+    renderPassInfo.pAttachments = colorAD.data();
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
+    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create render pass!");
+    }
+}
+
+void VulkanRenderer::CreateFrameBuffer(std::vector<VkImageView> images, VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer)
+{
+    VkFramebufferCreateInfo framebufferInfo{};
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass = pass;
+    framebufferInfo.attachmentCount = static_cast<uint32_t>(images.size());
+    framebufferInfo.pAttachments = images.data();
+    framebufferInfo.width = size.width;
+    framebufferInfo.height = size.height;
+    framebufferInfo.layers = 1;
+
+    if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &frameBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create framebuffer!");
+    }
+}
+
+void VulkanRenderer::CreateSemaphore(VkSemaphore& semaphore)
+{
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create Semaphore object");
+    }
+}
+
+void VulkanRenderer::CreateFence(VkFence& fence)
+{
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    if (vkCreateFence(device, &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create fence");
+    }
+}
+
+void VulkanRenderer::DestroyRenderPass(VkRenderPass& renderpass)
+{
+    if (renderpass != VK_NULL_HANDLE) {
+		vkDestroyRenderPass(device, renderpass, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroyFrameBuffer(VkFramebuffer& frameBuffer)
+{
+    if (frameBuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(device, frameBuffer, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroySemaphore(VkSemaphore& semaphore)
+{
+    if (semaphore != VK_NULL_HANDLE) {
+        vkDestroySemaphore(device, semaphore, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroyFence(VkFence& fence)
+{
+    if (fence != VK_NULL_HANDLE) {
+        vkDestroyFence(device, fence, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroySampler(VkSampler& sampler)
+{
+    if (sampler != VK_NULL_HANDLE) {
+        vkDestroySampler(device, sampler, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroyImageView(VkImageView& imageView)
+{
+    if (imageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
+}
+
+void VulkanRenderer::DestroyImage(VkImage& image, VkDeviceMemory& imageMemory)
+{
+    if (imageMemory != VK_NULL_HANDLE) {
+		vkFreeMemory(device, imageMemory, nullptr);
+        vkDestroyImage(device, image, nullptr);
+    }
+}
 
 void VulkanRenderer::CMDBeginRecord(const VkCommandBuffer& cmd)
 {

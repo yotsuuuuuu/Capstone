@@ -404,12 +404,62 @@ public:
     void DestroyGlobalDescriptionSet();
     DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
 
-
-
     void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
     
     PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
+  
+private:
+    //Creation Helper functions
+    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor);
+    void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD);
+    void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
+    void CreateSemaphore(VkSemaphore& semaphore);
+    void CreateFence(VkFence& fence);
+
+	void DestroyRenderPass(VkRenderPass& renderpass);
+    void DestroyFrameBuffer(VkFramebuffer& frameBuffer);
+    void DestroySemaphore(VkSemaphore& semaphore);
+    void DestroyFence(VkFence& fence);
+	void DestroySampler(VkSampler& sampler);
+	void DestroyImageView(VkImageView& imageView);
+	void DestroyImage(VkImage& image, VkDeviceMemory& imageMemory);
+
+
+	//Shadow Mapping
+    struct GlobalShadowMappingInfo
+    {
+        //Rendering handles
+        VkRenderPass RenderPass;
+		std::vector<Sampler2D> ShadowTextures2D;
+        std::vector<VkFramebuffer> FrameBuffers;
+		std::vector<VkSemaphore> WaitSemaphores;// 2 for the number of frames in flight
+		std::vector<VkSemaphore> SignalSemaphores;// 2
+		std::vector<VkFence> InFlightFences; //2 
+        //CommandBufferData CMDBuffers;
+		DescriptorSetInfo DesSetInfo;
+        PipelineInfo PipelineInfo;
+        //config info
+        VkExtent2D Diemensions;
+        VkFormat format;
+        VkImageTiling tile;
+        VkImageUsageFlags useFlag;
+        VkImageAspectFlags aspectFlag;
+        VkMemoryPropertyFlags propFlag;
+        VkImageLayout initial;
+        VkImageLayout final; 
+    };
+
+	GlobalShadowMappingInfo shadowMappingInfo;
+public:
+
+    void CreateShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
+        VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
+        VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
+
+	void DestroyShadowMappingResources();
+
+    GlobalShadowMappingInfo GetShadowMappingInfo() { return shadowMappingInfo; }
 
 };
 #endif 
