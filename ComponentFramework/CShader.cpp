@@ -15,9 +15,17 @@ bool CShader::OnCreate()
         desInfo.descriptorPool = vkrender->CreateDescriptorPool(layoutInfo, poolSize);
 
         std::vector<VkDescriptorSetLayout> arr ={vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout};
+        
+        //Temp Fix for now probly will needs to be changed
+        const char* vert = (vertShaderFile.empty()) ? nullptr : vertShaderFile.c_str();
+        const char* frag = (fragShaderFile.empty()) ? nullptr : fragShaderFile.c_str();
+        const char* tesC = (tesCShaderFile.empty()) ? nullptr : tesCShaderFile.c_str();
+        const char* tesE = (tesEShaderFile.empty()) ? nullptr : tesEShaderFile.c_str();
+        const char* geo =  (geomShaderFile.empty()) ? nullptr : geomShaderFile.c_str();        
 
-        pipelineInfo = vkrender->CreateGraphicsPipeline(arr, vertShaderFile, fragShaderFile,
-            tesCShaderFile, tesEShaderFile, geomShaderFile);
+
+        pipelineInfo = vkrender->CreateGraphicsPipeline(arr, vert, frag,
+            tesC, tesE, geo);
 
         isCreated = true;
         return true;
