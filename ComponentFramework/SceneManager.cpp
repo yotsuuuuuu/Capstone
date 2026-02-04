@@ -147,7 +147,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 	switch (scene) {
 	case SCENE0:  
 		currentScene = new Scene0(renderer);
-		status = currentScene->OnCreate();
+				status = currentScene->OnCreate();
 		break;
 
 	case SCENE1:
@@ -186,5 +186,4 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 		break;
 	}	
 }
-
 

@@ -65,9 +65,9 @@ bool Scene0::OnCreate() {
 
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
-		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
-	/*	assetManager.LoadAsset("./test.json");
-		Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
+		assetManager.LoadAsset("./test.json");
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, "./meshes/Mario.obj");
+	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
 
 		// step 1.2 shaders
@@ -79,12 +79,13 @@ bool Scene0::OnCreate() {
 		cshade->OnCreate();
 		
 		//step 1.3 Materials
-		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);
+		/*std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);*/
+		Ref<CMaterial> mat = assetManager.GetMat("mario");
 		mat->OnCreate();
 
-		filepaths = { "./textures/mario_fire.png" };
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		//filepaths = { "./textures/mario_fire.png" };
+		Ref<CMaterial> mat1 = assetManager.GetMat("mario");
 		mat1->OnCreate();
 
 		// step 2 create actors
