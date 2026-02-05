@@ -5,7 +5,8 @@ Chunk::Chunk(Vec2 pos)
 	// on create set position and transform model matrix
 	// also initialize buffers
 
-	InitializeBuffers();
+
+	//InitializeBuffers();
 }
 
 Chunk::~Chunk()

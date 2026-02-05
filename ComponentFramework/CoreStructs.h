@@ -150,8 +150,14 @@ struct DescriptorWriteInfo {
 // terrain structs
 // maybe add chunks here
 
+struct TerrainVertex {
+    Vec3 position;
+    Vec3 normal;
+    Vec2 uv;
+};
+
 struct TerrainRenderData { // shared terrain mesh topology data
-    VkBuffer vertexBuffer;
-    VkBuffer indexBuffer;
-    uint32_t indexCount;
+	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
+	ModelMatrixPushConst transform; // unique per chunk
+    bool isInitialized = false;
 };
