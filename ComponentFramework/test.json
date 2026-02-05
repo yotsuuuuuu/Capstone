@@ -7,7 +7,7 @@
       "frag": "shaders/multiPhong.frag.spv",
       "vert": "shaders/multiPhong.vert.spv",
      
-      "binding": 1,
+      "binding": 2,
       "type": 1,
       "stage": 16,
       "pass": 1,
