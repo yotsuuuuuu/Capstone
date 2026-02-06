@@ -22,6 +22,18 @@ enum class FractalType {
     PingPong
 };
 
+// what does what
+// length: num chunks
+// frequency: how often the noise pattern repeats across the world (higher frequency = more variation in smaller areas)
+// loudness (amplitude): how much the noise affects the height (higher amplitude = taller mountains/ deeper valleys)
+// have different base presets (biomes) depending on what we read from the song
+// 
+// clamp the height can be one biome
+// maybe have some layers that only affect the heightmap in certain height ranges (a layer that only adds detail to the mountains but doesn't affect the plains)
+// highs can affect num of layers
+//
+
+
 struct NoiseLayerPreset {
     NoiseType type;
     uint32_t seed;
