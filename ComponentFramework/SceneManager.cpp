@@ -4,6 +4,7 @@
 #include "OpenGLRenderer.h"
 #include "Timer.h"
 #include "Scene0.h"
+#include "Scene2.h"
 #include "Debug.h"
 
 SceneManager::SceneManager(): 
@@ -60,7 +61,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		return false;
 	}
 	
-	BuildScene(SCENE0);
+	BuildScene(SCENE2);
 	
 	return true;
 }
@@ -100,7 +101,7 @@ void SceneManager::GetEvents() {
 				break;
 
 			case SDL_SCANCODE_F2:
-				///BuildScene(SCENE2);
+				BuildScene(SCENE2);
 				break;
 
 			case SDL_SCANCODE_F3:
@@ -155,7 +156,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 		break;
 
 	case SCENE2:
-		///currentScene = new Scene2();
+		currentScene = new Scene2(renderer);
 		status = currentScene->OnCreate();
 		break;
 

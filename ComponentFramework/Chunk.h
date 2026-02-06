@@ -10,11 +10,9 @@ class Chunk
 	
 
 public:
-	//get chunk width/length
-	//static constexpr int GetChunkSize() { return CHUNK_SIZE; }
+
 
 	Chunk(Vec2 pos) { position = pos; }
-	~Chunk();
 
 	const std::vector<float>& GetHeightmap() const { return heightmap; }
 	const Vec2& GetPosition() const { return position; }

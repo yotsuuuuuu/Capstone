@@ -61,7 +61,7 @@ bool Scene2::OnCreate() {
 		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
 		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
@@ -115,8 +115,8 @@ bool Scene2::OnCreate() {
 		preset.detail = { NoiseType::OpenSimplex2, 7, 0.1f, 0.5f, true, FractalType::FBm, 3, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
 
 		preset.globalHeightScale = 10.0f;
-		World world(renderer);
-		world.Initialize(&preset);
+		world = new World(renderer);
+		world->Initialize(&preset,cam->GetCameraUBO(),lightsUBO);
 
 
 	}
@@ -194,6 +194,9 @@ void Scene2::Render() const {
 			vRenderer->BindMesh(meshdata);// 4 bind mesh
 			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
 			vRenderer->DrawIndexed(meshdata);// 6 draw
+
+			// render terrain
+			world->RenderWorld();
 		}
 	
 

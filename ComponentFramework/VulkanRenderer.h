@@ -379,6 +379,18 @@ public:
     PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
 
+
+
+
+    // TERRAIN STUFF
+public:
+	void CreateTerrainBuffers(const std::vector<TerrainVertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers);
+    void CreateTerrainVertexBuffer(const std::vector<TerrainVertex>& vertices, IndexedVertexBuffer& outBuffer);
+	void CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers);
+    void RenderTerrainChunk(IndexedVertexBuffer& terrainBuffers, const ModelMatrixPushConst& transform, PipelineInfo& pipelineInfo, DescriptorSetInfo descriptorSet);
+	PipelineInfo CreateTerrainPipeline(VkDescriptorSetLayout descriptorSetLayout); // hard coded shaders
+    void DrawTerrain(IndexedVertexBuffer chunk);
+
 };
 #endif 
 

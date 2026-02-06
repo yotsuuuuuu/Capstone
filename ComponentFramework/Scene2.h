@@ -8,6 +8,7 @@
 //temp for testing
 #include "Component.h"
 using namespace MATH;
+#include "World.h"
 
 /// Forward declarations 
 union SDL_Event;
@@ -23,7 +24,7 @@ private:
 	std::vector<BufferMemory> lightsUBO;
 	LightsData lights;
 
-
+	World* world;
 
 
 	

@@ -8,34 +8,45 @@
 #include "VulkanRenderer.h"
 #include "Chunk.h"
 #include "BaseGridMesh.h"
+#include "CActor.h"
 
 using namespace MATH;
 
 class World {
 private:
 	Renderer* renderer;
+	VulkanRenderer* vRenderer;
 	TerrainNoise* terrainNoise;
+
+	// chunks
 	std::unique_ptr<BaseGridMesh> baseChunkMesh; // base mesh for chunks
-
-	// vector of chunks
 	std::vector<std::unique_ptr<Chunk>> chunks; 
-
 	std::unordered_map<Vec2, TerrainChunkData> chunkRenderData; // map chunk positions to their render data
+
+	// vulkan
+	PipelineInfo worldPipeline;
+	DescriptorSetInfo worldDescriptorSet;
+
+	//player
+	//CActor* player;
+
+	//texture
+	Sampler2D terrainTexture;
 
 public:
 
 	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
 	~World();
 
-	void Initialize(TerrainPreset* t_);
+	void Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 	void RenderWorld();
 
 private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
-	void CreateChunkVulkanBuffers(Chunk* chunk);
+	void CalculateNormals(std::vector<TerrainVertex>& vertices);
 
-	void CalculateNormals(std::vector<TerrainVertex>& vertices, const std::vector<uint32_t>& indices);
-	//void Update(Vec3 playerPosition); // either pass it deltatime or player position or both, probably both
+	void CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
+	void CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO);
 };

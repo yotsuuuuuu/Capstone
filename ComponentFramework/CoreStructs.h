@@ -156,7 +156,7 @@ struct TerrainVertex {
     Vec2 uv;
 };
 
-struct TerrainRenderData { // shared terrain mesh topology data
+struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
 	ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;

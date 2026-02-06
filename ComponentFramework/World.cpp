@@ -1,19 +1,39 @@
 #include "World.h"
 
 
-void World::Initialize(TerrainPreset* t_)
+void World::Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_)
 {
+	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+
 	terrainNoise = new TerrainNoise(*t_);
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
+
+	terrainTexture = vRenderer->Create2DTextureImage("./textures/mario_fire.png");
+
+	CreateWorldPipeline(cameraUBO_, lightsUBO_);
 
 	GenerateAllChunks();
 }
 
 void World::RenderWorld()
 {
+
+
+	for (const auto& chunk : chunks) {
+		const Vec2& position = chunk->getChunkPos();
+
+		auto it = chunkRenderData.find(position);
+		if (it == chunkRenderData.end()) {
+			continue; // no render data found for this chunk
+		}
+
+		TerrainChunkData& renderData = it->second;
+		if (!renderData.isInitialized) {
+			continue; // render data not initialized
+		}
+		vRenderer->RenderTerrainChunk(renderData.vertexBuffer, renderData.transform, worldPipeline, worldDescriptorSet);
+	}
 }
-
-
 
 
 void World::GenerateAllChunks()
@@ -30,7 +50,6 @@ void World::GenerateAllChunks()
 
 			GenerateChunkHeightmap(tempChunk.get());
 			BuildChunkMeshData(tempChunk.get());
-			CreateChunkVulkanBuffers(tempChunk.get());
 
 			chunks.push_back(std::move(tempChunk));
 		}
@@ -65,61 +84,122 @@ void World::BuildChunkMeshData(Chunk* chunk)
 
 	for (size_t i = 0; i < baseChunkMesh->basePositions.size(); i++) {
 		TerrainVertex vertex;
-
 		Vec3 basePos = baseChunkMesh->basePositions[i]; // original position of the OG mesh
-		//vertex.position
-		// adjust x and z position based on chunk position in world
-		int x = static_cast<int>(basePos.x);
-		int z = static_cast<int>(basePos.z);
-		basePos.x += chunkPos.x; // move to chunk world position
-		basePos.z += chunkPos.y;
 
-		// adjust y position based on heightmap
-		float height = heightmap[z * CHUNK_SIZE + x];
-		basePos.y = height;
+		vertex.position = Vec3( // local space position of vertex in world space, y will be adjusted by heightmap
+			basePos.x,
+			heightmap[i],
+			basePos.z); 
 
 		vertex.uv = baseChunkMesh->baseUVs[i];
 		vertex.normal = Vec3(0.0f, 1.0f, 0.0f); // temporary normal, will be calculated later
-		vertex.position = basePos; // base pos at this point is the modified world position
+
+		vertices.push_back(vertex);
 	}
 
-	CalculateNormals(vertices, baseChunkMesh->baseIndices);
+	CalculateNormals(vertices);
 	
 	// Store the mesh data in the chunkRenderDataMap
 	TerrainChunkData renderData;
 
-	// initially identity matrix since positions are in world space already
-	renderData.transform.modelMatrix = MMath::translate(Vec3(0.0f, 0.0f, 0.0f)); 
-	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); // should be identity too
 
-	// create vulkan buffers
-	// renderer->CreateVertexBuffer(renderData.vertexBuffer, vertices);
-	// renderer->CreateIndexBuffer(renderData.vertexBuffer, baseChunkMesh->baseIndices);
+	renderData.transform.modelMatrix = MMath::translate(Vec3(chunkPos.x,0.0f,chunkPos.y)); 
+	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
-	renderData.vertexBuffer.vertBufferLength = vertices.size() * sizeof(TerrainVertex);
-	renderData.vertexBuffer.indexBufferLength = baseChunkMesh->baseIndices.size() * sizeof(uint32_t);
+	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+
+
 
 	renderData.isInitialized = true;
-
 	chunkRenderData[chunkPos] = renderData;
 
 }
 
-void World::CreateChunkVulkanBuffers(Chunk* chunk)
+void World::CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_)
 {
+	CreateWorldDescriptorSet(cameraUBO_, lightsUBO_);
 
-	// call vulkan renderer to create buffers for this chunk
-
-	// TerrainChunkData& renderData = chunkRenderData[chunk->getChunkPos()];
-	// renderer->CreateVertexBuffer(renderData.vertexBuffer, vertices);
+	worldPipeline = vRenderer->CreateTerrainPipeline(worldDescriptorSet.descriptorSetLayout);
 
 }
 
-void World::CalculateNormals(std::vector<TerrainVertex>& vertices, const std::vector<uint32_t>& indices)
+void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO)
+{
+
+	std::vector<SingleDescriptorSetLayoutInfo> terrainLayoutInfo;
+
+	SingleDescriptorSetLayoutInfo cameraBinding{};
+	cameraBinding.binding = 0;
+	cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	cameraBinding.descriptorCount = 1;
+	cameraBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	terrainLayoutInfo.push_back(cameraBinding);
+
+
+	SingleDescriptorSetLayoutInfo lightsBinding{};
+	lightsBinding.binding = 1;
+	lightsBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightsBinding.descriptorCount = 1;
+	lightsBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	terrainLayoutInfo.push_back(lightsBinding);
+
+	SingleDescriptorSetLayoutInfo textureBinding{};
+	textureBinding.binding = 2;
+	textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	textureBinding.descriptorCount = 1;
+	textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	terrainLayoutInfo.push_back(textureBinding);
+
+
+	VkDescriptorSetLayout terrainLayout = vRenderer->CreateDescriptorSetLayout(terrainLayoutInfo);
+
+
+	VkDescriptorPool terrainPool = vRenderer->CreateDescriptorPool(terrainLayoutInfo, 1);
+
+
+	std::vector<VkDescriptorSet> terrainSets = vRenderer->AllocateDescriptorSets(terrainPool, terrainLayout);
+
+	std::vector<DescriptorWriteInfo> terrainWriteInfo;
+
+	DescriptorWriteInfo cameraWrite{};
+	cameraWrite.binding = 0;
+	cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	cameraWrite.descriptorCount = 1;
+	cameraWrite.bufferMem = cameraUBO; 
+	terrainWriteInfo.push_back(cameraWrite);
+
+	DescriptorWriteInfo lightsWrite{};
+	lightsWrite.binding = 1;
+	lightsWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightsWrite.descriptorCount = 1;
+	lightsWrite.bufferMem = lightsUBO;  
+	terrainWriteInfo.push_back(lightsWrite);
+
+	DescriptorWriteInfo textureWrite{};
+	textureWrite.binding = 2;
+	textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	textureWrite.descriptorCount = 1;
+	textureWrite.pImageMem = &terrainTexture;
+	terrainWriteInfo.push_back(textureWrite);
+
+	vRenderer->WriteDescriptorSets(terrainSets, terrainWriteInfo);
+
+
+	worldDescriptorSet.descriptorSetLayout = terrainLayout;
+	worldDescriptorSet.descriptorPool = terrainPool;
+	worldDescriptorSet.descriptorSet = terrainSets;
+
+
+}
+
+
+void World::CalculateNormals(std::vector<TerrainVertex>& vertices)
 {
 	for (auto& vertex : vertices) {
 		vertex.normal = Vec3(0.0f, 0.0f, 0.0f); // reset normals
 	}
+
+	const auto& indices = baseChunkMesh->baseIndices;
 
 	for (size_t i = 0; i < indices.size(); i += 3) {
 		uint32_t index0 = indices[i];

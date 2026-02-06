@@ -109,6 +109,12 @@
     <ClCompile Include="TerrainGenerator.cpp">
       <Filter>CPP\TerrainGeneration</Filter>
     </ClCompile>
+    <ClCompile Include="BaseGridMesh.cpp">
+      <Filter>CPP\TerrainGeneration</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainVulkan.cpp">
+      <Filter>CPP\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -234,6 +240,7 @@
     <ClInclude Include="TerrainGenerator.h">
       <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
+    <ClInclude Include="BaseGridMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">
@@ -261,6 +268,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="test.json" />
+    <None Include="shaders\terrain.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\terrain.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Graphics Game Engine_Log.txt" />
