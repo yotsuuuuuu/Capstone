@@ -237,6 +237,9 @@
     <ClInclude Include="FmodController.h">
       <Filter>Headers\Component</Filter>
     </ClInclude>
+    <ClInclude Include="EngineContext.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">

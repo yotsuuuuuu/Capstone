@@ -17,6 +17,7 @@ class CMaterial;
 class CShader;
 class CActor;
 class CTransform;
+class Component;
 class AssetManager
 {
 private:

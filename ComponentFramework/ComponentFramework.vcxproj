@@ -195,6 +195,7 @@
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DescriptorSetBuilder.h" />
+    <ClInclude Include="EngineContext.h" />
     <ClInclude Include="FmodController.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />

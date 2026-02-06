@@ -3,6 +3,7 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CShader.h"
+#include "CTransform.h"
 #include "Component.h"
 
 using json = nlohmann::json;
@@ -29,14 +30,14 @@ std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
     if (!jsonLoader.contains("Actor"))
     {
         std::cout << "json does not contain an actor section " << "\n";
-        return ;
+        /*return std::vector<>;*/
     }
     Ref<CActor> act = std::make_shared<CActor>(nullptr);
     for ( auto&[actorname,actorData] : jsonLoader["Actor"].items())
     {
         
-        act->AddComponent(GetMesh(actorData["Mesh"]));
-        act->AddComponent(GetMat(actorData["Mat"]));
+        //act->AddComponent(GetMesh(actorData["Mesh"])); //doesnt work
+        //act->AddComponent(GetMat(actorData["Mat"]));
         Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1, 1, 1));
         act->AddComponent<CTransform>(t); 
         actorMap.push_back(act);
