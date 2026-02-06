@@ -149,7 +149,9 @@ void VulkanRenderer::Render() {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image!");
     }
+    //printf("%d curreframe pre ", currentFrame);
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    //printf("%d curreframe pre ", currentFrame);
 }
 
 void VulkanRenderer::DestroyUBO(std::vector<BufferMemory> ubo){
@@ -769,8 +771,8 @@ std::vector<const char*> VulkanRenderer::getRequiredExtensions() {
     if (!instance_extensions) {
         throw std::runtime_error("failed to get required SDL extensions!");
     }
-
-    for (int i = 0; i < extensionCount; ++i) {
+    int count = static_cast<int>(extensionCount);
+    for (int i = 0; i < count; ++i) {
         extensions.push_back(instance_extensions[i]);
     }
 

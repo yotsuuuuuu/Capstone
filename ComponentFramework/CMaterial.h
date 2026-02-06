@@ -35,6 +35,6 @@ public:
 
 
 	void SetRenderSetValue(uint32_t id) { setId = id; }
-	uint32_t GetRednerSetValue() { return setId; }
+	uint32_t GetSetValue() { return setId; }
 };
 

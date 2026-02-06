@@ -30,7 +30,7 @@ namespace MATH {
 
 		/// Calculate the cross product with Vec4
 #ifdef _DEBUG 
-	#pragma message("Warning: Vec4 cross(const Vec4& a, const Vec4& b) read my comments")
+	//#pragma message("Warning: Vec4 cross(const Vec4& a, const Vec4& b) read my comments")
 #endif
 		/// There is no cross product in 4D space (there is one in 7D space). I have included it here with 
 		/// the assumption that the Vec4 is really just a Vec3 ignoring the w component. This not uncommon 
@@ -103,7 +103,7 @@ namespace MATH {
 			return (v1 + t * (v2 - v1));
 
 		}
-#pragma message("This questionable: Vec4 inverse(const Vec4& v)")
+//#pragma message("This questionable: Vec4 inverse(const Vec4& v)")
 		static Vec4 inverse(const Vec4& v) {
 			// Flip all the signs, except for w
 			return Vec4(-v.x, -v.y, -v.z, v.w);
