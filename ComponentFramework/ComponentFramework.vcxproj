@@ -155,6 +155,7 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FmodController.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DescriptorSetBuilder.h" />
+    <ClInclude Include="FmodController.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />
     <ClInclude Include="imgui_impl_opengl3.h" />

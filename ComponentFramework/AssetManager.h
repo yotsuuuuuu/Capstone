@@ -16,24 +16,26 @@ class CMesh;
 class CMaterial;
 class CShader;
 class CActor;
+class CTransform;
 class AssetManager
 {
 private:
+	//WORK ON TEMPLATING FUNCTIONS 
 	VulkanRenderer* renderer;
 	nlohmann::json jsonLoader;
 	std::unordered_map<std::string, std::shared_ptr<CMesh>> meshMap;
 	std::unordered_map<std::string, std::shared_ptr<CMaterial>> materialMap;
 	std::unordered_map<std::string, std::shared_ptr<CShader>> shaderMap;
-	std::unordered_map<std::string, std::shared_ptr<CActor>> actorMap;
-	std::unordered_map<std::string, DescriptorSetInfo> descriptorMap;
-
+	//make all maps 1 map
+	std::vector<std::shared_ptr<Component>> actorMap;
+	//give all components a custom id.
 public:
-	AssetManager(VulkanRenderer* renderer_):renderer(renderer_) {};
+	AssetManager(VulkanRenderer* renderer_):renderer(renderer_){};
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
-	bool LoadActorsInScene();
+	std::vector<std::shared_ptr<Component>> GetActorsInScene();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);
-	//oncreate call actor oncreate
+	
 };

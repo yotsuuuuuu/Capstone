@@ -6,29 +6,31 @@
     "phong": {
       "frag": "shaders/multiPhong.frag.spv",
       "vert": "shaders/multiPhong.vert.spv",
-     
+
       "binding": 2,
       "type": 1,
       "stage": 16,
       "pass": 1,
       "opaque": 0
-     
+
     }
   },
   "Material": {
-    "mario" : {
+    "mario": {
       "texture": "./textures/mario_mime.png",
-        "shader": "phong",
-        "cast shadow": "true",
-        "recieve shadow": "false"
-
-
+      "shader": "phong",
+      "cast shadow": "true",
+      "recieve shadow": "false"
     }
   },
   "Actor": {
     "mario": {
       "Mat": "mario",
       "Mesh": "mario"
+    },
+    "luigi": {
+      "Mat": "mario",
+      "Mesh": "mario"
     }
   }
-}
+} 
