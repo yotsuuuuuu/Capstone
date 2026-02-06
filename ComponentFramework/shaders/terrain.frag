@@ -24,5 +24,6 @@ void main() {
     vec3 lightDir = normalize(lights.pos[0].xyz);
     float diff = max(dot(normal, lightDir), 0.2);
     
-    outColor = vec4(color * diff, 1.0);
+    //outColor = vec4(color * diff, 1.0);
+    outColor = vec4(1,0,0,1);
 }

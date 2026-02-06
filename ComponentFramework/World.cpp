@@ -105,6 +105,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 			basePos.z); 
 
 		vertex.uv = baseChunkMesh->baseUVs[i];
+		vertex.uv.print();
 		vertex.normal = Vec3(0.0f, 1.0f, 0.0f); // temporary normal, will be calculated later
 
 		vertices.push_back(vertex);

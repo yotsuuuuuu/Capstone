@@ -34,7 +34,6 @@ private:
 	Sampler2D terrainTexture;
 
 public:
-
 	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
 	~World();
 

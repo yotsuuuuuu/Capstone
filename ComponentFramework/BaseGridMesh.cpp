@@ -7,7 +7,9 @@ BaseGridMesh GenerateMesh(int size)
 	for (int z = 0; z < size; z++) {
 		for (int x = 0; x < size; x++) {
 			mesh.basePositions.push_back(Vec3(float(x), 0.0f, float(z))); // y will be set later by heightmap
+
 			mesh.baseUVs.push_back(Vec2(float(x) / float(size - 1), float(z) / float(size - 1))); // uv from 0 to 1 across the grid
+			//mesh.baseUVs.back().print();
 		}
 	}
 
