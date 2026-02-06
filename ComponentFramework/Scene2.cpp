@@ -44,7 +44,7 @@ bool Scene2::OnCreate() {
 		
 		// step 1 Create the  GLOBAL componetes
 		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), Quaternion(),Vec3()));
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(10, 5, 15), Quaternion(),Vec3()));
 		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
 		cam->UpdateViewMatrix();
 		cam->OnCreate();
