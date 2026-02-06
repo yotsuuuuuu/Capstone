@@ -20,7 +20,7 @@ void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<TerrainVertex>&
 
 	void* data;
 	vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, bufferSize, 0, &data);
-	memcpy(data, vertices.data(), bufferSize);
+	memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 	vkUnmapMemory(device, stagingBuffer.bufferMemoryID);
 
 	CreateBuffer(bufferSize,
@@ -50,7 +50,7 @@ void VulkanRenderer::CreateTerrainIndexBuffer(const std::vector<uint32_t>& indic
 
 	void* data;
 	vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, bufferSize, 0, &data);
-	memcpy(data, indices.data(), bufferSize);
+	memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
 	vkUnmapMemory(device, stagingBuffer.bufferMemoryID);
 
 	CreateBuffer(bufferSize,

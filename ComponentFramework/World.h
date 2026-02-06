@@ -40,6 +40,7 @@ public:
 
 	void Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 	void RenderWorld();
+	void OnDelete();
 
 private:
 	void GenerateAllChunks();

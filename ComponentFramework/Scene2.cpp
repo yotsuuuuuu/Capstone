@@ -242,6 +242,9 @@ void Scene2::OnDestroy() {
 
 		actor->OnDestroy();
 		actor1->OnDestroy();
+
+		world->OnDelete();
+		delete world;
 		
 		
 		}

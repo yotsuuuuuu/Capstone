@@ -214,9 +214,12 @@ public:
     void UpdateUniformBuffer(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
         void* data;
         int num = static_cast<int>(numSwapchains);
+		size_t size = sizeof(T);
+		VkDeviceSize bufferSize = static_cast<VkDeviceSize>(size);
+
         for (int i = 0; i < num; ++i) {
-            vkMapMemory(device, bufferMemory[i].bufferMemoryID, 0, sizeof(T), 0, &data);
-            memcpy(data, &srcData, bufferMemory[i].bufferMemoryLength);
+            vkMapMemory(device, bufferMemory[i].bufferMemoryID, 0, bufferSize, 0, &data);
+            memcpy(data, &srcData, static_cast<size_t>(bufferMemory[i].bufferMemoryLength));
             vkUnmapMemory(device, bufferMemory[i].bufferMemoryID);
         }
     };

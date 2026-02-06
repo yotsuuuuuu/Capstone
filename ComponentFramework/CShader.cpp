@@ -61,7 +61,7 @@ std::vector<VkDescriptorSet> CShader::AllocateDescriptorSet(std::vector<Sampler2
     VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
     if (vkrender) {
         std::vector<DescriptorWriteInfo> write;
-        for (int i = 0; i < layoutInfo.size(); i++) {
+        for (size_t i = 0; i < layoutInfo.size(); i++) {
             vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType,
                 layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, &arrySampler[i]);
         }

@@ -66,7 +66,7 @@ void VulkanRenderer::CreateVertexBuffer(IndexedVertexBuffer& indexedBufferMemory
 
     void* data;
     vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), bufferSize);
+    memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
     vkUnmapMemory(device, stagingBuffer.bufferMemoryID);
 
     CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -89,7 +89,7 @@ void VulkanRenderer::CreateIndexBuffer(IndexedVertexBuffer& indexedBufferMemory,
 
     void* data;
     vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), bufferSize);
+    memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
     vkUnmapMemory(device, stagingBuffer.bufferMemoryID);
 
     CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,

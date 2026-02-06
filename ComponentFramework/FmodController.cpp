@@ -40,7 +40,7 @@ void FmodController::createSystem()
 
 	numOfsounds.resize(nameOfsounds.size());
 
-	for (int i = 0; i < numOfsounds.size(); i++)
+	for (size_t i = 0; i < numOfsounds.size(); i++)
 	{
 		result = system->createSound(nameOfsounds[i], FMOD_DEFAULT, 0, &numOfsounds[i]);
 	}
@@ -48,7 +48,7 @@ void FmodController::createSystem()
 
 FmodController::~FmodController()
 {
-	for (int i = 0; i < numOfsounds.size(); i++)
+	for (size_t i = 0; i < numOfsounds.size(); i++)
 	{
 		numOfsounds[i]->release();
 	}
