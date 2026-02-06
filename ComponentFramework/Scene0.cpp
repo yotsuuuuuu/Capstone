@@ -145,7 +145,6 @@ void Scene0::Render() const {
 		// and see it vulkan can give be a success for the wait or not.
 		// apperently we can get the status on a fence using vkGetFenceStatus 
 		// but probly best idea to wait for fence for the current frame to be finished before updating UBOs
-		// todo : 1 implement function that waits for current frame and return a stuct with context info for that frame
 		// 2 use cntx to update UBOs
 		// 3 record on the right cmd buffer
 		// 4 submit the cmd buffer for that frame only

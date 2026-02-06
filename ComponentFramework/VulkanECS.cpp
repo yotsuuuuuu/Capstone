@@ -39,6 +39,7 @@ VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
 
     FrameContext context{};
     context.targetFrameIndex = imageIndex;
+    context.currentFrameIndex = currentFrame;
     context.CMDBuffer = primaryCommandBuffer.commandBuffers[imageIndex];
     context.currentframeFence = inFlightFences[currentFrame];
     context.waitSemaphores = imageAvailableSemaphores[currentFrame];
@@ -259,6 +260,11 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
     if (vkEndCommandBuffer(cmd) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
     }
+}
+
+void VulkanRenderer::CMDMemoryBarrier(const VkCommandBuffer&, std::optional<VkMemoryBarrier>)
+{
+    //TODO:
 }
 
 void VulkanRenderer::CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,

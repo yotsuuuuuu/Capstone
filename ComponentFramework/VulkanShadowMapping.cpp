@@ -5,8 +5,8 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 	VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
 	VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout)
 {
-	shadowMappingInfo.Diemensions.height = height;
-	shadowMappingInfo.Diemensions.width = width;
+	shadowMappingInfo.Exents.height = height;
+	shadowMappingInfo.Exents.width = width;
 	shadowMappingInfo.format = format;
 	shadowMappingInfo.tile = tiling;
 	shadowMappingInfo.useFlag = usage;
@@ -26,12 +26,12 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 	// Step 2 create image view for each shadow map
 	// Step 2.1 create sampler for each shadow map
 	for(  auto& sampler : shadowMappingInfo.ShadowTextures2D){
-		createImage(shadowMappingInfo.Diemensions.width, shadowMappingInfo.Diemensions.height,
+		createImage(shadowMappingInfo.Exents.width, shadowMappingInfo.Exents.height,
 			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
 			shadowMappingInfo.propFlag, sampler.image, sampler.imageDeviceMemory);
 		sampler.imageView = createImageView(sampler.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
-		// todo need a create sampler function
-		CreateSampler(sampler.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+		
+		CreateSampler(sampler.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE);
 	}
 	// Step 3 create render pass for shadow mapping
 
@@ -51,7 +51,7 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 	for (size_t i = 0; i < shadowMappingInfo.FrameBuffers.size(); i++) {
 
 		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[i].imageView },
-			shadowMappingInfo.Diemensions, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[i]);
+			shadowMappingInfo.Exents, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[i]);
 	}
 
 	// step 5 sync objects per frame in flight
@@ -72,9 +72,6 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// function
 	// if  used the shader ref it can only make a graphics pipeline with the 
 	// dummy variables to get it working
-	vertFile = "./shaders/GlobalLightvert.spv";
-	fragFile = "./shaders/GlobalLightfrag.spv";
-	// step 7 create descriptor set
 	
 	// idea for the light ubo
 	// ubo have to be specially made 
@@ -82,22 +79,45 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// oncreate acess parent gather data form other components
 	// construct should be made tkaing data that cant be gather form other componets
 	//  so like light color , type of light, intesity, raidus on influence
-	std::vector<BufferMemory> ubo;
+	vertFile = "./shaders/GlobalLightvert.spv"; // TODO: these dont exist yet
+	fragFile = "./shaders/GlobalLightfrag.spv";
+	
+	shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();
+	/*halfHeight = d * tan(fovy / 2)
+	halfWidth  = halfHeight * aspect*/
+	int width, height;
+	SDL_GetWindowSize(getWindow(), &width, &height);
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	float far = 100.0f;
+	float near = 0.5f;
+	float halfHieght = far * tan(45.0f / 2.0f);
+	float halfWidth = halfHieght * aspectRatio;
 	std::vector<SingleDescriptorSetLayoutInfo> layout;
+	GlobalLightData data{};
+	data.orientation;
+	data.pos;
+	data.projectionMatrix = MMath::orthographic(-halfHieght,halfHieght,-halfWidth,halfWidth, near, far); // should be ortho
+	data.projectionMatrix[5] *= -1.0f; // Invert Y for Vulkan
+	data.viewMatrix = MATH::MMath::toMatrix4(MATH::QMath::conjugate(data.orientation))  * MATH::MMath::translate(-data.pos);	
+	data.diffused= Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+	data.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+	data.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+	UpdateUniformBuffer<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
+
 	std::vector<DescriptorWriteInfo> write;
 	AddToDescrisptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-	// 7.1 layout
+	// 7.1  set layout
 	shadowMappingInfo.DesSetInfo.descriptorSetLayout = CreateDescriptorSetLayout(layout);
 	shadowMappingInfo.DesSetInfo.descriptorPool = CreateDescriptorPool(layout, 1);
 	// step  allocate set and write to it
 	shadowMappingInfo.DesSetInfo.descriptorSet = AllocateDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorPool,
 		shadowMappingInfo.DesSetInfo.descriptorSetLayout);
-	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, ubo);
+	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, shadowMappingInfo.LightsUBO);
 	WriteDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorSet, write);
 
 	// step 8 create pipeline
 	PipeLineConfig config;
-	config.viewPortsize = shadowMappingInfo.Diemensions;
+	config.viewPortsize = shadowMappingInfo.Exents;
 	config.renderPass = shadowMappingInfo.RenderPass;
 	config.cullMode = VK_CULL_MODE_FRONT_BIT;
 	config.depthBias = VK_TRUE;
@@ -115,6 +135,9 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 
 void VulkanRenderer::DestroyShadowMappingResources()
 {
+
+	DestroyPipeline(shadowMappingInfo.PipelineInfo);
+	DestroyDescriptorSet(shadowMappingInfo.DesSetInfo);
 	// need to destroy in reverse order
 	// step 5
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

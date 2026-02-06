@@ -33,7 +33,8 @@ Sampler2D VulkanRenderer::Create2DTextureImage(const char* textureFile) {
     return texture2D;
 }
 
-void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor)
+
+void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor, VkBool32 comapre)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
@@ -51,7 +52,7 @@ void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSample
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
     samplerInfo.anisotropyEnable = VK_TRUE;
     samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareEnable = comapre;
     samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 

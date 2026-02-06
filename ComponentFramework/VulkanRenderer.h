@@ -372,6 +372,7 @@ private:
         VkCommandBuffer CMDBuffer;
         VkRenderPass Renderpass;
         uint32_t targetFrameIndex;
+        uint32_t currentFrameIndex;
         VkFramebuffer currentFrameBuffer;
         VkExtent2D extent;
     };
@@ -387,6 +388,7 @@ private:
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
+    void CMDMemoryBarrier(const VkCommandBuffer&, std::optional<VkMemoryBarrier> = std::nullopt);
 
     void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
@@ -412,7 +414,7 @@ public:
     , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
 private:
     //Creation Helper functions
-    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor);
+    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
@@ -441,7 +443,7 @@ private:
 		DescriptorSetInfo DesSetInfo;
         PipelineInfo PipelineInfo;
         //config info
-        VkExtent2D Diemensions;
+        VkExtent2D Exents;
         VkFormat format;
         VkImageTiling tile;
         VkImageUsageFlags useFlag;
@@ -449,6 +451,8 @@ private:
         VkMemoryPropertyFlags propFlag;
         VkImageLayout initial;
         VkImageLayout final; 
+        //temp variables
+        std::vector<BufferMemory> LightsUBO;
     };
 
 	GlobalShadowMappingInfo shadowMappingInfo;

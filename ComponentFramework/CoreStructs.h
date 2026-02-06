@@ -45,6 +45,16 @@ struct LightsData {
     uint32_t numLights = 0;
 };
 
+struct GlobalLightData {
+    Matrix4 projectionMatrix;
+    Matrix4 viewMatrix;
+    Vec4 specular;
+    Vec4 ambient;
+    Vec4 diffused;
+    Vec4 pos;
+    Quaternion orientation;
+};
+
 
 
 /// A 3x3 cannot be sent to the GPU data alignment issues. 
