@@ -1,16 +1,17 @@
 #pragma once
 #include "Component.h"
 #include "CoreStructs.h"
+#include <string>
 
 class Renderer;
 
 class CShader : public Component
 {
-	const char* vertShaderFile;
-	const char* fragShaderFile;
-	const char* geomShaderFile;
-	const char* tesCShaderFile;
-	const char* tesEShaderFile;
+	std::string vertShaderFile;
+	std::string fragShaderFile;
+	std::string geomShaderFile;
+	std::string tesCShaderFile;
+	std::string tesEShaderFile;
 	Renderer* render;
 	uint32_t poolSize;
 	PipelineInfo pipelineInfo;
@@ -18,8 +19,8 @@ class CShader : public Component
 
 	std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 public:
-	CShader(Ref<Component> parent_, Renderer* render_, std::vector<SingleDescriptorSetLayoutInfo> layoutInfo_,const char* vertShaderFile_, const char* fragShaderFile_
-		,const char* geomShaderFile_ = nullptr,const char* tesCShaderFile_ = nullptr,const char* tesEShaderFile_ = nullptr)
+	CShader(Ref<Component> parent_, Renderer* render_, std::vector<SingleDescriptorSetLayoutInfo> layoutInfo_, std::string vertShaderFile_, std::string fragShaderFile_
+		, std::string geomShaderFile_ = "", std::string tesCShaderFile_ = "", std::string tesEShaderFile_ = "")
 		: Component(parent_),render(render_), layoutInfo(layoutInfo_), pipelineInfo({}), vertShaderFile(vertShaderFile_),
 		fragShaderFile(fragShaderFile_),geomShaderFile(geomShaderFile_),
 		tesCShaderFile(tesCShaderFile_),tesEShaderFile(tesEShaderFile_), poolSize(100){

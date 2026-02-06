@@ -11,7 +11,11 @@ public:
 	void Run();
 	bool Initialize(std::string name_, int width_, int height_);
 	void GetEvents();
-	
+		// assetManger* getAMgern();  -> get load
+		// Ref<AssetMange> 
+		// ref<comp> getActor("ke") ;  assetManger -> get actor key
+		// vulk render -> created global stuff (asstmanger get info);
+		// create manger load vulkab global"
 	
 private:
 	

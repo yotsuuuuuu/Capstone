@@ -117,6 +117,9 @@
     </ClCompile>
     <ClCompile Include="VulkanShadowMapping.cpp">
       <Filter>CPP\Vulkan</Filter>
+	</ClCompile>
+    <ClCompile Include="FmodController.cpp">
+      <Filter>CPP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +247,14 @@
       <Filter>Headers\TerrainGeneration</Filter>
     </ClInclude>
     <ClInclude Include="BaseGridMesh.h" />
+	  <Filter>Headers\TerrainGeneration</Filter>
+	</ClInclude> 	  
+    <ClInclude Include="FmodController.h">
+      <Filter>Headers\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineContext.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">
