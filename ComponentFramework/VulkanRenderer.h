@@ -457,17 +457,21 @@ private:
 
 	GlobalShadowMappingInfo shadowMappingInfo;
 
-public:
-
     void CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
 
-    void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , WeakRef<Component> globaLight);
+    void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , Ref<Component> globaLight);
 
 	void DestroyShadowMappingResources();
+public:
+
 
     GlobalShadowMappingInfo GetShadowMappingInfo() { return shadowMappingInfo; }
+
+    //Temp function just to initilize the variables
+    void CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO);
+    void DestroyGlobalResources();
 
 };
 #endif 

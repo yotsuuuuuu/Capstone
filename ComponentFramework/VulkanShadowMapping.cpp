@@ -66,7 +66,7 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 
 }
 
-void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, WeakRef<Component> globaLight)
+void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, Ref<Component> globaLight)
 {
 	// i dont knwo if we need shader component or just make the pipepine with in this 
 	// function
@@ -79,8 +79,8 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// oncreate acess parent gather data form other components
 	// construct should be made tkaing data that cant be gather form other componets
 	//  so like light color , type of light, intesity, raidus on influence
-	vertFile = "./shaders/GlobalLightvert.spv"; // TODO: these dont exist yet
-	fragFile = "./shaders/GlobalLightfrag.spv";
+	vertFile = "./shaders/GlobalLight.vert.spv"; // TODO: these dont exist yet
+	fragFile = "./shaders/GlobalLight.frag.spv";
 	
 	shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();
 	/*halfHeight = d * tan(fovy / 2)
@@ -135,7 +135,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 
 void VulkanRenderer::DestroyShadowMappingResources()
 {
-
+	//step 7 and 8
 	DestroyPipeline(shadowMappingInfo.PipelineInfo);
 	DestroyDescriptorSet(shadowMappingInfo.DesSetInfo);
 	// need to destroy in reverse order

@@ -21,6 +21,32 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
+void VulkanRenderer::CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO)
+{
+    // create the shadow resources
+    CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    CreateGlobalShadowPipelineResources("", "", nullptr);
+    // then creat global resources
+   
+    std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
+    AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+    AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    std::vector<DescriptorWriteInfo> writeGlobal;
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
+    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.LightsUBO);
+    CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
+
+}
+
+void VulkanRenderer::DestroyGlobalResources()
+{
+    vkDeviceWaitIdle(device);
+    DestroyGlobalDescriptionSet();
+    DestroyShadowMappingResources();
+}
+
 VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -51,7 +77,7 @@ VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
     return context;
    
 }
-void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD)
+void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD)
 {
     //VkAttachmentDescription colorAttachment{};
     //colorAttachment.format = swapChainImageFormat;
@@ -111,7 +137,7 @@ void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAt
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderpass_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
 }
@@ -329,7 +355,7 @@ public:
         ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("%.3f ms/frame (%.1f FPS) Deltatime: ", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
         VKRNDR->imGuiSystem->TestUI();
         VKRNDR->imGuiSystem->EndFrame();

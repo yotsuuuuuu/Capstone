@@ -47,6 +47,9 @@ bool Scene0::OnCreate() {
 		cam->UpdateViewMatrix();
 		cam->OnCreate();
 		cam->UpdateUBO(0);
+
+		//vRenderer->CreateGlobalRources(cam->GetCameraUBO());
+		//vRenderer->DestroyGlobalResources();
 		
 		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
 		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
@@ -222,7 +225,7 @@ void Scene0::OnDestroy() {
 		//vRenderer->DestroyCommandBuffers(); 
 
 		
-		vRenderer->DestroyGlobalDescriptionSet();
+		vRenderer->DestroyGlobalDescriptionSet(); // note eventaully need to get moved out of the scene.
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
 		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();
