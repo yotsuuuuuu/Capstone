@@ -408,11 +408,12 @@ public:
     
     PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
-  
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
+    , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
 private:
     //Creation Helper functions
     void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor);
-    void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD);
+    void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
     void CreateFence(VkFence& fence);
@@ -458,7 +459,7 @@ public:
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
 
-    void CreateGlobalShadowPipeline(Ref<Component> Shader, Ref<Component> globaLight);
+    void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , WeakRef<Component> globaLight);
 
 	void DestroyShadowMappingResources();
 

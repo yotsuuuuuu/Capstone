@@ -5,6 +5,7 @@
 #include <VMath.h>
 #include <MMath.h>
 #include <Hash.h>
+#include <optional>
 using namespace MATH;
 
 struct BufferMemory {
@@ -128,6 +129,32 @@ struct SingleDescriptorInfoCollection {
 
     /// OR just the one sampler data
     Sampler2D* pImageMem;
+};
+struct PipeLineConfig {
+enum BlendMode {OPAQUE,ALPHA,ADDITIVE};
+    //renderpass
+    VkRenderPass renderPass = VK_NULL_HANDLE;
+    //viewport and scissors should match framebuffersize usally
+    VkExtent2D viewPortsize;
+    //for custom vertex info
+    std::optional<VkPipelineVertexInputStateCreateInfo> vertexinfo = std::nullopt;
+    // for input assembly
+    VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    //rasterizer
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
+    VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT;
+    VkBool32 depthBias = VK_FALSE;
+    float depthBiasConstantFactor = 0.0f;
+    float depthBiasSlopeFactor = 0.0f;
+    float depthBiasClamp = 0.0f;
+    //depth
+    VkBool32 depthTestEnable = VK_TRUE; //Should fragments be compared against the depth buffer?
+    VkBool32 depthWriteEnable = VK_TRUE; //Should passing fragments update the depth buffer?
+    VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS; //How do we compare incoming depth vs stored depth?
+    //color
+    bool Color = true;
+    BlendMode blendMode = BlendMode::OPAQUE;
+    //Renderpass and viewport must be set
 };
 
 struct Drawitem {

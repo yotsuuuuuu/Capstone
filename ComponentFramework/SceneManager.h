@@ -3,7 +3,7 @@
 
 #include <string>
 #include "Renderer.h"
-class SceneManager  {\
+class SceneManager  {
 public:
 	
 	SceneManager();
@@ -14,6 +14,7 @@ public:
 	
 	
 private:
+	
 	
 	enum SCENE_NUMBER {
 		SCENE0 = 0,

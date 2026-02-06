@@ -6,6 +6,7 @@
 #include "CMesh.h"
 #include "CTransform.h"
 #include <unordered_map>
+#include "imgui.h"
 
 void VulkanRenderer::CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo, const std::vector<DescriptorWriteInfo>& WriteInfo)
 {
@@ -319,7 +320,11 @@ public:
         //  Normal forward pass
         //  Post process bloom pass
         //  ImGUI 
+        ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
+        ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("%.3f ms/frame (%.1f FPS) Deltatime: ", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
         VKRNDR->imGuiSystem->TestUI();
         VKRNDR->imGuiSystem->EndFrame();
         // 1 Get current render frame info
@@ -331,6 +336,7 @@ public:
             Ref<CActor> a = std::dynamic_pointer_cast<CActor>(comp);
             auto mat = a->GetComponent<CMaterial>();
             auto mesh = a->GetComponent<CMesh>();
+            // sohuld check for transform
             if (a && mat && mesh) {
                 DrawItem item = GetDrawItem(a, framecntx);
         // 1.2 sort them into buckets
