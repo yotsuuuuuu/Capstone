@@ -1,259 +1,256 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="AssetManager.cpp">
-      <Filter>CPP</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>CPP</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug.cpp">
-      <Filter>CPP</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
-      <Filter>CPP</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>CPP</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>CPP</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene0.cpp">
-      <Filter>CPP\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_demo.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_draw.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_opengl3.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_sdl3.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_vulkan.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_tables.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_widgets.cpp">
-      <Filter>CPP\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="CActor.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="CCameraActor.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="CMaterial.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="CMesh.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="CTransform.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="CShader.cpp">
-      <Filter>CPP\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="DescriptorSetBuilder.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLRenderer.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VkImGUISystem.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanCommandBuffer.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanMesh.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanPipeline.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanRenderer.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanSampler.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanUniformBuffer.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainNoise.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
-    </ClCompile>
-    <ClCompile Include="World.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanECS.cpp">
-      <Filter>CPP\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene2.cpp">
-      <Filter>CPP\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Chunk.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainGenerator.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>Source\Engine</Filter>
     </ClCompile>
     <ClCompile Include="BaseGridMesh.cpp">
-      <Filter>CPP\TerrainGeneration</Filter>
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="CActor.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CCameraActor.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="CMaterial.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CMesh.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CShader.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CTransform.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Source\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorSetBuilder.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="FmodController.cpp">
+      <Filter>Source\FMOD</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_opengl3.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_sdl3.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_vulkan.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLRenderer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene0.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene2.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainGenerator.cpp">
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainNoise.cpp">
+      <Filter>Source\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="TerrainVulkan.cpp">
-      <Filter>CPP\Vulkan</Filter>
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="VkImGUISystem.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCommandBuffer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanECS.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanPipeline.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanRenderer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanSampler.cpp">
+      <Filter>Source\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="VulkanShadowMapping.cpp">
-      <Filter>CPP\Vulkan</Filter>
-	</ClCompile>
-    <ClCompile Include="FmodController.cpp">
-      <Filter>CPP</Filter>
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanUniformBuffer.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Source\Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
-      <Filter>Headers</Filter>
+      <Filter>Header\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Debug.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="tiny_obj_loader.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_opengl3.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_opengl3_loader.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_sdl3.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_vulkan.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_internal.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_rectpack.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_textedit.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_truetype.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene0.h">
-      <Filter>Headers\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Headers\Scenes</Filter>
+    <ClInclude Include="BaseGridMesh.h">
+      <Filter>Header\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="CActor.h">
-      <Filter>Headers\Component</Filter>
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="CCameraActor.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="CMaterial.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="CMesh.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Component.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="CTransform.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainPreset.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="WorldConstants.h">
-      <Filter>Headers\TerrainGeneration</Filter>
-    </ClInclude>
-    <ClInclude Include="CShader.h">
-      <Filter>Headers\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="json.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="json_fwd.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLRenderer.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="UBO_Padding.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="VkImGUISystem.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanRenderer.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="DescriptorSetBuilder.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreStructs.h">
-      <Filter>Headers\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="imconfig.h">
-      <Filter>Headers\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene2.h">
-      <Filter>Headers\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainNoise.h">
-      <Filter>Headers\TerrainGeneration</Filter>
+      <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="Chunk.h">
-      <Filter>Headers\TerrainGeneration</Filter>
+      <Filter>Header\Components</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainGenerator.h">
-      <Filter>Headers\TerrainGeneration</Filter>
+    <ClInclude Include="CMaterial.h">
+      <Filter>Header\Components</Filter>
     </ClInclude>
-    <ClInclude Include="BaseGridMesh.h" />
-	  <Filter>Headers\TerrainGeneration</Filter>
-	</ClInclude> 	  
-    <ClInclude Include="FmodController.h">
-      <Filter>Headers\Component</Filter>
+    <ClInclude Include="CMesh.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreStructs.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="CShader.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CTransform.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorSetBuilder.h">
+      <Filter>Header\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="EngineContext.h">
-      <Filter>Headers</Filter>
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="FmodController.h">
+      <Filter>Header\FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3_loader.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_sdl3.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_vulkan.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>Header\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json_fwd.hpp">
+      <Filter>Header\json</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLRenderer.h">
+      <Filter>Header\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene0.h">
+      <Filter>Header\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene2.h">
+      <Filter>Header\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGenerator.h">
+      <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainNoise.h">
+      <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainPreset.h">
+      <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="UBO_Padding.h">
+      <Filter>Header\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="VkImGUISystem.h">
+      <Filter>Header\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanRenderer.h">
+      <Filter>Header\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldConstants.h">
+      <Filter>Header\Terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -281,56 +278,81 @@
     <None Include="shaders\simpleTexture.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="test.json" />
     <None Include="shaders\terrain.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\terrain.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="test.json">
+      <Filter>Json</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Graphics Game Engine_Log.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Headers">
-      <UniqueIdentifier>{2ce95ea9-bdb2-47bc-9e70-b9e5ef6fa95d}</UniqueIdentifier>
+    <Filter Include="Source">
+      <UniqueIdentifier>{1b01f6e0-e5e3-4033-b32c-d5685c2403b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\IMGUI">
-      <UniqueIdentifier>{dcd0bd0c-b354-4e3b-85f8-a9657e5f1181}</UniqueIdentifier>
+    <Filter Include="Header">
+      <UniqueIdentifier>{08712303-5b65-4987-bd59-a1d5efb61c2b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders">
-      <UniqueIdentifier>{38eee1bf-524c-4823-b419-c6c240e273fa}</UniqueIdentifier>
+      <UniqueIdentifier>{16ed95b5-416d-45b1-a17a-73984f8732a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Scenes">
-      <UniqueIdentifier>{2e812378-c40e-4e4d-b0d9-d84e3f1f1308}</UniqueIdentifier>
+    <Filter Include="Json">
+      <UniqueIdentifier>{dd78b84a-83e9-4cf6-8cb5-9752c862cd9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\TerrainGeneration">
-      <UniqueIdentifier>{3dd6e64d-cb5b-49b0-81d6-3c5ad84e3f54}</UniqueIdentifier>
+    <Filter Include="Log">
+      <UniqueIdentifier>{e29229b7-b3f7-4906-900e-5e7fed75fc34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Component">
-      <UniqueIdentifier>{9abbf14c-ff9b-4b5a-8c10-2b5c3df0acab}</UniqueIdentifier>
+    <Filter Include="Header\Terrain">
+      <UniqueIdentifier>{f2d8bd72-702f-4642-b567-46026be83098}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Vulkan">
-      <UniqueIdentifier>{2c637658-2afe-421e-b3a9-36496aaaf236}</UniqueIdentifier>
+    <Filter Include="Header\Scene">
+      <UniqueIdentifier>{b1de9c4f-f7bd-4e5c-adcc-7e3addcb1141}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP">
-      <UniqueIdentifier>{282b3588-fdab-4fac-813d-357b2c530a4d}</UniqueIdentifier>
+    <Filter Include="Header\Engine">
+      <UniqueIdentifier>{f55da3cc-5410-4dc2-867f-da85ebc36abe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP\Scenes">
-      <UniqueIdentifier>{a8bf67aa-38fd-442f-be6f-7df123eead96}</UniqueIdentifier>
+    <Filter Include="Header\Vulkan">
+      <UniqueIdentifier>{6578c4b2-bd79-4cdd-825b-ddf3b15e63a4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP\IMGUI">
-      <UniqueIdentifier>{6afba7b6-7a93-4afa-a1ed-0e0393536274}</UniqueIdentifier>
+    <Filter Include="Header\json">
+      <UniqueIdentifier>{fa43e398-ea75-48e5-b5f7-ba24c2415aec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP\TerrainGeneration">
-      <UniqueIdentifier>{3d05b503-eb8c-463b-9645-b5f30777a251}</UniqueIdentifier>
+    <Filter Include="Header\Components">
+      <UniqueIdentifier>{48fb274e-4dea-4cd6-91ee-4d14aa1bc2e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP\Components">
-      <UniqueIdentifier>{55a72f4b-d4ca-4f54-abb9-b1823d5359d2}</UniqueIdentifier>
+    <Filter Include="Header\ImGUI">
+      <UniqueIdentifier>{1c9bdffa-4f01-46bb-a613-c4bc4dbb7d6b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CPP\Vulkan">
-      <UniqueIdentifier>{af99d9c7-4d24-4b1f-ac97-0042a0a7688e}</UniqueIdentifier>
+    <Filter Include="Header\FMOD">
+      <UniqueIdentifier>{ab3daa78-fedc-44e7-8f4e-9ae8e4116caa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine">
+      <UniqueIdentifier>{0b9b2c97-6328-4d17-98ca-1376a428b810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Components">
+      <UniqueIdentifier>{ea4d374a-5e8f-4b82-b047-a104d2b9b6db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGUI">
+      <UniqueIdentifier>{3cbf0773-397f-4155-9f54-269ff67391de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FMOD">
+      <UniqueIdentifier>{f1bdb238-85f6-4762-989a-504e99c48ae8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Vulkan">
+      <UniqueIdentifier>{7e41cc03-0678-4b45-811e-1c7130bef4b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scene">
+      <UniqueIdentifier>{77cdb8c7-1dee-42b1-bf63-c386580a2a12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Terrain">
+      <UniqueIdentifier>{488c0726-f1be-4b30-a61f-52528ffca205}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Graphics Game Engine_Log.txt">
+      <Filter>Log</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -155,7 +155,6 @@
     <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FmodController.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
