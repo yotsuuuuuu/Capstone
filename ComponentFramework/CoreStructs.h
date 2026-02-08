@@ -183,14 +183,17 @@ struct SingleDescriptorSetLayoutInfo {
     VkShaderStageFlags stageFlags; 
 };
 
+//
 struct DescriptorWriteInfo {
+    enum Destype {UBO,SSBO,SAMPLER,TEXTURE,ARRTEXTURE};
+    Destype type;
     uint32_t binding;
 	VkDescriptorType descriptorType;
     uint32_t descriptorCount;
     VkDeviceSize offset;
     std::vector<BufferMemory> bufferMem;
-    Sampler2D* pImageMem;
-};
+    std::vector<Sampler2D> samplers;
+ };
 
 // terrain structs
 // maybe add chunks here

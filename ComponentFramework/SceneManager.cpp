@@ -61,7 +61,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		return false;
 	}
 	
-	BuildScene(SCENE2);
+	BuildScene(SCENE0);
 	
 	return true;
 }

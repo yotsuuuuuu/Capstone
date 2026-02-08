@@ -105,7 +105,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	UpdateUniformBuffer<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
 
 	std::vector<DescriptorWriteInfo> write;
-	AddToDescrisptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 	// 7.1  set layout
 	shadowMappingInfo.DesSetInfo.descriptorSetLayout = CreateDescriptorSetLayout(layout);
 	shadowMappingInfo.DesSetInfo.descriptorPool = CreateDescriptorPool(layout, 1);

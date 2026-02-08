@@ -138,7 +138,7 @@ void World::CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vecto
 
 void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO)
 {
-
+	// this will probly change due to write changes
 	std::vector<SingleDescriptorSetLayoutInfo> terrainLayoutInfo;
 
 	SingleDescriptorSetLayoutInfo cameraBinding{};

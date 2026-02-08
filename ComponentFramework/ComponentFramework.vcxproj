@@ -234,6 +234,8 @@
     <Text Include="Graphics Game Engine_Log.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\GlobalLight.frag" />
+    <None Include="shaders\GlobalLight.vert" />
     <None Include="shaders\multiPhong.frag" />
     <None Include="shaders\multiPhong.vert" />
     <None Include="shaders\phong.frag" />

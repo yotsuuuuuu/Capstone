@@ -50,6 +50,13 @@ bool Scene0::OnCreate() {
 
 		//vRenderer->CreateGlobalRources(cam->GetCameraUBO());
 		//vRenderer->DestroyGlobalResources();
+		//to get a shadow pass
+		// i need rework the main shader
+		// adjust the rendering passes in ecs
+		// created the memory barrier between renderpasses 
+		// Also Todo: Light component and camera component over a actors 
+		// need to adjust cshader to use the config pipeline
+		// Got side trackked need to update the descritor set writer
 		
 		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
 		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
@@ -59,8 +66,8 @@ bool Scene0::OnCreate() {
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
 		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
 		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
@@ -75,7 +82,7 @@ bool Scene0::OnCreate() {
 
 		// step 1.2 shaders
 		/*std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");*/
 		
 		Ref<CShader> cshade = assetManager.GetShader("phong");

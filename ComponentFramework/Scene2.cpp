@@ -58,8 +58,8 @@ bool Scene2::OnCreate() {
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
 		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
 		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
@@ -74,7 +74,7 @@ bool Scene2::OnCreate() {
 
 		// step 1.2 shaders
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
 		cshade->OnCreate();
 		

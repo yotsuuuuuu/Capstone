@@ -438,6 +438,31 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetL
 
     }
 
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.pName = "main";
+
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.pName = "main";
+
+    tessCtrlStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    tessCtrlStageInfo.stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+    tessCtrlStageInfo.module = tessCtrlModule;
+    tessCtrlStageInfo.pName = "main";
+
+    tessEvalStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    tessEvalStageInfo.stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+    tessEvalStageInfo.module = tessEvalModule;
+    tessEvalStageInfo.pName = "main";
+
+    geomStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    geomStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+    geomStageInfo.module = geomModule;
+    geomStageInfo.pName = "main";
+
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
     if (vertShaderModule != VK_NULL_HANDLE) shaderStages.push_back(vertShaderStageInfo);
@@ -584,7 +609,7 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetL
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.layout = graphicsPipeInfo.pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = config.renderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 

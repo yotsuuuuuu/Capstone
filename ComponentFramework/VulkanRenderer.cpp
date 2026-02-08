@@ -1,6 +1,7 @@
 #include "VulkanRenderer.h"
 #include "DescriptorSetBuilder.h"
 #include "Debug.h"
+#include <assert.h>
 
 
 VulkanRenderer::VulkanRenderer(): /// Initialize all the variables
@@ -970,7 +971,7 @@ void VulkanRenderer::ImGUIHandelEvents(const SDL_Event& event)
 	imGuiSystem->ImGUIHandelEvents(event);
 }
 
-void VulkanRenderer::AddToDescrisptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count)
+void VulkanRenderer::AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count)
 {
  
     SingleDescriptorSetLayoutInfo singleDesInfo{};
@@ -983,27 +984,33 @@ void VulkanRenderer::AddToDescrisptorLayoutCollection(std::vector<SingleDescript
 	desinfo.push_back(singleDesInfo);
 }
 
-void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, Sampler2D* data)
+
+void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo, 
+    uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data)
 {
-    std::vector<BufferMemory> empty;
+    std::vector<Sampler2D> emptys;
     DescriptorWriteInfo write{};
+    write.type = type;
     write.binding = binding;
     write.descriptorCount = count;
     write.descriptorType = desType;
-    write.pImageMem = data;
-    write.bufferMem = empty;
+    write.bufferMem = data;
+    write.samplers = emptys;
     write.offset = 0;
     desinfo.push_back(write);
 }
 
-void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data)
-{
+void VulkanRenderer::AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
+    uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count, std::vector<Sampler2D> data) {
+
+    std::vector<BufferMemory> empty;
     DescriptorWriteInfo write{};
+    write.type = type;
     write.binding = binding;
     write.descriptorCount = count;
     write.descriptorType = desType;
-    write.pImageMem = nullptr;
-    write.bufferMem = data;
+    write.samplers = data;
+    write.bufferMem = empty;
     write.offset = 0;
     desinfo.push_back(write);
 }
@@ -1088,26 +1095,49 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
     for (size_t i = 0; i < getNumSwapchains(); i++) { // loop for each set
 
 		for (const auto& b : writeInfo) { // gather all buffer and image infos handels for the write 
-            if (b.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
+            if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
                 VkDescriptorBufferInfo bufferInfo{};
                 bufferInfo.buffer = b.bufferMem[i].bufferID;
                 bufferInfo.offset = b.offset;
                 bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
                 bufferInfos.push_back(bufferInfo);
             }
-            else if (b.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = b.pImageMem->imageView;
-                imageInfo.sampler = b.pImageMem->sampler;
+                imageInfo.imageView = b.samplers[0].imageView;
+                imageInfo.sampler =   b.samplers[0].sampler;
                 imageInfos.push_back(imageInfo);
+            }
+            else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                for (uint32_t j = 0; j < b.descriptorCount; j++) {
+                    VkDescriptorImageInfo imageInfo{};
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.imageView = b.samplers[j].imageView;
+                    imageInfo.sampler = b.samplers[j].sampler;
+                    imageInfos.push_back(imageInfo);
+                }
+            }
+            else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                VkDescriptorImageInfo imageInfo{};
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = b.samplers[i].imageView;
+                imageInfo.sampler = b.samplers[i].sampler;
+                imageInfos.push_back(imageInfo);
+            }
+            else if (b.type == DescriptorWriteInfo::Destype::SSBO) { //VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+                VkDescriptorBufferInfo bufferInfo{};
+                bufferInfo.buffer = b.bufferMem[i].bufferID;
+                bufferInfo.offset = b.offset;
+                bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
+                bufferInfos.push_back(bufferInfo);
             }
         }
 		size_t bufferInfoIndex = 0;
 		size_t imageInfoIndex = 0;
 		size_t writeIndex = 0;
 		for (const auto& b : writeInfo) { // fill in the write forms for the descriptor set
-            if (b.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
+            if (b.type == DescriptorWriteInfo::Destype::UBO || b.type == DescriptorWriteInfo::Destype::SSBO) {
 				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
 				descriptorWrites[writeIndex].dstBinding = b.binding;
@@ -1115,21 +1145,20 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
 				descriptorWrites[writeIndex].descriptorType = b.descriptorType;
 				descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
 				descriptorWrites[writeIndex].pBufferInfo = &bufferInfos[bufferInfoIndex];
-
-                bufferInfoIndex++;
+                bufferInfoIndex+= b.descriptorCount;
                 writeIndex++;
 			}
-            else if (b.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE || b.type == DescriptorWriteInfo::Destype::ARRTEXTURE
+                || b.type == DescriptorWriteInfo::Destype::SAMPLER) {
 				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
                 descriptorWrites[writeIndex].dstBinding = b.binding;
                 descriptorWrites[writeIndex].dstArrayElement = 0;
                 descriptorWrites[writeIndex].descriptorType = b.descriptorType;
                 descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
-
                 descriptorWrites[writeIndex].pImageInfo = &imageInfos[imageInfoIndex];
+                imageInfoIndex+= b.descriptorCount;
                 writeIndex++;
-                imageInfoIndex++;
             }
         }
         // write to the descriptor set
