@@ -2,6 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 void main() { 
-	//gl_FragDepth = 0.5;
+	//gl_FragDepth = 0.0f;
 } 
 

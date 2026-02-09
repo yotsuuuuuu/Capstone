@@ -176,6 +176,7 @@ void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::v
 
 	DescriptorWriteInfo cameraWrite{};
 	cameraWrite.binding = 0;
+	cameraWrite.type = DescriptorWriteInfo::Destype::UBO;
 	cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	cameraWrite.descriptorCount = 1;
 	cameraWrite.bufferMem = cameraUBO; 
@@ -183,6 +184,7 @@ void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::v
 
 	DescriptorWriteInfo lightsWrite{};
 	lightsWrite.binding = 1;
+	lightsWrite.type = DescriptorWriteInfo::Destype::UBO;
 	lightsWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	lightsWrite.descriptorCount = 1;
 	lightsWrite.bufferMem = lightsUBO;  
@@ -190,9 +192,10 @@ void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::v
 
 	DescriptorWriteInfo textureWrite{};
 	textureWrite.binding = 2;
+	textureWrite.type = DescriptorWriteInfo::Destype::TEXTURE;
 	textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	textureWrite.descriptorCount = 1;
-	textureWrite.pImageMem = &terrainTexture;
+	textureWrite.samplers = { terrainTexture };
 	terrainWriteInfo.push_back(textureWrite);
 
 	vRenderer->WriteDescriptorSets(terrainSets, terrainWriteInfo);

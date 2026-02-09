@@ -55,7 +55,17 @@ namespace  MATH {
 				0.0f, 0.0f, (2.0f * zNear_ * zFar_) / (zNear_ - zFar_), 0.0f);
 			return result;
 		}
-
+		static Matrix4 perspectiveVK(const float fovy_, const float aspect_, const float zNear_, const float zFar_) {
+			float cot = 1.0f / tan(fovy_ * 0.5f * DEGREES_TO_RADIANS);
+			Matrix4 result;
+			result[0] = cot / aspect_;
+			result[5] = -cot;
+			result[10] = -zFar_ / (zFar_ - zNear_);      
+			result[11] = -1.0f;                        
+			result[14] = -(zNear_ * zFar_) / (zFar_ - zNear_);  
+			result[15] = 0.0f;
+			return result;
+		}
 
 
 		/// This creates a transform from Normalized Device Coordinates (NDC) to 
@@ -125,6 +135,26 @@ namespace  MATH {
 			m[14] = -((zMax + zMin) / (zMax - zMin));
 			m[15] = 1.0f;
 			***/
+			return m;
+		}
+		// ortho matrix that maps z form 0 to 1 for vulkan
+		static Matrix4 orthographicVK(float xMin_, float xMax_, float yMin_, float yMax_, float zMin_, float zMax_) {
+			Matrix4 m;
+			
+			float rl = xMax_ - xMin_;     
+			float bt = yMin_ - yMax_;      
+			float fn = zMin_ - zMax_;
+
+			m[0] = 2.0f / rl;           
+			m[5] = 2.0f / bt;            
+			m[10] = 1.0f / fn;            
+			m[11] = 0.0f;                
+
+			m[12] = -(xMax_ + xMin_) / rl;      
+			m[13] = -(yMin_ + yMax_) / bt;     
+			m[14] = -zMin_ / fn;              
+			m[15] = 1.0f;
+
 			return m;
 		}
 

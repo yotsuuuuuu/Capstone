@@ -354,9 +354,7 @@ public:
 
 	//Descriptor Set Builder
     void AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,
-        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);
-    void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
-        uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count,Sampler2D* data);
+        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);    
     void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
         uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count, std::vector<Sampler2D> data);
     void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
@@ -371,14 +369,14 @@ public:
 private:
     struct FrameContext
     {
-        VkSemaphore waitSemaphores;
-        VkSemaphore signalSemaphores;
-        VkFence currentframeFence;
         VkCommandBuffer CMDBuffer;
         VkRenderPass Renderpass;
-        uint32_t targetFrameIndex;
-        uint32_t currentFrameIndex;
         VkFramebuffer currentFrameBuffer;
+        VkFence currentFrameFence;
+        VkSemaphore waitSemaphores;
+        VkSemaphore signalSemaphores;
+        uint32_t targetFrameIndex;
+        uint32_t inFlightIndex;
         VkExtent2D extent;
     };
 
@@ -393,7 +391,9 @@ private:
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
-    void CMDMemoryBarrier(const VkCommandBuffer&, std::optional<VkMemoryBarrier> = std::nullopt);
+    void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
+        VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
+        uint32_t baseMip = 0, uint32_t mipCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
     void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
@@ -471,8 +471,7 @@ private:
 	void DestroyShadowMappingResources();
 public:
 
-
-    GlobalShadowMappingInfo GetShadowMappingInfo() { return shadowMappingInfo; }
+    VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
     //Temp function just to initilize the variables
     void CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO);

@@ -1095,21 +1095,21 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
     for (size_t i = 0; i < getNumSwapchains(); i++) { // loop for each set
 
 		for (const auto& b : writeInfo) { // gather all buffer and image infos handels for the write 
-            if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+            if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER write Per swapchain
                 VkDescriptorBufferInfo bufferInfo{};
                 bufferInfo.buffer = b.bufferMem[i].bufferID;
                 bufferInfo.offset = b.offset;
                 bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
                 bufferInfos.push_back(bufferInfo);
             }
-            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write one texture for all sets
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 imageInfo.imageView = b.samplers[0].imageView;
                 imageInfo.sampler =   b.samplers[0].sampler;
                 imageInfos.push_back(imageInfo);
             }
-            else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write an array of textures for a set
                 for (uint32_t j = 0; j < b.descriptorCount; j++) {
                     VkDescriptorImageInfo imageInfo{};
                     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1118,7 +1118,7 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
                     imageInfos.push_back(imageInfo);
                 }
             }
-            else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 imageInfo.imageView = b.samplers[i].imageView;
@@ -1127,9 +1127,9 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
             }
             else if (b.type == DescriptorWriteInfo::Destype::SSBO) { //VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
                 VkDescriptorBufferInfo bufferInfo{};
-                bufferInfo.buffer = b.bufferMem[i].bufferID;
+                bufferInfo.buffer = b.bufferMem[0].bufferID;
                 bufferInfo.offset = b.offset;
-                bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
+                bufferInfo.range = b.bufferMem[0].bufferMemoryLength;
                 bufferInfos.push_back(bufferInfo);
             }
         }

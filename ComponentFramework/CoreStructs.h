@@ -48,9 +48,9 @@ struct LightsData {
 struct GlobalLightData {
     Matrix4 projectionMatrix;
     Matrix4 viewMatrix;
-    Vec4 specular;
     Vec4 ambient;
     Vec4 diffused;
+    Vec4 specular;
     Vec4 pos;
     Quaternion orientation;
 };

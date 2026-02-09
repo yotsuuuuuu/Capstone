@@ -293,6 +293,12 @@
     <None Include="shaders\GlobalLight.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\MainPass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MainPass.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

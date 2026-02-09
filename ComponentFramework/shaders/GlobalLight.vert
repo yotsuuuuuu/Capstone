@@ -10,6 +10,11 @@ layout (location = 2) in  vec2 texCoords;
 layout(set = 0 ,binding = 0) uniform LightsUBO {
 	mat4 projectionMatrix;
 	mat4 viewMatrix; 
+	vec4 pad;
+	vec4 pad1;
+	vec4 pad2;
+	vec4 pad3;
+	vec4 pad4;
 } light;
 
 layout(push_constant) uniform Push {

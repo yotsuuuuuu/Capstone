@@ -236,6 +236,8 @@
   <ItemGroup>
     <None Include="shaders\GlobalLight.frag" />
     <None Include="shaders\GlobalLight.vert" />
+    <None Include="shaders\MainPass.frag" />
+    <None Include="shaders\MainPass.vert" />
     <None Include="shaders\multiPhong.frag" />
     <None Include="shaders\multiPhong.vert" />
     <None Include="shaders\phong.frag" />
