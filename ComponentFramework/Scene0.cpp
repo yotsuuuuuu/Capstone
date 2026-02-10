@@ -16,7 +16,7 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 
-Scene0::Scene0(EngineContext context_): 
+Scene0::Scene0(EngineContext& context_): 
 	Scene(context_) {
 	Debug::Info("Created Scene0: ", __FILE__, __LINE__);
 }

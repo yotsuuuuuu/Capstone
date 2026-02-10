@@ -1,7 +1,11 @@
 #pragma once
-#include "AssetManager.h"
-#include "Renderer.h"
+//#include "AssetManager.h"
+//#include "Renderer.h"
 #include "cassert"
+
+class Renderer;
+class AssetManager;
+
 struct EngineContext
 {
     Renderer* renderer = nullptr;
@@ -9,7 +13,7 @@ struct EngineContext
 
     void Set(Renderer& renderer_, AssetManager& assetManager_)
     {
-        assert(renderer == nullptr && assetManager == nullptr);
+        //assert(&renderer_ == nullptr && &assetManager_ == nullptr);
         renderer = &renderer_;
         assetManager = &assetManager_;
     }

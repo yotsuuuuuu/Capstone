@@ -37,7 +37,7 @@ private:
 
 public:
 
-	explicit Scene0(EngineContext context_);
+	explicit Scene0(EngineContext& context_);
 	virtual ~Scene0();
 
 	virtual bool OnCreate() override;

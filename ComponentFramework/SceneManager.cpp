@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
+#include "AssetManager.h"
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
