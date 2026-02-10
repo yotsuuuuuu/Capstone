@@ -112,7 +112,7 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
     int shaderType = jsonLoader["Shaders"][id]["type"].get<int>();
     int shaderStage = jsonLoader["Shaders"][id]["stage"].get<int>();
 
-    renderer->AddToDescrisptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
+    renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
     Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
     shaderMap[id] = cshade;
     return cshade;

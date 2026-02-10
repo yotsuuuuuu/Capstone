@@ -211,7 +211,7 @@ public:
     }
 
     template <class T>
-    void UpdateUniformBuffer(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
+    void UpdateUniformBuffers(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
         void* data;
         int num = static_cast<int>(numSwapchains);
 		size_t size = sizeof(T);
@@ -223,6 +223,16 @@ public:
             vkUnmapMemory(device, bufferMemory[i].bufferMemoryID);
         }
     };
+
+    template <class T>
+    void UpdateUniformBuffer(const T& srcData, const BufferMemory bufferMemory) {
+        void* data;      
+        VkDeviceSize bufferSize = static_cast<VkDeviceSize>(sizeof(T));
+        vkMapMemory(device, bufferMemory.bufferMemoryID, 0, bufferSize, 0, &data);
+        memcpy(data, &srcData, static_cast<size_t>(bufferMemory.bufferMemoryLength));
+        vkUnmapMemory(device, bufferMemory.bufferMemoryID);
+    };
+  
 
     void DestroyUBO(std::vector<BufferMemory> ubo);
 
@@ -353,12 +363,12 @@ public:
 	void ImGUIHandelEvents(const SDL_Event& event);
 
 	//Descriptor Set Builder
-    void AddToDescrisptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,
-        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);
+    void AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,
+        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count);    
     void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
-        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count,Sampler2D* data);
+        uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count, std::vector<Sampler2D> data);
     void AddToDescrisptorLayoutWrite(std::vector<DescriptorWriteInfo>& desinfo,
-        uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data);
+        uint32_t binding, VkDescriptorType desType, DescriptorWriteInfo::Destype type, VkShaderStageFlags stageFlags, uint32_t count, std::vector<BufferMemory> data);
 
 	VkDescriptorSetLayout CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo);
 	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
@@ -369,14 +379,14 @@ public:
 private:
     struct FrameContext
     {
-        VkSemaphore waitSemaphores;
-        VkSemaphore signalSemaphores;
-        VkFence currentframeFence;
         VkCommandBuffer CMDBuffer;
         VkRenderPass Renderpass;
-        uint32_t targetFrameIndex;
-        uint32_t currentFrameIndex;
         VkFramebuffer currentFrameBuffer;
+        VkFence currentFrameFence;
+        VkSemaphore waitSemaphores;
+        VkSemaphore signalSemaphores;
+        uint32_t targetFrameIndex;
+        uint32_t inFlightIndex;
         VkExtent2D extent;
     };
 
@@ -391,7 +401,9 @@ private:
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
-    void CMDMemoryBarrier(const VkCommandBuffer&, std::optional<VkMemoryBarrier> = std::nullopt);
+    void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
+        VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
+        uint32_t baseMip = 0, uint32_t mipCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
     void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
@@ -454,8 +466,7 @@ private:
         VkMemoryPropertyFlags propFlag;
         VkImageLayout initial;
         VkImageLayout final; 
-        //temp variables
-        std::vector<BufferMemory> LightsUBO;
+  
     };
 
 	GlobalShadowMappingInfo shadowMappingInfo;
@@ -469,11 +480,10 @@ private:
 	void DestroyShadowMappingResources();
 public:
 
-
-    GlobalShadowMappingInfo GetShadowMappingInfo() { return shadowMappingInfo; }
+    VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
     //Temp function just to initilize the variables
-    void CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO);
+    void CreateGlobalRources(Ref<Component> cameraActor);
     void DestroyGlobalResources();
 
 

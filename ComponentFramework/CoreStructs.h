@@ -48,13 +48,31 @@ struct LightsData {
 struct GlobalLightData {
     Matrix4 projectionMatrix;
     Matrix4 viewMatrix;
-    Vec4 specular;
     Vec4 ambient;
     Vec4 diffused;
+    Vec4 specular;
     Vec4 pos;
     Quaternion orientation;
 };
-
+struct OrthConfig {
+    float xmin;
+    float xmax;
+    float ymin;
+    float ymax;
+    float zmin;
+    float zmax;
+};
+struct PerspectiveConfig {
+    float fovy;
+    float aspectRatio;
+    float near;
+    float far;
+};
+struct LightConfig {
+    Vec4 ambient;
+    Vec4 diffused;
+    Vec4 specular;
+};
 
 
 /// A 3x3 cannot be sent to the GPU data alignment issues. 
@@ -183,14 +201,17 @@ struct SingleDescriptorSetLayoutInfo {
     VkShaderStageFlags stageFlags; 
 };
 
+//
 struct DescriptorWriteInfo {
+    enum Destype {UBO,SSBO,SAMPLER,TEXTURE,ARRTEXTURE};
+    Destype type;
     uint32_t binding;
 	VkDescriptorType descriptorType;
     uint32_t descriptorCount;
     VkDeviceSize offset;
     std::vector<BufferMemory> bufferMem;
-    Sampler2D* pImageMem;
-};
+    std::vector<Sampler2D> samplers;
+ };
 
 // terrain structs
 // maybe add chunks here

@@ -27,7 +27,7 @@ public:
 
 	MATH::Matrix4 GetModelMatrix() const;
 
-	Ref<Component> GetParent() const { return parent; }
+	//Ref<Component> GetParent() const { return parent; }
 
 	template<typename T, typename... TArgs>
 	inline void AddComponent(TArgs&&... args);

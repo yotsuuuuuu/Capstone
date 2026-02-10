@@ -1,9 +1,11 @@
 #include "VulkanRenderer.h"
 #include "CActor.h"
 #include "CCameraActor.h"
+#include "CCamera.h"
 #include "CMaterial.h"
 #include "CShader.h"
 #include "CMesh.h"
+#include "CGlobalLight.h"
 #include "CTransform.h"
 #include <unordered_map>
 #include "imgui.h"
@@ -21,23 +23,44 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
-void VulkanRenderer::CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO)
+
+void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
 {
+
+    auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
+    if (!cam) {
+        Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
+        return;
+    }
+
+    auto Glight = cam->GetComponent< CGlobalLight>();
+    if (!Glight) {
+        Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
+        return;
+    }
+
+    auto Camera = cam->GetComponent<CCamera>();
+    if (!Glight) {
+        Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
+        return;
+    }
+
     // create the shadow resources
     CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    CreateGlobalShadowPipelineResources("", "", nullptr);
+    CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
     // then creat global resources
-   
-    std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-    AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-    AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-    std::vector<DescriptorWriteInfo> writeGlobal;
-    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
-    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.LightsUBO);
-    CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
+    std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
+    AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    std::vector<DescriptorWriteInfo> writeGlobal;
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
+    CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 }
 
 void VulkanRenderer::DestroyGlobalResources()
@@ -65,9 +88,9 @@ VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
 
     FrameContext context{};
     context.targetFrameIndex = imageIndex;
-    context.currentFrameIndex = currentFrame;
+    context.inFlightIndex = currentFrame;
     context.CMDBuffer = primaryCommandBuffer.commandBuffers[imageIndex];
-    context.currentframeFence = inFlightFences[currentFrame];
+    context.currentFrameFence = inFlightFences[currentFrame];
     context.waitSemaphores = imageAvailableSemaphores[currentFrame];
     context.signalSemaphores = renderFinishedSemaphores[currentFrame];
     context.currentFrameBuffer = swapChainFramebuffers[imageIndex];
@@ -77,6 +100,7 @@ VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
     return context;
    
 }
+
 void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD)
 {
     //VkAttachmentDescription colorAttachment{};
@@ -288,10 +312,33 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
     }
 }
 
-void VulkanRenderer::CMDMemoryBarrier(const VkCommandBuffer&, std::optional<VkMemoryBarrier>)
+void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t baseMip, uint32_t mipCount, uint32_t baseLayer, uint32_t layerCount)
 {
-    //TODO:
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+    barrier.srcAccessMask = srcAccess;
+    barrier.dstAccessMask = dstAccess;
+
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = aspectMask;
+    barrier.subresourceRange.baseMipLevel = baseMip;
+    barrier.subresourceRange.levelCount = mipCount;
+    barrier.subresourceRange.baseArrayLayer = baseLayer;
+    barrier.subresourceRange.layerCount = layerCount;
+
+    vkCmdPipelineBarrier(cmd, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
 }
+
+
+
 
 void VulkanRenderer::CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,
     VkPipelineStageFlags* stageFlags, VkSemaphore* waitSema, uint32_t wait_count, VkSemaphore* readySema, uint32_t ready_count)
@@ -361,23 +408,57 @@ public:
         VKRNDR->imGuiSystem->EndFrame();
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
+        VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
+        // TODO: Update UBOs for current frame ??? needs to be done
+
         VkPipelineLayout line;
         // 1.1 get draw items
         std::unordered_map<VkPipeline, std::vector<DrawItem>> DrawingBuckets;
         for (const auto& comp : drawlist) {
             Ref<CActor> a = std::dynamic_pointer_cast<CActor>(comp);
-            auto mat = a->GetComponent<CMaterial>();
-            auto mesh = a->GetComponent<CMesh>();
-            // sohuld check for transform
-            if (a && mat && mesh) {
-                DrawItem item = GetDrawItem(a, framecntx);
-        // 1.2 sort them into buckets
-                DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
-                line = item.pipeInfo.pipelineLayout;
+            if (a) {
+                auto mat = a->GetComponent<CMaterial>();
+                auto mesh = a->GetComponent<CMesh>();
+                // sohuld check for transform
+                if (mat && mesh) {
+                    DrawItem item = GetDrawItem(a, framecntx);
+                    // 1.2 sort them into buckets
+                    DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
+                    line = item.pipeInfo.pipelineLayout;
+                }
             }
         }
-        // 2 Update UBOs for current frame ??? needs to be done
         // 3 Start recording
+        VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
+        {// Shadow Pass
+            VkRenderPassBeginInfo renderinfo{};
+            renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderinfo.renderPass = shadowcntx.RenderPass;           
+            renderinfo.framebuffer = shadowcntx.FrameBuffers[framecntx.targetFrameIndex];
+            renderinfo.renderArea.offset = { 0,0 };
+            renderinfo.renderArea.extent = shadowcntx.Exents;
+            std::array<VkClearValue, 1> clearValue{};
+            clearValue[0].depthStencil = { 1.0f,0 };
+            renderinfo.clearValueCount = static_cast<uint32_t>(clearValue.size());
+            renderinfo.pClearValues = clearValue.data();
+            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
+            VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                &shadowcntx.DesSetInfo.descriptorSet[framecntx.targetFrameIndex]);
+            for (const auto& pair : DrawingBuckets) {
+                for (const auto& item : pair.second) {
+                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
+                    VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                }
+            }
+            VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+        }
+   
+        // An image must leave a render pass in the layout it will be used in next.
+        // If the next use requires a different layout, a memory image barrier must be used to transition it.
+       
+
         { // the main pass
             VkRenderPassBeginInfo renderinfo{};
             renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -390,7 +471,6 @@ public:
             clearValues[1].depthStencil = { 1.0f, 0 };
             renderinfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderinfo.pClearValues = clearValues.data();
-            VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
@@ -411,9 +491,9 @@ public:
 
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
          /*   printf("%d cmd\t%d framefence\t%d waitSemaphore\t%d singalSemaphore\n", (int)framecntx.CMDBuffer, 
-                (int)framecntx.currentframeFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
+                (int)framecntx.currentFrameFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
         // 5 submit
-            VKRNDR->CMDSubmitGraphics(&framecntx.CMDBuffer, 1, framecntx.currentframeFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
+            VKRNDR->CMDSubmitGraphics(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
         // 6 present
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
         }

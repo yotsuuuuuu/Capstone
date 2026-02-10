@@ -4,8 +4,8 @@
 
 void CCameraActor::UpdateProjectionMatrix(const float& FOVY, const float& aspectRatio, const float& nearClip, const float& farClip)
 {
-	projectionMatrix = MATH::MMath::perspective(FOVY, aspectRatio, nearClip, farClip);
-	projectionMatrix[5] *= -1.0f; // Invert Y for Vulkan
+	projectionMatrix = MATH::MMath::perspectiveVK(FOVY, aspectRatio, nearClip, farClip);
+	//projectionMatrix[5] *= -1.0f; // Invert Y for Vulkan
 
 }
 
@@ -105,7 +105,7 @@ void CCameraActor::UpdateUBO(uint32_t uboindex)
 	case RendererType::VULKAN: {
 		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
 		auto data = GetCamDataUBO();
-		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO);
+		vkrender->UpdateUniformBuffers<CameraData>(data, cameraUBO);
 		uboNeedsUpdate = false;
 		break;
 	}

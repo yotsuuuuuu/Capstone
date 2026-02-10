@@ -25,7 +25,7 @@ public:
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
 	virtual void Update(const float dt) override {}
-	MATH::Matrix4 GetViewMatrix() const { return viewMatrix; }
+	MATH::Matrix4 UpdateViewMatrix() const { return viewMatrix; }
 	MATH::Matrix4 GetProjectionMatrix() const { return projectionMatrix; }
 	
 	void SetCameraUBO(const std::vector<BufferMemory>& ubo_) { cameraUBO = ubo_; }

@@ -9,6 +9,8 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
+#include "CCamera.h"
+#include "CGlobalLight.h"
 #include "CCameraActor.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
@@ -41,30 +43,58 @@ bool Scene0::OnCreate() {
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
 		// step 1 Create the  GLOBAL componetes
-		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), Quaternion(),Vec3()));
+		/*Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f,Vec3(0,1,0)), Vec3()));
 		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
 		cam->UpdateViewMatrix();
 		cam->OnCreate();
-		cam->UpdateUBO(0);
-
-		//vRenderer->CreateGlobalRources(cam->GetCameraUBO());
+		cam->UpdateUBO(0);*/
+		Ref<CActor> cam = std::make_shared<CActor>();
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
+		LightConfig ldata;
+		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		OrthConfig config;
+		config.xmax = 4.0f; config.xmin = -4.0f; config.ymax = 4.0f; config.ymin =-4.0f;
+		config.zmax = 100.0f; config.zmin = 0.5f;
+		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, renderer, config, ldata));
+		if (!cam->OnCreate()) {
+			printf(" FAILED TO CREATE CAMERA \n");
+		}
+		vRenderer->CreateGlobalRources(cam);
 		//vRenderer->DestroyGlobalResources();
+		//to get a shadow pass
+		// i need rework the main shader
+		// adjust the rendering passes in ecs
+		// created the memory barrier between renderpasses 
+		// Also Todo: Light component and camera component over a actors 
+		// need to adjust cshader to use the config pipeline
+		// TODO: GET IT WORKING WITHOUT SHADOWS , DONE
+		// TODO: MEMORY BARRIER FOR BETWEEN RENDERPASSES , DONE
+		// TODO: ADJUST ECS RENDERING TO INCLUDE SHADOW PASS , DONE
+		// TODO: SHADER WORK GET SHADOWS , DONE
+		// TODO: PROTOTYPE CAMERA AND LIGHT COMPONENTS , DONE
+		// TODO: ADJUST CSHADER USE NEW PIPELINE COFIG
+		// TODO :PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE
 		
-		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
+	
+		
+	/*	lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
 		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
 		lights.specular[0] = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
 		lights.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		lights.numLights = 1;
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
-		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
+		vRenderer->UpdateUniformBuffers<LightsData>(lights, lightsUBO);
 		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
-		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
+		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);*/
 
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
@@ -72,24 +102,32 @@ bool Scene0::OnCreate() {
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, "./meshes/Mario.obj");
 	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
+		Ref<CMesh> mesh1 = std::make_shared<CMesh>(nullptr, renderer, "./meshes/Plane.obj");
+		/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
+		mesh1->OnCreate();
 
 		// step 1.2 shaders
-		/*std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		vRenderer->AddToDescrisptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");*/
-		
-		Ref<CShader> cshade = assetManager.GetShader("phong");
+
+		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");		
+		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
 		//step 1.3 Materials
-		/*std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);*/
-		Ref<CMaterial> mat = assetManager.GetMat("mario");
+		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);
+		//Ref<CMaterial> mat = assetManager.GetMat("mario");
 		mat->OnCreate();
 
-		//filepaths = { "./textures/mario_fire.png" };
-		Ref<CMaterial> mat1 = assetManager.GetMat("mario");
+		filepaths = { "./textures/mario_fire.png" };
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
 		mat1->OnCreate();
+
+		filepaths = { "./textures/checkered_board.png" };
+		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		mat2->OnCreate();
 
 		// step 2 create actors
 		Ref<CActor> act = std::make_shared<CActor>(nullptr);
@@ -103,10 +141,17 @@ bool Scene0::OnCreate() {
 		act1->AddComponent<CTransform>(t1);
 		act1->AddComponent<CMesh>(mesh);
 		act1->AddComponent<CMaterial>(mat1);
+
+		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0, 0,-10), QMath::angleAxisRotation(-25, Vec3(1, 0, 0)), Vec3(3, 3, 1));
+		act2->AddComponent<CTransform>(t2);
+		act2->AddComponent<CMesh>(mesh1);
+		act2->AddComponent<CMaterial>(mat2);
 		
 		//step 3 Actors being added to the scene.
 		actor = act;
 		actor1 = act1;
+		plane = act2;
 		camera = cam;
 		shader = cshade;
 		
@@ -144,55 +189,13 @@ void Scene0::Render() const {
 	case RendererType::VULKAN:
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
-		// notes for me:
-		// UBO should be only updated when it is not being worked on by the GPU
-		// we should use fences to ensure that
-		// thought: maybe we can wait for fence for like fractions of an ms 
-		// and see it vulkan can give be a success for the wait or not.
-		// apperently we can get the status on a fence using vkGetFenceStatus 
-		// but probly best idea to wait for fence for the current frame to be finished before updating UBOs
-		// 2 use cntx to update UBOs
-		// 3 record on the right cmd buffer
-		// 4 submit the cmd buffer for that frame only
 
-		//
-		//vRenderer->RecordCommandBuffers(Recording::START);
-		//{
-		//	auto a = std::dynamic_pointer_cast<CActor>(actor);
-		//	auto mat = a->GetComponent<CMaterial>();
-		//	auto mesh = a->GetComponent<CMesh>();
-		//	auto meshdata = mesh->GetMesh();
-		//	auto pipelineinfo = mat->GetPipelineInfo();
-
-		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout,vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
-		//	vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
-		//	vRenderer->BindMesh(meshdata);// 4 bind mesh
-		//	vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-		//	vRenderer->DrawIndexed(meshdata);// 6 draw
-		//}
-		//{
-		//	auto a = std::dynamic_pointer_cast<CActor>(actor1);
-		//	auto mat = a->GetComponent<CMaterial>();
-		//	auto mesh = a->GetComponent<CMesh>();
-		//	auto meshdata = mesh->GetMesh();
-		//	auto pipelineinfo = mat->GetPipelineInfo();
-
-		//	// no need to re bind the global set
-		//	vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-		//	vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
-		//	vRenderer->BindMesh(meshdata);// 4 bind mesh
-		//	vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-		//	vRenderer->DrawIndexed(meshdata);// 6 draw
-		//}
-	
-
-		//vRenderer->RecordCommandBuffers(Recording::STOP);
-		//vRenderer->Render();
+		
 		{
 			std::vector<Ref<Component>> drawlist;
 			drawlist.push_back(actor);
 			drawlist.push_back(actor1);
+			drawlist.push_back(plane);
 			vRenderer->RenderECS(drawlist);
 		}
 		break;
@@ -228,13 +231,15 @@ void Scene0::OnDestroy() {
 		//vRenderer->DestroyCommandBuffers(); 
 
 		
-		vRenderer->DestroyGlobalDescriptionSet(); // note eventaully need to get moved out of the scene.
+		//vRenderer->DestroyGlobalDescriptionSet(); // note eventaully need to get moved out of the scene.
+		vRenderer->DestroyGlobalResources();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
-		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();
-
+		
+		camera->OnDestroy();
 		actor->OnDestroy();
 		actor1->OnDestroy();
+		plane->OnDestroy();
 		
 		
 		}

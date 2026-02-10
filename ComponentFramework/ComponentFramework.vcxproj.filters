@@ -121,6 +121,10 @@
     <ClCompile Include="CPlayerActor.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="CCamera.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CGlobalLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -258,6 +262,10 @@
     <ClInclude Include="CPlayerActor.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
+    <ClInclude Include="CCamera.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CGlobalLight.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">
@@ -292,6 +300,18 @@
     </None>
     <None Include="test.json">
       <Filter>Json</Filter>
+    </None>
+    <None Include="shaders\GlobalLight.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\GlobalLight.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MainPass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MainPass.vert">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
