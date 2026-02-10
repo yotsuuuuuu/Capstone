@@ -115,7 +115,4 @@ void CPlayerActor::UpdateUBO(uint32_t uboindex)
 	}
 }
 
-void CPlayerActor::Update(const float dt)
-
-{
 

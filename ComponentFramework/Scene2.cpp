@@ -61,7 +61,7 @@ bool Scene2::OnCreate() {
 		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 		vRenderer->AddToDescrisptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, cam->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1, player1->GetCameraUBO());
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
 		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
@@ -104,7 +104,7 @@ bool Scene2::OnCreate() {
 		actor = act;
 		actor1 = act1;
 		player = player1;
-		cPlayer = player1;
+		//cPlayer = player1;
 		shader = cshade;
 	
 
@@ -117,7 +117,7 @@ bool Scene2::OnCreate() {
 
 		preset.globalHeightScale = 10.0f;
 		world = new World(renderer);
-		world->Initialize(&preset,cam->GetCameraUBO(),lightsUBO);
+		world->Initialize(&preset, player1->GetCameraUBO(),lightsUBO);
 
 
 	}
@@ -142,52 +142,52 @@ void Scene2::HandleEvents(const SDL_Event& sdlEvent) {
 		}
 		break;
 
-	case SDL_EVENT_KEY_DOWN: {
-		switch (sdlEvent.key.key) {
-			case SDLK_ESCAPE:
-				SDL_Quit();
-				exit(0);
-				break;
-			case SDLK_W:
-				cPlayer->moveForward(true);
-				break;
-			case SDLK_S:
-				cPlayer->moveBackward(true);
-				break;
-			case SDLK_A:
-				cPlayer->moveLeft(true);
-				break;
-			case SDLK_D:
-				cPlayer->moveRight(true);
-				break;
-			default:
-				break;
-		}	
-		}
+	//case SDL_EVENT_KEY_DOWN: {
+	//	switch (sdlEvent.key.key) {
+	//		case SDLK_ESCAPE:
+	//			SDL_Quit();
+	//			exit(0);
+	//			break;
+	//		case SDLK_W:
+	//			cPlayer->moveForward(true);
+	//			break;
+	//		case SDLK_S:
+	//			cPlayer->moveBackward(true);
+	//			break;
+	//		case SDLK_A:
+	//			cPlayer->moveLeft(true);
+	//			break;
+	//		case SDLK_D:
+	//			cPlayer->moveRight(true);
+	//			break;
+	//		default:
+	//			break;
+	//	}	
+	//	}
 
-	case SDL_EVENT_KEY_UP: {
-		switch (sdlEvent.key.key) {
-			case SDLK_W:
-				cPlayer->moveForward(false);
-				break;
-			case SDLK_S:
-				cPlayer->moveBackward(false);
-				break;
-			case SDLK_A:
-				cPlayer->moveLeft(false);
-				break;
-			case SDLK_D:
-				cPlayer->moveRight(false);
-				break;
-			default:
-				break;
-			}
-		}	
+	//case SDL_EVENT_KEY_UP: {
+	//	switch (sdlEvent.key.key) {
+	//		case SDLK_W:
+	//			cPlayer->moveForward(false);
+	//			break;
+	//		case SDLK_S:
+	//			cPlayer->moveBackward(false);
+	//			break;
+	//		case SDLK_A:
+	//			cPlayer->moveLeft(false);
+	//			break;
+	//		case SDLK_D:
+	//			cPlayer->moveRight(false);
+	//			break;
+	//		default:
+	//			break;
+	//		}
+	//	}	
 	}
 }
 
 void Scene2::Update(const float deltaTime) {
-	cPlayer->Update(deltaTime);
+	//cPlayer->Update(deltaTime);
 }
 
 void Scene2::Render() const {
@@ -281,7 +281,7 @@ void Scene2::OnDestroy() {
 		vRenderer->DestroyGlobalDescriptionSet();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
-		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();
+		std::dynamic_pointer_cast<CPlayerActor>(player)->OnDestroy();
 
 		actor->OnDestroy();
 		actor1->OnDestroy();

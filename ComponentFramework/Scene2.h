@@ -31,7 +31,7 @@ private:
 	
 	//Components
 	Ref<Component> player;
-	Ref<CPlayerActor> cPlayer;
+	//Ref<CPlayerActor> cPlayer;
 	Ref<Component> actor;
 	Ref<Component> actor1;	
 	Ref<Component> shader;
