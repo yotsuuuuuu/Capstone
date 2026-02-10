@@ -105,7 +105,7 @@ void CPlayerActor::UpdateUBO(uint32_t uboindex)
 	case RendererType::VULKAN: {
 		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
 		auto data = GetCamDataUBO();
-		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO);
+		vkrender->UpdateUniformBuffers<CameraData>(data, cameraUBO);
 		uboNeedsUpdate = false;
 		break;
 	}

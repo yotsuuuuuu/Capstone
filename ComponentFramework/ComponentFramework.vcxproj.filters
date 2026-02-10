@@ -124,7 +124,9 @@
     <ClCompile Include="CCamera.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
-    <ClCompile Include="CGlobalLight.cpp" />
+    <ClCompile Include="CGlobalLight.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -265,7 +267,9 @@
     <ClInclude Include="CCamera.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
-    <ClInclude Include="CGlobalLight.h" />
+    <ClInclude Include="CGlobalLight.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">

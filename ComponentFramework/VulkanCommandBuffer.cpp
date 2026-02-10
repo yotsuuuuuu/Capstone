@@ -35,6 +35,7 @@ void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
         // not the whole device
         vkDeviceWaitIdle(device); /// This is bad
         imGuiSystem->BeginFrame();
+
 		imGuiSystem->TestUI();
 		imGuiSystem->EndFrame();
 
