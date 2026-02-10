@@ -16,8 +16,8 @@
 
 #include "World.h"
 
-Scene2::Scene2(Renderer *renderer_): 
-	Scene(nullptr),renderer(renderer_) {
+Scene2::Scene2(EngineContext &context_): 
+	Scene(context_){
 	Debug::Info("Created Scene2: ", __FILE__, __LINE__);
 }
 
@@ -27,12 +27,12 @@ Scene2::~Scene2() {
 bool Scene2::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	AssetManager assetManager(static_cast<VulkanRenderer*>(renderer));
-	switch (renderer->getRendererType()){
+	AssetManager assetManager(static_cast<VulkanRenderer*>(engineContext.renderer));
+	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
 		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 		
 		
 
@@ -43,7 +43,7 @@ bool Scene2::OnCreate() {
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
 		// step 1 Create the  GLOBAL componetes
-		Ref<CPlayerActor> player1 = std::make_shared<CPlayerActor>(nullptr, renderer);
+		Ref<CPlayerActor> player1 = std::make_shared<CPlayerActor>(nullptr, engineContext.renderer);
 		player1->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(40, 25, 40), QMath::angleAxisRotation(-25,Vec3(1,0,0)), Vec3()));
 		player1->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
 		player1->UpdateViewMatrix();
@@ -76,16 +76,16 @@ bool Scene2::OnCreate() {
 		// step 1.2 shaders
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/multiPhong.vert.spv", "shaders/multiPhong.frag.spv");
 		cshade->OnCreate();
 		
 		//step 1.3 Materials
 		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths,cshade);
 		mat->OnCreate();
 
 		filepaths = { "./textures/mario_fire.png" };
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr,engineContext.renderer, filepaths, cshade);
 		mat1->OnCreate();
 
 		// step 2 create actors
@@ -117,7 +117,7 @@ bool Scene2::OnCreate() {
 		preset.detail = { NoiseType::OpenSimplex2, 7, 0.1f, 0.5f, true, FractalType::FBm, 3, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
 
 		preset.globalHeightScale = 10.0f;
-		world = new World(renderer);
+		world = new World(engineContext.renderer);
 		world->Initialize(&preset, player1->GetCameraUBO(),lightsUBO);
 
 
@@ -138,8 +138,8 @@ void Scene2::HandleEvents(const SDL_Event& sdlEvent) {
 		printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
 		float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
 		///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-		if (renderer->getRendererType() == RendererType::VULKAN) {
-			dynamic_cast<VulkanRenderer*>(renderer)->RecreateSwapChain();
+		if (engineContext.renderer->getRendererType() == RendererType::VULKAN) {
+			dynamic_cast<VulkanRenderer*>(engineContext.renderer)->RecreateSwapChain();
 		}
 		break;
 
@@ -192,11 +192,11 @@ void Scene2::Update(const float deltaTime) {
 }
 
 void Scene2::Render() const {
-		switch (renderer->getRendererType()) {
+		switch (engineContext.renderer->getRendererType()) {
 
 	case RendererType::VULKAN:
 		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 		// notes for me:
 		// UBO should be only updated when it is not being worked on by the GPU
 		// we should use fences to ensure that
@@ -250,7 +250,7 @@ void Scene2::Render() const {
 
 	case RendererType::OPENGL:
 		OpenGLRenderer* glRenderer;
-		glRenderer = dynamic_cast<OpenGLRenderer*>(renderer);
+		glRenderer = dynamic_cast<OpenGLRenderer*>(engineContext.renderer);
 		/// Clear the screen
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -266,7 +266,7 @@ void Scene2::Render() const {
 
 void Scene2::OnDestroy() {
 	VulkanRenderer* vRenderer;
-	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());
 		// the life time of the cmd buffers is bound to the cmd pool

@@ -1,11 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
-#include "Renderer.h"
+#include "EngineContext.h"
 union SDL_Event;
 
 class Scene {
 public:
-	explicit Scene(Renderer* renderer_){};
+	explicit Scene(EngineContext& engineContext_) : engineContext(engineContext_) {};
 	virtual ~Scene() {}
 
 	virtual bool OnCreate() = 0;
@@ -14,6 +14,6 @@ public:
 	virtual void Render() const  = 0 ;
 	virtual void HandleEvents(const SDL_Event &sdlEvent) = 0;
 protected:
-	//Renderer *renderer;
+	EngineContext &engineContext;
 };
 #endif

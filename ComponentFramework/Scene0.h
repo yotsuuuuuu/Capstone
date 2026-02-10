@@ -16,7 +16,7 @@ union SDL_Event;
 class Scene0 : public Scene {
 private:
 	
-	Renderer *renderer;
+
 	//Camera *camera;
 
 	
@@ -37,7 +37,7 @@ private:
 
 public:
 
-	explicit Scene0(Renderer* renderer_);
+	explicit Scene0(EngineContext context_);
 	virtual ~Scene0();
 
 	virtual bool OnCreate() override;

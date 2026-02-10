@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Renderer.h"
+#include "EngineContext.h"
 class SceneManager  {
 public:
 	
@@ -34,7 +35,9 @@ private:
 	class Scene* currentScene;
 	class Timer* timer;
 
+	EngineContext engineContext;
 	Renderer* renderer;
+	AssetManager* assetManager;
 	unsigned int fps;
 	bool isRunning;
 	void BuildScene(SCENE_NUMBER scene_);

@@ -1,10 +1,16 @@
 #pragma once
 #include "AssetManager.h"
-#include "VulkanRenderer.h"
+#include "Renderer.h"
+#include "cassert"
 struct EngineContext
 {
-	VulkanRenderer& renderer;
-	AssetManager& assetManager;
-	EngineContext(VulkanRenderer& renderer_, AssetManager& assetManger_) : renderer(renderer_), assetManager(assetManger_) {};
-};
+    Renderer* renderer = nullptr;
+    AssetManager* assetManager = nullptr;
 
+    void Set(Renderer& renderer_, AssetManager& assetManager_)
+    {
+        assert(renderer == nullptr && assetManager == nullptr);
+        renderer = &renderer_;
+        assetManager = &assetManager_;
+    }
+};

@@ -7,10 +7,10 @@
 #include "Scene2.h"
 #include "Debug.h"
 
-SceneManager::SceneManager(): 
+SceneManager::SceneManager() :
 	currentScene(nullptr), timer(nullptr),
 	fps(60), isRunning(false), rendererType(RendererType::VULKAN),
-	renderer(nullptr) {}
+	renderer(nullptr){}
 
 SceneManager::~SceneManager() {
 	if (currentScene) {
@@ -60,7 +60,9 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		Debug::FatalError("Failed to initialize Timer object", __FILE__, __LINE__);
 		return false;
 	}
-	
+	assetManager = new AssetManager(static_cast<VulkanRenderer*>(renderer));
+	engineContext.Set(*renderer, *assetManager);
+
 	BuildScene(SCENE0);
 	
 	return true;
@@ -146,7 +148,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 
 	switch (scene) {
 	case SCENE0:  
-		currentScene = new Scene0(renderer);
+		currentScene = new Scene0(engineContext);
 				status = currentScene->OnCreate();
 		break;
 
@@ -156,7 +158,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 		break;
 
 	case SCENE2:
-		currentScene = new Scene2(renderer);
+		currentScene = new Scene2(engineContext);
 		status = currentScene->OnCreate();
 		break;
 

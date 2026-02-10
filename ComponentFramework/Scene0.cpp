@@ -16,8 +16,8 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 
-Scene0::Scene0(Renderer *renderer_): 
-	Scene(nullptr),renderer(renderer_) {
+Scene0::Scene0(EngineContext context_): 
+	Scene(context_) {
 	Debug::Info("Created Scene0: ", __FILE__, __LINE__);
 }
 
@@ -27,12 +27,12 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	AssetManager assetManager(static_cast<VulkanRenderer*>(renderer));
-	switch (renderer->getRendererType()){
+	
+	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
 		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 		
 		
 
@@ -50,7 +50,7 @@ bool Scene0::OnCreate() {
 		cam->OnCreate();
 		cam->UpdateUBO(0);*/
 		Ref<CActor> cam = std::make_shared<CActor>();
-		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
 		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
 		LightConfig ldata;
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
@@ -59,7 +59,7 @@ bool Scene0::OnCreate() {
 		OrthConfig config;
 		config.xmax = 4.0f; config.xmin = -4.0f; config.ymax = 4.0f; config.ymin =-4.0f;
 		config.zmax = 100.0f; config.zmin = 0.5f;
-		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, renderer, config, ldata));
+		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, engineContext.renderer, config, ldata));
 		if (!cam->OnCreate()) {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
@@ -98,11 +98,11 @@ bool Scene0::OnCreate() {
 
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
-		assetManager.LoadAsset("./test.json");
-		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, "./meshes/Mario.obj");
+		engineContext.assetManager->LoadAsset("./test.json");
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
 	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
-		Ref<CMesh> mesh1 = std::make_shared<CMesh>(nullptr, renderer, "./meshes/Plane.obj");
+		Ref<CMesh> mesh1 = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Plane.obj");
 		/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh1->OnCreate();
 
@@ -110,23 +110,23 @@ bool Scene0::OnCreate() {
 
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr,renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");		
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
 		//step 1.3 Materials
 		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, renderer, filepaths,cshade);
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths,cshade);
 		//Ref<CMaterial> mat = assetManager.GetMat("mario");
 		mat->OnCreate();
 
 		filepaths = { "./textures/mario_fire.png" };
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
 		mat1->OnCreate();
 
 		filepaths = { "./textures/checkered_board.png" };
-		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, renderer, filepaths, cshade);
+		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		mat2->OnCreate();
 
 		// step 2 create actors
@@ -172,8 +172,9 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
 			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
 			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-			if(renderer->getRendererType() == RendererType::VULKAN){
-				dynamic_cast<VulkanRenderer*>(renderer)->RecreateSwapChain();
+			if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
+			{
+				dynamic_cast<VulkanRenderer*>(engineContext.renderer)->RecreateSwapChain();
 			}
 			break;
 		}
@@ -184,11 +185,11 @@ void Scene0::Update(const float deltaTime) {
 }
 
 void Scene0::Render() const {
-	switch (renderer->getRendererType()) {
+	switch (engineContext.renderer->getRendererType()) {
 
 	case RendererType::VULKAN:
 		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 		
 		{
@@ -202,7 +203,7 @@ void Scene0::Render() const {
 
 	case RendererType::OPENGL:
 		OpenGLRenderer* glRenderer;
-		glRenderer = dynamic_cast<OpenGLRenderer*>(renderer);
+		glRenderer = dynamic_cast<OpenGLRenderer*>(engineContext.renderer);
 		/// Clear the screen
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,7 +219,7 @@ void Scene0::Render() const {
 
 void Scene0::OnDestroy() {
 	VulkanRenderer* vRenderer;
-	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());
 		// the life time of the cmd buffers is bound to the cmd pool
