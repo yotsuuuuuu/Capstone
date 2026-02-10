@@ -54,7 +54,25 @@ struct GlobalLightData {
     Vec4 pos;
     Quaternion orientation;
 };
-
+struct OrthConfig {
+    float xmin;
+    float xmax;
+    float ymin;
+    float ymax;
+    float zmin;
+    float zmax;
+};
+struct PerspectiveConfig {
+    float fovy;
+    float aspectRatio;
+    float near;
+    float far;
+};
+struct LightConfig {
+    Vec4 ambient;
+    Vec4 diffused;
+    Vec4 specular;
+};
 
 
 /// A 3x3 cannot be sent to the GPU data alignment issues. 

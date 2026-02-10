@@ -433,8 +433,9 @@ public:
             }
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
+   
         // An image must leave a render pass in the layout it will be used in next.
-        // if not then a memory image barrier needs to be used to transition.
+        // If the next use requires a different layout, a memory image barrier must be used to transition it.
        
 
         { // the main pass

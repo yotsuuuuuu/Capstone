@@ -9,6 +9,7 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
+#include "CCamera.h"
 #include "CCameraActor.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
@@ -41,14 +42,20 @@ bool Scene0::OnCreate() {
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
 		// step 1 Create the  GLOBAL componetes
-		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
+		/*Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
 		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f,Vec3(0,1,0)), Vec3()));
 		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
 		cam->UpdateViewMatrix();
 		cam->OnCreate();
-		cam->UpdateUBO(0);
+		cam->UpdateUBO(0);*/
+		Ref<CActor> cam = std::make_shared<CActor>();
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
 
-		vRenderer->CreateGlobalRources(cam->GetCameraUBO());
+		if (!cam->OnCreate()) {
+			printf(" FAILED TO CREATE CAMERA \n");
+		}
+		vRenderer->CreateGlobalRources(cam->GetComponent<CCamera>()->GetCameraUBO());
 		//vRenderer->DestroyGlobalResources();
 		//to get a shadow pass
 		// i need rework the main shader
@@ -71,7 +78,7 @@ bool Scene0::OnCreate() {
 		lights.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		lights.numLights = 1;
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
-		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
+		vRenderer->UpdateUniformBuffers<LightsData>(lights, lightsUBO);
 		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -219,8 +226,8 @@ void Scene0::OnDestroy() {
 		vRenderer->DestroyGlobalResources();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
-		std::dynamic_pointer_cast<CCameraActor>(camera)->OnDestroy();
-
+		
+		camera->OnDestroy();
 		actor->OnDestroy();
 		actor1->OnDestroy();
 		plane->OnDestroy();

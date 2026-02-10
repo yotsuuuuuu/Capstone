@@ -211,7 +211,7 @@ public:
     }
 
     template <class T>
-    void UpdateUniformBuffer(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
+    void UpdateUniformBuffers(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
         void* data;
         int num = static_cast<int>(numSwapchains);
 		size_t size = sizeof(T);
@@ -223,6 +223,16 @@ public:
             vkUnmapMemory(device, bufferMemory[i].bufferMemoryID);
         }
     };
+
+    template <class T>
+    void UpdateUniformBuffer(const T& srcData, const BufferMemory bufferMemory) {
+        void* data;      
+        VkDeviceSize bufferSize = static_cast<VkDeviceSize>(sizeof(T));
+        vkMapMemory(device, bufferMemory.bufferMemoryID, 0, bufferSize, 0, &data);
+        memcpy(data, &srcData, static_cast<size_t>(bufferMemory.bufferMemoryLength));
+        vkUnmapMemory(device, bufferMemory.bufferMemoryID);
+    };
+  
 
     void DestroyUBO(std::vector<BufferMemory> ubo);
 

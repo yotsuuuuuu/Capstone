@@ -5,12 +5,12 @@ bool CActor::OnCreate()
     if (isCreated)
         return true;
    
-    bool flag = false;
+    bool flag = true;
     for(const auto & comp : components)
     {
         if(comp->OnCreate() == false)
         {
-            flag = true;
+            flag = false;
             break;
         }
 	}
@@ -54,8 +54,8 @@ MATH::Matrix4 CActor::GetModelMatrix() const
 		modelMatrix = transform->GetTransformMatrix();
     }
 
-    if (parent) {
-        Ref<CActor> parentActor =  std::dynamic_pointer_cast<CActor>(parent);
+    if (auto p = parent.lock()) {
+        Ref<CActor> parentActor =  std::dynamic_pointer_cast<CActor>(p);
         if (parentActor) {
             modelMatrix = parentActor->GetModelMatrix() * modelMatrix;
 		}

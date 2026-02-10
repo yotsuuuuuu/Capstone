@@ -12,7 +12,7 @@ class CMesh : public Component
 	IndexedVertexBuffer mesh;
 	Renderer* render;
 public:
-	CMesh(Ref<Component> parent_, Renderer* render_, std::string meshFile_ = nullptr)
+	CMesh(Ref<Component> parent_, Renderer* render_, std::string meshFile_)
 		: Component(parent_),render(render_), meshFile(meshFile_), mesh({}) {
 	}
 	virtual ~CMesh() {}

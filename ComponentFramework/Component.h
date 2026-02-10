@@ -8,7 +8,7 @@ using WeakRef = std::weak_ptr<T>;
 
 class Component{
 protected:
-	Ref<Component> parent;
+	WeakRef<Component> parent;
 	bool isCreated;
 public:
 	Component(Ref<Component> parent_ = nullptr) :parent(parent_), isCreated(false) {}

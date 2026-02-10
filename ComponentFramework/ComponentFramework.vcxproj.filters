@@ -118,6 +118,10 @@
     <ClCompile Include="World.cpp">
       <Filter>Source\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="CCamera.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CGlobalLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -252,6 +256,10 @@
     <ClInclude Include="WorldConstants.h">
       <Filter>Header\Terrain</Filter>
     </ClInclude>
+    <ClInclude Include="CCamera.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CGlobalLight.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">

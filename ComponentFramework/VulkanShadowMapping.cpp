@@ -79,12 +79,10 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// oncreate acess parent gather data form other components
 	// construct should be made tkaing data that cant be gather form other componets
 	//  so like light color , type of light, intesity, raidus on influence
-	vertFile = "./shaders/GlobalLight.vert.spv"; // TODO: these dont exist yet
+	vertFile = "./shaders/GlobalLight.vert.spv"; 
 	fragFile = "./shaders/GlobalLight.frag.spv";
 	
-	shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();
-	/*halfHeight = d * tan(fovy / 2)
-	halfWidth  = halfHeight * aspect*/
+	shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();	
 	int width, height;
 	SDL_GetWindowSize(getWindow(), &width, &height);
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
@@ -104,7 +102,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	data.diffused= Vec4(0.5f, 0.6f, 0.0f, 0.0f);
 	data.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
 	data.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
-	UpdateUniformBuffer<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
+	UpdateUniformBuffers<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
 
 	std::vector<DescriptorWriteInfo> write;
 	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);

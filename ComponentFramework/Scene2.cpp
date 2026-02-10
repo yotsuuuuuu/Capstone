@@ -56,7 +56,7 @@ bool Scene2::OnCreate() {
 		lights.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		lights.numLights = 1;
 		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
-		vRenderer->UpdateUniformBuffer<LightsData>(lights, lightsUBO);
+		vRenderer->UpdateUniformBuffers<LightsData>(lights, lightsUBO);
 		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
