@@ -10,6 +10,7 @@
 #include "CMaterial.h"
 #include "CTransform.h"
 #include "CCamera.h"
+#include "CGlobalLight.h"
 #include "CCameraActor.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
@@ -51,11 +52,18 @@ bool Scene0::OnCreate() {
 		Ref<CActor> cam = std::make_shared<CActor>();
 		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
 		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
-
+		LightConfig ldata;
+		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		OrthConfig config;
+		config.xmax = 4.0f; config.xmin = -4.0f; config.ymax = 4.0f; config.ymin =-4.0f;
+		config.zmax = 100.0f; config.zmin = 0.5f;
+		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, renderer, config, ldata));
 		if (!cam->OnCreate()) {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
-		vRenderer->CreateGlobalRources(cam->GetComponent<CCamera>()->GetCameraUBO());
+		vRenderer->CreateGlobalRources(cam);
 		//vRenderer->DestroyGlobalResources();
 		//to get a shadow pass
 		// i need rework the main shader
@@ -67,9 +75,10 @@ bool Scene0::OnCreate() {
 		// TODO: MEMORY BARRIER FOR BETWEEN RENDERPASSES , DONE
 		// TODO: ADJUST ECS RENDERING TO INCLUDE SHADOW PASS , DONE
 		// TODO: SHADER WORK GET SHADOWS , DONE
+		// TODO: PROTOTYPE CAMERA AND LIGHT COMPONENTS , DONE
 		// TODO: ADJUST CSHADER USE NEW PIPELINE COFIG
-		// TODO: PROTOTYPE CAMERA AND LIGHT COMPONENTS , PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY UPDATE
-		// CURRENT FRAMES UBO NOT ALL UBOS AT THE SAME TIME
+		// TODO :PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE
+		
 	
 		
 	/*	lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();

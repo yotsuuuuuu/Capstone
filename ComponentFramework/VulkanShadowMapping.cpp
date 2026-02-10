@@ -1,5 +1,6 @@
 #include "VulkanRenderer.h"
-
+#include "CGlobalLight.h"
+#include "Debug.h"
 
 void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format, 
 	VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
@@ -79,31 +80,34 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// oncreate acess parent gather data form other components
 	// construct should be made tkaing data that cant be gather form other componets
 	//  so like light color , type of light, intesity, raidus on influence
-	vertFile = "./shaders/GlobalLight.vert.spv"; 
-	fragFile = "./shaders/GlobalLight.frag.spv";
-	
-	shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();	
-	int width, height;
-	SDL_GetWindowSize(getWindow(), &width, &height);
-	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	float far = 100.0f;
-	float near = 0.5f;
-	float halfHeight = far * tan(45.0f / 2.0f * DEGREES_TO_RADIANS);
-	float halfWidth = halfHeight * aspectRatio;
+
+	//
+	//shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();	
+	//int width, height;
+	//SDL_GetWindowSize(getWindow(), &width, &height);
+	//float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	//float far = 100.0f;
+	//float near = 0.5f;
+	//float halfHeight = far * tan(45.0f / 2.0f * DEGREES_TO_RADIANS);
+	//float halfWidth = halfHeight * aspectRatio;
+	//GlobalLightData data{};
+	//data.orientation;
+	//data.pos = Vec3(0.0f,0.0f,5.0f);
+	//data.projectionMatrix = MMath::orthographicVK(-4.0f, 4.0f,-4.0f, 4.0f, near, far);
+	//data.viewMatrix = MATH::MMath::toMatrix4(MATH::QMath::conjugate(data.orientation))  * MATH::MMath::translate(-data.pos);	
+	////data.projectionMatrix = MMath::perspectiveVK(45.0f, aspectRatio, 0.5f, 100.0f);
+	////data.projectionMatrix.print();	
+	//data.diffused= Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+	//data.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+	//data.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);  
+	//UpdateUniformBuffers<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
+
+	auto Glight = std::dynamic_pointer_cast<CGlobalLight>(globaLight);
+	if (!Glight) {
+		Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
+		return;
+	}
 	std::vector<SingleDescriptorSetLayoutInfo> layout;
-	GlobalLightData data{};
-
-	data.orientation;
-	data.pos = Vec3(0.0f,0.0f,5.0f);
-	data.projectionMatrix = MMath::orthographicVK(-4.0f, 4.0f,-4.0f, 4.0f, near, far);
-	data.viewMatrix = MATH::MMath::toMatrix4(MATH::QMath::conjugate(data.orientation))  * MATH::MMath::translate(-data.pos);	
-	//data.projectionMatrix = MMath::perspectiveVK(45.0f, aspectRatio, 0.5f, 100.0f);
-	//data.projectionMatrix.print();	
-	data.diffused= Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-	data.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
-	data.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
-	UpdateUniformBuffers<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
-
 	std::vector<DescriptorWriteInfo> write;
 	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 	// 7.1  set layout
@@ -112,7 +116,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	// step  allocate set and write to it
 	shadowMappingInfo.DesSetInfo.descriptorSet = AllocateDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorPool,
 		shadowMappingInfo.DesSetInfo.descriptorSetLayout);
-	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, shadowMappingInfo.LightsUBO);
+	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Glight->GetUBO());
 	WriteDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorSet, write);
 
 	// step 8 create pipeline
@@ -135,8 +139,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 
 void VulkanRenderer::DestroyShadowMappingResources()
 {
-	//TODO: DONT FROGET LIGHTS UBO IUN ONDESTROY
-	DestroyUBO(shadowMappingInfo.LightsUBO);
+	
 	//step 7 and 8
 	DestroyPipeline(shadowMappingInfo.PipelineInfo);
 	DestroyDescriptorSet(shadowMappingInfo.DesSetInfo);

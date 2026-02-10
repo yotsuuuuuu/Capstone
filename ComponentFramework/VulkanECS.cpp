@@ -1,9 +1,11 @@
 #include "VulkanRenderer.h"
 #include "CActor.h"
 #include "CCameraActor.h"
+#include "CCamera.h"
 #include "CMaterial.h"
 #include "CShader.h"
 #include "CMesh.h"
+#include "CGlobalLight.h"
 #include "CTransform.h"
 #include <unordered_map>
 #include "imgui.h"
@@ -21,25 +23,44 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
-void VulkanRenderer::CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO)
+
+void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
 {
+
+    auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
+    if (!cam) {
+        Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
+        return;
+    }
+
+    auto Glight = cam->GetComponent< CGlobalLight>();
+    if (!Glight) {
+        Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
+        return;
+    }
+
+    auto Camera = cam->GetComponent<CCamera>();
+    if (!Glight) {
+        Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
+        return;
+    }
+
     // create the shadow resources
     CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    CreateGlobalShadowPipelineResources("", "", nullptr);
+    CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
     // then creat global resources
-   
+
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-    AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);   
+    AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     std::vector<DescriptorWriteInfo> writeGlobal;
-    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, cameraUBO);
-    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.LightsUBO);
-    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT,1,shadowMappingInfo.ShadowTextures2D);
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
-
 }
 
 void VulkanRenderer::DestroyGlobalResources()

@@ -466,8 +466,7 @@ private:
         VkMemoryPropertyFlags propFlag;
         VkImageLayout initial;
         VkImageLayout final; 
-        //temp variables
-        std::vector<BufferMemory> LightsUBO;
+  
     };
 
 	GlobalShadowMappingInfo shadowMappingInfo;
@@ -484,7 +483,7 @@ public:
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
     //Temp function just to initilize the variables
-    void CreateGlobalRources(const std::vector<BufferMemory>& cameraUBO);
+    void CreateGlobalRources(Ref<Component> cameraActor);
     void DestroyGlobalResources();
 
 

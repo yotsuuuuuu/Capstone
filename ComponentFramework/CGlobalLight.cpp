@@ -33,7 +33,7 @@ bool CGlobalLight::OnCreate()
 	if (!T)
 		return false;
 	transform = T;
-	UpdateViewMatrix();
+	//UpdateViewMatrix(); // NEEDS ADJSUTMENT
 	switch (renderer->getRendererType())
 	{
 	case RendererType::VULKAN: {
