@@ -30,7 +30,8 @@ private:
 	
 	
 	//Components
-	Ref<Component> camera;
+	Ref<Component> player;
+	Ref<CPlayerActor> cPlayer;
 	Ref<Component> actor;
 	Ref<Component> actor1;	
 	Ref<Component> shader;

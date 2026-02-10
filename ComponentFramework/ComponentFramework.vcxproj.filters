@@ -118,6 +118,9 @@
     <ClCompile Include="World.cpp">
       <Filter>Source\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="CPlayerActor.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -251,6 +254,9 @@
     </ClInclude>
     <ClInclude Include="WorldConstants.h">
       <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="CPlayerActor.h">
+      <Filter>Header\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

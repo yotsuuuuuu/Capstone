@@ -9,7 +9,7 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
-#include "CCameraActor.h"
+#include "CPlayerActor.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
@@ -43,12 +43,12 @@ bool Scene2::OnCreate() {
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
 		// step 1 Create the  GLOBAL componetes
-		Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(10, 5, 15), Quaternion(),Vec3()));
-		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
-		cam->UpdateViewMatrix();
-		cam->OnCreate();
-		cam->UpdateUBO(0);
+		Ref<CPlayerActor> player1 = std::make_shared<CPlayerActor>(nullptr, renderer);
+		player1->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(40, 25, 40), QMath::angleAxisRotation(-25,Vec3(1,0,0)), Vec3()));
+		player1->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
+		player1->UpdateViewMatrix();
+		player1->OnCreate();
+		player1->UpdateUBO(0);
 		
 		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
 		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
@@ -103,7 +103,8 @@ bool Scene2::OnCreate() {
 		//step 3 Actors being added to the scene.
 		actor = act;
 		actor1 = act1;
-		camera = cam;
+		player = player1;
+		cPlayer = player1;
 		shader = cshade;
 	
 
@@ -130,21 +131,63 @@ bool Scene2::OnCreate() {
 }
 
 void Scene2::HandleEvents(const SDL_Event& sdlEvent) {
-	
-		switch (sdlEvent.type) {
-		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
-			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
-			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-			if(renderer->getRendererType() == RendererType::VULKAN){
-				dynamic_cast<VulkanRenderer*>(renderer)->RecreateSwapChain();
-			}
-			break;
+
+	switch (sdlEvent.type) {
+	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
+		float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
+		///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
+		if (renderer->getRendererType() == RendererType::VULKAN) {
+			dynamic_cast<VulkanRenderer*>(renderer)->RecreateSwapChain();
 		}
-	
+		break;
+
+	case SDL_EVENT_KEY_DOWN: {
+		switch (sdlEvent.key.key) {
+			case SDLK_ESCAPE:
+				SDL_Quit();
+				exit(0);
+				break;
+			case SDLK_W:
+				cPlayer->moveForward(true);
+				break;
+			case SDLK_S:
+				cPlayer->moveBackward(true);
+				break;
+			case SDLK_A:
+				cPlayer->moveLeft(true);
+				break;
+			case SDLK_D:
+				cPlayer->moveRight(true);
+				break;
+			default:
+				break;
+		}	
+		}
+
+	case SDL_EVENT_KEY_UP: {
+		switch (sdlEvent.key.key) {
+			case SDLK_W:
+				cPlayer->moveForward(false);
+				break;
+			case SDLK_S:
+				cPlayer->moveBackward(false);
+				break;
+			case SDLK_A:
+				cPlayer->moveLeft(false);
+				break;
+			case SDLK_D:
+				cPlayer->moveRight(false);
+				break;
+			default:
+				break;
+			}
+		}	
+	}
 }
+
 void Scene2::Update(const float deltaTime) {
-	
+	cPlayer->Update(deltaTime);
 }
 
 void Scene2::Render() const {
