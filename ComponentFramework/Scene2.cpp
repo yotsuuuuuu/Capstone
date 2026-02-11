@@ -16,7 +16,7 @@
 
 #include "World.h"
 
-Scene2::Scene2(EngineContext &context_): 
+Scene2::Scene2(EngineContext& context_): 
 	Scene(context_){
 	Debug::Info("Created Scene2: ", __FILE__, __LINE__);
 }

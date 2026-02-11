@@ -237,6 +237,7 @@ void Scene0::OnDestroy() {
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
 		
+
 		camera->OnDestroy();
 		actor->OnDestroy();
 		actor1->OnDestroy();

@@ -24,7 +24,11 @@ SceneManager::~SceneManager() {
 		delete timer;
 		timer = nullptr;
 	}
+	
 	renderer->OnDestroy();
+	engineContext.renderer = nullptr;
+	engineContext.assetManager = nullptr;	
+	delete assetManager;
 	delete renderer;
 	Debug::Info("Deleting the GameSceneManager", __FILE__, __LINE__);
 

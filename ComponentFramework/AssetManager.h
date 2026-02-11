@@ -32,6 +32,7 @@ private:
 	//give all components a custom id.
 public:
 	AssetManager(VulkanRenderer* renderer_):renderer(renderer_){};
+	~AssetManager();
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
 	std::vector<std::shared_ptr<Component>> GetActorsInScene();

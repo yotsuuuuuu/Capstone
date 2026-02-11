@@ -117,4 +117,28 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
     shaderMap[id] = cshade;
     return cshade;
 }
+AssetManager::~AssetManager()
+{
+	for (auto& [key, mesh] : meshMap)
+	{
+		mesh->OnDestroy();
+	}
+	meshMap.clear();
+	for (auto& [key, mat] : materialMap)
+	{
+		mat->OnDestroy();
+	}
+	materialMap.clear();
+	for (auto& [key, shader] : shaderMap)
+	{
+		shader->OnDestroy();
+	}
+	shaderMap.clear();
+    for(int i = 0; i < actorMap.size();i++)
+	{
+		actorMap[i]->OnDestroy();
+	}
+	actorMap.clear();
 
+	renderer = nullptr;
+}
