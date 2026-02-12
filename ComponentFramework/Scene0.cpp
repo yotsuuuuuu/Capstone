@@ -37,18 +37,10 @@ bool Scene0::OnCreate() {
 		
 
 		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
-		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-		//camera.projectionMatrix = MMath::perspective(45.0f, aspectRatio, 0.5f, 100.0f);
-		//camera.projectionMatrix[5] *= -1.0f;
-		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
+		aspectRatio = static_cast<float>(width) / static_cast<float>(height);	
 		
 		// step 1 Create the  GLOBAL componetes
-		/*Ref<CCameraActor> cam = std::make_shared<CCameraActor>(nullptr, renderer);
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f,Vec3(0,1,0)), Vec3()));
-		cam->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
-		cam->UpdateViewMatrix();
-		cam->OnCreate();
-		cam->UpdateUBO(0);*/
+		
 		Ref<CActor> cam = std::make_shared<CActor>();
 		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
 		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
@@ -76,8 +68,14 @@ bool Scene0::OnCreate() {
 		// TODO: ADJUST ECS RENDERING TO INCLUDE SHADOW PASS , DONE
 		// TODO: SHADER WORK GET SHADOWS , DONE
 		// TODO: PROTOTYPE CAMERA AND LIGHT COMPONENTS , DONE
+		// TODO: ADD FUCTION TO MAKE A DEFUALT PIPELINE COFIG WITH THE MAIN RENDERPASS
 		// TODO: ADJUST CSHADER USE NEW PIPELINE COFIG
 		// TODO :PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE
+		// TODO: SKYBOX  - images - pipeline
+		// TODO : Compute Boiler work
+		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
+		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
+		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders
 		
 	
 		

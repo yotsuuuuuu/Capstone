@@ -480,6 +480,7 @@ private:
 	void DestroyShadowMappingResources();
 public:
 
+    PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
     //Temp function just to initilize the variables
