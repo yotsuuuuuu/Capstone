@@ -1,8 +1,4 @@
 #include "FmodController.h"
-FmodController::FmodController(FMOD::System* system_)
-{
-	system = system_;
-}
 
 void FmodController::addSong(const char* wave_)
 {
@@ -30,13 +26,17 @@ void FmodController::playsong(int songnum_)
 	result = system->update();
 }
 
-void FmodController::createSystem()
+bool FmodController::createSystem()
 {
 	result = FMOD::System_Create(&system);
 	
+	if (result != FMOD_OK)
+		return false;
 
-	result = system->init(32, FMOD_INIT_NORMAL, nullptr);
+	result = system->init(512, FMOD_INIT_NORMAL, nullptr);
 	
+	if (result != FMOD_OK)
+		return false;
 
 	numOfsounds.resize(nameOfsounds.size());
 
@@ -44,6 +44,19 @@ void FmodController::createSystem()
 	{
 		result = system->createSound(nameOfsounds[i], FMOD_DEFAULT, 0, &numOfsounds[i]);
 	}
+	return true;
+}
+
+AudioBands FmodController::AnalyzeAudioOffline(const char* path)
+{
+	//creates audio bands object
+	AudioBands bands = { 0.0f,0.0f,0.0f };
+
+	
+	FMOD::Sound* sound = nullptr;
+
+	if(system->createSound(path, FMOD_DEFAULT, 0, &sound) != FMOD_OK)
+	return AudioBands();
 }
 
 FmodController::~FmodController()

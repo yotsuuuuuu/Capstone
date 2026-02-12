@@ -2,6 +2,15 @@
 #include <fmod.hpp>
 #include <vector>
 #include "fmod_common.h"
+
+struct AudioBands
+{
+	float low;
+	float mid;
+	float high;
+};
+
+
 class FmodController
 {
 private:
@@ -13,10 +22,12 @@ private:
 	void* extradriverdata = 0;
 
 public:
-	FmodController(FMOD::System* system_);
+	FmodController(){};
 	void addSong(const char* wave_);
 	void playsong(int songnum_);
-	void createSystem();
+	bool createSystem();
+
+	AudioBands AnalyzeAudioOffline(const char* path);
 	~FmodController();
 };
 
