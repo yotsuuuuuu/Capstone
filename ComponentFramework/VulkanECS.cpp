@@ -26,14 +26,13 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
 
 void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
 {
-
     auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
     if (!cam) {
         Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
         return;
     }
 
-    auto Glight = cam->GetComponent< CGlobalLight>();
+    auto Glight = cam->GetComponent<CGlobalLight>();
     if (!Glight) {
         Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
         return;
@@ -44,14 +43,15 @@ void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
         Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
         return;
     }
+    camera = cameraActor;
 
     // create the shadow resources
     CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
-    // then creat global resources
-
+    
+    // then create global resources
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -312,7 +312,10 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
     }
 }
 
-void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t baseMip, uint32_t mipCount, uint32_t baseLayer, uint32_t layerCount)
+void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage,
+    VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess,
+    VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, 
+    uint32_t baseMip, uint32_t mipCount, uint32_t baseLayer, uint32_t layerCount)
 {
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -327,11 +330,11 @@ void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& 
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
     barrier.image = image;
+    barrier.subresourceRange.layerCount = layerCount;
+    barrier.subresourceRange.baseArrayLayer = baseLayer;
     barrier.subresourceRange.aspectMask = aspectMask;
     barrier.subresourceRange.baseMipLevel = baseMip;
     barrier.subresourceRange.levelCount = mipCount;
-    barrier.subresourceRange.baseArrayLayer = baseLayer;
-    barrier.subresourceRange.layerCount = layerCount;
 
     vkCmdPipelineBarrier(cmd, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
@@ -410,6 +413,11 @@ public:
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
         VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
         // TODO: Update UBOs for current frame ??? needs to be done
+        if (auto cam = VKRNDR->camera.lock()) {
+            auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
+            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
+            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.targetFrameIndex);
+        }
 
         VkPipelineLayout line;
         // 1.1 get draw items

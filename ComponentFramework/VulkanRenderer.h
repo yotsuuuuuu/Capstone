@@ -174,7 +174,9 @@ public: /// Member functions
     void BindPipeline(VkPipeline pipeline);
     void DrawIndexed(IndexedVertexBuffer mesh);
     void SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_);
+    void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
     //
+
     void DestroyIndexedMesh(IndexedVertexBuffer mesh_);
 private:
     void CreateVertexBuffer(IndexedVertexBuffer& indexedVertexBuffer, const std::vector<Vertex>& vertices);
@@ -409,25 +411,14 @@ private:
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
 
     struct ECSRenderer;
-public:
-    void RenderECS(const std::vector<Ref<Component>>& drawlist);
 
     //Global Descriptorset
-private:
-    DescriptorSetInfo GlobalSet;
+    //Main Camera
+    DescriptorSetInfo GlobalSet;    
+    WeakRef<Component> camera;
 
-public:
-    void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
-    void DestroyGlobalDescriptionSet();
-    DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
 
-    void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
-    
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
-        const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
-    , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
-private:
+
     //Creation Helper functions
     void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
@@ -444,6 +435,8 @@ private:
 	void DestroyImage(VkImage& image, VkDeviceMemory& imageMemory);
 
 
+    void CopyBufferToImage(VkBuffer, VkImage, uint32_t, uint32_t, VkImageAspectFlags, uint32_t, uint32_t, uint32_t);
+    void CubeImageLayoutTransition(VkImage, VkImageLayout srcLay, VkImageLayout dtsLay, VkPipelineStageFlags srdFlag, VkPipelineStageFlags dtsFlag,VkAccessFlags srcAcss, VkAccessFlags dtsAcss);
 	//Shadow Mapping
     struct GlobalShadowMappingInfo
     {
@@ -474,21 +467,33 @@ private:
     void CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
+	void DestroyShadowMappingResources();
 
     void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , Ref<Component> globaLight);
 
-	void DestroyShadowMappingResources();
 public:
+    void RenderECS(const std::vector<Ref<Component>>& drawlist);
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
-    //Temp function just to initilize the variables
     void CreateGlobalRources(Ref<Component> cameraActor);
     void DestroyGlobalResources();
 
+    void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
+    void DestroyGlobalDescriptionSet();
+    DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
 
+    
+    //probly should be removed
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
+        const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
 
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
+    , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
+
+    //Skybox
+    Sampler2D SkyBoxSampler(std::vector<std::string> paths);
 
     // TERRAIN STUFF
 public:

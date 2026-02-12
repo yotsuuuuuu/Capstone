@@ -574,6 +574,41 @@ void VulkanRenderer::transitionImageLayout(VkImage image, VkFormat format, VkIma
     endSingleTimeCommands(commandBuffer);
 }
 
+
+void VulkanRenderer::CubeImageLayoutTransition(VkImage image,
+    VkImageLayout srcLayout, VkImageLayout dtsLayout,
+    VkPipelineStageFlags srcFlag, VkPipelineStageFlags dtsFlag,
+    VkAccessFlags srcAcces, VkAccessFlags dtsAcces)
+{
+
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    CMDImageBarrier(commandBuffer, image, srcFlag, dtsFlag, srcAcces, dtsAcces, srcLayout, dtsLayout, VK_IMAGE_ASPECT_COLOR_BIT, 0
+        , 0, 6);  
+
+    endSingleTimeCommands(commandBuffer);
+}
+
+void VulkanRenderer::CopyBufferToImage(VkBuffer buffer, VkImage image, 
+    uint32_t width, uint32_t height, VkImageAspectFlags flag, 
+    uint32_t layerCount, uint32_t baseLayer, uint32_t mipLvl)
+{
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = flag;
+    region.imageSubresource.mipLevel = mipLvl;
+    region.imageSubresource.baseArrayLayer = baseLayer;
+    region.imageSubresource.layerCount = layerCount;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = { width, height, 1 };
+
+    vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    endSingleTimeCommands(commandBuffer);
+}
+
 void VulkanRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 

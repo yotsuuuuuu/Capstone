@@ -4,12 +4,11 @@
 
 class Renderer;
 
+// THIS CLASS PROBLY SHOULD GET DELETED
 class CCameraActor :
     public CActor
 {
-	// TODO: creationg and up dating of UBOs for camera data
-	// thought maybe there should 
-	// be a ubo component
+	// THIS CLASS PROBLY SHOULD GET DELETED
 	MATH::Matrix4 viewMatrix;
 	MATH::Matrix4 projectionMatrix;
 	

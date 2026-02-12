@@ -103,3 +103,23 @@ void CGlobalLight::UpdateViewMatrix() {
 	}
 
 }
+
+
+void CGlobalLight::UpdateUBO(uint32_t uboindex) 
+{
+
+	if (!isCreated)
+		return;
+	if (!renderer)
+		return;
+
+	switch (renderer->getRendererType())
+	{
+	case RendererType::VULKAN: {
+		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(renderer);		
+		vkrender->UpdateUniformBuffer<GlobalLightData>(G_data, GL_UBO[uboindex]);
+		break;
+	}
+	}
+
+}

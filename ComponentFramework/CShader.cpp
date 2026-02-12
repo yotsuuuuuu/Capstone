@@ -14,10 +14,14 @@ bool CShader::OnCreate()
         desInfo.descriptorSetLayout = vkrender->CreateDescriptorSetLayout(layoutInfo);
         desInfo.descriptorPool = vkrender->CreateDescriptorPool(layoutInfo, poolSize);
 
-        std::vector<VkDescriptorSetLayout> arr ={vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout};
+        std::vector<VkDescriptorSetLayout> arrDescriptorlayouts ={vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout};
         
+        PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
+        pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
+            fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
+       
         //Temp Fix for now probly will needs to be changed
-        const char* vert = (vertShaderFile.empty()) ? nullptr : vertShaderFile.c_str();
+       /* const char* vert = (vertShaderFile.empty()) ? nullptr : vertShaderFile.c_str();
         const char* frag = (fragShaderFile.empty()) ? nullptr : fragShaderFile.c_str();
         const char* tesC = (tesCShaderFile.empty()) ? nullptr : tesCShaderFile.c_str();
         const char* tesE = (tesEShaderFile.empty()) ? nullptr : tesEShaderFile.c_str();
@@ -25,7 +29,7 @@ bool CShader::OnCreate()
 
 
         pipelineInfo = vkrender->CreateGraphicsPipeline(arr, vert, frag,
-            tesC, tesE, geo);
+            tesC, tesE, geo);*/
 
         isCreated = true;
         return true;
