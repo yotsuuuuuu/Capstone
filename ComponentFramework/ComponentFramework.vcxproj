@@ -151,8 +151,10 @@
     <ClCompile Include="CCameraActor.cpp" />
     <ClCompile Include="CGlobalLight.cpp" />
     <ClCompile Include="Chunk.cpp" />
+    <ClCompile Include="CInput.cpp" />
     <ClCompile Include="CMaterial.cpp" />
     <ClCompile Include="CMesh.cpp" />
+    <ClCompile Include="CPhysics.cpp" />
     <ClCompile Include="CShader.cpp" />
     <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="Debug.cpp" />
@@ -196,9 +198,11 @@
     <ClInclude Include="CCameraActor.h" />
     <ClInclude Include="CGlobalLight.h" />
     <ClInclude Include="Chunk.h" />
+    <ClInclude Include="CInput.h" />
     <ClInclude Include="CMaterial.h" />
     <ClInclude Include="CMesh.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="CPhysics.h" />
     <ClInclude Include="CShader.h" />
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="Debug.h" />

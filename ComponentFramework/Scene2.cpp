@@ -8,8 +8,10 @@
 #include "CShader.h"
 #include "CMesh.h"
 #include "CMaterial.h"
-#include "CTransform.h"
-#include "CPlayerActor.h"
+//#include "CTransform.h"
+#include "CPhysics.h"
+#include "CCamera.h"
+#include "CInput.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
@@ -38,17 +40,25 @@ bool Scene2::OnCreate() {
 
 		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
 		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+		SDL_SetWindowRelativeMouseMode(vRenderer->getWindow(), mouseLocked);
 		//camera.projectionMatrix = MMath::perspective(45.0f, aspectRatio, 0.5f, 100.0f);
 		//camera.projectionMatrix[5] *= -1.0f;
 		//camera.viewMatrix = MMath::translate(0.0f, 0.0f, -5.0f);
 		
 		// step 1 Create the  GLOBAL componetes
-		Ref<CPlayerActor> player1 = std::make_shared<CPlayerActor>(nullptr, engineContext.renderer);
-		player1->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(40, 25, 40), QMath::angleAxisRotation(-25,Vec3(1,0,0)), Vec3()));
-		player1->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
-		player1->UpdateViewMatrix();
+		Ref<CActor> player1 = std::make_shared<CActor>(nullptr);
+		Ref<CCamera> camera = std::make_shared<CCamera>(player1, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f);
+		//player1->AddComponent<CPhysics>(std::make_shared<CPhysics>(player1, Vec3(40, 25, 40), QMath::angleAxisRotation(-25,Vec3(1,0,0)), Vec3()));
+
+		player1->AddComponent<CPhysics>(std::make_shared<CPhysics>(player1));
+		player1->AddComponent<CInput>(std::make_shared<CInput>(player1));
+		player1->AddComponent<CCamera>(camera);
+
 		player1->OnCreate();
-		player1->UpdateUBO(0);
+
+		camera->UpdateProjectionMatrix(45.0f, aspectRatio, 0.5f, 100.0f);
+		camera->UpdateViewMatrix();
+		camera->UpdateUBO(0);
 		
 		lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
 		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
@@ -61,7 +71,7 @@ bool Scene2::OnCreate() {
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		std::vector<DescriptorWriteInfo> writeGlobal;
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, player1->GetCameraUBO());
+		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, camera->GetCameraUBO());
 		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
 
 		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
@@ -70,7 +80,9 @@ bool Scene2::OnCreate() {
 		// step 1.1 Meshs
 		//Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
 		assetManager.LoadAsset("./test.json");
-		Ref<CMesh> mesh = assetManager.GetMesh("mario");
+		//Ref<CMesh> mesh = assetManager.GetMesh("mario"); // asset manager needs to know about engine context, currently crashes
+
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
 		mesh->OnCreate();	
 
 		// step 1.2 shaders
@@ -105,8 +117,8 @@ bool Scene2::OnCreate() {
 		actor = act;
 		actor1 = act1;
 		player = player1;
-		//cPlayer = player1;
 		shader = cshade;
+		//playerController = std::dynamic_pointer_cast<CActor>(player)->GetComponent<CInput>();
 	
 
 		// Terrain Stuff
@@ -118,8 +130,7 @@ bool Scene2::OnCreate() {
 
 		preset.globalHeightScale = 10.0f;
 		world = new World(engineContext.renderer);
-		world->Initialize(&preset, player1->GetCameraUBO(),lightsUBO);
-
+		world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
 
 	}
 		break;
@@ -132,63 +143,60 @@ bool Scene2::OnCreate() {
 }
 
 void Scene2::HandleEvents(const SDL_Event& sdlEvent) {
+	void* playerController = nullptr;
 
 	switch (sdlEvent.type) {
-	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-		printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
-		float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
-		///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-		if (engineContext.renderer->getRendererType() == RendererType::VULKAN) {
-			dynamic_cast<VulkanRenderer*>(engineContext.renderer)->RecreateSwapChain();
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		{
+			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
+			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
+			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
+			if (engineContext.renderer->getRendererType() == RendererType::VULKAN) {
+				dynamic_cast<VulkanRenderer*>(engineContext.renderer)->RecreateSwapChain();
+			}
+			break;
 		}
-		break;
+			
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+		{
 
-	//case SDL_EVENT_KEY_DOWN: {
-	//	switch (sdlEvent.key.key) {
-	//		case SDLK_ESCAPE:
-	//			SDL_Quit();
-	//			exit(0);
-	//			break;
-	//		case SDLK_W:
-	//			cPlayer->moveForward(true);
-	//			break;
-	//		case SDLK_S:
-	//			cPlayer->moveBackward(true);
-	//			break;
-	//		case SDLK_A:
-	//			cPlayer->moveLeft(true);
-	//			break;
-	//		case SDLK_D:
-	//			cPlayer->moveRight(true);
-	//			break;
-	//		default:
-	//			break;
-	//	}	
-	//	}
+			// escape stuff
+			if (sdlEvent.key.key == SDLK_ESCAPE && sdlEvent.type == SDL_EVENT_KEY_DOWN) {
+				mouseLocked = !mouseLocked;
+				SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
+			}
 
-	//case SDL_EVENT_KEY_UP: {
-	//	switch (sdlEvent.key.key) {
-	//		case SDLK_W:
-	//			cPlayer->moveForward(false);
-	//			break;
-	//		case SDLK_S:
-	//			cPlayer->moveBackward(false);
-	//			break;
-	//		case SDLK_A:
-	//			cPlayer->moveLeft(false);
-	//			break;
-	//		case SDLK_D:
-	//			cPlayer->moveRight(false);
-	//			break;
-	//		default:
-	//			break;
-	//		}
-	//	}	
+			auto p1 = std::dynamic_pointer_cast<CActor>(player);
+			auto playerController = p1->GetComponent<CInput>();
+			playerController->HandleKeyboardInput(sdlEvent);
+			break;
+		}
+
+		case SDL_EVENT_MOUSE_MOTION:
+		{
+			auto p1 = std::dynamic_pointer_cast<CActor>(player);
+			auto playerController = p1->GetComponent<CInput>();
+			playerController->HandleMouseMotion(sdlEvent);
+			break;
+		}
+
 	}
 }
 
+
 void Scene2::Update(const float deltaTime) {
-	//cPlayer->Update(deltaTime);
+	//playerController->UpdateInput(deltaTime);
+	auto p1 = std::dynamic_pointer_cast<CActor>(player);
+
+	auto playerController = p1->GetComponent<CInput>();
+
+	playerController->UpdateInput(deltaTime);
+	//p1->Update(deltaTime);
+	auto phys = p1->GetComponent<CPhysics>();
+	phys->Update(deltaTime);
+	auto cam = p1->GetComponent<CCamera>();
+	cam->UpdateFromInput();
 }
 
 void Scene2::Render() const {
@@ -282,7 +290,7 @@ void Scene2::OnDestroy() {
 		vRenderer->DestroyGlobalDescriptionSet();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
-		std::dynamic_pointer_cast<CPlayerActor>(player)->OnDestroy();
+		std::dynamic_pointer_cast<CActor>(player)->OnDestroy();
 
 		actor->OnDestroy();
 		actor1->OnDestroy();

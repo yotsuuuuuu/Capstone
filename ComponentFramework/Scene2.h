@@ -25,6 +25,7 @@ private:
 	LightsData lights;
 
 	World* world;
+	bool mouseLocked = true;
 
 
 	
@@ -35,6 +36,8 @@ private:
 	Ref<Component> actor;
 	Ref<Component> actor1;	
 	Ref<Component> shader;
+
+	//Ref<CInput> playerController; 
 
 public:
 

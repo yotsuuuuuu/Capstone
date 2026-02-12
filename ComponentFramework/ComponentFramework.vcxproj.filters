@@ -127,6 +127,12 @@
     <ClCompile Include="CGlobalLight.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="CInput.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CPhysics.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -268,6 +274,12 @@
       <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="CGlobalLight.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CInput.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CPhysics.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
   </ItemGroup>

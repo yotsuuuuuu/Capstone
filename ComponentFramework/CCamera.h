@@ -18,6 +18,8 @@ class CCamera : public Component {
 	
 	std::vector<BufferMemory> cameraUBO;
 	Renderer* renderer;
+
+	bool needsUpdate = false;
 	
 public:
 	CCamera(Ref<Component> parent_, Renderer* renderer_, const float& FOVY, const float& aspectRatio_, const float& nearClip_, const float& farClip_)
@@ -34,5 +36,14 @@ public:
 
 	void UpdateProjectionMatrix(float FOVY,float aspectRatio,float nearClip,float farClip);
 	void UpdateViewMatrix();
+
+	// input stuff
+	MATH::Vec3 GetFrontVector() const;
+	MATH::Vec3 GetRightVector() const;
+	MATH::Vec3 GetUpVector() const;
+	void SetNeedsUpdate(bool needsUpdate_) { needsUpdate = needsUpdate_; }
+	bool NeedsUpdate() const { return needsUpdate; }
+	void UpdateFromInput();
+
 };
 

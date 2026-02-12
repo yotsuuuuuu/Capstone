@@ -98,7 +98,7 @@ void SceneManager::GetEvents() {
 		}
 		else if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
 			switch (sdlEvent.key.scancode) {
-			case SDL_SCANCODE_ESCAPE:
+			//case SDL_SCANCODE_ESCAPE:
 			case SDL_SCANCODE_Q:
 				isRunning = false;
 				return;

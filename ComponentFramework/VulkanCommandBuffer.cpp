@@ -1,5 +1,5 @@
 #include "VulkanRenderer.h"
-
+#include "imgui.h"
 void VulkanRenderer::createCommandPool() {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
@@ -34,9 +34,13 @@ void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
         // need ot wait on the current recording frame
         // not the whole device
         vkDeviceWaitIdle(device); /// This is bad
+        ImGuiIO& io = ImGui::GetIO();
         imGuiSystem->BeginFrame();
-
-		imGuiSystem->TestUI();
+        //imGuiSystem->TestUI();
+        ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+		//imGuiSystem->TestUI();
 		imGuiSystem->EndFrame();
 
         for (size_t i = 0; i < primaryCommandBuffer.commandBuffers.size(); i++) {
@@ -79,3 +83,10 @@ void VulkanRenderer::DestroyCommandBuffers(){
     vkFreeCommandBuffers(device, primaryCommandBuffer.commandPool, 1, primaryCommandBuffer.commandBuffers.data());
     vkDestroyCommandPool(device, primaryCommandBuffer.commandPool, nullptr);  
 }
+
+// maybe?
+// 
+//uint32_t count = static_cast<uint32_t>(primaryCommandBuffer.commandBuffers.size());
+//if (count > 0) {
+//    vkFreeCommandBuffers(device, primaryCommandBuffer.commandPool, count, primaryCommandBuffer.commandBuffers.data());
+//}
