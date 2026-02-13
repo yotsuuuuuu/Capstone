@@ -5,9 +5,9 @@
 
 struct AudioBands
 {
-	float low;
-	float mid;
-	float high;
+	float low; //20 Hz-250 Hz
+	float mid; //250 Hz-4 kHz
+	float high; //4kHz-20 kHz
 };
 
 
@@ -27,7 +27,7 @@ public:
 	void playsong(int songnum_);
 	bool createSystem();
 
-	AudioBands AnalyzeAudioOffline(const char* path);
+	AudioBands AnalyzeAudioOffline(int songunum_);
 	~FmodController();
 };
 
