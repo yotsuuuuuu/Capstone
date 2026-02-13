@@ -86,6 +86,8 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	const int fftSize = 2048;       // Window size for FFT
 	const float sampleRate = 44100; // Standard sample rate
 
+	fftw_complex* fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
+
 	return AudioBands();
 }
 
