@@ -42,7 +42,7 @@ bool Scene0::OnCreate() {
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
 		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(-6, 0, 4), QMath::angleAxisRotation(-45.0f, Vec3(0, 1, 0)), Vec3()));
+		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 40), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
 		LightConfig ldata;
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
 		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
@@ -55,6 +55,8 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
+		
+		
 		//vRenderer->DestroyGlobalResources();
 		//to get a shadow pass
 		// i need rework the main shader
@@ -70,7 +72,8 @@ bool Scene0::OnCreate() {
 		//  ADD FUCTION TO MAKE A DEFUALT PIPELINE COFIG WITH THE MAIN RENDERPASS , DONE
 		//  ADJUST CSHADER USE NEW PIPELINE COFIG , DONE
 		// PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE , DONE
-		// TODO: SKYBOX  - images - pipeline
+		// TODO: SKYBOX  - images - pipeline DONE
+		// TODO: ADD SKYBOX TO ECS RENDERING DONE
 		// TODO : Compute Boiler work
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO

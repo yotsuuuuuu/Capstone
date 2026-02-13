@@ -134,7 +134,7 @@ AssetManager::~AssetManager()
 		shader->OnDestroy();
 	}
 	shaderMap.clear();
-    for(int i = 0; i < actorMap.size();i++)
+    for(size_t i = 0; i < actorMap.size();i++)
 	{
 		actorMap[i]->OnDestroy();
 	}

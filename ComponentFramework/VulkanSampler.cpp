@@ -160,21 +160,29 @@ Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
     }
 
     Sampler2D CubeSampler;
-    SDL_Surface* image0 = IMG_Load(paths[0].c_str());
-    SDL_Surface* image1 = IMG_Load(paths[1].c_str());
-    SDL_Surface* image2 = IMG_Load(paths[2].c_str());
-    SDL_Surface* image3 = IMG_Load(paths[3].c_str());
-    SDL_Surface* image4 = IMG_Load(paths[4].c_str());
-    SDL_Surface* image5 = IMG_Load(paths[5].c_str());
+    SDL_Surface* im0 = IMG_Load(paths[0].c_str());
+    SDL_Surface* image0 = SDL_ConvertSurface(im0, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* im1 = IMG_Load(paths[1].c_str());
+    SDL_Surface* image1 = SDL_ConvertSurface(im1, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* im2 = IMG_Load(paths[2].c_str());
+    SDL_Surface* image2 = SDL_ConvertSurface(im2, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* im3 = IMG_Load(paths[3].c_str());
+    SDL_Surface* image3 = SDL_ConvertSurface(im3, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* im4 = IMG_Load(paths[4].c_str());
+    SDL_Surface* image4 = SDL_ConvertSurface(im4, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* im5 = IMG_Load(paths[5].c_str());
+    SDL_Surface* image5 = SDL_ConvertSurface(im5, SDL_PIXELFORMAT_RGBA32);
 
-    VkDeviceSize imageSize = image0->w * image0->h * 4; /// RGBA only 
-
-    BufferMemory stagingBuffer{}; // allocate buffer for later on
-    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer.bufferID, stagingBuffer.bufferMemoryID);
+    SDL_DestroySurface(im0);
+    SDL_DestroySurface(im1);
+    SDL_DestroySurface(im2);
+    SDL_DestroySurface(im3);
+    SDL_DestroySurface(im4);
+    SDL_DestroySurface(im5);
 
     // Create Cube Image
     VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
     imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     // 1024 x 1024 atm the moment
@@ -204,8 +212,12 @@ Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
     }
     vkBindImageMemory(device, CubeSampler.image, CubeSampler.imageDeviceMemory, 0);
 
+    VkDeviceSize imageSize = image0->w * image0->h * 4; /// RGBA only 
+    // allocate buffer 
+    BufferMemory stagingBuffer{}; 
+    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer.bufferID, stagingBuffer.bufferMemoryID);
 
-    void* data;
     // change the layout of the dst image
     // transition in a dst to copy over
     CubeImageLayoutTransition(CubeSampler.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -213,7 +225,12 @@ Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
 
     //load image to staging buffer. 
     // copy form buffer to image for each face
-    vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, imageSize, 0, &data);
+    void* data = nullptr;
+    VkResult result = vkMapMemory(device, stagingBuffer.bufferMemoryID, 0, imageSize, 0, &data);
+    if (result != VK_SUCCESS)
+        throw std::runtime_error("map failed");
+    //const char* formatName = SDL_GetPixelFormatName(image0->format);
+    //printf("format: %s ,pitch:%d ,w: %d,h: %d,pitch xh: %d", formatName, image0->pitch,image0->w, image0->h , image0->pitch * image0->h);
          // dts   source         amount in bytes
     memcpy(data, image0->pixels, static_cast<size_t>(imageSize)); // load image0 +X (right)
     CopyBufferToImage(stagingBuffer.bufferID, CubeSampler.image, image0->w, image0->h, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 0);
@@ -232,8 +249,8 @@ Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
     //transition out to sampler
     CubeImageLayoutTransition(CubeSampler.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
+    //freeing tempory resources
     vkUnmapMemory(device, stagingBuffer.bufferMemoryID);
-
     vkDestroyBuffer(device, stagingBuffer.bufferID, nullptr);
     vkFreeMemory(device, stagingBuffer.bufferMemoryID, nullptr);
     SDL_DestroySurface(image0);
@@ -254,7 +271,7 @@ Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 6;
 
-    VkImageView imageView;
+   
     if (vkCreateImageView(device, &viewInfo, nullptr, &CubeSampler.imageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }

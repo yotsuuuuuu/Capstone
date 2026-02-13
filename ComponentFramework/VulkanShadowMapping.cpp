@@ -69,38 +69,7 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 
 void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, Ref<Component> globaLight)
 {
-	// i dont knwo if we need shader component or just make the pipepine with in this 
-	// function
-	// if  used the shader ref it can only make a graphics pipeline with the 
-	// dummy variables to get it working
 	
-	// idea for the light ubo
-	// ubo have to be specially made 
-	// compoente light ubo have a parented to the actor
-	// oncreate acess parent gather data form other components
-	// construct should be made tkaing data that cant be gather form other componets
-	//  so like light color , type of light, intesity, raidus on influence
-
-	//
-	//shadowMappingInfo.LightsUBO =  CreateUniformBuffers<GlobalLightData>();	
-	//int width, height;
-	//SDL_GetWindowSize(getWindow(), &width, &height);
-	//float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	//float far = 100.0f;
-	//float near = 0.5f;
-	//float halfHeight = far * tan(45.0f / 2.0f * DEGREES_TO_RADIANS);
-	//float halfWidth = halfHeight * aspectRatio;
-	//GlobalLightData data{};
-	//data.orientation;
-	//data.pos = Vec3(0.0f,0.0f,5.0f);
-	//data.projectionMatrix = MMath::orthographicVK(-4.0f, 4.0f,-4.0f, 4.0f, near, far);
-	//data.viewMatrix = MATH::MMath::toMatrix4(MATH::QMath::conjugate(data.orientation))  * MATH::MMath::translate(-data.pos);	
-	////data.projectionMatrix = MMath::perspectiveVK(45.0f, aspectRatio, 0.5f, 100.0f);
-	////data.projectionMatrix.print();	
-	//data.diffused= Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-	//data.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
-	//data.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);  
-	//UpdateUniformBuffers<GlobalLightData>(data, shadowMappingInfo.LightsUBO);
 
 	auto Glight = std::dynamic_pointer_cast<CGlobalLight>(globaLight);
 	if (!Glight) {

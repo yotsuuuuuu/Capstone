@@ -583,8 +583,8 @@ void VulkanRenderer::CubeImageLayoutTransition(VkImage image,
 
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
-    CMDImageBarrier(commandBuffer, image, srcFlag, dtsFlag, srcAcces, dtsAcces, srcLayout, dtsLayout, VK_IMAGE_ASPECT_COLOR_BIT, 0
-        , 0, 6);  
+    CMDImageBarrier(commandBuffer, image, srcFlag, dtsFlag, srcAcces, dtsAcces, srcLayout, dtsLayout, VK_IMAGE_ASPECT_COLOR_BIT,
+        0, 1, 0, 6);
 
     endSingleTimeCommands(commandBuffer);
 }

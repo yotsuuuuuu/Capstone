@@ -127,6 +127,9 @@
     <ClCompile Include="CGlobalLight.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="CSkyBox.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -270,6 +273,9 @@
     <ClInclude Include="CGlobalLight.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
+    <ClInclude Include="CSkyBox.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">
@@ -315,6 +321,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\MainPass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

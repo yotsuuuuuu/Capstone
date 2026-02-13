@@ -405,7 +405,7 @@ private:
     void CMDEndRecord(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
         VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
-        uint32_t baseMip = 0, uint32_t mipCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
+        uint32_t baseMip = 0, uint32_t levelCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
     void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);

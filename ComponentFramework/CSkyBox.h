@@ -19,13 +19,16 @@ class CSkyBox : public Component
 
 public:
 	CSkyBox(Ref<Component> parent_, Renderer* renderer_, std::vector<std::string> files ): Component(parent_),
-		renderer(renderer_), CubeSampler({}), DesSet(VK_NULL_HANDLE) { }
+		renderer(renderer_),paths(files), CubeSampler({}), DesSet(VK_NULL_HANDLE) { }
 
 
 	bool OnCreate() override;
 	void OnDestroy()  override;
 	void Update(const float dt)  override {}
 
+	IndexedVertexBuffer GetMesh();
+	PipelineInfo GetPipeline();
+	std::vector<VkDescriptorSet> GetSet() { return DesSet; }
 
 };
 
