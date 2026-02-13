@@ -202,60 +202,62 @@ void Scene2::Update(const float deltaTime) {
 void Scene2::Render() const {
 		switch (engineContext.renderer->getRendererType()) {
 
-	case RendererType::VULKAN:
-		VulkanRenderer* vRenderer;
-		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
-		// notes for me:
-		// UBO should be only updated when it is not being worked on by the GPU
-		// we should use fences to ensure that
-		// thought: maybe we can wait for fence for like fractions of an ms 
-		// and see it vulkan can give be a success for the wait or not.
-		// apperently we can get the status on a fence using vkGetFenceStatus 
-		// but probly best idea to wait for fence for the current frame to be finished before updating UBOs
-		// todo : 1 implement function that waits for current frame and return a stuct with context info for that frame
-		// 2 use cntx to update UBOs
-		// 3 record on the right cmd buffer
-		// 4 submit the cmd buffer for that frame only
+		case RendererType::VULKAN: {
+			VulkanRenderer* vRenderer;
+			vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+			// notes for me:
+			// UBO should be only updated when it is not being worked on by the GPU
+			// we should use fences to ensure that
+			// thought: maybe we can wait for fence for like fractions of an ms 
+			// and see it vulkan can give be a success for the wait or not.
+			// apperently we can get the status on a fence using vkGetFenceStatus 
+			// but probly best idea to wait for fence for the current frame to be finished before updating UBOs
+			// todo : 1 implement function that waits for current frame and return a stuct with context info for that frame
+			// 2 use cntx to update UBOs
+			// 3 record on the right cmd buffer
+			// 4 submit the cmd buffer for that frame only
+			auto cam = std::dynamic_pointer_cast<CActor>(player)->GetComponent<CCamera>();
+			cam->UpdateViewMatrix();
+			cam->UpdateUBO(0);
 
-		
-		vRenderer->RecordCommandBuffers(Recording::START);
-		{
-			auto a = std::dynamic_pointer_cast<CActor>(actor);
-			auto mat = a->GetComponent<CMaterial>();
-			auto mesh = a->GetComponent<CMesh>();
-			auto meshdata = mesh->GetMesh();
-			auto pipelineinfo = mat->GetPipelineInfo();
+			vRenderer->RecordCommandBuffers(Recording::START);
+			{
+				auto a = std::dynamic_pointer_cast<CActor>(actor);
+				auto mat = a->GetComponent<CMaterial>();
+				auto mesh = a->GetComponent<CMesh>();
+				auto meshdata = mesh->GetMesh();
+				auto pipelineinfo = mat->GetPipelineInfo();
 
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout,vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
-			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
-			vRenderer->BindMesh(meshdata);// 4 bind mesh
-			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-			vRenderer->DrawIndexed(meshdata);// 6 draw
+				vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, vRenderer->GetGlobalDescriptionSet().descriptorSet, 0); // 1 bind global discriptor
+				vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+				vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
+				vRenderer->BindMesh(meshdata);// 4 bind mesh
+				vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+				vRenderer->DrawIndexed(meshdata);// 6 draw
+			}
+			{
+				auto a = std::dynamic_pointer_cast<CActor>(actor1);
+				auto mat = a->GetComponent<CMaterial>();
+				auto mesh = a->GetComponent<CMesh>();
+				auto meshdata = mesh->GetMesh();
+				auto pipelineinfo = mat->GetPipelineInfo();
+
+				// no need to re bind the global set
+				vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
+				vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
+				vRenderer->BindMesh(meshdata);// 4 bind mesh
+				vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
+				vRenderer->DrawIndexed(meshdata);// 6 draw
+
+				// render terrain
+				world->RenderWorld();
+			}
+
+
+			vRenderer->RecordCommandBuffers(Recording::STOP);
+			vRenderer->Render();
+			break;
 		}
-		{
-			auto a = std::dynamic_pointer_cast<CActor>(actor1);
-			auto mat = a->GetComponent<CMaterial>();
-			auto mesh = a->GetComponent<CMesh>();
-			auto meshdata = mesh->GetMesh();
-			auto pipelineinfo = mat->GetPipelineInfo();
-
-			// no need to re bind the global set
-			vRenderer->BindPipeline(pipelineinfo.pipeline);// 2 bind pipeline
-			vRenderer->BindDescriptorSet(pipelineinfo.pipelineLayout, mat->GetDescriptorSet(), mat->GetSetValue());// 3 bind local discriptor
-			vRenderer->BindMesh(meshdata);// 4 bind mesh
-			vRenderer->SetPushConstant(pipelineinfo, a->GetModelMatrix());// 5 set push constant
-			vRenderer->DrawIndexed(meshdata);// 6 draw
-
-			// render terrain
-			world->RenderWorld();
-		}
-	
-
-		vRenderer->RecordCommandBuffers(Recording::STOP);
-		vRenderer->Render();
-		break;
-
 	case RendererType::OPENGL:
 		OpenGLRenderer* glRenderer;
 		glRenderer = dynamic_cast<OpenGLRenderer*>(engineContext.renderer);
