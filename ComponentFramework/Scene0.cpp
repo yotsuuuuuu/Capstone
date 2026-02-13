@@ -9,7 +9,9 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
+#include "CInput.h"
 #include "CCamera.h"
+#include "CPhysics.h"
 #include "CGlobalLight.h"
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
@@ -42,7 +44,9 @@ bool Scene0::OnCreate() {
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
 		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
-		cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 40), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
+		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 40), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
+		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
+		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
 		LightConfig ldata;
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
 		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
@@ -168,7 +172,7 @@ bool Scene0::OnCreate() {
 void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 	
 		switch (sdlEvent.type) {
-		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
 			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
 			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
 			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
@@ -178,10 +182,43 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 			}
 			break;
 		}
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+		{
+
+			// escape stuff
+			if (sdlEvent.key.key == SDLK_ESCAPE && sdlEvent.type == SDL_EVENT_KEY_DOWN) {
+				mouseLocked = !mouseLocked;
+				SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
+			}
+
+			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+			auto playerController = p1->GetComponent<CInput>();
+			playerController->HandleKeyboardInput(sdlEvent);
+			break;
+		}
+
+		case SDL_EVENT_MOUSE_MOTION:
+		{
+			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+			auto playerController = p1->GetComponent<CInput>();
+			playerController->HandleMouseMotion(sdlEvent);
+			break;
+		}
+
+		}
 	
 }
 void Scene0::Update(const float deltaTime) {
-	
+	auto player = std::dynamic_pointer_cast<CActor>(camera);
+	if (player) {
+		auto input =player->GetComponent<CInput>(); 
+		auto phys  =player->GetComponent<CPhysics>();
+
+		input->UpdateInput(deltaTime);
+		phys->Update(deltaTime);
+
+	}
 }
 
 void Scene0::Render() const {

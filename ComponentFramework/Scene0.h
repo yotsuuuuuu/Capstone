@@ -23,6 +23,7 @@ private:
 	std::vector<BufferMemory> lightsUBO;
 	LightsData lights;
 
+	bool mouseLocked = true;
 
 
 

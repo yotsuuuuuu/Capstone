@@ -68,20 +68,32 @@ void CCamera::UpdateUBO(uint32_t index) {
 		return;
 	if (!renderer)
 		return;
+	
+	if (auto T = transform.lock()) {
+		
+		if (T->needsUBOupdate) {
+			UpdateViewMatrix();
+		}
+		else {
+			return;
+		}
 
-	switch (renderer->getRendererType())
-	{
-	case RendererType::VULKAN: {
-		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(renderer);
-		CameraData data = {};
-		data.projectionMatrix = projectionMatrix;
-		data.viewMatrix = viewMatrix;
-		// should update all buffers cause it might flicker at times	
-		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO[index]); 
-		//needsUpdate = false;
-		break;
-	}	
+		switch (renderer->getRendererType())
+		{
+		case RendererType::VULKAN: {
+			VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(renderer);
+			CameraData data = {};
+			data.projectionMatrix = projectionMatrix;
+			data.viewMatrix = viewMatrix;
+			// should update all buffers cause it might flicker at times	
+			vkrender->UpdateUniformBuffers<CameraData>(data, cameraUBO);
+			T->needsUBOupdate = false;
+			break;
+		}
+		}
 	}
+	
+
 }
 
 void CCamera::UpdateProjectionMatrix(float fovy_, float aspectRatio_, float nearClip_, float farClip_)
