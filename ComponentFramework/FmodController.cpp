@@ -48,6 +48,24 @@ bool FmodController::createSystem()
 	return true;
 }
 
+void FmodController::DummyFunction()
+{
+	const int fftSize = 2048;
+
+	fftw_complex* in, * out;
+	fftw_plan plan;
+
+	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftSize);
+	out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftSize);
+	plan = fftw_plan_dft_1d(fftSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+	fftw_execute(plan); // Execute the FFT
+	printf("\n data between herer \n");
+	fftw_print_plan(plan);// Print the FFT plan (for debugging)
+	printf("\n PRINTINF FROM DUMMY");
+
+}
+
 AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 {
 	//creates audio bands object
@@ -85,7 +103,6 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	const int fftSize = 2048;       // Window size for FFT
 	const float sampleRate = 44100; // Standard sample rate
 
-	fftw_complex* fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
 	//DO NOT USE DELETE USE FFTW_FREE TO FREE THE DATA
 	
 	return AudioBands();

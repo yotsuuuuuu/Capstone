@@ -26,6 +26,7 @@ public:
 	void addSong(const char* wave_);
 	void playsong(int songnum_);
 	bool createSystem();
+	void DummyFunction();
 
 	AudioBands AnalyzeAudioOffline(int songunum_);
 	~FmodController();
