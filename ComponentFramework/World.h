@@ -8,7 +8,7 @@
 #include "VulkanRenderer.h"
 #include "Chunk.h"
 #include "BaseGridMesh.h"
-#include "CActor.h"
+
 
 using namespace MATH;
 
@@ -39,7 +39,7 @@ private:
 	// TODO: (andres) tweak the pipeline more and maybe use compute shaders for heightmap generation and normal calculation. avoids reusing the mesh
 
 public:
-
+	
 	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
 	~World();
 
