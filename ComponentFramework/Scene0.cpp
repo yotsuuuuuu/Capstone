@@ -78,7 +78,7 @@ bool Scene0::OnCreate() {
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
 		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders
-		
+		// TODO: FIXING RESIZING THE SCREEN
 	
 		
 	/*	lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();

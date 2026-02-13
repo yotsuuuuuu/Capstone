@@ -53,8 +53,12 @@ struct QueueFamilyIndices {
     /// has_value() returns false if no value has ever been assigned. 
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
+    std::optional<uint32_t> computeFamily;
     bool isComplete() {
         return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+    bool isVkComplete() {
+        return graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
     }
 };
 
@@ -271,6 +275,7 @@ private: /// Private member variables
    
     VkQueue graphicsQueue;
     VkQueue presentQueue;
+    VkQueue computeQueue;
  
     CommandBufferData primaryCommandBuffer{};
     std::vector<Sampler2D> textures2D;
@@ -287,6 +292,8 @@ private:
     void createSwapChain();
     void createImageViews();
     
+    void CreateVkLogicalDevice();
+    QueueFamilyIndices VkFindQueueFamilies(VkPhysicalDevice device);
    
 
     VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
