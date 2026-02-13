@@ -27,6 +27,8 @@ private:
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
+
+
 	//player
 	//CActor* player;
 
@@ -46,6 +48,10 @@ public:
 	void Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 	void RenderWorld();
 	void OnDelete();
+
+	PipelineInfo const GetPipeline() { return worldPipeline; }
+	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
+	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return chunkRenderData; }
 
 private:
 	void GenerateAllChunks();

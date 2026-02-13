@@ -18,12 +18,19 @@ public:
 		C_World = new World(renderer_);
 	}
 
+	virtual bool OnCreate();
+	virtual void OnDestroy();
+	virtual void Update(const float dt) {}
+
 	// TODO:
 	// get piepe
 	// get set
 	// get terrain chunk
 
-	virtual bool OnCreate();
-	virtual void OnDestroy();
-	virtual void Update(const float dt) {}
+	PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
+	std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
+	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { C_World->GetChunkRenderData(); }
+
+	void InitializeWorld(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
+
 };

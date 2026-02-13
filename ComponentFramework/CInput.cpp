@@ -102,8 +102,7 @@ void CInput::UpdateInput(const float dt)
 {
 	auto phys = physics.lock();
 
-	auto cam = camera.lock();
-	if (!phys || !cam) return;
+	if (!phys) return;
 
 	// would usually check if grounded but we dont care atm
 	// CheckGrounded();
@@ -128,21 +127,18 @@ void CInput::UpdateInput(const float dt)
 
 	phys->SetVelocity(currentVelocity);
 
-	// update ubo here maybe
 }
 
 void CInput::UpdateCameraRotation()
 {
-	auto cam = camera.lock();
 	auto phys = physics.lock();
 	auto transform = std::dynamic_pointer_cast<CTransform>(phys);
-	if (!cam || !phys) return;
+	if (!phys) return;
 
 	Quaternion yawRotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, 1.0f, 0.0f));
 	Quaternion pitchRotation = QMath::angleAxisRotation(pitch, Vec3(1.0f, 0.0f, 0.0f));
 
 	transform->SetRotation(yawRotation * pitchRotation);
-	//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 
 }
 

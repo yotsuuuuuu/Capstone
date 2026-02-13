@@ -18,7 +18,6 @@ public:
 	virtual void OnDestroy();
 	virtual void Update(const float dt) = 0;
 
-
 	const std::vector<float>& GetHeightmap() const { return chunk.GetHeightmap(); }
 	const Vec2& GetPosition() const { return chunk.GetPosition(); }
 
