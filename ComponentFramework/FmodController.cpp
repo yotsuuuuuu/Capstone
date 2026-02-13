@@ -1,4 +1,6 @@
 #include "FmodController.h"
+#include <fftw3.h>
+//https://www.fftw.org/fftw3.pdf
 
 void FmodController::addSong(const char* wave_)
 {
