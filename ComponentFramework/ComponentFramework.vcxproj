@@ -157,6 +157,7 @@
     <ClCompile Include="CShader.cpp" />
     <ClCompile Include="CSkyBox.cpp" />
     <ClCompile Include="CTransform.cpp" />
+    <ClCompile Include="CWorld.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
     <ClCompile Include="FmodController.cpp" />

@@ -122,9 +122,12 @@
       <Filter>Source\Components</Filter>
     </ClCompile>
     <ClCompile Include="CPhysics.cpp">
-		<Filter>Source\Components</Filter>
-	</ClCompile>
+      <Filter>Source\Components</Filter>
+    </ClCompile>
     <ClCompile Include="CSkyBox.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CWorld.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
   </ItemGroup>
@@ -274,8 +277,8 @@
       <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="CChunk.h">
-		<Filter>Header\Components</Filter>
-	</ClInclude>
+      <Filter>Header\Components</Filter>
+    </ClInclude>
     <ClInclude Include="CSkyBox.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
