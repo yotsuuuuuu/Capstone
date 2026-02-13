@@ -631,6 +631,7 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetL
 
 
 
+
 void VulkanRenderer::DestroyPipeline(PipelineInfo pipelineInfo){
     vkDestroyPipelineLayout(device, pipelineInfo.pipelineLayout, nullptr);
     vkDestroyPipeline(device, pipelineInfo.pipeline, nullptr);
@@ -647,4 +648,34 @@ std::vector<char> VulkanRenderer::readFile(const std::string& filename) {
     file.read(buffer.data(), fileSize);
     file.close();
     return buffer;
+}
+
+PipeLineConfig VulkanRenderer::GetMainPassPipeLineConfig()
+{
+    PipeLineConfig config;
+
+    config.blendMode = PipeLineConfig::BlendMode::OPAQUE;    // Controls how fragment color blends with existing framebuffer color
+    config.Color = true;                                     // Enables writing fragment shader output to color attachments
+    config.cullMode = VK_CULL_MODE_BACK_BIT;                 // Determines which triangle faces are discarded before rasterization
+
+    config.depthBias = VK_FALSE;                             // Enables polygon depth offset (used to prevent z-fighting e.g. shadows)
+    config.depthBiasClamp = 0.0f;                            // Limits maximum depth offset applied
+    config.depthBiasConstantFactor = 0.0f;                   // Constant depth offset added to fragments
+    config.depthBiasSlopeFactor = 0.0f;                      // Depth offset scaled by polygon slope relative to camera
+
+    config.depthCompareOp = VK_COMPARE_OP_LESS;              // Comparison rule used when testing fragment depth vs depth buffer
+    config.depthTestEnable = VK_TRUE;                        // Enables depth testing stage
+    config.depthWriteEnable = VK_TRUE;                       // Controls whether fragments update depth buffer
+
+    config.polygonMode = VK_POLYGON_MODE_FILL;               // Controls rasterization style (filled, wireframe, points)
+
+    config.renderPass = renderPass;                          // Defines which render pass/subpass this pipeline is compatible with
+
+    config.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;   // Defines how vertex data is interpreted into primitives
+
+    config.viewPortsize = swapChainExtent;                   // Defines viewport and scissor dimensions used during rasterization
+
+    ///config.vertexinfo;                                    // Would define vertex binding + attribute layout for vertex input stage
+
+    return config;
 }

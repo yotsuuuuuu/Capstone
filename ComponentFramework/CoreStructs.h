@@ -185,13 +185,6 @@ enum BlendMode {OPAQUE,ALPHA,ADDITIVE};
     //Renderpass and viewport must be set
 };
 
-struct Drawitem {
-    PipelineInfo pipe;
-    VkDescriptorSet set;
-    uint32_t setId;
-    IndexedVertexBuffer mesh;
-    ModelMatrixPushConst push;
-};
 
 struct SingleDescriptorSetLayoutInfo {
     uint32_t binding; 

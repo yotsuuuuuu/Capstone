@@ -122,6 +122,9 @@
       <Filter>Source\Components</Filter>
     </ClCompile>
     <ClCompile Include="CPhysics.cpp">
+		<Filter>Source\Components</Filter>
+	</ClCompile>
+    <ClCompile Include="CSkyBox.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
   </ItemGroup>
@@ -271,6 +274,9 @@
       <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="CChunk.h">
+		<Filter>Header\Components</Filter>
+	</ClInclude>
+    <ClInclude Include="CSkyBox.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
   </ItemGroup>
@@ -318,6 +324,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\MainPass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

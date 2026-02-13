@@ -8,7 +8,7 @@ class Renderer;
 class CMesh : public Component
 {
 	std::string meshFile;
-
+	
 	IndexedVertexBuffer mesh;
 	Renderer* render;
 public:

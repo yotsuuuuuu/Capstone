@@ -53,8 +53,12 @@ struct QueueFamilyIndices {
     /// has_value() returns false if no value has ever been assigned. 
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
+    std::optional<uint32_t> computeFamily;
     bool isComplete() {
         return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+    bool isVkComplete() {
+        return graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
     }
 };
 
@@ -174,7 +178,9 @@ public: /// Member functions
     void BindPipeline(VkPipeline pipeline);
     void DrawIndexed(IndexedVertexBuffer mesh);
     void SetPushConstant(const PipelineInfo pipelineInfo, const Matrix4& modelMatrix_);
+    void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
     //
+
     void DestroyIndexedMesh(IndexedVertexBuffer mesh_);
 private:
     void CreateVertexBuffer(IndexedVertexBuffer& indexedVertexBuffer, const std::vector<Vertex>& vertices);
@@ -269,6 +275,7 @@ private: /// Private member variables
    
     VkQueue graphicsQueue;
     VkQueue presentQueue;
+    VkQueue computeQueue;
  
     CommandBufferData primaryCommandBuffer{};
     std::vector<Sampler2D> textures2D;
@@ -285,6 +292,8 @@ private:
     void createSwapChain();
     void createImageViews();
     
+    void CreateVkLogicalDevice();
+    QueueFamilyIndices VkFindQueueFamilies(VkPhysicalDevice device);
    
 
     VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
@@ -403,31 +412,20 @@ private:
     void CMDEndRecord(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
         VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
-        uint32_t baseMip = 0, uint32_t mipCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
+        uint32_t baseMip = 0, uint32_t levelCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
     void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
 
     struct ECSRenderer;
-public:
-    void RenderECS(const std::vector<Ref<Component>>& drawlist);
 
     //Global Descriptorset
-private:
-    DescriptorSetInfo GlobalSet;
+    //Main Camera
+    DescriptorSetInfo GlobalSet;    
+    WeakRef<Component> camera;
 
-public:
-    void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
-    void DestroyGlobalDescriptionSet();
-    DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
 
-    void BindDescriptorSet(VkPipelineLayout pipelineLayout, const std::vector<VkDescriptorSet> descriptorSet,uint32_t setID);
-    
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
-        const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
-    , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
-private:
+
     //Creation Helper functions
     void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
@@ -444,6 +442,8 @@ private:
 	void DestroyImage(VkImage& image, VkDeviceMemory& imageMemory);
 
 
+    void CopyBufferToImage(VkBuffer, VkImage, uint32_t, uint32_t, VkImageAspectFlags, uint32_t, uint32_t, uint32_t);
+    void CubeImageLayoutTransition(VkImage, VkImageLayout srcLay, VkImageLayout dtsLay, VkPipelineStageFlags srdFlag, VkPipelineStageFlags dtsFlag,VkAccessFlags srcAcss, VkAccessFlags dtsAcss);
 	//Shadow Mapping
     struct GlobalShadowMappingInfo
     {
@@ -474,20 +474,33 @@ private:
     void CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
+	void DestroyShadowMappingResources();
 
     void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , Ref<Component> globaLight);
 
-	void DestroyShadowMappingResources();
 public:
+    void RenderECS(const std::vector<Ref<Component>>& drawlist);
 
+    PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
-    //Temp function just to initilize the variables
     void CreateGlobalRources(Ref<Component> cameraActor);
     void DestroyGlobalResources();
 
+    void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
+    void DestroyGlobalDescriptionSet();
+    DescriptorSetInfo GetGlobalDescriptionSet() { return GlobalSet; }
 
+    
+    //probly should be removed
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
+        const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
 
+    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
+    , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
+
+    //Skybox
+    Sampler2D SkyBoxSampler(std::vector<std::string> paths);
 
     // TERRAIN STUFF
 public:

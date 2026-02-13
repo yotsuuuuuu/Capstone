@@ -155,6 +155,7 @@
     <ClCompile Include="CMesh.cpp" />
     <ClCompile Include="CPhysics.cpp" />
     <ClCompile Include="CShader.cpp" />
+    <ClCompile Include="CSkyBox.cpp" />
     <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DescriptorSetBuilder.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="CPhysics.h" />
     <ClInclude Include="CShader.h" />
+    <ClInclude Include="CSkyBox.h" />
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="CWorld.h" />
     <ClInclude Include="Debug.h" />
@@ -253,6 +255,8 @@
     <None Include="shaders\simplePhong.vert" />
     <None Include="shaders\simpleTexture.frag" />
     <None Include="shaders\simpleTexture.vert" />
+    <None Include="shaders\SkyBox.frag" />
+    <None Include="shaders\SkyBox.vert" />
     <None Include="shaders\terrain.frag" />
     <None Include="shaders\terrain.vert" />
     <None Include="test.json" />

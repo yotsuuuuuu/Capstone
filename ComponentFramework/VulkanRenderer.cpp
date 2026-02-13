@@ -2,7 +2,7 @@
 #include "DescriptorSetBuilder.h"
 #include "Debug.h"
 #include <assert.h>
-
+#include <map>
 
 VulkanRenderer::VulkanRenderer(): /// Initialize all the variables
     window(nullptr), instance(nullptr), debugMessenger(0), surface(0),device(nullptr),
@@ -34,7 +34,8 @@ bool VulkanRenderer::OnCreate(){
     }
     
     pickPhysicalDevice();
-    createLogicalDevice();
+    //createLogicalDevice();
+    CreateVkLogicalDevice();
     createSwapChain(); 
     createImageViews();
     createRenderPass();
@@ -327,6 +328,183 @@ void VulkanRenderer::createLogicalDevice() {
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
 
+QueueFamilyIndices VulkanRenderer::VkFindQueueFamilies(VkPhysicalDevice device)
+{
+    QueueFamilyIndices indices;
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const VkQueueFamilyProperties& queueFamily : queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        if (presentSupport && !indices.presentFamily.has_value()) {
+            indices.presentFamily = i;
+        }
+
+        if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+            indices.computeFamily = i;
+        }
+
+        if (indices.isVkComplete()) {
+            break;
+        }
+
+        i++;
+    }
+
+    if (!indices.graphicsFamily.has_value()) {
+        throw std::runtime_error("Failed to find graphics queue family!");
+    }
+
+    if (!indices.presentFamily.has_value()) {
+        throw std::runtime_error("Failed to find present queue family!");
+    }
+
+    if (!indices.computeFamily.has_value()) {
+        // Optionally fall back to graphics queue 
+        // might better to just not to give a vlaue
+        // and make the compute queue null just in case
+
+        Debug::Warning("WARNING: No compute queue found! Falling back to graphics queue\n", __FILE__, __LINE__);      
+        indices.computeFamily = indices.graphicsFamily;
+    }
+
+    return indices;
+}
+
+
+void VulkanRenderer::CreateVkLogicalDevice()
+{
+    QueueFamilyIndices indices = VkFindQueueFamilies(physicalDevice);
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
+    // So we need to track how many queue per family
+    // idealy looking to end up with 3 different queues 
+    // but think the most common is 1 graphics/present 1 compute queues
+    std::map<uint32_t, uint32_t> queueCounts;
+
+    float queuePriority = 1.0f;
+    // always need 1 graphics queue
+    queueCounts[indices.graphicsFamily.value()] = 1;
+
+    // Present queue edge case if their not the same family
+    if (indices.presentFamily.value() != indices.graphicsFamily.value()) {
+        queueCounts[indices.presentFamily.value()] = 1;
+    }
+    else {
+        queueCounts[indices.presentFamily.value()]++;
+    }
+    
+    if (indices.computeFamily.has_value()) {
+        if (queueCounts.find(indices.computeFamily.value()) != queueCounts.end()) {
+            // if the same family as graphics/present add to the count
+            queueCounts[indices.computeFamily.value()]++;
+        }
+        else {
+            // Different family
+            queueCounts[indices.computeFamily.value()] = 1;
+        }
+    }
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+    // Create queue create infos
+    std::vector<float> priorities;
+    for (const auto& [familyIndex, requestedCount] : queueCounts) {
+
+        // Check if requested count is supported for debugging in case
+        if (requestedCount > queueFamilies[familyIndex].queueCount) {
+            throw std::runtime_error(
+                "Requested " + std::to_string(requestedCount) +
+                " queues from Family " + std::to_string(familyIndex) +
+                " but only " + std::to_string(queueFamilies[familyIndex].queueCount) +
+                " supported!"
+            );
+        }
+
+        //an array of queue priority equal the number of queue  requested
+        std::vector<float> prio(requestedCount, queuePriority);
+        priorities = prio;
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = familyIndex;
+        queueCreateInfo.queueCount = requestedCount;
+        queueCreateInfo.pQueuePriorities = priorities.data();
+
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
+
+    //Create the logica device
+    VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+    createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+    createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+    if (enableValidationLayers) {
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }
+    else {
+        createInfo.enabledLayerCount = 0;
+    }
+
+    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create logical device!");
+    }
+
+    //create queues 
+    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+
+    //present queue
+    if (indices.presentFamily.value() == indices.graphicsFamily.value()) {
+        uint32_t presentQueueIndex = 1; 
+        vkGetDeviceQueue(device, indices.presentFamily.value(), presentQueueIndex, &presentQueue);
+    }
+    else {
+        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    }
+
+    //compute queue
+    if (indices.computeFamily.has_value()) {
+        // check if compute and graphisc share the same family
+        if (indices.computeFamily.value() == indices.graphicsFamily.value()) {
+            // check if the present and grpahics have the same family and set the index accoordenly
+            uint32_t computeQueueIndex = (indices.presentFamily.value() == indices.graphicsFamily.value()) ? 2 : 1;
+            vkGetDeviceQueue(device, indices.computeFamily.value(), computeQueueIndex, &computeQueue);
+        }
+        else { // compute in is own fmaily
+            vkGetDeviceQueue(device, indices.computeFamily.value(), 0, &computeQueue);
+        }
+
+    }
+    else { // Compute queues is optional in vulkan and some hardware does not support it. This is a warning just for this situation
+        computeQueue = VK_NULL_HANDLE;
+        Debug::Warning("No compute queue available. Handel is null", __FILE__, __LINE__);
+    }
+
+}
+
+
 void VulkanRenderer::createSwapChain() {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -574,6 +752,41 @@ void VulkanRenderer::transitionImageLayout(VkImage image, VkFormat format, VkIma
     endSingleTimeCommands(commandBuffer);
 }
 
+
+void VulkanRenderer::CubeImageLayoutTransition(VkImage image,
+    VkImageLayout srcLayout, VkImageLayout dtsLayout,
+    VkPipelineStageFlags srcFlag, VkPipelineStageFlags dtsFlag,
+    VkAccessFlags srcAcces, VkAccessFlags dtsAcces)
+{
+
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    CMDImageBarrier(commandBuffer, image, srcFlag, dtsFlag, srcAcces, dtsAcces, srcLayout, dtsLayout, VK_IMAGE_ASPECT_COLOR_BIT,
+        0, 1, 0, 6);
+
+    endSingleTimeCommands(commandBuffer);
+}
+
+void VulkanRenderer::CopyBufferToImage(VkBuffer buffer, VkImage image, 
+    uint32_t width, uint32_t height, VkImageAspectFlags flag, 
+    uint32_t layerCount, uint32_t baseLayer, uint32_t mipLvl)
+{
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = flag;
+    region.imageSubresource.mipLevel = mipLvl;
+    region.imageSubresource.baseArrayLayer = baseLayer;
+    region.imageSubresource.layerCount = layerCount;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = { width, height, 1 };
+
+    vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    endSingleTimeCommands(commandBuffer);
+}
+
 void VulkanRenderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -755,6 +968,7 @@ QueueFamilyIndices VulkanRenderer::findQueueFamilies(VkPhysicalDevice device) {
         if (presentSupport) {
             indices.presentFamily = i;
         }
+
         if (indices.isComplete()) {
             break;
         }

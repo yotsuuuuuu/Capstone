@@ -7,6 +7,7 @@
 #include "CMesh.h"
 #include "CGlobalLight.h"
 #include "CTransform.h"
+#include "CSkyBox.h"
 #include <unordered_map>
 #include "imgui.h"
 
@@ -26,14 +27,13 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
 
 void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
 {
-
     auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
     if (!cam) {
         Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
         return;
     }
 
-    auto Glight = cam->GetComponent< CGlobalLight>();
+    auto Glight = cam->GetComponent<CGlobalLight>();
     if (!Glight) {
         Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
         return;
@@ -44,14 +44,15 @@ void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
         Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
         return;
     }
+    camera = cameraActor;
 
     // create the shadow resources
     CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
-    // then creat global resources
-
+    
+    // then create global resources
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -61,6 +62,15 @@ void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
     AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
+
+    //
+    //add the skybox to the main camera actor
+    std::vector<std::string> skyboxFiles = { "./textures/skybox/px.png","./textures/skybox/nx.png",
+                                             "./textures/skybox/py.png","./textures/skybox/ny.png",
+                                             "./textures/skybox/pz.png","./textures/skybox/nz.png" };
+    Ref<CSkyBox> sky = std::make_shared<CSkyBox>(nullptr,this, skyboxFiles);
+    sky->OnCreate();
+    cam->AddComponent<CSkyBox>(sky);
 }
 
 void VulkanRenderer::DestroyGlobalResources()
@@ -312,7 +322,10 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
     }
 }
 
-void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, uint32_t baseMip, uint32_t mipCount, uint32_t baseLayer, uint32_t layerCount)
+void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage,
+    VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess,
+    VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask, 
+    uint32_t baseMip, uint32_t levelCount, uint32_t baseLayer, uint32_t layerCount)
 {
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -327,11 +340,11 @@ void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& 
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
     barrier.image = image;
+    barrier.subresourceRange.layerCount = layerCount;
+    barrier.subresourceRange.baseArrayLayer = baseLayer;
     barrier.subresourceRange.aspectMask = aspectMask;
     barrier.subresourceRange.baseMipLevel = baseMip;
-    barrier.subresourceRange.levelCount = mipCount;
-    barrier.subresourceRange.baseArrayLayer = baseLayer;
-    barrier.subresourceRange.layerCount = layerCount;
+    barrier.subresourceRange.levelCount = levelCount;
 
     vkCmdPipelineBarrier(cmd, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
@@ -410,6 +423,11 @@ public:
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
         VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
         // TODO: Update UBOs for current frame ??? needs to be done
+        if (auto cam = VKRNDR->camera.lock()) {
+            auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
+            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
+            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.targetFrameIndex);
+        }
 
         VkPipelineLayout line;
         // 1.1 get draw items
@@ -428,6 +446,20 @@ public:
                 }
             }
         }
+        //1.3 skybox draw item for main pass
+        DrawItem skybox;
+        if (auto cam = VKRNDR->camera.lock()) {
+           auto MainCamera =  std::dynamic_pointer_cast<CActor>(cam);
+           auto CskyBox = MainCamera->GetComponent<CSkyBox>();
+           skybox.mesh = CskyBox->GetMesh();
+           skybox.pipeInfo = CskyBox->GetPipeline();
+           skybox.set = CskyBox->GetSet()[framecntx.targetFrameIndex];
+           skybox.setID = 1;
+        }
+        else {
+            throw std::runtime_error("Main Camera is in valid");
+        }
+      
         // 3 Start recording
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
@@ -474,7 +506,12 @@ public:
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
-            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, line, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.targetFrameIndex]);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.targetFrameIndex]);
+            // draw sky box
+            VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, skybox.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
+            VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
+            VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             for (const auto& pair : DrawingBuckets) {
                 VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, pair.first, VK_PIPELINE_BIND_POINT_GRAPHICS);
                 for (const auto& item : pair.second) {
@@ -483,12 +520,12 @@ public:
                     VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
+            }
             VKRNDR->imGuiSystem->RecordCMDBuffer(framecntx.CMDBuffer);
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
-            }
+        }
         // 4 Stop recording
             VKRNDR->CMDEndRecord(framecntx.CMDBuffer);
-
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
          /*   printf("%d cmd\t%d framefence\t%d waitSemaphore\t%d singalSemaphore\n", (int)framecntx.CMDBuffer, 
                 (int)framecntx.currentFrameFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
@@ -496,7 +533,7 @@ public:
             VKRNDR->CMDSubmitGraphics(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
         // 6 present
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
-        }
+
     }
     static DrawItem GetDrawItem(const Ref<CActor>& actor,const VulkanRenderer::FrameContext& cntx) {
 
