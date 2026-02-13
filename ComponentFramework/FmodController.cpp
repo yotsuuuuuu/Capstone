@@ -20,9 +20,9 @@ void FmodController::playsong(int songnum_)
 	}
 	else
 	{
-		channel->setPaused(true);
-		system->playSound(numOfsounds[songnum_], 0, false, &channel);
-		channel->setPaused(false);
+		//channel->setPaused(true);
+		/*system->playSound(numOfsounds[songnum_], 0, false, &channel);*/
+		channel->stop();
 	}
 	result = system->update();
 }
