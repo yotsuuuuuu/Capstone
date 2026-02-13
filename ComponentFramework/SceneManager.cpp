@@ -3,6 +3,7 @@
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
+#include "FmodController.h"
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
@@ -28,6 +29,8 @@ SceneManager::~SceneManager() {
 	renderer->OnDestroy();
 	engineContext.renderer = nullptr;
 	engineContext.assetManager = nullptr;	
+	engineContext.fmodController = nullptr;
+	delete fmodController;
 	delete assetManager;
 	delete renderer;
 	Debug::Info("Deleting the GameSceneManager", __FILE__, __LINE__);
@@ -66,7 +69,10 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		return false;
 	}
 	assetManager = new AssetManager(static_cast<VulkanRenderer*>(renderer));
-	engineContext.Set(*renderer, *assetManager);
+	fmodController = new FmodController();
+	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
+	fmodController->createSystem();
+	engineContext.Set(*renderer, *assetManager,*fmodController);
 
 	BuildScene(SCENE0);
 	

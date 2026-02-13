@@ -38,6 +38,7 @@ private:
 	EngineContext engineContext;
 	Renderer* renderer;
 	AssetManager* assetManager;
+	FmodController* fmodController;
 	unsigned int fps;
 	bool isRunning;
 	void BuildScene(SCENE_NUMBER scene_);

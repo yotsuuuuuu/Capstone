@@ -16,6 +16,7 @@
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
+#include "FmodController.h"
 
 Scene0::Scene0(EngineContext& context_): 
 	Scene(context_) {
@@ -28,7 +29,8 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	
+
+	engineContext.fmodController->DummyFunction();
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -159,6 +161,8 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
+
+		engineContext.fmodController->playsong(0);
 		
 	}
 		break;
