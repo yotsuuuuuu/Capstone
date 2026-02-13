@@ -23,7 +23,7 @@
 #include "Renderer.h"
 #include "DescriptorSetBuilder.h"
 #include "VkImGUISystem.h"
-#include "Component.h"
+
 
 #include <Vector.h>
 #include <VMath.h>
@@ -32,6 +32,7 @@
 #include <memory>
 using namespace MATH;
 
+class Component;
 
 #ifdef NDEBUG /// only use validation layers if in debug mode
 const bool enableValidationLayers = false;
@@ -422,8 +423,8 @@ private:
     //Global Descriptorset
     //Main Camera
     DescriptorSetInfo GlobalSet;    
-    WeakRef<Component> camera;
-
+    
+    std::weak_ptr<Component> camera;
 
 
     //Creation Helper functions
@@ -476,15 +477,15 @@ private:
         VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout);
 	void DestroyShadowMappingResources();
 
-    void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , Ref<Component> globaLight);
+    void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , std::shared_ptr<Component> globaLight);
 
 public:
-    void RenderECS(const std::vector<Ref<Component>>& drawlist);
+    void RenderECS(const std::vector<std::shared_ptr<Component>>& drawlist);
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
 
-    void CreateGlobalRources(Ref<Component> cameraActor);
+    void CreateGlobalRources(std::shared_ptr<Component> cameraActor);
     void DestroyGlobalResources();
 
     void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);

@@ -406,7 +406,7 @@ private:
         ModelMatrixPushConst push;
     };
 public:
-    static void Render(VulkanRenderer* VKRNDR, const std::vector<Ref<Component>>& drawlist) {
+    static void Render(VulkanRenderer* VKRNDR, const std::vector<std::shared_ptr<Component>>& drawlist) {
         //  Passes i want to do currently doing forward rendering
         //  Sky light shadow pass : the Main light source that affects the scene
         //  Normal forward pass
