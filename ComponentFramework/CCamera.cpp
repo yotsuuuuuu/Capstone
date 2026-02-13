@@ -76,8 +76,9 @@ void CCamera::UpdateUBO(uint32_t index) {
 		CameraData data = {};
 		data.projectionMatrix = projectionMatrix;
 		data.viewMatrix = viewMatrix;
-		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO[index]);	
-		needsUpdate = false;
+		// should update all buffers cause it might flicker at times	
+		vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO[index]); 
+		//needsUpdate = false;
 		break;
 	}	
 	}
@@ -131,10 +132,4 @@ MATH::Vec3 CCamera::GetUpVector() const
 	return MATH::QMath::rotate(MATH::Vec3(0.0f, 1.0f, 0.0f), rot);
 }
 
-void CCamera::UpdateFromInput()
-{
-	if (!needsUpdate) { return; }
-	std::cout << "updated UBO from input" << std::endl;
-	UpdateViewMatrix();
-	UpdateUBO(0);
-}
+

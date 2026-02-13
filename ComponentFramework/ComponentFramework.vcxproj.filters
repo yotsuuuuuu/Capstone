@@ -16,9 +16,6 @@
     <ClCompile Include="CCameraActor.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Chunk.cpp">
-      <Filter>Source\Terrain</Filter>
-    </ClCompile>
     <ClCompile Include="CMaterial.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
@@ -76,9 +73,6 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>Source\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainGenerator.cpp">
-      <Filter>Source\Terrain</Filter>
-    </ClCompile>
     <ClCompile Include="TerrainNoise.cpp">
       <Filter>Source\Terrain</Filter>
     </ClCompile>
@@ -117,9 +111,6 @@
     </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Source\Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="CPlayerActor.cpp">
-      <Filter>Source\Components</Filter>
     </ClCompile>
     <ClCompile Include="CCamera.cpp">
       <Filter>Source\Components</Filter>
@@ -237,9 +228,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Header\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainGenerator.h">
-      <Filter>Header\Terrain</Filter>
-    </ClInclude>
     <ClInclude Include="TerrainNoise.h">
       <Filter>Header\Terrain</Filter>
     </ClInclude>
@@ -267,9 +255,6 @@
     <ClInclude Include="WorldConstants.h">
       <Filter>Header\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="CPlayerActor.h">
-      <Filter>Header\Components</Filter>
-    </ClInclude>
     <ClInclude Include="CCamera.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
@@ -280,6 +265,12 @@
       <Filter>Header\Components</Filter>
     </ClInclude>
     <ClInclude Include="CPhysics.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CWorld.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CChunk.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
   </ItemGroup>

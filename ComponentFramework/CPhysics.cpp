@@ -32,6 +32,8 @@ void CPhysics::Update(const float deltaTime)
 
 	ApplyDragForce();
 	velocity += acceleration * deltaTime;
+
+	if (MATH::VMath::mag(velocity) >= VERY_SMALL) { needsUBOupdate = true; } // if moving then update UBO
 	position += velocity * deltaTime;
 
 	//acceleration = MATH::Vec3(0.0f, 0.0f, 0.0f); // Reset acceleration after each update

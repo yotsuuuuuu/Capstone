@@ -150,7 +150,6 @@
     <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CCameraActor.cpp" />
     <ClCompile Include="CGlobalLight.cpp" />
-    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="CInput.cpp" />
     <ClCompile Include="CMaterial.cpp" />
     <ClCompile Include="CMesh.cpp" />
@@ -168,9 +167,7 @@
     <ClCompile Include="imgui_impl_vulkan.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
-    <ClCompile Include="CPlayerActor.cpp" />
     <ClCompile Include="Scene2.cpp" />
-    <ClCompile Include="TerrainGenerator.cpp" />
     <ClCompile Include="TerrainNoise.cpp" />
     <ClCompile Include="TerrainVulkan.cpp" />
     <ClCompile Include="VkImGUISystem.cpp" />
@@ -196,6 +193,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CCameraActor.h" />
+    <ClInclude Include="CChunk.h" />
     <ClInclude Include="CGlobalLight.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="CInput.h" />
@@ -205,6 +203,7 @@
     <ClInclude Include="CPhysics.h" />
     <ClInclude Include="CShader.h" />
     <ClInclude Include="CTransform.h" />
+    <ClInclude Include="CWorld.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DescriptorSetBuilder.h" />
     <ClInclude Include="EngineContext.h" />
@@ -222,13 +221,11 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="json_fwd.hpp" />
     <ClInclude Include="OpenGLRenderer.h" />
-    <ClInclude Include="CPlayerActor.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene0.h" />
     <ClInclude Include="Scene2.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="TerrainGenerator.h" />
     <ClInclude Include="TerrainNoise.h" />
     <ClInclude Include="TerrainPreset.h" />
     <ClInclude Include="Timer.h" />

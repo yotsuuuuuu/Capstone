@@ -95,6 +95,7 @@ void CInput::HandleMouseMotion(const SDL_Event& motion)
 void CInput::HandleMouseButton(const SDL_Event& button)
 {
 	// dunno if we need this for anything yet
+	// TODO: (andres) figure out a use for mouse clicking and implement
 }
 
 void CInput::UpdateInput(const float dt)
@@ -110,15 +111,15 @@ void CInput::UpdateInput(const float dt)
 	MATH::Vec3 movementDirection = CalculateMovementDirection();
 	float currentSpeed = moveSpeed * (sprintPressed ? sprintMultiplier : 1.0f);
 
-	std::cout << "Movement Direction: " << movementDirection.x << ", " << movementDirection.y << ", " << movementDirection.z << std::endl;
+	//std::cout << "Movement Direction: " << movementDirection.x << ", " << movementDirection.y << ", " << movementDirection.z << std::endl;
 
-	phys->SetVelocity(movementDirection * currentSpeed);
+	//phys->SetVelocity(movementDirection * currentSpeed);
 	MATH::Vec3 currentVelocity = phys->GetVelocity();
 
 	if (MATH::VMath::mag(movementDirection) > VERY_SMALL) {
 
 		currentVelocity = movementDirection * currentSpeed;
-		cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
+		//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 	}
 	else 
 	{
@@ -127,25 +128,28 @@ void CInput::UpdateInput(const float dt)
 
 	phys->SetVelocity(currentVelocity);
 
+	// update ubo here maybe
 }
 
 void CInput::UpdateCameraRotation()
 {
 	auto cam = camera.lock();
 	auto phys = physics.lock();
+	auto transform = std::dynamic_pointer_cast<CTransform>(phys);
 	if (!cam || !phys) return;
 
 	Quaternion yawRotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, 1.0f, 0.0f));
 	Quaternion pitchRotation = QMath::angleAxisRotation(pitch, Vec3(1.0f, 0.0f, 0.0f));
 
-	phys->SetRotation(yawRotation * pitchRotation);
-	cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
+	transform->SetRotation(yawRotation * pitchRotation);
+	//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 
 }
 
 void CInput::CheckGrounded()
 {
 	// no floor so ignore this for now
+	// TODO: (andres) implement raycast or collision check to set isGrounded properly. requires collisions to be implemented first
 }
 
 MATH::Vec3 CInput::CalculateMovementDirection() const

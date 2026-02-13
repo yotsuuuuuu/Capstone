@@ -8,6 +8,7 @@ class Chunk
 	Vec2 position; // x,z position in world space. y comes from heightmap
 	std::vector<float> heightmap; // heightmap for the chunk
 	
+	// TODO: (andres) turn this into a component
 
 public:
 

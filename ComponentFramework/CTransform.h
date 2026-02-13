@@ -22,9 +22,11 @@ public:
 	inline MATH::Vec3 GetPosition() const { return position; }
 	inline void SetPosition(const MATH::Vec3& pos) { position = pos; }	
 	inline MATH::Quaternion GetRotation() const { return rotation; }
-	inline void SetRotation(const MATH::Quaternion& rot) { rotation = rot; }
+	void SetRotation(const MATH::Quaternion& rot);
 	inline MATH::Vec3 GetScale() const { return scale; }
 	inline void SetScale(const MATH::Vec3& scl) { scale = scl; }
+
+	bool needsUBOupdate = true;
 
 	MATH::Matrix4 GetTransformMatrix() const;
 };

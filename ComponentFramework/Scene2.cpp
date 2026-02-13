@@ -195,8 +195,8 @@ void Scene2::Update(const float deltaTime) {
 	//p1->Update(deltaTime);
 	auto phys = p1->GetComponent<CPhysics>();
 	phys->Update(deltaTime);
-	auto cam = p1->GetComponent<CCamera>();
-	cam->UpdateFromInput();
+	//auto cam = p1->GetComponent<CCamera>();
+	//cam->UpdateFromInput();
 }
 
 void Scene2::Render() const {

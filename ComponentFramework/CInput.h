@@ -8,7 +8,7 @@ class CCamera;
 class CInput : public Component
 {
 private:
-	WeakRef<CPhysics> physics; //  should be physics component when added
+	WeakRef<CPhysics> physics;
 	WeakRef<CCamera> camera;
 
 public:

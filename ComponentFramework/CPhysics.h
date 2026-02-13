@@ -37,7 +37,7 @@ public:
 	void SetAcceleration(MATH::Vec3 acceleration_) { acceleration = acceleration_; }
 	void SetHasGravity(bool hasGravity_) { hasGravity = hasGravity_; }
 	void SetDragCoefficient(float dragCoefficient_) { dragCoefficient = dragCoefficient_; }
-	void SetRotation(MATH::Quaternion rot_) { rotation = rot_; }
+	//void SetRotation(MATH::Quaternion rot_) { rotation = rot_; }
 
 	float GetMass() { return mass; }
 	MATH::Vec3 GetVelocity() { return velocity; }

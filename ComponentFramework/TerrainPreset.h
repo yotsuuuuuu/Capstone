@@ -22,7 +22,7 @@ enum class FractalType {
     PingPong
 };
 
-// what does what
+// TODO: (andres) what does what
 // length: num chunks
 // frequency: how often the noise pattern repeats across the world (higher frequency = more variation in smaller areas)
 // loudness (amplitude): how much the noise affects the height (higher amplitude = taller mountains/ deeper valleys)

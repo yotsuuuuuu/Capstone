@@ -33,6 +33,11 @@ private:
 	//texture
 	Sampler2D terrainTexture;
 
+	// TODO: (andres) collision meshes
+	// TODO: (andres) LOD/ render distance
+	// TODO: (andres) turn this into a component
+	// TODO: (andres) tweak the pipeline more and maybe use compute shaders for heightmap generation and normal calculation. avoids reusing the mesh
+
 public:
 
 	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
