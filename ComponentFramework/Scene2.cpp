@@ -188,13 +188,13 @@ void Scene2::HandleEvents(const SDL_Event& sdlEvent) {
 void Scene2::Update(const float deltaTime) {
 	//playerController->UpdateInput(deltaTime);
 	auto p1 = std::dynamic_pointer_cast<CActor>(player);
-
 	auto playerController = p1->GetComponent<CInput>();
+	auto phys = p1->GetComponent<CPhysics>();
 
 	playerController->UpdateInput(deltaTime);
-	//p1->Update(deltaTime);
-	auto phys = p1->GetComponent<CPhysics>();
 	phys->Update(deltaTime);
+
+	//p1->Update(deltaTime);
 	//auto cam = p1->GetComponent<CCamera>();
 	//cam->UpdateFromInput();
 }

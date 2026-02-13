@@ -12,13 +12,16 @@ class Chunk
 
 public:
 
+	Chunk() { position = Vec2(); }
 
 	Chunk(Vec2 pos) { position = pos; }
+
+	void SetHeightmap(std::vector<float>&& hm) { heightmap = std::move(hm); }
+	void SetPosition(Vec2 pos) { position = pos; }
 
 	const std::vector<float>& GetHeightmap() const { return heightmap; }
 	const Vec2& GetPosition() const { return position; }
 
-	void SetHeightmap(std::vector<float>&& hm) { heightmap = std::move(hm); }
 
 	Vec2 getChunkPos() const { return position; }
 

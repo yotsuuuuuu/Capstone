@@ -209,6 +209,7 @@ struct DescriptorWriteInfo {
 // terrain structs
 // maybe add chunks here
 
+// TODO: Replace this with scotts vertex
 struct TerrainVertex {
     Vec3 position;
     Vec3 normal;
