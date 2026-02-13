@@ -1,6 +1,5 @@
 #include "FmodController.h"
 #include <fftw3.h>
-//https://www.fftw.org/fftw3.pdf
 
 void FmodController::addSong(const char* wave_)
 {
@@ -87,7 +86,8 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	const float sampleRate = 44100; // Standard sample rate
 
 	fftw_complex* fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
-
+	//DO NOT USE DELETE USE FFTW_FREE TO FREE THE DATA
+	
 	return AudioBands();
 }
 
