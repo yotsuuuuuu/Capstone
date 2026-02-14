@@ -34,6 +34,7 @@ bool CGlobalLight::OnCreate()
 		return false;
 	transform = T;
 	//UpdateViewMatrix(); // NEEDS ADJSUTMENT
+	G_data.pos = Vec3(0,10,0);
 	switch (renderer->getRendererType())
 	{
 	case RendererType::VULKAN: {

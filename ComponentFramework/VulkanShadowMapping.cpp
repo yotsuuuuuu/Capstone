@@ -67,9 +67,9 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 
 }
 
-void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, Ref<Component> globaLight)
+void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, std::shared_ptr<Component> globaLight)
 {
-	
+
 
 	auto Glight = std::dynamic_pointer_cast<CGlobalLight>(globaLight);
 	if (!Glight) {
@@ -94,7 +94,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	config.renderPass = shadowMappingInfo.RenderPass;
 	config.cullMode = VK_CULL_MODE_FRONT_BIT; //VK_CULL_MODE_BACK_BIT VK_CULL_MODE_FRONT_BIT
 	config.depthBias = VK_TRUE;
-	config.depthBiasConstantFactor = 0.0005f;
+	config.depthBiasConstantFactor = 0.0000f;
 	config.depthBiasSlopeFactor = 1.5f;
 	config.depthTestEnable = VK_TRUE;
 	config.depthWriteEnable = VK_TRUE;

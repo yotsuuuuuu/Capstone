@@ -150,7 +150,7 @@ bool Scene0::OnCreate() {
 		act1->AddComponent<CMaterial>(mat1);
 
 		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0, 0,-10), QMath::angleAxisRotation(-25, Vec3(1, 0, 0)), Vec3(3, 3, 1));
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0, -4 ,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(10, 10, 1));
 		act2->AddComponent<CTransform>(t2);
 		act2->AddComponent<CMesh>(mesh1);
 		act2->AddComponent<CMaterial>(mat2);
@@ -162,7 +162,7 @@ bool Scene0::OnCreate() {
 		camera = cam;
 		shader = cshade;
 
-		engineContext.fmodController->playsong(0);
+		//engineContext.fmodController->playsong(0);
 		
 	}
 		break;
