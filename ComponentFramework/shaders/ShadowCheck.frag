@@ -34,10 +34,15 @@ vec3 ShadowCheck(vec4 pos) {
 	vec3 color = vec3(uv, depth);
 
 	if (uv.x < 0 || uv.x > 1 ||
-	    uv.y < 0 || uv.y > 1 ||
-        depth < 0 || depth > 1)
+	    uv.y < 0 || uv.y > 1 
+        )
 	{
-	 color = vec3(1,0,1); // bright magenta = invalid
+	 color = vec3(0.6,0,0.6); // bright magenta = invalid
+	}
+	
+	if(depth < 0 || depth > 1 ) {
+	
+	color += vec3(0,0.5,0);
 	}
 
 	return color;

@@ -22,19 +22,40 @@ layout(set = 0, binding = 2) uniform sampler2DShadow shadowMap;
 
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
+
+
 float ShadowCheck(vec4 pos) {
 
 	// going form clip space to NDC space
-	vec3 ndc = pos.xyz/ pos.w;
+	float invW = 1.0 / pos.w;
+	
+	vec3 ndc = pos.xyz * invW;
 	// Vulkan ndc  -1 to 1 for x and y and z form 0 - 1
 	// so need to remap to texture jsut x and y
 	vec2 uv =  ndc.xy * 0.5 + 0.5;
-	float bias = 0.0f;
-	float depth = ndc.z;
 
-	//float shadow = 
+	float minBias = 0.0005;
+	float slopeFactor = 0.0005;
+	float NL = max( dot(normalize(vertNormal), normalize(lightDir)) ,0.0);
+	float bias = max(minBias,slopeFactor * (1 - NL));
+	float depth = ndc.z - bias;
+	float clampedDepth = clamp(depth, 0.0, 1.0);
+	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 
-    return texture(shadowMap,vec3(uv,depth));
+	int kernelHalf = 2;
+	int totalSamples = 0;
+	float result = 0.0;
+	for(int x = -kernelHalf; x<= kernelHalf ;x++){
+		for(int y = -kernelHalf; y<= kernelHalf ;y++){
+			vec2 offset = vec2(x,y)* texelSize;
+			result += texture(shadowMap, vec3(uv + offset, clampedDepth));
+			totalSamples++;
+		}
+	}
+
+	//return  texture(shadowMap,vec3(uv,clampedDepth));
+
+    return result /float(totalSamples);
 
 	
 }
@@ -55,18 +76,17 @@ void main() {
 	// 
 	float shadow = ShadowCheck(fragLightSpace);
 	//float shadow = 1.0; // Temporary - no shadows
-
-	diff = max(dot(vertNormal, lightDir), 0.0);
-	 
-	float flag = (diff > 0.0) ? 1.0 : 0.0;
+	
+	diff = max(dot(vertNormal, lightDir), 0);		
 	reflection = normalize(reflect(-lightDir, vertNormal));
 	spec = max(dot(eyeDir, reflection), 0.0);
 	spec = pow(spec, 14.0);
-	spec *= flag;
+	
 	
 	// Add diffuse and specular
 	phongResult += shadow * ((diff * kd) + (spec * ks)) * kt;
-	
+	//vec4 phongResult = vec4(max(dot(vertNormal, lightDir), 0));
 	fragColor = phongResult;
+	//fragColor = shadow * vec4(1.0,1.0,1.0,1.0);
 } 
 

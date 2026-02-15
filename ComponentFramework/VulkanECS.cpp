@@ -45,7 +45,7 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
         return;
     }
     camera = cameraActor;
-    uint32_t shadowmapsize = 1024 * 3;
+    uint32_t shadowmapsize = 1024 * 1;
     // create the shadow resources
     CreateGlobalShadowMappingResources(shadowmapsize, shadowmapsize, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -417,7 +417,7 @@ public:
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
-        VKRNDR->imGuiSystem->TestUI();
+        //VKRNDR->imGuiSystem->TestUI();
         VKRNDR->imGuiSystem->EndFrame();
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();

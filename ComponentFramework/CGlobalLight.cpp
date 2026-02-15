@@ -106,6 +106,10 @@ void CGlobalLight::UpdateViewMatrix() {
 		
 		MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
 		MATH::Vec3 LightPos = campos - LightDir * distance;
+
+
+
+
 		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightPos);
 		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(orientation));
 		G_data.viewMatrix = R_Inv * T_Inv;

@@ -335,6 +335,9 @@
     <None Include="shaders\SkyBox.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\ShadowCheck.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
