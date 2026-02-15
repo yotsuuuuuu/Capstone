@@ -3,8 +3,10 @@
 Sampler2D VulkanRenderer::Create2DTextureImage(const char* textureFile) {
 
     Sampler2D texture2D;
-    SDL_Surface* image = IMG_Load(textureFile);
+    SDL_Surface* im = IMG_Load(textureFile);
+    SDL_Surface* image = SDL_ConvertSurface(im, SDL_PIXELFORMAT_RGBA32);
     VkDeviceSize imageSize = image->w * image->h * 4; /// RGBA only please
+    SDL_DestroySurface(im);
 
     BufferMemory stagingBuffer{};
     CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -34,7 +36,8 @@ Sampler2D VulkanRenderer::Create2DTextureImage(const char* textureFile) {
 }
 
 
-void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor, VkBool32 comapre)
+void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode,
+    VkBorderColor borderColor, VkBool32 compare,VkBool32 anisotropy)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
@@ -46,13 +49,17 @@ void VulkanRenderer::CreateSampler(VkSampler& sampler, VkFilter filter, VkSample
 	samplerInfo.addressModeU = samplerMode;
     samplerInfo.addressModeV = samplerMode;
     samplerInfo.addressModeW = samplerMode;
-    samplerInfo.anisotropyEnable = VK_TRUE;
-    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    if (anisotropy == VK_TRUE) {
+        samplerInfo.anisotropyEnable = VK_TRUE;
+        samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    }
+    else {
+        samplerInfo.anisotropyEnable = VK_FALSE;
+        samplerInfo.maxAnisotropy = 1.0f;
+    }
 	samplerInfo.borderColor = borderColor;
-    samplerInfo.unnormalizedCoordinates = VK_FALSE;
-    samplerInfo.anisotropyEnable = VK_TRUE;
-    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-    samplerInfo.compareEnable = comapre;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;   
+    samplerInfo.compareEnable = compare;
     samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 

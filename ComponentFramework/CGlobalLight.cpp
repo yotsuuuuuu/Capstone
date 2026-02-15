@@ -9,7 +9,9 @@ CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, OrthConf
 	G_data.diffused = data.diffused;
 	G_data.specular = data.specular;
 	G_data.projectionMatrix = MMath::orthographicVK(config.xmin,config.xmax,config.ymin,config.ymax,config.zmin,config.zmax);
-
+	G_data.direction = Vec4(VMath::normalize(QMath::rotate(Vec3(0, 0, -1), data.orientation)),0);
+	orientation = data.orientation;
+	distance = data.distance;
 }
 
 CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, PerspectiveConfig config, LightConfig data)
@@ -18,6 +20,9 @@ CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, Perspect
 	G_data.diffused = data.diffused;
 	G_data.specular = data.specular;
 	G_data.projectionMatrix = MMath::perspectiveVK(config.fovy, config.aspectRatio, config.near, config.far);
+	G_data.direction = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), data.orientation));
+	orientation = data.orientation;
+	distance = data.distance;
 }
 
 bool CGlobalLight::OnCreate()
@@ -33,8 +38,8 @@ bool CGlobalLight::OnCreate()
 	if (!T)
 		return false;
 	transform = T;
-	//UpdateViewMatrix(); // NEEDS ADJSUTMENT
-	G_data.pos = Vec3(0,10,0);
+	UpdateViewMatrix(); // NEEDS ADJSUTMENT
+	
 	switch (renderer->getRendererType())
 	{
 	case RendererType::VULKAN: {
@@ -96,10 +101,13 @@ void CGlobalLight::SetLightProjection(PerspectiveConfig config)
 void CGlobalLight::UpdateViewMatrix() {
 	auto T = transform.lock();
 	if (T) {
-		MATH::Vec3 pos = T->GetPosition();
-		MATH::Quaternion rot = T->GetRotation();
-		MATH::Matrix4 T_Inv = MATH::MMath::translate(-pos);
-		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(rot));
+		MATH::Vec3 campos = T->GetPosition();
+		
+		
+		MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
+		MATH::Vec3 LightPos = campos - LightDir * distance;
+		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightPos);
+		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(orientation));
 		G_data.viewMatrix = R_Inv * T_Inv;
 	}
 
@@ -117,6 +125,7 @@ void CGlobalLight::UpdateUBO(uint32_t uboindex)
 	switch (renderer->getRendererType())
 	{
 	case RendererType::VULKAN: {
+		UpdateViewMatrix();
 		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(renderer);		
 		vkrender->UpdateUniformBuffer<GlobalLightData>(G_data, GL_UBO[uboindex]);
 		break;

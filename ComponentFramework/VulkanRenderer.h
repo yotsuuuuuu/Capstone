@@ -428,7 +428,7 @@ private:
 
 
     //Creation Helper functions
-    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE);
+    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE,VkBool32 = VK_TRUE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);

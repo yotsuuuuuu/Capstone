@@ -46,15 +46,20 @@ bool Scene0::OnCreate() {
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
 		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
-		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 40), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
+		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
 		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
 		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
 		LightConfig ldata;
-		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		//ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+		//ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
+		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f)*0.5f;
+		ldata.distance = 5.0f;
+		ldata.orientation = QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
 		OrthConfig config;
-		config.xmax = 4.0f; config.xmin = -4.0f; config.ymax = 4.0f; config.ymin =-4.0f;
+		config.xmax = 20.0f; config.xmin = -20.0f; config.ymax = 20.0f; config.ymin =-20.0f;
 		config.zmax = 100.0f; config.zmin = 0.5f;
 		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, engineContext.renderer, config, ldata));
 		if (!cam->OnCreate()) {
@@ -62,6 +67,9 @@ bool Scene0::OnCreate() {
 		}
 		vRenderer->CreateGlobalRources(cam);
 		
+		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
+		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
+
 		
 		//vRenderer->DestroyGlobalResources();
 		//to get a shadow pass
@@ -80,7 +88,7 @@ bool Scene0::OnCreate() {
 		// PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE , DONE
 		// TODO: SKYBOX  - images - pipeline DONE
 		// TODO: ADD SKYBOX TO ECS RENDERING DONE
-		// TODO: ADD FORWARD COMPOENT TO VULKAN AND REMOVE INCLUDE 
+		// TODO: ADD FORWARD Declaration COMPOENT TO VULKAN AND REMOVE INCLUDE DONE 
 		// TODO : Compute Boiler work
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
@@ -132,7 +140,8 @@ bool Scene0::OnCreate() {
 		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
 		mat1->OnCreate();
 
-		filepaths = { "./textures/checkered_board.png" };
+		filepaths = { "./textures/texture_07.png" };
+
 		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		mat2->OnCreate();
 
@@ -150,7 +159,7 @@ bool Scene0::OnCreate() {
 		act1->AddComponent<CMaterial>(mat1);
 
 		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0, -4 ,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(10, 10, 1));
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(10, 10, 1));
 		act2->AddComponent<CTransform>(t2);
 		act2->AddComponent<CMesh>(mesh1);
 		act2->AddComponent<CMaterial>(mat2);
@@ -199,7 +208,9 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
-			playerController->HandleKeyboardInput(sdlEvent);
+			if (playerController) {
+				playerController->HandleKeyboardInput(sdlEvent);
+			}
 			break;
 		}
 
@@ -207,7 +218,9 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 		{
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
-			playerController->HandleMouseMotion(sdlEvent);
+			if (playerController) {
+				playerController->HandleMouseMotion(sdlEvent);
+			}
 			break;
 		}
 
@@ -217,12 +230,12 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 void Scene0::Update(const float deltaTime) {
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
-		auto input =player->GetComponent<CInput>(); 
+		auto playerController =player->GetComponent<CInput>();
 		auto phys  =player->GetComponent<CPhysics>();
-
-		input->UpdateInput(deltaTime);
-		phys->Update(deltaTime);
-
+		if (playerController) {
+			playerController->UpdateInput(deltaTime);
+			phys->Update(deltaTime);
+		}
 	}
 }
 

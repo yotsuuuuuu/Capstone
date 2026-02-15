@@ -22,51 +22,30 @@ layout(set = 0, binding = 2) uniform sampler2DShadow shadowMap;
 
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
-float ShadowCheck(vec4 pos) {
+vec3 ShadowCheck(vec4 pos) {
 
 	// going form clip space to NDC space
 	vec3 ndc = pos.xyz/ pos.w;
 	// Vulkan ndc  -1 to 1 for x and y and z form 0 - 1
 	// so need to remap to texture jsut x and y
 	vec2 uv =  ndc.xy * 0.5 + 0.5;
-	float bias = 0.0f;
 	float depth = ndc.z;
 
-	//float shadow = 
+	vec3 color = vec3(uv, depth);
 
-    return texture(shadowMap,vec3(uv,depth));
+	if (uv.x < 0 || uv.x > 1 ||
+	    uv.y < 0 || uv.y > 1 ||
+        depth < 0 || depth > 1)
+	{
+	 color = vec3(1,0,1); // bright magenta = invalid
+	}
 
+	return color;
 	
 }
 
 
 void main() { 
-	vec3 reflection;
-	float spec;
-	float diff;
-	vec4 ka = GLData.ambient;
-	vec4 kd = GLData.diffuse;
-	vec4 ks = GLData.specular;
-	vec4 kt = texture(texSampler, fragTexCoords);
-	
-	// Ambient 
-	vec4 phongResult = ka * kt;
-
-	// 
-	float shadow = ShadowCheck(fragLightSpace);
-	//float shadow = 1.0; // Temporary - no shadows
-
-	diff = max(dot(vertNormal, lightDir), 0.0);
-	 
-	float flag = (diff > 0.0) ? 1.0 : 0.0;
-	reflection = normalize(reflect(-lightDir, vertNormal));
-	spec = max(dot(eyeDir, reflection), 0.0);
-	spec = pow(spec, 14.0);
-	spec *= flag;
-	
-	// Add diffuse and specular
-	phongResult += shadow * ((diff * kd) + (spec * ks)) * kt;
-	
-	fragColor = phongResult;
+	fragColor = vec4(ShadowCheck(fragLightSpace),1);;
 } 
 
