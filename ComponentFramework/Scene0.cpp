@@ -29,8 +29,6 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-
-	engineContext.fmodController->AnalyzeAudioOffline(0);
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -164,7 +162,7 @@ bool Scene0::OnCreate() {
 		camera = cam;
 		shader = cshade;
 
-		//engineContext.fmodController->playsong(0);
+		engineContext.fmodController->playsong(0);
 		
 	}
 		break;

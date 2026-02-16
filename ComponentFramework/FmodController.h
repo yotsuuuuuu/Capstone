@@ -9,16 +9,14 @@ struct AudioBands
 	float bass; //60 Hz-130 Hz
 	float highBass; //130 Hz-262 Hz
 	float lowMid; //250 Hz-523 Hz
-	float midMid; //500 Hz-1046 Hz
+	float midMid; //523 Hz-1046 Hz
 	float highMid; //1 kHz-2093 Hz
 	float lowHigh; //2 kHz-41896 Hz
-	float highHigh; //4 kHz-20 kHz
+	float midHigh; //4 kHz-8 kHz
+	float highHigh; //8 kHz-12 kHz
+	float air; //12 kHz-20 kHz
 
-	float low; //20 Hz-250 Hz
-	float mid; //250 Hz-4 kHz
-	float high; //4kHz-20 kHz
-	///create more bands for noise map
-	//get 10 
+	
 };
 
 
@@ -40,7 +38,8 @@ public:
 	bool createSystem();
 	void Volume(float volume_);
 
-	AudioBands AnalyzeAudioOffline(int songunum_);
+	std::vector<AudioBands> AnalyzeAudioOffline(int songunum_);
+	//system that gets the fmod sound data that fram puts it inot bands then sends it to the vulkan rednerer for the shader system. NEEDS TO GET SIZE
 	~FmodController();
 };
 

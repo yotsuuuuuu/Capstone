@@ -73,7 +73,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
-
+	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE0);
 	
 	return true;

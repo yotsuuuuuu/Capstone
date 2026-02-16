@@ -50,6 +50,9 @@ bool FmodController::createSystem()
 	{
 		result = system->createSound(nameOfsounds[i], FMOD_DEFAULT, 0, &numOfsounds[i]);
 	}
+
+
+
 	return true;
 }
 
@@ -73,10 +76,10 @@ void FmodController::Volume(float volume_)
 	}
 }
 
-AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
+std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 {
 	//creates audio bands object
-	AudioBands bands = { 0.0f,0.0f,0.0f };
+	std::vector<AudioBands> bandHolder;
 
 	
 	unsigned int lengthPCM = 0;//length cannot be negatice
@@ -90,10 +93,17 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	numOfsounds[songnum_]->getFormat(&type, &format, &channels, &bits);	
 	//gets the length  of the sound in PCM
 	numOfsounds[songnum_]->getLength(&lengthPCM, FMOD_TIMEUNIT_PCM);
-	
+	//
+	//system->mixerSuspend(); // Suspend the mixer to safely access sound data
+
 	void* ptr1 = nullptr;
 	void* ptr2 = nullptr;
 	unsigned int len1 = 0, len2 = 0;
+
+	//flexible sample rate if the song is not 44100 it will still work
+	float sampleRate;
+	numOfsounds[songnum_]->getDefaults(&sampleRate, nullptr);
+
 
 	// gets the size get ptr1 is where it starts in memory and len1 is the size of the sound in memory
 	//	ptr2 is the second block of the memeory if the sond is long len2 is the size of the second block of memory
@@ -102,21 +112,13 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	short* samples = static_cast<short*>(ptr1);  // access PCM16 samples
 	
 	const int fftSize = 2048;       // Window size for FFT
-
-	//flexible sample rate if the song is not 44100 it will still work
-	float sampleRate;
-	numOfsounds[songnum_]->getDefaults(&sampleRate, nullptr);
-	
-
-
 	//allocating the fftw buffers (OMG VULKAN BUFFER REFERENCE not really)
 	double* in = (double*)fftw_malloc(sizeof(double) * fftSize);
 	fftw_complex* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
 
 	//Creating the plan for the FFT, we can reuse this plan for multiple executions if the input size remains the same
-	fftw_plan plan = fftw_plan_dft_r2c_1d(fftSize, in, out, FFTW_MEASURE);
+	fftw_plan plan = fftw_plan_dft_r2c_1d(fftSize, in, out, FFTW_ESTIMATE);
 
-	unsigned int windowCount = 0;
 	double binWidth = static_cast<double>(sampleRate) / fftSize;
 	//gets me pi according to the internet i can be wrong
 	double pi = 3.14159265358979323846;
@@ -142,9 +144,16 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 
 
 		// Analyze the FFT output to calculate energy in low, mid, and high frequency bands
-		float lowEnergy = 0.0f;
-		float midEnergy = 0.0f;
-		float highEnergy = 0.0f;
+		float subEnergy = 0.0f;
+		float bassEnergy = 0.0f;
+		float highBassEnergy = 0.0f;
+		float lowMidEnergy = 0.0f;
+		float midMidEnergy = 0.0f;
+		float highMidEnergy = 0.0f;
+		float lowHighEnergy = 0.0f;
+		float midHighEnergy = 0.0f;
+		float highHighEnergy = 0.0f;	
+		float airEnergy = 0.0f;
 
 
 		for (int k = 0; k < fftSize / 2 + 1; k++)
@@ -157,39 +166,36 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 			//you canr ead the name but gets frequency
 			double frequency = k * binWidth;
 
-			if (frequency >= 20 && frequency < 250)
-				lowEnergy += power;
-			else if (frequency >= 250 && frequency < 4000)
-				midEnergy += power;
-			else if (frequency >= 4000 && frequency <= 20000)
-				highEnergy += power;
+			if (frequency < 60)
+				subEnergy += power;
+			else if (frequency < 130)
+				bassEnergy += power;
+			else if (frequency <= 262)
+				highBassEnergy += power;
+			else if (frequency < 523)
+				lowMidEnergy += power;
+			else if (frequency < 1046)
+				midMidEnergy += power;
+			else if (frequency < 2093)
+				highMidEnergy += power;
+			else if (frequency < 4186)
+				lowHighEnergy += power;
+			else if (frequency < 8000)
+				midHighEnergy += power;
+			else if (frequency < 12000)
+				highHighEnergy += power;
+			else if (frequency <= 20000)
+				airEnergy += power;
+			
 		}
-		//adding to global totals for each band
-		bands.low += lowEnergy;
-		bands.mid += midEnergy;
-		bands.high += highEnergy;
 
-		windowCount++;
+		float totalEnergy = subEnergy + bassEnergy + highBassEnergy + lowMidEnergy + midMidEnergy + highMidEnergy + lowHighEnergy + midHighEnergy + highHighEnergy + airEnergy;
+		if(totalEnergy == 0)
+			totalEnergy = 1.0f; // Avoid division by zero
+
+		bandHolder.push_back({ subEnergy/totalEnergy, bassEnergy/totalEnergy, highBassEnergy/totalEnergy, lowMidEnergy/totalEnergy, midMidEnergy/totalEnergy, highMidEnergy/totalEnergy, lowHighEnergy/totalEnergy, midHighEnergy/totalEnergy, highHighEnergy/totalEnergy, airEnergy/totalEnergy });
+
 	}
-
-	//Average over all windows
-	if (windowCount > 0)
-	{
-		bands.low /= windowCount;
-		bands.mid /= windowCount;
-		bands.high /= windowCount;
-	}
-
-	// NORMAILZE TIME 
-	float total = bands.low + bands.mid + bands.high;
-	if (total > 0.0f)
-	{
-		bands.low /= total;
-		bands.mid /= total;
-		bands.high /= total;
-	}
-
-	printf("Low: %f, Mid: %f, High: %f\n", bands.low, bands.mid, bands.high);
 	
 	//DO NOT USE DELETE USE FFTW_FREE TO FREE THE DATA
 	fftw_destroy_plan(plan);
@@ -198,10 +204,9 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 
 	numOfsounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
 	
-	
-	//incorparate more bands for noise map
+	system->mixerResume(); // Resume the mixer after processing
 
-	return bands;
+	return bandHolder;
 }
 
 
