@@ -9,8 +9,9 @@
 #include "CTransform.h"
 #include "CWorld.h"
 #include "CSkyBox.h"
-#include <unordered_map>
+
 #include "imgui.h"
+#include <unordered_map>
 
 void VulkanRenderer::CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo, const std::vector<DescriptorWriteInfo>& WriteInfo)
 {
@@ -426,6 +427,7 @@ public:
         // TODO: Update UBOs for current frame ??? needs to be done
         if (auto cam = VKRNDR->camera.lock()) {
             auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
+            //context get data form fmdo  then update buffer.
             MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
             MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.targetFrameIndex);
         }
@@ -433,6 +435,7 @@ public:
         VkPipelineLayout line;
         // 1.1 get draw items
         std::unordered_map<VkPipeline, std::vector<DrawItem>> DrawingBuckets;
+        std::unordered_map<VkPipeline, std::vector<DrawItem>> ChunkDraw;
         for (const auto& comp : drawlist) {
             Ref<CActor> a = std::dynamic_pointer_cast<CActor>(comp);
             if (a) {
@@ -446,18 +449,18 @@ public:
                     line = item.pipeInfo.pipelineLayout;
                 }       
                 auto world = a->GetComponent<CWorld>();
-                if (world) {
-                    PipelineInfo info = world->GetWorldPipeline();
-                    VkDescriptorSet set = world->GetWorldDescriptorSet()[framecntx.targetFrameIndex];
+                if (world && mat) {
+                    PipelineInfo info = mat->GetPipelineInfo();;
+                    VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.targetFrameIndex];
                     auto chunkMap = world->GetChunkRenderData();
                     for (const auto& pair : chunkMap) {
                         DrawItem item;
                         item.mesh = pair.second.vertexBuffer;
                         item.push = pair.second.transform;
-                        item.setID = 1;
+                        item.setID = mat->GetSetValue();;
                         item.pipeInfo = info;
                         item.set = set;
-                        DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
+                        ChunkDraw[item.pipeInfo.pipeline].push_back(item);
                     }
                 }
 
@@ -494,6 +497,7 @@ public:
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
                 &shadowcntx.DesSetInfo.descriptorSet[framecntx.targetFrameIndex]);
+            //For stuff not terrain
             for (const auto& pair : DrawingBuckets) {
                 for (const auto& item : pair.second) {
                     VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
@@ -501,6 +505,15 @@ public:
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
             }
+            // For terrain
+            for (const auto& pair : ChunkDraw) {
+                for (const auto& item : pair.second) {
+                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
+                    VKRNDR->CMDRecordDrawTerrainIndex(framecntx.CMDBuffer, item.mesh);
+                }
+            }
+
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
    
@@ -536,6 +549,16 @@ public:
                     VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
                     VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                }
+            }
+            //for terrain
+            for (const auto& pair : ChunkDraw) {
+                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, pair.first, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                for (const auto& item : pair.second) {
+                    VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &item.set, item.setID);
+                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
+                    VKRNDR->CMDRecordDrawTerrainIndex(framecntx.CMDBuffer, item.mesh);
                 }
             }
             VKRNDR->imGuiSystem->RecordCMDBuffer(framecntx.CMDBuffer);

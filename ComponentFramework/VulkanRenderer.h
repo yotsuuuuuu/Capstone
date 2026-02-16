@@ -412,6 +412,8 @@ private:
     void CMDRecordDescriptorSet(const VkCommandBuffer&, const VkPipelineLayout&, VkPipelineBindPoint flag, const VkDescriptorSet*, uint32_t fristSet = 0, uint32_t count = 1, uint32_t desOffset = 0, const uint32_t* DynamicOffset = nullptr);
     void CMDRecordBindIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
+    void CMDRecordDrawTerrainIndex(const VkCommandBuffer&, const IndexedVertexBuffer&);
+
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
@@ -514,7 +516,7 @@ public:
     void RenderTerrainChunk(IndexedVertexBuffer& terrainBuffers, const ModelMatrixPushConst& transform, PipelineInfo& pipelineInfo, DescriptorSetInfo descriptorSet);
 	PipelineInfo CreateTerrainPipeline(VkDescriptorSetLayout descriptorSetLayout); // hard coded shaders
     void DrawTerrain(IndexedVertexBuffer chunk);
-
+  
 };
 #endif 
 

@@ -1,7 +1,7 @@
 #include "World.h"
 
 
-void World::Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_)
+void World::Initialize(TerrainPreset* t_)
 {
 	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 
@@ -9,9 +9,9 @@ void World::Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, 
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
 	// TODO: change texture to something real
-	terrainTexture = vRenderer->Create2DTextureImage("./textures/rock.png");
+	//terrainTexture = vRenderer->Create2DTextureImage("./textures/rock.png");
 
-	CreateWorldPipeline(cameraUBO_, lightsUBO_);
+	//CreateWorldPipeline(cameraUBO_, lightsUBO_);
 
 	GenerateAllChunks();
 }
@@ -38,13 +38,13 @@ void World::RenderWorld()
 
 void World::OnDelete()
 {
-	vRenderer->DestroySampler2D(terrainTexture);
-	vRenderer->DestroyPipeline(worldPipeline);
+	//vRenderer->DestroySampler2D(terrainTexture);
+	//vRenderer->DestroyPipeline(worldPipeline);
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
 	}
 
-	vRenderer->DestroyDescriptorSet(worldDescriptorSet);
+	//vRenderer->DestroyDescriptorSet(worldDescriptorSet);
 
 
 }
@@ -56,16 +56,18 @@ void World::GenerateAllChunks()
 	chunkRenderData.clear();
 
 	// create grid of chunks
+	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
 		for (int y = 0; y < WORLD_SIZE; y++) {
 
 			Vec2 chunkWorldPos = Vec2(x * CHUNK_WORLD_SIZE, y * CHUNK_WORLD_SIZE);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
-
+			//printf("Chunk number: %d\n", i);
 			GenerateChunkHeightmap(tempChunk.get());
 			BuildChunkMeshData(tempChunk.get());
 
 			chunks.push_back(std::move(tempChunk));
+			i++;
 		}
 	}
 }
@@ -83,6 +85,7 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 			float worldZ = chunkPos.y + float(z);
 
 			heightmap[z * CHUNK_SIZE + x] = terrainNoise->sample(worldX, worldZ);
+			//printf("heightValue: %f X:%f, Y %f \t", heightmap[z * CHUNK_SIZE + x],worldX,worldZ);
 		}
 	}
 	chunk->SetHeightmap(std::move(heightmap));
@@ -107,7 +110,9 @@ void World::BuildChunkMeshData(Chunk* chunk)
 
 		vertex.uv = baseChunkMesh->baseUVs[i];
 		vertex.normal = Vec3(0.0f, 1.0f, 0.0f); // temporary normal, will be calculated later
-
+		//vertex.position.print("vertext postion");
+		//vertex.uv.print("vertext UV");
+		//vertex.normal.print("vertext Normal");
 		vertices.push_back(vertex);
 	}
 

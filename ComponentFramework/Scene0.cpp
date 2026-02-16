@@ -9,6 +9,7 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
+#include "CWorld.h"
 #include "CInput.h"
 #include "CCamera.h"
 #include "CPhysics.h"
@@ -43,7 +44,7 @@ bool Scene0::OnCreate() {
 		// step 1 Create the  GLOBAL componetes
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
-		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 70.0f, aspectRatio, 0.25f, 100.0f));
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 70.0f, aspectRatio, 0.25f, 500.0f));
 		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
 		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
 		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
@@ -120,6 +121,7 @@ bool Scene0::OnCreate() {
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
+		
 		//step 1.3 Materials
 		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
 		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths,cshade);
@@ -135,6 +137,12 @@ bool Scene0::OnCreate() {
 
 		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		mat2->OnCreate();
+
+
+		filepaths = { "./textures/rock.png" };
+
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
+		mat3->OnCreate();
 
 		// step 2 create actors
 		Ref<CActor> act = std::make_shared<CActor>(nullptr);
@@ -154,6 +162,21 @@ bool Scene0::OnCreate() {
 		act2->AddComponent<CTransform>(t2);
 		act2->AddComponent<CMesh>(mesh1);
 		act2->AddComponent<CMaterial>(mat2);
+
+		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
+		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
+		TerrainPreset preset;
+		//	noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
+		preset.base = { NoiseType::Perlin,	42,		0.01f,		1.0f,		true,		FractalType::FBm,	4,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
+		preset.mountains = { NoiseType::OpenSimplex2, 1337, 0.02f, 1.0f, true, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
+		preset.detail = { NoiseType::OpenSimplex2, 7, 0.1f, 0.5f, true, FractalType::FBm, 3, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+		preset.globalHeightScale = 10.0f;
+		wC->InitializeWorld(&preset);
+		WorldActor->AddComponent<CWorld>(wC);
+		WorldActor->AddComponent<CMaterial>(mat3);
+		WorldActor->OnCreate();
+
+		
 		
 		//step 3 Actors being added to the scene.
 		actor = act;
@@ -161,8 +184,9 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
-
-		engineContext.fmodController->playsong(0);
+		
+		World = WorldActor;
+		//engineContext.fmodController->playsong(0);
 		
 	}
 		break;
@@ -243,7 +267,8 @@ void Scene0::Render() const {
 			drawlist.push_back(actor);
 			drawlist.push_back(actor1);
 			drawlist.push_back(plane);
-			vRenderer->RenderECS(drawlist);
+			drawlist.push_back(World);
+			vRenderer->RenderECS(drawlist);// Context obejct
 		}
 		break;
 
@@ -271,11 +296,13 @@ void Scene0::OnDestroy() {
 		
 		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
+	
 		vRenderer->DestroyUBO(lightsUBO);
 		
 		engineContext.fmodController->playsong(0);
 		camera->OnDestroy();
 		actor->OnDestroy();
+		World->OnDestroy();
 		actor1->OnDestroy();
 		plane->OnDestroy();
 		
