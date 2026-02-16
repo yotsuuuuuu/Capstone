@@ -9,7 +9,7 @@ void World::Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, 
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
 	// TODO: change texture to something real
-	terrainTexture = vRenderer->Create2DTextureImage("./textures/mario_fire.png");
+	terrainTexture = vRenderer->Create2DTextureImage("./textures/rock.png");
 
 	CreateWorldPipeline(cameraUBO_, lightsUBO_);
 
