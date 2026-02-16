@@ -9,6 +9,7 @@ struct AudioBands
 	float mid; //250 Hz-4 kHz
 	float high; //4kHz-20 kHz
 	///create more bands for noise map
+	//get 10 
 };
 
 
