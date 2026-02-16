@@ -45,7 +45,7 @@ bool Scene0::OnCreate() {
 		// step 1 Create the  GLOBAL componetes
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
-		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 70.0f, aspectRatio, 0.25f, 100.0f));
 		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
 		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
 		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
@@ -55,13 +55,13 @@ bool Scene0::OnCreate() {
 		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.8f;
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(-90, Vec3(1, 0, 0));
-		ldata.distance = 5.0f;
+		ldata.orientation =  QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
+		//ldata.distance = 2.0f;
 		OrthConfig config;
-		config.xmax = 7.0f; config.xmin = -7.0f; config.ymax = 7.0f; config.ymin =-7.0f;
-		config.zmax = 100.0f; config.zmin = 0.5f;
+		config.xmax = 6.0f; config.xmin = -6.0f; config.ymax = 6.0f; config.ymin =-6.0f;
+		config.zmax = 12.0f; config.zmin = 0.25f;
 		/*PerspectiveConfig config;
 		config.aspectRatio = aspectRatio;
 		config.far = 100.0f;
@@ -151,7 +151,7 @@ bool Scene0::OnCreate() {
 		act1->AddComponent<CMaterial>(mat1);
 
 		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(1, 1, 1));
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(5, 5, 1));
 		act2->AddComponent<CTransform>(t2);
 		act2->AddComponent<CMesh>(mesh1);
 		act2->AddComponent<CMaterial>(mat2);

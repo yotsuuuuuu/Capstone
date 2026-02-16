@@ -30,6 +30,9 @@
 #include <MMath.h>
 #include <Hash.h>
 #include <memory>
+
+constexpr uint32_t SHAWDOW_SIZE = 1024;
+
 using namespace MATH;
 
 class Component;

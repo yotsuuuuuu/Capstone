@@ -42,7 +42,7 @@ float ShadowCheck(vec4 pos) {
 	float clampedDepth = clamp(depth, 0.0, 1.0);
 	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 
-	int kernelHalf = 2;
+	int kernelHalf = 1;
 	int totalSamples = 0;
 	float result = 0.0;
 	for(int x = -kernelHalf; x<= kernelHalf ;x++){

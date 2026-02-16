@@ -32,7 +32,7 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 			shadowMappingInfo.propFlag, sampler.image, sampler.imageDeviceMemory);
 		sampler.imageView = createImageView(sampler.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
 		//VK_FILTER_LINEAR VK_FILTER_NEAREST
-		CreateSampler(sampler.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE,VK_FALSE);
+		CreateSampler(sampler.sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE,VK_FALSE);
 	}
 	// Step 3 create render pass for shadow mapping
 

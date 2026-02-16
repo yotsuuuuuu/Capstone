@@ -42,7 +42,7 @@ vec3 ShadowCheck(vec4 pos) {
 	
 	if(depth < 0 || depth > 1 ) {
 	
-	color += vec3(0,0.5,0);
+	color = vec3(0,0.5,0);
 	}
 
 	return color;

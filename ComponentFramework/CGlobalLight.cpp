@@ -4,7 +4,7 @@
 #include "VulkanRenderer.h"
 
 CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, OrthConfig config, LightConfig data)
-: Component(parent_), renderer(renderer_){
+	: Component(parent_), renderer(renderer_), Perc({}) {
 	G_data.ambient = data.ambient;
 	G_data.diffused = data.diffused;
 	G_data.specular = data.specular;
@@ -12,10 +12,12 @@ CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, OrthConf
 	G_data.direction = Vec4(VMath::normalize(QMath::rotate(Vec3(0, 0, -1), data.orientation)),0);
 	orientation = data.orientation;
 	distance = data.distance;
+	mode = GLMODE::ORTHO;
+	Othc = config;
 }
 
 CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, PerspectiveConfig config, LightConfig data)
-	: Component(parent_), renderer(renderer_) {
+	: Component(parent_), renderer(renderer_), Othc({}) {
 	G_data.ambient = data.ambient;
 	G_data.diffused = data.diffused;
 	G_data.specular = data.specular;
@@ -23,6 +25,8 @@ CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, Perspect
 	G_data.direction = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), data.orientation));
 	orientation = data.orientation;
 	distance = data.distance;
+	mode = GLMODE::PRESPECTIVE;
+	Perc = config;
 }
 
 bool CGlobalLight::OnCreate()
@@ -101,17 +105,30 @@ void CGlobalLight::SetLightProjection(PerspectiveConfig config)
 void CGlobalLight::UpdateViewMatrix() {
 	auto T = transform.lock();
 	if (T) {
-		MATH::Vec3 campos = T->GetPosition();
-		
+		MATH::Vec3 CamPos = T->GetPosition();
+		MATH::Quaternion CamRot = T->GetRotation();
 		
 		MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
-		MATH::Vec3 LightPos = campos - LightDir * distance;
-
-
-
-
-		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightPos);
+		MATH::Vec3 CameraFoward = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), CamRot));
+		float offset = (Othc.zmax - Othc.zmin) * 0.45f;
+		MATH::Vec3 ShadowCenter = CamPos + CameraFoward * offset;
+		MATH::Vec3 LightPos = ShadowCenter - LightDir * offset;
 		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(orientation));
+		
+		//MATH::Vec3 LightCenter = LightPos ;
+		/*switch (mode) {
+		case GLMODE::ORTHO: {
+			LightCenter = QMath::rotate(LightPos, QMath::conjugate(orientation));
+			float texelSizeX = Othc.xmax - Othc.xmin / float(SHAWDOW_SIZE);
+			float texelSizeY = Othc.ymax - Othc.zmin / float(SHAWDOW_SIZE);
+			LightCenter.x = floor(LightCenter.x / texelSizeX) * texelSizeX;
+			LightCenter.y = floor(LightCenter.y / texelSizeY) * texelSizeY;
+			LightCenter = QMath::rotate(LightCenter, orientation);
+			break;
+		}
+		}*/
+		
+		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightPos);
 		G_data.viewMatrix = R_Inv * T_Inv;
 	}
 
