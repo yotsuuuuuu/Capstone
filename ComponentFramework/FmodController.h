@@ -20,6 +20,7 @@ private:
 	FMOD::Channel* channel = nullptr;
 	FMOD_RESULT result = FMOD_OK;
 	void* extradriverdata = 0;
+	float volume = 100.0f;
 
 public:
 	FmodController(){};
@@ -27,6 +28,7 @@ public:
 	void playsong(int songnum_);
 	bool createSystem();
 	void DummyFunction();
+	void Volume(float volume_);
 
 	AudioBands AnalyzeAudioOffline(int songunum_);
 	~FmodController();

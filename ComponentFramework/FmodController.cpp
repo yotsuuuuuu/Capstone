@@ -21,6 +21,7 @@ void FmodController::playsong(int songnum_)
 	if (channel == nullptr || playing == false)
 	{
 		result = system->playSound(numOfsounds[songnum_], 0, false, &channel);
+		channel->setVolume(volume / 100.0f);
 	}
 	else
 	{
@@ -68,6 +69,25 @@ void FmodController::DummyFunction()
 	fftw_print_plan(plan);// Print the FFT plan (for debugging)
 	printf("\n PRINTINF FROM DUMMY");
 
+}
+
+void FmodController::Volume(float volume_)
+{
+	volume += volume_;
+
+	if (volume > 100)
+	{
+		volume = 100;
+	}
+	else if (volume < 0)
+	{
+		volume = 0;
+	}
+
+	if (channel)
+	{
+		channel->setVolume(volume/100.0f);
+	}
 }
 
 AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
@@ -187,15 +207,19 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	}
 
 	printf("Low: %f, Mid: %f, High: %f\n", bands.low, bands.mid, bands.high);
+	
 	//DO NOT USE DELETE USE FFTW_FREE TO FREE THE DATA
 	fftw_destroy_plan(plan);
 	fftw_free(in);
 	fftw_free(out);
+
 	numOfsounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
 
 
 	return bands;
 }
+
+
 
 FmodController::~FmodController()
 {
