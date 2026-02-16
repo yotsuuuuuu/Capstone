@@ -8,9 +8,15 @@ class Renderer;
 
 class CGlobalLight : public Component
 {
+	enum GLMODE {ORTHO,PRESPECTIVE};
+	OrthConfig Othc;
+	PerspectiveConfig Perc;
+	GLMODE mode;
 	WeakRef<CTransform> transform;
 	GlobalLightData G_data;
 	std::vector<BufferMemory> GL_UBO;
+	MATH::Quaternion orientation;
+	float distance;
 	Renderer* renderer;
 public:
 	CGlobalLight(Ref<Component> parent_, Renderer* renderer_, OrthConfig config, LightConfig data);

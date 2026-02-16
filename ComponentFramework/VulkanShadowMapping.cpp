@@ -31,8 +31,8 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
 			shadowMappingInfo.propFlag, sampler.image, sampler.imageDeviceMemory);
 		sampler.imageView = createImageView(sampler.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
-		
-		CreateSampler(sampler.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE);
+		//VK_FILTER_LINEAR VK_FILTER_NEAREST
+		CreateSampler(sampler.sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE,VK_FALSE);
 	}
 	// Step 3 create render pass for shadow mapping
 
@@ -67,9 +67,9 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 
 }
 
-void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, Ref<Component> globaLight)
+void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile, std::shared_ptr<Component> globaLight)
 {
-	
+
 
 	auto Glight = std::dynamic_pointer_cast<CGlobalLight>(globaLight);
 	if (!Glight) {
@@ -94,11 +94,11 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	config.renderPass = shadowMappingInfo.RenderPass;
 	config.cullMode = VK_CULL_MODE_FRONT_BIT; //VK_CULL_MODE_BACK_BIT VK_CULL_MODE_FRONT_BIT
 	config.depthBias = VK_TRUE;
-	config.depthBiasConstantFactor = 0.0005f;
-	config.depthBiasSlopeFactor = 1.5f;
+	config.depthBiasConstantFactor = 0.7f;
+	config.depthBiasSlopeFactor = 2.75f;
 	config.depthTestEnable = VK_TRUE;
 	config.depthWriteEnable = VK_TRUE;
-	config.depthCompareOp = VK_COMPARE_OP_LESS;
+	config.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL; //VK_COMPARE_OP_LESS_OR_EQUAL VK_COMPARE_OP_LESS
 	config.Color = false;
 
 	shadowMappingInfo.PipelineInfo = CreateGraphicsPipeline({ shadowMappingInfo.DesSetInfo.descriptorSetLayout }, config, vertFile, fragFile);

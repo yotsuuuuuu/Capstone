@@ -16,8 +16,7 @@ layout(set = 0, binding = 1) uniform GLightData{
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
-	vec4 pos;
-	vec4 pad;
+	vec4 dir;
 } GLData;
 
 layout(push_constant) uniform Push {
@@ -34,18 +33,23 @@ layout (location = 4) out vec4 fragLightSpace;
 
 void main() {
 	fragTexCoords = texCoords;
-	mat3 normalMatrix = mat3(push.normalMatrix);
+	// Transform normals to view space
+	mat3 normalMatrix = mat3(transpose(inverse(camera.viewMatrix * push.modelMatrix)));
+	vertNormal = normalize(normalMatrix * vNormal.xyz);
+	// Position in view space
+	vec4 viewPos = camera.viewMatrix * push.modelMatrix * vVertex;
+	vec3 viewVertPos = vec3(viewPos);
+	// Eye direction 
+	eyeDir = normalize(-viewVertPos);
 
-	vertNormal = normalize(normalMatrix * vNormal.xyz); /// Rotate the normal to the correct orientation 
-	vec3 vertPos = vec3(camera.viewMatrix * push.modelMatrix * vVertex); /// This is the position of the vertex from the origin
-	vec3 vertDir = normalize(vertPos);
-	eyeDir = -vertDir;
+	// If we are Trasnforming the normal to view space the light dir must match 
+	// it is form pespective form the vertex so it must be negated
+	lightDir = -normalize(mat3(camera.viewMatrix) * GLData.dir.xyz);
 
-	/// Light position from the point-of-view of each vertex
-	vec3 lightLocFromVertex =  vec3(GLData.pos) - vertPos; 
-	lightDir = normalize(lightLocFromVertex); 
-	
+	// Fragment postion in light space
 	fragLightSpace = GLData.projectionMatrix * GLData.viewMatrix * push.modelMatrix * vVertex;
-	
-	gl_Position =  camera.projectionMatrix * camera.viewMatrix * push.modelMatrix * vVertex; 
+
+	// Final Pos
+	// viewpos  =  camera.viewMatrix * push.modelMatrix * vVertex;
+	gl_Position = camera.projectionMatrix * viewPos;
 }

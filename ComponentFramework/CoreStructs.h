@@ -51,8 +51,7 @@ struct GlobalLightData {
     Vec4 ambient;
     Vec4 diffused;
     Vec4 specular;
-    Vec4 pos;
-    Quaternion orientation;
+    Vec4 direction;
 };
 struct OrthConfig {
     float xmin;
@@ -72,6 +71,8 @@ struct LightConfig {
     Vec4 ambient;
     Vec4 diffused;
     Vec4 specular;
+    float distance;
+    Quaternion orientation;
 };
 
 

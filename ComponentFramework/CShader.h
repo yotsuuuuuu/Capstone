@@ -26,7 +26,7 @@ public:
 		std::optional<std::string> tesEShaderFile_ = std::nullopt)
 		: Component(parent_),render(render_), layoutInfo(layoutInfo_), pipelineInfo({}), p_config(config_), vertShaderFile(vertShaderFile_),
 		fragShaderFile(fragShaderFile_),geomShaderFile(geomShaderFile_),
-		tesCShaderFile(tesCShaderFile_),tesEShaderFile(tesEShaderFile_), poolSize(100){
+		tesCShaderFile(tesCShaderFile_),tesEShaderFile(tesEShaderFile_), poolSize(30){
 	}
 
 	

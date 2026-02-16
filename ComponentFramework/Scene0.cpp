@@ -45,23 +45,38 @@ bool Scene0::OnCreate() {
 		// step 1 Create the  GLOBAL componetes
 		
 		Ref<CActor> cam = std::make_shared<CActor>();
-		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 45.0f, aspectRatio, 0.5f, 100.0f));
-		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 40), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 70.0f, aspectRatio, 0.25f, 100.0f));
+		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
 		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
 		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
 		LightConfig ldata;
-		ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-		ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		//ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
+		//ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
+		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
+		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
+		
+		ldata.orientation =  QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
+		ldata.distance = 2.0f;
+		float sidelenght = 10.0f;
 		OrthConfig config;
-		config.xmax = 4.0f; config.xmin = -4.0f; config.ymax = 4.0f; config.ymin =-4.0f;
-		config.zmax = 100.0f; config.zmin = 0.5f;
+		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
+		config.zmax = sidelenght; config.zmin = 0.25f;
+		/*PerspectiveConfig config;
+		config.aspectRatio = aspectRatio;
+		config.far = 100.0f;
+		config.near = 0.5f;
+		config.fovy = 45.0f;*/
 		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, engineContext.renderer, config, ldata));
 		if (!cam->OnCreate()) {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
 		
+		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
+		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
+
 		
 		//vRenderer->DestroyGlobalResources();
 		//to get a shadow pass
@@ -80,29 +95,14 @@ bool Scene0::OnCreate() {
 		// PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE , DONE
 		// TODO: SKYBOX  - images - pipeline DONE
 		// TODO: ADD SKYBOX TO ECS RENDERING DONE
-		// TODO: ADD FORWARD COMPOENT TO VULKAN AND REMOVE INCLUDE 
+		// TODO: ADD FORWARD Declaration COMPOENT TO VULKAN AND REMOVE INCLUDE DONE 
 		// TODO : Compute Boiler work
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
 		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders
 		// TODO: FIXING RESIZING THE SCREEN
-	
 		
-	/*	lightsUBO = vRenderer->CreateUniformBuffers<LightsData>();
-		lights.diffuse[0] = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-		lights.specular[0] = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
-		lights.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
-		lights.numLights = 1;
-		lights.pos[0] = Vec4(-4.0f, 0.0f, -5.0f, 0.0f);
-		vRenderer->UpdateUniformBuffers<LightsData>(lights, lightsUBO);
-		std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
-		vRenderer->AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		std::vector<DescriptorWriteInfo> writeGlobal;
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1,cam->GetCameraUBO());
-		vRenderer->AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1,lightsUBO);
-		vRenderer->CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);*/
-
+	
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
 		engineContext.assetManager->LoadAsset("./test.json");
@@ -118,6 +118,7 @@ bool Scene0::OnCreate() {
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
+		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MainPass.vert.spv", "shaders/ShadowCheck.frag.spv");
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
@@ -132,7 +133,8 @@ bool Scene0::OnCreate() {
 		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
 		mat1->OnCreate();
 
-		filepaths = { "./textures/checkered_board.png" };
+		filepaths = { "./textures/texture_07.png" };
+
 		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		mat2->OnCreate();
 
@@ -144,13 +146,13 @@ bool Scene0::OnCreate() {
 		act->AddComponent<CMaterial>(mat);
 
 		Ref<CActor> act1 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1, 0, 0),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
+		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1.5, -0.5, 0),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
 		act1->AddComponent<CTransform>(t1);
 		act1->AddComponent<CMesh>(mesh);
 		act1->AddComponent<CMaterial>(mat1);
 
 		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0, 0,-10), QMath::angleAxisRotation(-25, Vec3(1, 0, 0)), Vec3(3, 3, 1));
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(5, 5, 1));
 		act2->AddComponent<CTransform>(t2);
 		act2->AddComponent<CMesh>(mesh1);
 		act2->AddComponent<CMaterial>(mat2);
@@ -162,7 +164,7 @@ bool Scene0::OnCreate() {
 		camera = cam;
 		shader = cshade;
 
-		engineContext.fmodController->playsong(0);
+		//engineContext.fmodController->playsong(0);
 		
 	}
 		break;
@@ -199,7 +201,9 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
-			playerController->HandleKeyboardInput(sdlEvent);
+			if (playerController) {
+				playerController->HandleKeyboardInput(sdlEvent);
+			}
 			break;
 		}
 
@@ -207,7 +211,9 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 		{
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
-			playerController->HandleMouseMotion(sdlEvent);
+			if (playerController) {
+				playerController->HandleMouseMotion(sdlEvent);
+			}
 			break;
 		}
 
@@ -217,12 +223,12 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 void Scene0::Update(const float deltaTime) {
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
-		auto input =player->GetComponent<CInput>(); 
+		auto playerController =player->GetComponent<CInput>();
 		auto phys  =player->GetComponent<CPhysics>();
-
-		input->UpdateInput(deltaTime);
-		phys->Update(deltaTime);
-
+		if (playerController) {
+			playerController->UpdateInput(deltaTime);
+			phys->Update(deltaTime);
+		}
 	}
 }
 
@@ -263,19 +269,9 @@ void Scene0::OnDestroy() {
 	VulkanRenderer* vRenderer;
 	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 	if(vRenderer){
-		vkDeviceWaitIdle(vRenderer->getDevice());
-		// the life time of the cmd buffers is bound to the cmd pool
-		// and i don't think the life time should be tied to the scene
-		// so commeted out and moved the destruction of primary cmd and the pool
-		// to the OnDestroy of the VulkanRenderer
-		// On the Same note: in recreate swapchains
-		// I removed the creation on of new cmd buffers
-		// 
-		//vRenderer->DestroyCommandBuffers(); 
-
+		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
-		//vRenderer->DestroyGlobalDescriptionSet(); // note eventaully need to get moved out of the scene.
-		vRenderer->DestroyGlobalResources();
+		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
 		

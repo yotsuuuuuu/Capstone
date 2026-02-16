@@ -29,7 +29,7 @@ public:
 
 	PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
 	std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
-	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { C_World->GetChunkRenderData(); }
+	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return C_World->GetChunkRenderData(); }
 
 	void InitializeWorld(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 

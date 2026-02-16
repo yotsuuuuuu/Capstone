@@ -19,10 +19,8 @@ layout (location = 1) out vec3 fragTexCoords;
 void main() {
 
 	fragTexCoords = vVertex.xyz;
-	mat4 view =  camera.viewMatrix;
-	view[3][0] = 0.0f;
-	view[3][1] = 0.0f; 
-	view[3][2] = 0.0f; 
+	mat4 view =  mat4(mat3(camera.viewMatrix));
+	
 
 	gl_Position =  camera.projectionMatrix * view  * vVertex; 
 }

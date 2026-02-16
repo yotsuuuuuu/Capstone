@@ -7,6 +7,7 @@
 #include "CMesh.h"
 #include "CGlobalLight.h"
 #include "CTransform.h"
+#include "CWorld.h"
 #include "CSkyBox.h"
 #include <unordered_map>
 #include "imgui.h"
@@ -24,9 +25,9 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
-
-void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
+void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
 {
+
     auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
     if (!cam) {
         Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
@@ -45,9 +46,9 @@ void VulkanRenderer::CreateGlobalRources(Ref<Component> cameraActor)
         return;
     }
     camera = cameraActor;
-
+    uint32_t shadowmapsize = SHAWDOW_SIZE * 1;
     // create the shadow resources
-    CreateGlobalShadowMappingResources(1024, 1024, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+    CreateGlobalShadowMappingResources(shadowmapsize, shadowmapsize, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
@@ -417,7 +418,7 @@ public:
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
-        VKRNDR->imGuiSystem->TestUI();
+        //VKRNDR->imGuiSystem->TestUI();
         VKRNDR->imGuiSystem->EndFrame();
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
@@ -443,7 +444,23 @@ public:
                     // 1.2 sort them into buckets
                     DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
                     line = item.pipeInfo.pipelineLayout;
+                }       
+                auto world = a->GetComponent<CWorld>();
+                if (world) {
+                    PipelineInfo info = world->GetWorldPipeline();
+                    VkDescriptorSet set = world->GetWorldDescriptorSet()[framecntx.targetFrameIndex];
+                    auto chunkMap = world->GetChunkRenderData();
+                    for (const auto& pair : chunkMap) {
+                        DrawItem item;
+                        item.mesh = pair.second.vertexBuffer;
+                        item.push = pair.second.transform;
+                        item.setID = 1;
+                        item.pipeInfo = info;
+                        item.set = set;
+                        DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
+                    }
                 }
+
             }
         }
         //1.3 skybox draw item for main pass
