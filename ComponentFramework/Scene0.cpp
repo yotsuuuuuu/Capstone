@@ -31,7 +31,6 @@ bool Scene0::OnCreate() {
 	float aspectRatio;
 
 	engineContext.fmodController->AnalyzeAudioOffline(0);
-	engineContext.fmodController->DummyFunction();
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{

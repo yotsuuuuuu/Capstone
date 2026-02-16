@@ -53,23 +53,6 @@ bool FmodController::createSystem()
 	return true;
 }
 
-void FmodController::DummyFunction()
-{
-	const int fftSize = 2048;
-
-	fftw_complex* in, * out;
-	fftw_plan plan;
-
-	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftSize);
-	out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftSize);
-	plan = fftw_plan_dft_1d(fftSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-
-	fftw_execute(plan); // Execute the FFT
-	printf("\n data between herer \n");
-	fftw_print_plan(plan);// Print the FFT plan (for debugging)
-	printf("\n PRINTINF FROM DUMMY");
-
-}
 
 void FmodController::Volume(float volume_)
 {
@@ -214,7 +197,9 @@ AudioBands FmodController::AnalyzeAudioOffline(int songnum_)
 	fftw_free(out);
 
 	numOfsounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
-
+	
+	
+	//incorparate more bands for noise map
 
 	return bands;
 }

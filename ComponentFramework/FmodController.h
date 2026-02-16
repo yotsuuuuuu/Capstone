@@ -8,6 +8,7 @@ struct AudioBands
 	float low; //20 Hz-250 Hz
 	float mid; //250 Hz-4 kHz
 	float high; //4kHz-20 kHz
+	///create more bands for noise map
 };
 
 
@@ -27,7 +28,6 @@ public:
 	void addSong(const char* wave_);
 	void playsong(int songnum_);
 	bool createSystem();
-	void DummyFunction();
 	void Volume(float volume_);
 
 	AudioBands AnalyzeAudioOffline(int songunum_);
