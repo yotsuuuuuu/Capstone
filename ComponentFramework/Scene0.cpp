@@ -73,30 +73,9 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		
-		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
-		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
-
-		
-		//vRenderer->DestroyGlobalResources();
-		//to get a shadow pass
-		// i need rework the main shader
-		// adjust the rendering passes in ecs
-		// created the memory barrier between renderpasses 
-		// Also Todo: Light component and camera component over a actors 
-		// need to adjust cshader to use the config pipeline
-		//  GET IT WORKING WITHOUT SHADOWS , DONE
-		//  MEMORY BARRIER FOR BETWEEN RENDERPASSES , DONE
-		//  ADJUST ECS RENDERING TO INCLUDE SHADOW PASS , DONE
-		//  SHADER WORK GET SHADOWS , DONE
-		//  PROTOTYPE CAMERA AND LIGHT COMPONENTS , DONE
-		//  ADD FUCTION TO MAKE A DEFUALT PIPELINE COFIG WITH THE MAIN RENDERPASS , DONE
-		//  ADJUST CSHADER USE NEW PIPELINE COFIG , DONE
-		// PART TWO UBOS SHOULD UPDATE AND SHOULD ONLY CURRENT FRAME UPDATE , DONE
-		// TODO: SKYBOX  - images - pipeline DONE
-		// TODO: ADD SKYBOX TO ECS RENDERING DONE
-		// TODO: ADD FORWARD Declaration COMPOENT TO VULKAN AND REMOVE INCLUDE DONE 
-		// TODO : Compute Boiler work
+	
+	
+		// TODO : Compute Boiler work ( only queue is done)
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
 		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders

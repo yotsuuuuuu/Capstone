@@ -1,7 +1,8 @@
 #include "VulkanRenderer.h"
 #include "CGlobalLight.h"
 #include "Debug.h"
-
+//TODO: ADJUST FOR PER FRAME RESOUCES 
+//TODO: PIVOT TO CASCADIN SHAOW MAPS
 void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format, 
 	VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
 	VkMemoryPropertyFlags properties, VkImageLayout initialLayout, VkImageLayout finalLayout)

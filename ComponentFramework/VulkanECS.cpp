@@ -413,6 +413,7 @@ public:
         //  Normal forward pass
         //  Post process bloom pass
         //  ImGUI 
+        //TODO: (KEV) ADJUT FOR PER FRAME DATA NOT PER SWAP CHAIN
         ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -423,7 +424,7 @@ public:
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
         VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
-        // TODO: Update UBOs for current frame ??? needs to be done
+        // 1.1.1 UPDATE PER FRAME UBO
         if (auto cam = VKRNDR->camera.lock()) {
             auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
             MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
@@ -529,6 +530,7 @@ public:
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
             VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
+            // draw the rest of the items
             for (const auto& pair : DrawingBuckets) {
                 VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, pair.first, VK_PIPELINE_BIND_POINT_GRAPHICS);
                 for (const auto& item : pair.second) {
@@ -552,6 +554,7 @@ public:
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 
     }
+
     static DrawItem GetDrawItem(const Ref<CActor>& actor,const VulkanRenderer::FrameContext& cntx) {
 
         auto mat = actor->GetComponent<CMaterial>();

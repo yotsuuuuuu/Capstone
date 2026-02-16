@@ -504,7 +504,7 @@ void VulkanRenderer::CreateVkLogicalDevice()
 
 }
 
-
+//Per SwapChainResource
 void VulkanRenderer::createSwapChain() {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -560,6 +560,8 @@ void VulkanRenderer::createSwapChain() {
     swapChainExtent = extent;
 }
 
+//Per SwapChainResource 
+// TODO: RENAME SO IMPLY THIS ISCREATING THE SWAPIMAGEVIEWS
 void VulkanRenderer::createImageViews() {
     swapChainImageViews.resize(numSwapchains);
 
@@ -661,7 +663,7 @@ VkFormat VulkanRenderer::findDepthFormat() {
 bool VulkanRenderer::hasStencilComponent(VkFormat format) {
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
-
+//Per SwapChainResource
 void VulkanRenderer::createFramebuffers() {
     swapChainFramebuffers.resize(numSwapchains);
 
@@ -1255,17 +1257,19 @@ VkDescriptorSetLayout VulkanRenderer::CreateDescriptorSetLayout(const std::vecto
     }
     return descriptorSetLayout;
 }
-// When allocation form this function
-// we must allocate descriptor sets equal to the number of swapchains
+
+
+
 VkDescriptorPool VulkanRenderer::CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count)
 {
+    uint32_t maxSets = count * getNumberOfFramesInFlight();
     VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorPoolSize> poolSizes{};
     for (auto& desc : descriptorInfo)
     {
         VkDescriptorPoolSize poolSize{};
         poolSize.type = desc.descriptorType;
-        poolSize.descriptorCount = desc.descriptorCount * count * getNumSwapchains();
+        poolSize.descriptorCount = desc.descriptorCount * maxSets;
         poolSizes.push_back(poolSize);
     }
 
@@ -1273,7 +1277,7 @@ VkDescriptorPool VulkanRenderer::CreateDescriptorPool(const std::vector<SingleDe
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = count * getNumSwapchains();
+	poolInfo.maxSets = maxSets;
 	poolInfo.flags = 0;
 
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
@@ -1283,14 +1287,17 @@ VkDescriptorPool VulkanRenderer::CreateDescriptorPool(const std::vector<SingleDe
     return descriptorPool;
 }
 
-std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
+std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t count)
 {
-	std::vector<VkDescriptorSet> descriptorSets(getNumSwapchains());
-	std::vector<VkDescriptorSetLayout> layouts(getNumSwapchains(), descriptorSetLayout);
+    
+    size_t countSize = (count == 0) ? getNumberOfFramesInFlight() : count;
+
+	std::vector<VkDescriptorSet> descriptorSets(countSize);
+	std::vector<VkDescriptorSetLayout> layouts(countSize, descriptorSetLayout);
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	allocInfo.descriptorPool = descriptorPool;
-	allocInfo.descriptorSetCount = static_cast<uint32_t>(getNumSwapchains());
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(countSize);
 	allocInfo.pSetLayouts = layouts.data();
     
     if(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
@@ -1300,51 +1307,98 @@ std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptor
     return descriptorSets;
 }
 
+// TODO:(kev) ADJUST THE LOGIC TO ACCOUNT FOR PRE FRAME VS STATIC RESOURCES 
 void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo)
 {
-	std::vector<VkWriteDescriptorSet> descriptorWrites(writeInfo.size());
+    size_t numberOfSets = descriptorSets.size();
+	std::vector<VkWriteDescriptorSet> descriptorWrites(numberOfSets);
 	std::vector<VkDescriptorBufferInfo> bufferInfos;
 	std::vector<VkDescriptorImageInfo> imageInfos;
 
-    for (size_t i = 0; i < getNumSwapchains(); i++) { // loop for each set
+    for (size_t i = 0; i < numberOfSets; i++) { // loop for each set
 
 		for (const auto& b : writeInfo) { // gather all buffer and image infos handels for the write 
-            if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER write Per swapchain
+            //if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER write Per swapchain
+            //    VkDescriptorBufferInfo bufferInfo{};
+            //    bufferInfo.buffer = b.bufferMem[i].bufferID;
+            //    bufferInfo.offset = b.offset;
+            //    bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
+            //    bufferInfos.push_back(bufferInfo);
+            //}
+            //else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write one texture for all sets
+            //    VkDescriptorImageInfo imageInfo{};
+            //    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //    imageInfo.imageView = b.samplers[0].imageView;
+            //    imageInfo.sampler =   b.samplers[0].sampler;
+            //    imageInfos.push_back(imageInfo);
+            //}
+            //else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write an array of textures for a set
+            //    for (uint32_t j = 0; j < b.descriptorCount; j++) {
+            //        VkDescriptorImageInfo imageInfo{};
+            //        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //        imageInfo.imageView = b.samplers[j].imageView;
+            //        imageInfo.sampler = b.samplers[j].sampler;
+            //        imageInfos.push_back(imageInfo);
+            //    }
+            //}
+            //else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
+            //    VkDescriptorImageInfo imageInfo{};
+            //    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //    imageInfo.imageView = b.samplers[i].imageView;
+            //    imageInfo.sampler = b.samplers[i].sampler;
+            //    imageInfos.push_back(imageInfo);
+            //}
+            //else if (b.type == DescriptorWriteInfo::Destype::SSBO) { //VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+            //    VkDescriptorBufferInfo bufferInfo{};
+            //    bufferInfo.buffer = b.bufferMem[0].bufferID;
+            //    bufferInfo.offset = b.offset;
+            //    bufferInfo.range = b.bufferMem[0].bufferMemoryLength;
+            //    bufferInfos.push_back(bufferInfo);
+            //}
+            switch (b.type) {
+            case DescriptorWriteInfo::Destype::STATIC_SSBO:
+            case DescriptorWriteInfo::Destype::STATIC_UBO:
+            {
+                VkDescriptorBufferInfo bufferInfo{};
+                bufferInfo.buffer = b.bufferMem[0].bufferID;
+                bufferInfo.offset = b.offset;
+                bufferInfo.range = b.bufferMem[0].bufferMemoryLength;
+                bufferInfos.push_back(bufferInfo);
+            }
+                break;
+            case DescriptorWriteInfo::Destype::STATIC_SAMPLER:
+            {
+                VkDescriptorImageInfo imageInfo{};
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = b.samplers[0].imageView;
+                imageInfo.sampler = b.samplers[0].sampler;
+                imageInfos.push_back(imageInfo);
+            }
+                break;
+            case DescriptorWriteInfo::Destype::PRE_FRAME_UBO:
+            {
                 VkDescriptorBufferInfo bufferInfo{};
                 bufferInfo.buffer = b.bufferMem[i].bufferID;
                 bufferInfo.offset = b.offset;
                 bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
                 bufferInfos.push_back(bufferInfo);
             }
-            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write one texture for all sets
-                VkDescriptorImageInfo imageInfo{};
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = b.samplers[0].imageView;
-                imageInfo.sampler =   b.samplers[0].sampler;
-                imageInfos.push_back(imageInfo);
-            }
-            else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write an array of textures for a set
-                for (uint32_t j = 0; j < b.descriptorCount; j++) {
-                    VkDescriptorImageInfo imageInfo{};
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    imageInfo.imageView = b.samplers[j].imageView;
-                    imageInfo.sampler = b.samplers[j].sampler;
-                    imageInfos.push_back(imageInfo);
-                }
-            }
-            else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
+                break;
+            case DescriptorWriteInfo::Destype::PRE_FRAME_SAMPLER:
+            {
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 imageInfo.imageView = b.samplers[i].imageView;
                 imageInfo.sampler = b.samplers[i].sampler;
                 imageInfos.push_back(imageInfo);
             }
-            else if (b.type == DescriptorWriteInfo::Destype::SSBO) { //VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-                VkDescriptorBufferInfo bufferInfo{};
-                bufferInfo.buffer = b.bufferMem[0].bufferID;
-                bufferInfo.offset = b.offset;
-                bufferInfo.range = b.bufferMem[0].bufferMemoryLength;
-                bufferInfos.push_back(bufferInfo);
+                break;
+            case DescriptorWriteInfo::Destype::PRE_FRAME_ARR_SAMPLER:
+                break;
+            case DescriptorWriteInfo::Destype::STATIC_ARR_SAMPLER:
+                break;
+
+
             }
         }
 		size_t bufferInfoIndex = 0;
