@@ -58,10 +58,11 @@ bool Scene0::OnCreate() {
 		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
 		
 		ldata.orientation =  QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
-		//ldata.distance = 2.0f;
+		ldata.distance = 2.0f;
+		float sidelenght = 10.0f;
 		OrthConfig config;
-		config.xmax = 6.0f; config.xmin = -6.0f; config.ymax = 6.0f; config.ymin =-6.0f;
-		config.zmax = 12.0f; config.zmin = 0.25f;
+		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
+		config.zmax = sidelenght; config.zmin = 0.25f;
 		/*PerspectiveConfig config;
 		config.aspectRatio = aspectRatio;
 		config.far = 100.0f;

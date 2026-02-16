@@ -107,28 +107,35 @@ void CGlobalLight::UpdateViewMatrix() {
 	if (T) {
 		MATH::Vec3 CamPos = T->GetPosition();
 		MATH::Quaternion CamRot = T->GetRotation();
-		
-		MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
-		MATH::Vec3 CameraFoward = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), CamRot));
-		float offset = (Othc.zmax - Othc.zmin) * 0.45f;
-		MATH::Vec3 ShadowCenter = CamPos + CameraFoward * offset;
-		MATH::Vec3 LightPos = ShadowCenter - LightDir * offset;
+		MATH::Vec3 LightCenter;
 		MATH::Matrix4 R_Inv = MATH::MMath::toMatrix4(MATH::QMath::conjugate(orientation));
 		
-		//MATH::Vec3 LightCenter = LightPos ;
-		/*switch (mode) {
-		case GLMODE::ORTHO: {
-			LightCenter = QMath::rotate(LightPos, QMath::conjugate(orientation));
-			float texelSizeX = Othc.xmax - Othc.xmin / float(SHAWDOW_SIZE);
-			float texelSizeY = Othc.ymax - Othc.zmin / float(SHAWDOW_SIZE);
-			LightCenter.x = floor(LightCenter.x / texelSizeX) * texelSizeX;
-			LightCenter.y = floor(LightCenter.y / texelSizeY) * texelSizeY;
-			LightCenter = QMath::rotate(LightCenter, orientation);
-			break;
+		switch (mode) {
+			case GLMODE::ORTHO: {
+				MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
+				MATH::Vec3 CameraFoward = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), CamRot));
+				float offset = (Othc.zmax - Othc.zmin) * 0.45f;
+				MATH::Vec3 ShadowCenter = CamPos + CameraFoward * offset;
+				MATH::Vec3 LightPos = ShadowCenter - LightDir * offset;
+				LightCenter = LightPos ;
+				LightCenter = QMath::rotate(LightPos, QMath::conjugate(orientation));
+				float texelSizeX = (Othc.xmax - Othc.xmin) / float(SHAWDOW_SIZE);
+				float texelSizeY = (Othc.ymax - Othc.ymin) / float(SHAWDOW_SIZE);
+				LightCenter.x = floor(LightCenter.x / texelSizeX) * texelSizeX;
+				LightCenter.y = floor(LightCenter.y / texelSizeY) * texelSizeY;
+				LightCenter = QMath::rotate(LightCenter, orientation);
+				break;
+			}
+			case GLMODE::PRESPECTIVE: {
+				MATH::Vec3 LightDir = VMath::normalize(QMath::rotate(Vec3(0, 0, -1), orientation));
+				float offset = distance;
+				MATH::Vec3 LightPos = CamPos - LightDir * offset;
+				LightCenter = LightPos;
+				break;
+			}
 		}
-		}*/
 		
-		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightPos);
+		MATH::Matrix4 T_Inv = MATH::MMath::translate(-LightCenter);
 		G_data.viewMatrix = R_Inv * T_Inv;
 	}
 
