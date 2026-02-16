@@ -132,7 +132,12 @@ void SceneManager::GetEvents() {
 			case SDL_SCANCODE_F6:
 				///BuildScene(SCENE6);
 				break;
-
+			case SDL_SCANCODE_1:
+				engineContext.fmodController->Volume(10);
+				break;
+			case SDL_SCANCODE_2:
+				engineContext.fmodController->Volume(-10);
+				break;
 			default:
 				//BuildScene(SCENE0);
 				break;
