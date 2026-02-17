@@ -123,12 +123,64 @@ bool Scene2::OnCreate() {
 
 		// Terrain Stuff
 		TerrainPreset preset;
-						//	noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
-		preset.base= {		NoiseType::Perlin,	42,		0.01f,		1.0f,		true,		FractalType::FBm,	4,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
-		preset.mountains = { NoiseType::OpenSimplex2, 1337, 0.02f, 1.0f, true, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
-		preset.detail = { NoiseType::OpenSimplex2, 7, 0.1f, 0.5f, true, FractalType::FBm, 3, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+		preset.base= {		
+			NoiseType::Perlin,		// noise type
+			42,						// seed
+			0.03f,					// frequency
+			0.3f,					// amplitude
+			false,					// fractal?
+			FractalType::FBm,		// fractal type
+			5,						// octaves
+			2.0f,					// lacunarity
+			0.5f,					// gain
+			false,					// warp?
+			WarpType::OpenSimplex2,	// warp type	
+			0.05f,					// warp frequency
+			15.0f,					// warp amplitude
+			1.0f,					// exponent
+			1.0f,					// ridge
+			0.0f					// bias
+		};					
 
-		preset.globalHeightScale = 10.0f;
+		preset.mountains = { 
+			NoiseType::OpenSimplex2, 
+			298347, 
+			0.09f, 
+			0.3f, 
+			false, 
+			FractalType::Ridged,
+			2, 
+			2.0f, 
+			0.5f, 
+			false, 
+			WarpType::OpenSimplex2, 
+			0.1f, 
+			20.0f, 
+			2.0f, 
+			2.0f, 
+			0.0f 
+		};
+
+		preset.detail = { 
+			NoiseType::OpenSimplex2, 
+			723429, 
+			0.02f, 
+			0.02f, 
+			false, 
+			FractalType::FBm, 
+			1, 
+			2.0f,
+			0.5f, 
+			false, 
+			WarpType::None, 
+			0.0f, 
+			0.0f, 
+			1.0f, 
+			1.0f, 
+			0.0f 
+		};
+
+		preset.globalHeightScale = 15.0f;
 		world = new World(engineContext.renderer);
 		world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
 

@@ -83,7 +83,9 @@ float TerrainNoise::sample(float wX, float wZ) const
 float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, const FastNoiseLite& noiseGen, float x, float z) const
 {
 
-	// all of this is temporary filler, can be adjusted later for what style() we are looking for. handles different behaviours and landscapes by modifying the sampled noise value
+	// all of this is temporary filler, can be adjusted later for what style() we are looking for. 
+	// handles different behaviours and landscapes by modifying the sampled noise value
+
 	float height = 0.0f;
 	float amplitude = layerP.amplitude;
 	float frequency = layerP.frequency;
