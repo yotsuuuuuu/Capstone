@@ -1,6 +1,6 @@
 {
   "Meshes": {
-    "mario": "./meshes/Mario.obj"
+    "marioMesh": "./meshes/Mario.obj"
   },
   "Shaders": {
     "phong": {
@@ -15,9 +15,14 @@
 
     }
   },
+  "Textures": {
+    "marioMime": "./textures/mario_mime.png",
+    "marioFire": "./textures/mario_fire.png"
+  },
+
   "Material": {
-    "mario": {
-      "texture": "./textures/mario_mime.png",
+    "marioMat": {
+      "texture": "marioMime",
       "shader": "phong",
       "cast shadow": "true",
       "recieve shadow": "false"
@@ -25,12 +30,24 @@
   },
   "Actor": {
     "mario": {
-      "Mat": "mario",
-      "Mesh": "mario"
+      "Texture": "marioMime",
+      "Mat": "marioMat",
+      "Mesh": "marioMesh",
+      "Transform": {
+        "position": [ -1, 0, 0 ],
+        "rotation": [ 90, 0, 0, 0 ],
+        "scale": [ 1, 1, 1 ]
+      }
     },
     "luigi": {
-      "Mat": "mario",
-      "Mesh": "mario"
+      "Texture": "marioFire",
+      "Mat": "marioMat",
+      "Mesh": "marioMat",
+      "Transform": {
+        "position": [ 1.5, -0.5, 0 ],
+        "rotation": [ -90,0, 0, 0],
+        "scale": [ 1, 1, 1 ]
+      }
     }
   }
 } 

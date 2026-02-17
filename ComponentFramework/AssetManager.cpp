@@ -17,6 +17,85 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
         return false;
     }
     jsonLoader = json::parse(file);
+
+	if (!jsonLoader.contains("Meshes"))
+	{
+		std::cout << "json does not contain meshes" << "\n";
+		return false;
+	}
+
+	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
+	{
+		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, meshPath.get<std::string>());
+		mesh->OnCreate();
+		assetMap[meshId] = mesh;
+	}
+
+	if (!jsonLoader.contains("Textures")) 
+    {
+		std::cout << "json does not contain textures" << "\n";
+		return false;
+	}
+
+	if (!jsonLoader.contains("Shaders"))
+	{
+		std::cout << "json does not contain shader" << "\n";
+		return false;
+	}
+
+	for(auto & [shaderId, shaderData] : jsonLoader["Shaders"].items())
+	{
+		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+		std::pair<std::string, std::string> shaderPaths;
+		shaderPaths.first = shaderData["frag"].get<std::string>();
+		shaderPaths.second = shaderData["vert"].get<std::string>();
+		int shaderBinding = shaderData["binding"].get<int>();
+		int shaderType = shaderData["type"].get<int>();
+		int shaderStage = shaderData["stage"].get<int>();
+		renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
+		assetMap[shaderId] = cshade;
+	}
+
+    if (!jsonLoader.contains("Material")) 
+    {
+        std::cout << "json does not contain material" << "\n";
+        return false;
+    }
+
+    for (auto& [matId, matData] : jsonLoader["Material"].items())
+    {
+
+        std::vector<std::string> texName;
+		std::string filepath = matData["texture"].get<std::string>();
+		texName.push_back(jsonLoader["Textures"][filepath].get<std::string>());
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer,texName, assetMapGet<CShader>(matData["shader"]));
+        assetMap[matId] = mat1;
+        mat1->OnCreate();
+
+    }
+
+	if (!jsonLoader.contains("Actor"))
+	{
+		std::cout << "json does not contain an actor section " << "\n";
+		return false;
+	}
+
+	for (auto& [actorname, actorData] : jsonLoader["Actor"].items())
+	{
+		Ref<CActor> act = std::make_shared<CActor>(nullptr);
+        auto pos = actorData["Transform"]["position"];
+		auto rot = actorData["Transform"]["rotation"];
+
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>()), Quaternion(rot[0].get<float>(), Vec3(pos[1].get<float>(),pos[2].get<float>(),pos[3].get<float>())), Vec3(1, 1, 1));
+
+		act->AddComponent<CTransform>(t);
+		act->AddComponent(GetMesh(actorData["Mesh"]));
+		act->AddComponent(GetMat(actorData["Mat"]));
+		actorMap.push_back(act);
+		
+	}
+
     return true;
 }
 
@@ -36,8 +115,8 @@ std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
     for ( auto&[actorname,actorData] : jsonLoader["Actor"].items())
     {
         
-        //act->AddComponent(GetMesh(actorData["Mesh"])); //doesnt work
-        //act->AddComponent(GetMat(actorData["Mat"]));
+        act->AddComponent(GetMesh(actorData["Mesh"])); //doesnt work
+        act->AddComponent(GetMat(actorData["Mat"]));
         Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1, 1, 1));
         act->AddComponent<CTransform>(t); 
         actorMap.push_back(act);
@@ -47,12 +126,12 @@ std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
 
 Ref<CMesh> AssetManager::GetMesh(const std::string& id)
 {
-    auto checker = meshMap.find(id);
-    if (checker != meshMap.end())
-    {
-        return checker->second;
-    }
+    auto checker = assetMapGet<CMesh>(id);
 
+    if (checker)
+    {
+		return checker;
+    }
     if (!jsonLoader.contains("Meshes") || !jsonLoader["Meshes"].contains(id))
     {
         std::cout << "json does not contain meshes" << id << "\n";
@@ -60,16 +139,16 @@ Ref<CMesh> AssetManager::GetMesh(const std::string& id)
     }
     std::string meshpath = jsonLoader["Meshes"][id].get<std::string>();
     Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr,renderer,meshpath);
-    meshMap[id] = mesh;
+    assetMap[id] = mesh;
     return mesh;
 }
 
 Ref<CMaterial> AssetManager::GetMat(const std::string& id)
 {
-    auto checker = materialMap.find(id);
-    if (checker != materialMap.end())
+	auto checker = assetMapGet<CMaterial>(id); 
+    if (checker)
     {
-        return checker->second;
+        return checker;
     }
 
     if (!jsonLoader.contains("Material") || !jsonLoader["Material"].contains(id))
@@ -81,7 +160,7 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
     std::vector<std::string> filepathtexture;
     filepathtexture.push_back(jsonLoader["Material"][id]["texture"].get<std::string>());
     Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepathtexture, GetShader(jsonLoader["Material"][id]["shader"]));
-    materialMap[id] = mat1;
+    assetMap[id] = mat1;
     mat1->OnCreate();
 
     return mat1;
@@ -91,10 +170,10 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
 {
     //grab thje vert and frag seprately based on what shader they want
     //so if they say phong itll filter phong first then look for its vert and frag and combo that
-    auto checker = shaderMap.find(id);
-    if (checker != shaderMap.end())
+	auto checker = assetMapGet<CShader>(id);
+    if (checker)
     {
-        return checker->second;
+        return checker;
     }
 
     if (!jsonLoader.contains("Shaders") || !jsonLoader["Shaders"].contains(id))
@@ -114,26 +193,17 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
 
     renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
     Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
-    shaderMap[id] = cshade;
+    assetMap[id] = cshade;
     return cshade;
 }
 AssetManager::~AssetManager()
 {
-	for (auto& [key, mesh] : meshMap)
+	for (auto& [key, asset] : assetMap)
 	{
-		mesh->OnDestroy();
+		asset->OnDestroy();
 	}
-	meshMap.clear();
-	for (auto& [key, mat] : materialMap)
-	{
-		mat->OnDestroy();
-	}
-	materialMap.clear();
-	for (auto& [key, shader] : shaderMap)
-	{
-		shader->OnDestroy();
-	}
-	shaderMap.clear();
+	assetMap.clear();
+
     for(size_t i = 0; i < actorMap.size();i++)
 	{
 		actorMap[i]->OnDestroy();

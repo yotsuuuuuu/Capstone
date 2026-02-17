@@ -24,11 +24,24 @@ private:
 	//WORK ON TEMPLATING FUNCTIONS 
 	VulkanRenderer* renderer;
 	nlohmann::json jsonLoader;
-	std::unordered_map<std::string, std::shared_ptr<CMesh>> meshMap;
-	std::unordered_map<std::string, std::shared_ptr<CMaterial>> materialMap;
-	std::unordered_map<std::string, std::shared_ptr<CShader>> shaderMap;
+	std::unordered_map<std::string, std::shared_ptr<Component>> assetMap;
 	//make all maps 1 map
 	std::vector<std::shared_ptr<Component>> actorMap;
+	template<typename T>
+	void assetMapInsert(const std::string& id, Ref<T> asset)
+	{
+		assetMap[id] = asset;
+	};
+	template<typename T>
+	Ref<T> assetMapGet(const std::string& id)
+	{
+		auto checker = assetMap.find(id);
+		if (checker != assetMap.end())
+		{
+			return std::dynamic_pointer_cast<T>(checker->second);
+		}
+		return nullptr;
+	};
 	//give all components a custom id.
 public:
 	AssetManager(VulkanRenderer* renderer_):renderer(renderer_){};

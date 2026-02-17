@@ -30,6 +30,7 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
+	engineContext.assetManager->LoadAsset("./test.json");
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -104,7 +105,6 @@ bool Scene0::OnCreate() {
 	
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
-		engineContext.assetManager->LoadAsset("./test.json");
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
 	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
@@ -263,9 +263,10 @@ void Scene0::Render() const {
 
 		
 		{
-			std::vector<Ref<Component>> drawlist;
-			drawlist.push_back(actor);
-			drawlist.push_back(actor1);
+			/*std::vector<Ref<Component>> drawlist;*/
+			std::vector<Ref<Component>> drawlist = engineContext.assetManager->GetActorsInScene();
+		/*	drawlist.push_back(actor);
+			drawlist.push_back(actor1);*/
 			drawlist.push_back(plane);
 			drawlist.push_back(World);
 			vRenderer->RenderECS(drawlist);// Context obejct
