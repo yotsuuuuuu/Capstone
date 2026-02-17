@@ -4,7 +4,7 @@
 #include "CMaterial.h"
 #include "CShader.h"
 #include "CTransform.h"
-#include "Component.h"
+
 
 using json = nlohmann::json;
 

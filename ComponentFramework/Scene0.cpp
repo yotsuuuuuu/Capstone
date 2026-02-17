@@ -176,6 +176,10 @@ bool Scene0::OnCreate() {
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
 		
+		actorsInScene.push_back(WorldActor);
+		actorsInScene.push_back(act2);
+		actorsInScene.push_back(act);
+		actorsInScene.push_back(act1);
 		
 		//step 3 Actors being added to the scene.
 		actor = act;
@@ -183,7 +187,6 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
-		engineContext.assetManager->GetActorsInScene();
 		World = WorldActor;
 		//engineContext.fmodController->playsong(0);
 		

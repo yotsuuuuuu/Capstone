@@ -5,19 +5,16 @@
 #include "json.hpp"
 #include "VulkanRenderer.h"
 #include <unordered_map>
+#include "Component.h"
 // link to examples and documantation https://github.com/nlohmann/json?tab=readme-ov-file#examples
 //link to exception list https://json.nlohmann.me/home/exceptions/
 //helpful video https://www.youtube.com/watch?v=NuWQp_uAvwo&t=119s
-
-template<typename T>
-using Ref = std::shared_ptr<T>;
 
 class CMesh;
 class CMaterial;
 class CShader;
 class CActor;
 class CTransform;
-class Component;
 class AssetManager
 {
 private:
@@ -52,7 +49,7 @@ public:
 	~AssetManager();
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
-	std::vector<std::shared_ptr<Component>> GetActorsInScene();
+	std::vector<Ref<Component>> GetActorsInScene();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);
