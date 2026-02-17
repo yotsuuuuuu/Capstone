@@ -86,7 +86,7 @@ PipelineInfo VulkanRenderer::CreateTerrainPipeline(VkDescriptorSetLayout descrip
 
 void VulkanRenderer::DrawTerrain(IndexedVertexBuffer chunk)
 {
-	// Convert byte size to element count
+	// convert byte size to element count
 	uint32_t indexCount = static_cast<uint32_t>(chunk.indexBufferLength / sizeof(uint32_t));
 	for (const auto& commandBuffer : primaryCommandBuffer.commandBuffers){
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
