@@ -34,8 +34,8 @@ bool VulkanRenderer::OnCreate(){
     }
     
     pickPhysicalDevice();
-    //createLogicalDevice();
-    CreateVkLogicalDevice();
+    createLogicalDevice();
+    //CreateVkLogicalDevice();
     createSwapChain(); 
     createImageViews();
     createRenderPass();

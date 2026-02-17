@@ -57,7 +57,7 @@ private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
-	void CalculateNormals(std::vector<TerrainVertex>& vertices);
+	void CalculateNormals(std::vector<Vertex>& vertices);
 
 	void CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 	void CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO);
