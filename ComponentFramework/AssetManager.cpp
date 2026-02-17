@@ -27,7 +27,12 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
 	{
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, meshPath.get<std::string>());
-		mesh->OnCreate();
+        
+        if (!mesh->OnCreate())
+        {
+			std::cout << "Failed to create mesh :" << meshId << "\n";
+        }
+
 		assetMap[meshId] = mesh;
 	}
 
@@ -54,7 +59,10 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		int shaderStage = shaderData["stage"].get<int>();
 		renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
-		cshade->OnCreate();
+        if (!cshade->OnCreate()) 
+        {
+			std::cout << "Failed to create shader :" << shaderId << "\n";
+        }
 		assetMap[shaderId] = cshade;
 	}
 
@@ -72,7 +80,11 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		texName.push_back(jsonLoader["Textures"][filepath].get<std::string>());
 		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer,texName, assetMapGet<CShader>(matData["shader"]));
         assetMap[matId] = mat1;
-        mat1->OnCreate();
+        
+        if (!mat1->OnCreate())
+        {
+			std::cout << "Failed to create material :"  << matId << "\n";
+        }
 
     }
 
@@ -85,14 +97,20 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 	for (auto& [actorname, actorData] : jsonLoader["Actor"].items())
 	{
 		Ref<CActor> act = std::make_shared<CActor>(nullptr);
-        auto pos = actorData["Transform"]["position"];
-		auto rot = actorData["Transform"]["rotation"];
+        auto pos = actorData["Transform"]["position"].get<std::vector<float>>();
+        auto rot = actorData["Transform"]["rotation"].get<std::vector<float>>();
 
-		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>()), Quaternion(rot[0].get<float>(), Vec3(pos[1].get<float>(),pos[2].get<float>(),pos[3].get<float>())), Vec3(1, 1, 1));
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0], pos[1], pos[2]), QMath::angleAxisRotation(rot[0],Vec3(rot[1],rot[2],rot[3])), Vec3(1, 1, 1));
 
 		act->AddComponent<CTransform>(t);
-		act->AddComponent(GetMesh(actorData["Mesh"]));
-		act->AddComponent(GetMat(actorData["Mat"]));
+        Ref<CMesh> temp = assetMapGet<CMesh>(actorData["Mesh"].get<std::string>());
+		act->AddComponent<CMesh>(temp);
+		act->AddComponent<CMaterial>(assetMapGet<CMaterial>(actorData["Mat"].get<std::string>()));
+
+        if (!act->OnCreate())
+        {
+			std::cout << "Failed to create actor :" << actorname << "\n";
+        }
 		actorMap.push_back(act);
 		
 	}
@@ -107,21 +125,6 @@ bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref
 
 std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
 {
-    if (!jsonLoader.contains("Actor"))
-    {
-        std::cout << "json does not contain an actor section " << "\n";
-        /*return std::vector<>;*/
-    }
-    Ref<CActor> act = std::make_shared<CActor>(nullptr);
-    for ( auto&[actorname,actorData] : jsonLoader["Actor"].items())
-    {
-        
-        act->AddComponent(GetMesh(actorData["Mesh"])); //doesnt work
-        act->AddComponent(GetMat(actorData["Mat"]));
-        Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1, 1, 1));
-        act->AddComponent<CTransform>(t); 
-        actorMap.push_back(act);
-    }
     return actorMap;
 }
 

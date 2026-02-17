@@ -30,6 +30,7 @@ private:
 	
 	
 	//Components
+	std::vector<Ref<Component>> actorsInScene;
 	Ref<Component> camera;
 	Ref<Component> plane;
 	Ref<Component> World;

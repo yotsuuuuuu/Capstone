@@ -1,17 +1,17 @@
 {
   "Meshes": {
-    "marioMesh": "./meshes/Mario.obj"
+    "marioMesh": "./meshes/Mario.obj",
+    "sphereMesh": "./meshes/Sphere.obj"
   },
   "Shaders": {
-    "phong": {
-      "frag": "shaders/multiPhong.frag.spv",
-      "vert": "shaders/multiPhong.vert.spv",
-
-      "binding": 2,
-      "type": 1,
-      "stage": 16,
-      "pass": 1,
-      "opaque": 0
+    "main": {
+        "frag":"shaders/MainPass.frag.spv",
+        "vert": "shaders/MainPass.vert.spv",
+        "binding": 0,
+        "type": 1,
+        "stage": 16,
+        "pass": 1,
+        "opaque": 0
 
     }
   },
@@ -23,31 +23,38 @@
   "Material": {
     "marioMat": {
       "texture": "marioMime",
-      "shader": "phong",
+      "shader": "main",
       "cast shadow": "true",
       "recieve shadow": "false"
     }
   },
-  "Actor": {
-    "mario": {
-      "Texture": "marioMime",
-      "Mat": "marioMat",
-      "Mesh": "marioMesh",
-      "Transform": {
-        "position": [ -1, 0, 0 ],
-        "rotation": [ 90, 0, 0, 0 ],
-        "scale": [ 1, 1, 1 ]
-      }
-    },
-    "luigi": {
-      "Texture": "marioFire",
-      "Mat": "marioMat",
-      "Mesh": "marioMat",
-      "Transform": {
-        "position": [ 1.5, -0.5, 0 ],
-        "rotation": [ -90,0, 0, 0],
-        "scale": [ 1, 1, 1 ]
-      }
+    "Actor": {
+        "mario": {
+            "Mat": "marioMat",
+            "Mesh": "marioMesh",
+            "Transform": {
+                "position": [ -1, 0, 0 ],
+                "rotation": [ 90, 0, 1, 0 ],
+                "scale": [ 1, 1, 1 ]
+            }
+        },
+        "luigi": {
+            "Mat": "marioMat",
+            "Mesh": "marioMesh",
+            "Transform": {
+                "position": [ 1.5, -0.5, 0 ],
+                "rotation": [ -90, 0, 1, 0 ],
+                "scale": [ 1, 1, 1 ]
+            }
+        },
+        "Sphere":{
+            "Mat": "marioMat",
+            "Mesh": "sphereMesh",
+            "Transform": {
+                "position": [ 0, 0, 0 ],
+                "rotation": [ 0, 0, 1, 0 ],
+                "scale": [ 1, 1, 1 ]
+            }
+        }
     }
-  }
 } 

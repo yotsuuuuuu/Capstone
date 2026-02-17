@@ -28,17 +28,21 @@ private:
 	//make all maps 1 map
 	std::vector<std::shared_ptr<Component>> actorMap;
 	template<typename T>
-	void assetMapInsert(const std::string& id, Ref<T> asset)
+	void assetMapInsert(const std::string id, Ref<T> asset)
 	{
 		assetMap[id] = asset;
 	};
 	template<typename T>
-	Ref<T> assetMapGet(const std::string& id)
+	Ref<T> assetMapGet(const std::string id)
 	{
 		auto checker = assetMap.find(id);
+		Ref<Component> result = checker->second;
+
+
 		if (checker != assetMap.end())
 		{
-			return std::dynamic_pointer_cast<T>(checker->second);
+			return std::dynamic_pointer_cast<T>(result);
+		
 		}
 		return nullptr;
 	};

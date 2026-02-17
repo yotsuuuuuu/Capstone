@@ -30,7 +30,6 @@ Scene0::~Scene0() {
 bool Scene0::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	engineContext.assetManager->LoadAsset("./test.json");
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
@@ -73,7 +72,8 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		
+		engineContext.assetManager->LoadAsset("./test.json");
+		actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
@@ -175,7 +175,6 @@ bool Scene0::OnCreate() {
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
-
 		
 		
 		//step 3 Actors being added to the scene.
@@ -184,7 +183,7 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
-		
+		engineContext.assetManager->GetActorsInScene();
 		World = WorldActor;
 		//engineContext.fmodController->playsong(0);
 		
@@ -263,13 +262,13 @@ void Scene0::Render() const {
 
 		
 		{
-			/*std::vector<Ref<Component>> drawlist;*/
-			std::vector<Ref<Component>> drawlist = engineContext.assetManager->GetActorsInScene();
-		/*	drawlist.push_back(actor);
-			drawlist.push_back(actor1);*/
+		/*	std::vector<Ref<Component>> drawlist;
+			actorsInScene.push_back(plane);*/
+			/*drawlist.push_back(actor);
+			drawlist.push_back(actor1);
 			drawlist.push_back(plane);
-			drawlist.push_back(World);
-			vRenderer->RenderECS(drawlist);// Context obejct
+			drawlist.push_back(World);*/
+			vRenderer->RenderECS(actorsInScene);// Context obejct
 		}
 		break;
 
