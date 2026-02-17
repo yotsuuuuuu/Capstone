@@ -130,7 +130,7 @@ bool Scene2::OnCreate() {
 
 		preset.globalHeightScale = 10.0f;
 		world = new World(engineContext.renderer);
-		world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
+		//world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
 
 	}
 		break;

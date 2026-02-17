@@ -17,6 +17,7 @@ public:
 	worldConfig(config){
 		C_World = new World(renderer_);
 	}
+	~CWorld();
 
 	virtual bool OnCreate();
 	virtual void OnDestroy();
@@ -27,10 +28,10 @@ public:
 	// get set
 	// get terrain chunk
 
-	PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
-	std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
+	//PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
+	//std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
 	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return C_World->GetChunkRenderData(); }
 
-	void InitializeWorld(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
+	void InitializeWorld(TerrainPreset* t_);
 
 };

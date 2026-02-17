@@ -73,7 +73,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
-
+	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE0);
 	
 	return true;
@@ -132,7 +132,12 @@ void SceneManager::GetEvents() {
 			case SDL_SCANCODE_F6:
 				///BuildScene(SCENE6);
 				break;
-
+			case SDL_SCANCODE_1:
+				engineContext.fmodController->Volume(10);
+				break;
+			case SDL_SCANCODE_2:
+				engineContext.fmodController->Volume(-10);
+				break;
 			default:
 				//BuildScene(SCENE0);
 				break;

@@ -45,7 +45,7 @@ public:
 	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
 	~World();
 
-	void Initialize(TerrainPreset* t_, std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
+	void Initialize(TerrainPreset* t_);
 	void RenderWorld();
 	void OnDelete();
 

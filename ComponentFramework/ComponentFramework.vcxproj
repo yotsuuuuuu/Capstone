@@ -246,6 +246,8 @@
   <ItemGroup>
     <None Include="shaders\GlobalLight.frag" />
     <None Include="shaders\GlobalLight.vert" />
+    <None Include="shaders\TerraintTESTSHADER.frag" />
+    <None Include="shaders\TerraintTESTSHADER.vert" />
     <None Include="shaders\MainPass.frag" />
     <None Include="shaders\MainPass.vert" />
     <None Include="shaders\multiPhong.frag" />

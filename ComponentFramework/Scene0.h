@@ -32,9 +32,11 @@ private:
 	//Components
 	Ref<Component> camera;
 	Ref<Component> plane;
+	Ref<Component> World;
 	Ref<Component> actor;
 	Ref<Component> actor1;	
 	Ref<Component> shader;
+	
 
 public:
 
