@@ -72,7 +72,8 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		
+		engineContext.assetManager->LoadAsset("./test.json");
+		actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
@@ -104,7 +105,6 @@ bool Scene0::OnCreate() {
 	
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
-		engineContext.assetManager->LoadAsset("./test.json");
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
 	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
@@ -175,8 +175,11 @@ bool Scene0::OnCreate() {
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
-
 		
+		actorsInScene.push_back(WorldActor);
+		actorsInScene.push_back(act2);
+		actorsInScene.push_back(act);
+		actorsInScene.push_back(act1);
 		
 		//step 3 Actors being added to the scene.
 		actor = act;
@@ -184,7 +187,6 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
-		
 		World = WorldActor;
 		//engineContext.fmodController->playsong(0);
 		
@@ -263,12 +265,13 @@ void Scene0::Render() const {
 
 		
 		{
-			std::vector<Ref<Component>> drawlist;
-			drawlist.push_back(actor);
+		/*	std::vector<Ref<Component>> drawlist;
+			actorsInScene.push_back(plane);*/
+			/*drawlist.push_back(actor);
 			drawlist.push_back(actor1);
 			drawlist.push_back(plane);
-			drawlist.push_back(World);
-			vRenderer->RenderECS(drawlist);// Context obejct
+			drawlist.push_back(World);*/
+			vRenderer->RenderECS(actorsInScene);// Context obejct
 		}
 		break;
 
