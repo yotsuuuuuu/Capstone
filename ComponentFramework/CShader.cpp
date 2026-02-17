@@ -66,10 +66,8 @@ std::vector<VkDescriptorSet> CShader::AllocateDescriptorSet(std::vector<Sampler2
     if (vkrender) {
         std::vector<DescriptorWriteInfo> write;
         for (size_t i = 0; i < layoutInfo.size(); i++) {
-            vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::TEXTURE,
-                layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { arrySampler[i] });
-            //vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::TEXTURE,
-             //   layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { &arrySampler[i] });
+            vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::STATIC_SAMPLER,
+                layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { arrySampler[i] });            
         }
         std::vector<VkDescriptorSet> set = vkrender->AllocateDescriptorSets(desInfo.descriptorPool, desInfo.descriptorSetLayout);
 

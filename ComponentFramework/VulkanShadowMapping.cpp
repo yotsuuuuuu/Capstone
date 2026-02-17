@@ -16,13 +16,13 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 	shadowMappingInfo.propFlag = properties;
 	shadowMappingInfo.initial = initialLayout;
 	shadowMappingInfo.final = finalLayout;
+	shadowMappingInfo.NumOFCascadeMaps = 3;
 
+	shadowMappingInfo.ShadowTextures2D.resize(shadowMappingInfo.NumOFCascadeMaps * getNumberOfFramesInFlight());
+	shadowMappingInfo.FrameBuffers.resize(shadowMappingInfo.NumOFCascadeMaps * getNumberOfFramesInFlight());
 
-	shadowMappingInfo.ShadowTextures2D.resize(numSwapchains);
-	shadowMappingInfo.FrameBuffers.resize(numSwapchains);
-	shadowMappingInfo.WaitSemaphores.resize(MAX_FRAMES_IN_FLIGHT); // not sure ill need syncs objects
-	shadowMappingInfo.SignalSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	shadowMappingInfo.InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+	//VK_FILTER_LINEAR VK_FILTER_NEAREST
+	CreateSampler(shadowMappingInfo.ShadowSampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE,VK_FALSE);
 
 	// Step 1 create number of swapchains images for each shadow map
 	// Step 2 create image view for each shadow map
@@ -32,8 +32,34 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
 			shadowMappingInfo.propFlag, sampler.image, sampler.imageDeviceMemory);
 		sampler.imageView = createImageView(sampler.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
-		//VK_FILTER_LINEAR VK_FILTER_NEAREST
-		CreateSampler(sampler.sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,VK_TRUE,VK_FALSE);
+	}
+
+	for (size_t i = 0; i < getNumberOfFramesInFlight(); i++) {
+		size_t base = i * shadowMappingInfo.NumOFCascadeMaps;
+		Sampler2D HighRes, Medium, Low;
+		createImage(shadowMappingInfo.Exents.width, shadowMappingInfo.Exents.height,
+			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
+			shadowMappingInfo.propFlag, HighRes.image, HighRes.imageDeviceMemory);
+		HighRes.imageView = createImageView(HighRes.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
+		
+		createImage(shadowMappingInfo.Exents.width / 2 , shadowMappingInfo.Exents.height / 2,
+			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
+			shadowMappingInfo.propFlag, Medium.image, Medium.imageDeviceMemory);
+		Medium.imageView = createImageView(Medium.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
+
+		createImage(shadowMappingInfo.Exents.width / 4, shadowMappingInfo.Exents.height / 4,
+			shadowMappingInfo.format, shadowMappingInfo.tile, shadowMappingInfo.useFlag,
+			shadowMappingInfo.propFlag, Low.image, Low.imageDeviceMemory);
+		Low.imageView = createImageView(Low.image, shadowMappingInfo.format, shadowMappingInfo.aspectFlag);
+
+		HighRes.sampler = shadowMappingInfo.ShadowSampler;
+		Medium.sampler = shadowMappingInfo.ShadowSampler;
+		Low.sampler = shadowMappingInfo.ShadowSampler;
+
+		shadowMappingInfo.ShadowTextures2D[base + 0] = HighRes;
+		shadowMappingInfo.ShadowTextures2D[base + 1] = Medium;
+		shadowMappingInfo.ShadowTextures2D[base + 2] = Low;
+
 	}
 	// Step 3 create render pass for shadow mapping
 
@@ -50,21 +76,21 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 	CreateRenderPass(shadowMappingInfo.RenderPass, {}, depthAttachment);
 	// step 4 create framebuffer for each image
 	
-	for (size_t i = 0; i < shadowMappingInfo.FrameBuffers.size(); i++) {
+	
+	for (size_t i = 0; i < getNumberOfFramesInFlight(); i++) {
+		size_t base = i * shadowMappingInfo.NumOFCascadeMaps;
+		VkExtent2D HIGH, MED, LOW;
+		HIGH = shadowMappingInfo.Exents;
+		MED.width = HIGH.width / 2;
+		MED.height = HIGH.height / 2;
+		LOW.width = HIGH.width / 4;
+		LOW.height = HIGH.height / 4;
+		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[base + 0].imageView }, HIGH, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[base + 0]);
+		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[base + 1].imageView }, MED, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[base + 1]);
+		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[base + 2].imageView }, LOW, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[base + 2]);
 
-		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[i].imageView },
-			shadowMappingInfo.Exents, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[i]);
 	}
-
-	// step 5 sync objects per frame in flight
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		
-		CreateSemaphore(shadowMappingInfo.WaitSemaphores[i]);
-		CreateSemaphore(shadowMappingInfo.SignalSemaphores[i]);
-		CreateFence(shadowMappingInfo.InFlightFences[i]);
-	}
-
-	// step 6 create command buffers for each frame in flight? maybe not need maybe use the main command buffers
+	
 
 }
 
@@ -82,11 +108,11 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
 	// 7.1  set layout
 	shadowMappingInfo.DesSetInfo.descriptorSetLayout = CreateDescriptorSetLayout(layout);
-	shadowMappingInfo.DesSetInfo.descriptorPool = CreateDescriptorPool(layout, 1);
+	shadowMappingInfo.DesSetInfo.descriptorPool = CreateDescriptorPool(layout, 3);
 	// step  allocate set and write to it
 	shadowMappingInfo.DesSetInfo.descriptorSet = AllocateDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorPool,
 		shadowMappingInfo.DesSetInfo.descriptorSetLayout);
-	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Glight->GetUBO());
+	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Glight->GetShadowUBOS());
 	WriteDescriptorSets(shadowMappingInfo.DesSetInfo.descriptorSet, write);
 
 	// step 8 create pipeline
@@ -114,12 +140,7 @@ void VulkanRenderer::DestroyShadowMappingResources()
 	DestroyPipeline(shadowMappingInfo.PipelineInfo);
 	DestroyDescriptorSet(shadowMappingInfo.DesSetInfo);
 	// need to destroy in reverse order
-	// step 5
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		DestroySemaphore(shadowMappingInfo.WaitSemaphores[i]);
-		DestroySemaphore(shadowMappingInfo.SignalSemaphores[i]);
-		DestroyFence(shadowMappingInfo.InFlightFences[i]);
-	}
+	
 
 	// step 4
 	for (size_t i = 0; i < shadowMappingInfo.FrameBuffers.size(); i++) {
@@ -130,8 +151,8 @@ void VulkanRenderer::DestroyShadowMappingResources()
 	DestroyRenderPass(shadowMappingInfo.RenderPass);
 	// step 2	
 	// step 1
-	for (auto& sampler : shadowMappingInfo.ShadowTextures2D) {
-		DestroySampler(sampler.sampler);
+	DestroySampler(shadowMappingInfo.ShadowSampler);
+	for (auto& sampler : shadowMappingInfo.ShadowTextures2D) {	
 		DestroyImageView(sampler.imageView);
 		DestroyImage(sampler.image, sampler.imageDeviceMemory);
 	}

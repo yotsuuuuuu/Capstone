@@ -469,15 +469,14 @@ private:
     {
         //Rendering handles
         VkRenderPass RenderPass;
+        VkSampler ShadowSampler;
 		std::vector<Sampler2D> ShadowTextures2D;
-        std::vector<VkFramebuffer> FrameBuffers;
-		std::vector<VkSemaphore> WaitSemaphores;// 2 for the number of frames in flight
-		std::vector<VkSemaphore> SignalSemaphores;// 2
-		std::vector<VkFence> InFlightFences; //2 
+        std::vector<VkFramebuffer> FrameBuffers;	
         //CommandBufferData CMDBuffers;
 		DescriptorSetInfo DesSetInfo;
         PipelineInfo PipelineInfo;
         //config info
+        uint16_t NumOFCascadeMaps;
         VkExtent2D Exents;
         VkFormat format;
         VkImageTiling tile;

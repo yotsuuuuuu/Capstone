@@ -429,8 +429,8 @@ public:
         if (auto cam = VKRNDR->camera.lock()) {
             auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
             //context get data form fmdo  then update buffer.
-            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
-            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.targetFrameIndex);
+            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.inFlightIndex);
+            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
 
         VkPipelineLayout line;
@@ -451,14 +451,14 @@ public:
                 }       
                 auto world = a->GetComponent<CWorld>();
                 if (world && mat) {
-                    PipelineInfo info = mat->GetPipelineInfo();;
-                    VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.targetFrameIndex];
+                    PipelineInfo info = mat->GetPipelineInfo();
+                    VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.inFlightIndex];
                     auto chunkMap = world->GetChunkRenderData();
                     for (const auto& pair : chunkMap) {
                         DrawItem item;
                         item.mesh = pair.second.vertexBuffer;
                         item.push = pair.second.transform;
-                        item.setID = mat->GetSetValue();;
+                        item.setID = mat->GetSetValue();
                         item.pipeInfo = info;
                         item.set = set;
                         ChunkDraw[item.pipeInfo.pipeline].push_back(item);
@@ -474,13 +474,13 @@ public:
            auto CskyBox = MainCamera->GetComponent<CSkyBox>();
            skybox.mesh = CskyBox->GetMesh();
            skybox.pipeInfo = CskyBox->GetPipeline();
-           skybox.set = CskyBox->GetSet()[framecntx.targetFrameIndex];
+           skybox.set = CskyBox->GetSet()[framecntx.inFlightIndex];
            skybox.setID = 1;
         }
         else {
             throw std::runtime_error("Main Camera is in valid");
         }
-      
+        // TODO: REDO FOR CASTCADING SHAHOW MAPS.
         // 3 Start recording
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
@@ -537,7 +537,7 @@ public:
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
-            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.targetFrameIndex]);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.inFlightIndex]);
             // draw sky box
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, skybox.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
@@ -589,7 +589,7 @@ public:
         item.push.normalMatrix = MMath::transpose(MMath::inverse(item.push.modelMatrix));
         item.pipeInfo = mat->GetPipelineInfo();
         item.mesh = mesh->GetMesh();
-        item.set = mat->GetDescriptorSet()[cntx.targetFrameIndex];
+        item.set = mat->GetDescriptorSet()[cntx.inFlightIndex];
         item.setID = mat->GetSetValue();
         return item;
     }

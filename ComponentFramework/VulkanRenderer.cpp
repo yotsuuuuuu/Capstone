@@ -1356,6 +1356,14 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
             }
                 break;
             case DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER:
+                for (uint32_t j = 0; j < b.descriptorCount; j++) {
+                    VkDescriptorImageInfo imageInfo{};
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.imageView = b.samplers[i * b.descriptorCount + j].imageView;
+                    imageInfo.sampler = b.samplers[i * b.descriptorCount + j].sampler;
+                    imageInfos.push_back(imageInfo);
+                }
+                break;
             case DescriptorWriteInfo::Destype::STATIC_ARR_SAMPLER:
                 for (uint32_t j = 0; j < b.descriptorCount; j++) {
                     VkDescriptorImageInfo imageInfo{};

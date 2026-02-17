@@ -45,9 +45,10 @@ struct LightsData {
     uint32_t numLights = 0;
 };
 
+#define MAX_SHADOWS 3
 struct GlobalLightData {
-    Matrix4 projectionMatrix;
-    Matrix4 viewMatrix;
+    Matrix4 projectionMatrix[MAX_SHADOWS];
+    Matrix4 viewMatrix[MAX_SHADOWS];
     Vec4 ambient;
     Vec4 diffused;
     Vec4 specular;
