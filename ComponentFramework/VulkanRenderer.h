@@ -308,7 +308,7 @@ private:
     void createSurface();
     void createLogicalDevice();
     void createSwapChain();
-    void createImageViews();
+    void CreateSwapImageViews();
     
     void CreateVkLogicalDevice();
     QueueFamilyIndices VkFindQueueFamilies(VkPhysicalDevice device);

@@ -37,7 +37,7 @@ bool VulkanRenderer::OnCreate(){
     //createLogicalDevice();
     CreateVkLogicalDevice();
     createSwapChain(); 
-    createImageViews();
+    CreateSwapImageViews();
     createRenderPass();
     createDepthResources();
     createFramebuffers();  
@@ -88,7 +88,7 @@ void VulkanRenderer::RecreateSwapChain() {
     vkDeviceWaitIdle(device);
     destroySwapChain();
     createSwapChain();
-    createImageViews();
+    CreateSwapImageViews();
     createRenderPass();
     createDepthResources();
     createFramebuffers();
@@ -561,8 +561,7 @@ void VulkanRenderer::createSwapChain() {
 }
 
 //Per SwapChainResource 
-// TODO: RENAME SO IMPLY THIS ISCREATING THE SWAPIMAGEVIEWS
-void VulkanRenderer::createImageViews() {
+void VulkanRenderer::CreateSwapImageViews() {
     swapChainImageViews.resize(numSwapchains);
 
     for (uint32_t i = 0; i < numSwapchains; i++) {
@@ -1307,7 +1306,7 @@ std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptor
     return descriptorSets;
 }
 
-// TODO:(kev) ADJUST THE LOGIC TO ACCOUNT FOR PRE FRAME VS STATIC RESOURCES 
+
 void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo)
 {
     size_t numberOfSets = descriptorSets.size();
@@ -1317,44 +1316,7 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
 
     for (size_t i = 0; i < numberOfSets; i++) { // loop for each set
 
-		for (const auto& b : writeInfo) { // gather all buffer and image infos handels for the write 
-            //if (b.type == DescriptorWriteInfo::Destype::UBO) {//VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER write Per swapchain
-            //    VkDescriptorBufferInfo bufferInfo{};
-            //    bufferInfo.buffer = b.bufferMem[i].bufferID;
-            //    bufferInfo.offset = b.offset;
-            //    bufferInfo.range = b.bufferMem[i].bufferMemoryLength;
-            //    bufferInfos.push_back(bufferInfo);
-            //}
-            //else if (b.type == DescriptorWriteInfo::Destype::TEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write one texture for all sets
-            //    VkDescriptorImageInfo imageInfo{};
-            //    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //    imageInfo.imageView = b.samplers[0].imageView;
-            //    imageInfo.sampler =   b.samplers[0].sampler;
-            //    imageInfos.push_back(imageInfo);
-            //}
-            //else if (b.type == DescriptorWriteInfo::Destype::ARRTEXTURE) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER write an array of textures for a set
-            //    for (uint32_t j = 0; j < b.descriptorCount; j++) {
-            //        VkDescriptorImageInfo imageInfo{};
-            //        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //        imageInfo.imageView = b.samplers[j].imageView;
-            //        imageInfo.sampler = b.samplers[j].sampler;
-            //        imageInfos.push_back(imageInfo);
-            //    }
-            //}
-            //else if (b.type == DescriptorWriteInfo::Destype::SAMPLER) {//VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
-            //    VkDescriptorImageInfo imageInfo{};
-            //    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //    imageInfo.imageView = b.samplers[i].imageView;
-            //    imageInfo.sampler = b.samplers[i].sampler;
-            //    imageInfos.push_back(imageInfo);
-            //}
-            //else if (b.type == DescriptorWriteInfo::Destype::SSBO) { //VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-            //    VkDescriptorBufferInfo bufferInfo{};
-            //    bufferInfo.buffer = b.bufferMem[0].bufferID;
-            //    bufferInfo.offset = b.offset;
-            //    bufferInfo.range = b.bufferMem[0].bufferMemoryLength;
-            //    bufferInfos.push_back(bufferInfo);
-            //}
+		for (const auto& b : writeInfo) { 
             switch (b.type) {
             case DescriptorWriteInfo::Destype::STATIC_SSBO:
             case DescriptorWriteInfo::Destype::STATIC_UBO:
@@ -1375,7 +1337,7 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
                 imageInfos.push_back(imageInfo);
             }
                 break;
-            case DescriptorWriteInfo::Destype::PRE_FRAME_UBO:
+            case DescriptorWriteInfo::Destype::PER_FRAME_UBO:
             {
                 VkDescriptorBufferInfo bufferInfo{};
                 bufferInfo.buffer = b.bufferMem[i].bufferID;
@@ -1384,7 +1346,7 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
                 bufferInfos.push_back(bufferInfo);
             }
                 break;
-            case DescriptorWriteInfo::Destype::PRE_FRAME_SAMPLER:
+            case DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER:
             {
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1393,41 +1355,53 @@ void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descripto
                 imageInfos.push_back(imageInfo);
             }
                 break;
-            case DescriptorWriteInfo::Destype::PRE_FRAME_ARR_SAMPLER:
-                break;
+            case DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER:
             case DescriptorWriteInfo::Destype::STATIC_ARR_SAMPLER:
-                break;
-
-
+                for (uint32_t j = 0; j < b.descriptorCount; j++) {
+                    VkDescriptorImageInfo imageInfo{};
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.imageView = b.samplers[j].imageView;
+                    imageInfo.sampler = b.samplers[j].sampler;
+                    imageInfos.push_back(imageInfo);
+                }
+                break;     
             }
         }
 		size_t bufferInfoIndex = 0;
 		size_t imageInfoIndex = 0;
 		size_t writeIndex = 0;
 		for (const auto& b : writeInfo) { // fill in the write forms for the descriptor set
-            if (b.type == DescriptorWriteInfo::Destype::UBO || b.type == DescriptorWriteInfo::Destype::SSBO) {
-				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
-				descriptorWrites[writeIndex].dstBinding = b.binding;
-				descriptorWrites[writeIndex].dstArrayElement = 0;
-				descriptorWrites[writeIndex].descriptorType = b.descriptorType;
-				descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
-				descriptorWrites[writeIndex].pBufferInfo = &bufferInfos[bufferInfoIndex];
-                bufferInfoIndex+= b.descriptorCount;
+
+            switch (b.type) {
+            case DescriptorWriteInfo::Destype::STATIC_SSBO:
+            case DescriptorWriteInfo::Destype::STATIC_UBO:
+            case DescriptorWriteInfo::Destype::PER_FRAME_UBO:
+                descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptorWrites[writeIndex].dstSet = descriptorSets[i];
+                descriptorWrites[writeIndex].dstBinding = b.binding;
+                descriptorWrites[writeIndex].dstArrayElement = 0;
+                descriptorWrites[writeIndex].descriptorType = b.descriptorType;
+                descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
+                descriptorWrites[writeIndex].pBufferInfo = &bufferInfos[bufferInfoIndex];
+                bufferInfoIndex += b.descriptorCount;
                 writeIndex++;
-			}
-            else if (b.type == DescriptorWriteInfo::Destype::TEXTURE || b.type == DescriptorWriteInfo::Destype::ARRTEXTURE
-                || b.type == DescriptorWriteInfo::Destype::SAMPLER) {
-				descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrites[writeIndex].dstSet = descriptorSets[i];
+                break;
+            case DescriptorWriteInfo::Destype::STATIC_SAMPLER:
+            case DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER:
+            case DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER:
+            case DescriptorWriteInfo::Destype::STATIC_ARR_SAMPLER:
+                descriptorWrites[writeIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptorWrites[writeIndex].dstSet = descriptorSets[i];
                 descriptorWrites[writeIndex].dstBinding = b.binding;
                 descriptorWrites[writeIndex].dstArrayElement = 0;
                 descriptorWrites[writeIndex].descriptorType = b.descriptorType;
                 descriptorWrites[writeIndex].descriptorCount = b.descriptorCount;
                 descriptorWrites[writeIndex].pImageInfo = &imageInfos[imageInfoIndex];
-                imageInfoIndex+= b.descriptorCount;
+                imageInfoIndex += b.descriptorCount;
                 writeIndex++;
-            }
+                break;
+
+            }         
         }
         // write to the descriptor set
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);

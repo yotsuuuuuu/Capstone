@@ -197,8 +197,8 @@ struct SingleDescriptorSetLayoutInfo {
 
 //
 struct DescriptorWriteInfo {
-    enum Destype {STATIC_UBO,STATIC_SAMPLER,STATIC_SSBO,PRE_FRAME_UBO,
-                PRE_FRAME_SAMPLER,PRE_FRAME_ARR_SAMPLER,STATIC_ARR_SAMPLER};
+    enum Destype {STATIC_UBO,STATIC_SAMPLER,STATIC_SSBO,PER_FRAME_UBO,
+                PER_FRAME_SAMPLER, PER_FRAME_ARR_SAMPLER,STATIC_ARR_SAMPLER};
     Destype type;
     uint32_t binding;
 	VkDescriptorType descriptorType;

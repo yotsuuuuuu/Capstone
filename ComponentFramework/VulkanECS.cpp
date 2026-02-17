@@ -60,9 +60,9 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     std::vector<DescriptorWriteInfo> writeGlobal;
-    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
     //
