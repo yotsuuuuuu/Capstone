@@ -54,6 +54,7 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		int shaderStage = shaderData["stage"].get<int>();
 		renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
 		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
+		cshade->OnCreate();
 		assetMap[shaderId] = cshade;
 	}
 
