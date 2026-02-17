@@ -2,12 +2,13 @@
 
 void VulkanRenderer::CreateTerrainBuffers(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers)
 {
-	CreateTerrainVertexBuffer(vertices, outBuffers);
+	//CreateTerrainVertexBuffer(vertices, outBuffers);
 	//CreateTerrainIndexBuffer(indices, outBuffers);
+	CreateVertexBuffer(outBuffers, vertices);
 	CreateIndexBuffer(outBuffers, indices);
 }
 
-void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<Vertex>& vertices, IndexedVertexBuffer& outBuffer)
+void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<Vertex>& vertices, IndexedVertexBuffer& outBuffer) // DEPRECATAED
 {
 	VkDeviceSize bufferSize = sizeof(TerrainVertex) * vertices.size();
 	outBuffer.vertBufferLength = bufferSize; // resize outBuffer length
@@ -36,7 +37,7 @@ void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<Vertex>& vertic
 
 }
 
-void VulkanRenderer::CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers)
+void VulkanRenderer::CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers) // DEPRECATAED
 {
 	VkDeviceSize bufferSize = sizeof(uint32_t) * indices.size();
 	outBuffers.indexBufferLength = bufferSize; // resize outBuffer length
