@@ -60,7 +60,7 @@ void World::GenerateAllChunks()
 	for (int x = 0; x < WORLD_SIZE; x++) {
 		for (int y = 0; y < WORLD_SIZE; y++) {
 
-			Vec2 chunkWorldPos = Vec2(x * CHUNK_WORLD_SIZE, y * CHUNK_WORLD_SIZE);
+			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
 			//printf("Chunk number: %d\n", i);
 			GenerateChunkHeightmap(tempChunk.get());
