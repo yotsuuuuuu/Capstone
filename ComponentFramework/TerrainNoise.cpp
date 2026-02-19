@@ -35,27 +35,43 @@ static FastNoiseLite::FractalType ConvertFractalType(FractalType type)
 }
 
 static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& noiseGen)
-{
-	noiseGen.SetSeed(layerP.seed);
-	noiseGen.SetFrequency(layerP.frequency);
-	noiseGen.SetNoiseType(ConvertNoiseType(layerP.type));
+{    noiseGen.SetSeed(layerP.seed);
+    noiseGen.SetNoiseType(ConvertNoiseType(layerP.type));
 
-	noiseGen.SetFractalType(ConvertFractalType(layerP.fractal));
-	noiseGen.SetFractalOctaves(layerP.octaves);
-	noiseGen.SetFractalLacunarity(layerP.lacunarity);
-	noiseGen.SetFractalGain(layerP.gain);
+    noiseGen.SetFrequency(layerP.frequency);
 
-	if (layerP.useDomainWarp) {
-		noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
-		noiseGen.SetDomainWarpAmp(layerP.warpAmplitude);
-	}
+    if (layerP.useFractal && layerP.fractal != FractalType::None) {
+        noiseGen.SetFractalType(ConvertFractalType(layerP.fractal));
+        noiseGen.SetFractalOctaves(layerP.octaves);
+        noiseGen.SetFractalLacunarity(layerP.lacunarity);
+        noiseGen.SetFractalGain(layerP.gain);
+        noiseGen.SetFractalWeightedStrength(0.0f); // could change
+        noiseGen.SetFractalPingPongStrength(layerP.bias);
+    }
+    else {
+        noiseGen.SetFractalType(FastNoiseLite::FractalType_None);
+    }
+
+    if (layerP.useDomainWarp) {
+        noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
+        noiseGen.SetDomainWarpAmp(layerP.warpAmp);
+    }
+
+
+    if (layerP.type == NoiseType::Cellular) {
+        noiseGen.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean);
+        noiseGen.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
+        noiseGen.SetCellularJitter(1.0f);
+    }
 }
 
 TerrainNoise::TerrainNoise(const TerrainPreset& preset)
 	:	basePreset(preset.base), 
 		mountainPreset(preset.mountains), 
 		detailPreset(preset.detail),
-		globalHeightScale(preset.globalHeightScale)
+		globalHeightScale(preset.globalHeightScale),
+        concatenate(preset.concatenate),
+        concatenateScale(preset.concatenateScale)
 {
 	InitializeNoiseLayer(basePreset, baseNoise);
 	InitializeNoiseLayer(mountainPreset, mountainNoise);
@@ -65,58 +81,35 @@ TerrainNoise::TerrainNoise(const TerrainPreset& preset)
 
 float TerrainNoise::sample(float wX, float wZ) const
 {
+    float base = baseNoise.GetNoise(wX, wZ);
+    float mountains = mountainNoise.GetNoise(wX, wZ);
+    float detail = detailNoise.GetNoise(wX, wZ);
 
-	float base = evalLayer(basePreset, baseNoise, wX, wZ);
-	float mountains = evalLayer(mountainPreset, mountainNoise, wX, wZ);
-	float detail = evalLayer(detailPreset, detailNoise, wX, wZ);
+    // post-processing for terrain shaping
+    float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
-	float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
-	
-	float h = base;
-	h += mountains * mask; // apply mountains modulated by base mask
-	h += detail * 0.25f; // add some detail
+    // combine layers with amplitude scaling
+    float h = base *basePreset.amplitude;
+    h += mountains * mask *mountainPreset.amplitude; // mountains only in base areas
+    h += detail * detailPreset.amplitude * 0.25f; // subtle detail everywhere
 
-	return h *= globalHeightScale;
+    // apply additional shaping based on layer properties
+    if (basePreset.exponent != 1.0f) {
+        h = std::pow(std::max(0.0f, h), basePreset.exponent);
+    }
 
+    if (mountainPreset.ridge > 1.0f) {
+        // additional ridge enhancement if needed
+        h *= (1.0f + std::abs(mountains) * (mountainPreset.ridge - 1.0f));
+    }
+
+    if (concatenate) { return Concatenate(h); };
+
+    return h * globalHeightScale;
 }
 
-float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, const FastNoiseLite& noiseGen, float x, float z) const
+int TerrainNoise::Concatenate(float h) const
 {
-
-	// all of this is temporary filler, can be adjusted later for what style() we are looking for. 
-	// handles different behaviours and landscapes by modifying the sampled noise value
-
-	float height = 0.0f;
-	float amplitude = layerP.amplitude;
-	float frequency = layerP.frequency;
-
-	for (int i = 0; i < layerP.octaves; i++) { // do this for each octave (compounds the noise each time)
-		float nx = x * frequency;
-		float nz = z * frequency;
-
-		if (layerP.useDomainWarp) {
-			float warp = noiseGen.GetNoise(nx * layerP.warpFrequency, nz * layerP.warpFrequency);
-			nx += warp * layerP.warpAmplitude;
-			nz += warp * layerP.warpAmplitude;
-		}
-
-		float noiseValue = noiseGen.GetNoise(nx, nz); // sample the noise
-		if (layerP.fractal == FractalType::Ridged) {
-			noiseValue = 1.0f - fabs(noiseValue); // make ridges
-			noiseValue *= noiseValue; // square to sharpen
-			noiseValue *= layerP.ridge; // apply ridge factor
-		}
-		else if (layerP.fractal == FractalType::PingPong) {
-			noiseValue = noiseValue * 2.0f; // 
-			if (noiseValue < 0.0f) noiseValue = -noiseValue;
-			if (noiseValue > 1.0f) noiseValue = 2.0f - noiseValue;
-			noiseValue *= layerP.bias;
-		}// if fractal is fBm do nothing special
-
-		height += noiseValue * amplitude;
-		amplitude *= layerP.gain;
-		frequency *= layerP.lacunarity;
-	}
-
-	return height;
+    return (int)h * globalHeightScale;
 }
+

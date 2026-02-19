@@ -124,9 +124,9 @@ bool Scene2::OnCreate() {
 		// Terrain Stuff
 		TerrainPreset preset;
 		preset.base= {		
-			NoiseType::Perlin,		// noise type
+			NoiseType::OpenSimplex2,// noise type
 			42,						// seed
-			0.03f,					// frequency
+			0.01f,					// frequency
 			0.3f,					// amplitude
 			false,					// fractal?
 			FractalType::FBm,		// fractal type
@@ -135,7 +135,6 @@ bool Scene2::OnCreate() {
 			0.5f,					// gain
 			false,					// warp?
 			WarpType::OpenSimplex2,	// warp type	
-			0.05f,					// warp frequency
 			15.0f,					// warp amplitude
 			1.0f,					// exponent
 			1.0f,					// ridge
@@ -154,7 +153,6 @@ bool Scene2::OnCreate() {
 			0.5f, 
 			false, 
 			WarpType::OpenSimplex2, 
-			0.1f, 
 			20.0f, 
 			2.0f, 
 			2.0f, 
@@ -172,8 +170,7 @@ bool Scene2::OnCreate() {
 			2.0f,
 			0.5f, 
 			false, 
-			WarpType::None, 
-			0.0f, 
+			WarpType::None,
 			0.0f, 
 			1.0f, 
 			1.0f, 

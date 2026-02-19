@@ -170,7 +170,9 @@
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="Scene2.cpp" />
+    <ClCompile Include="Scene3.cpp" />
     <ClCompile Include="TerrainNoise.cpp" />
+    <ClCompile Include="TerrainPreset.cpp" />
     <ClCompile Include="TerrainVulkan.cpp" />
     <ClCompile Include="VkImGUISystem.cpp" />
     <ClCompile Include="VulkanCommandBuffer.cpp" />
@@ -227,6 +229,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene0.h" />
     <ClInclude Include="Scene2.h" />
+    <ClInclude Include="Scene3.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="TerrainNoise.h" />

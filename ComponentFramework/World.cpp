@@ -6,6 +6,7 @@ void World::Initialize(TerrainPreset* t_)
 	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
+	//baseChunkMesh.reset();
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
 	// TODO: change texture to something real
@@ -247,6 +248,11 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 		vertex.normal = Vec3 (0.0f,1.0f,0.0f);
 		}
 	}
+
+}
+
+void World::LowerAll()
+{
 
 }
 

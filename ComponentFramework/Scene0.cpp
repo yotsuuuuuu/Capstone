@@ -166,10 +166,49 @@ bool Scene0::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 		TerrainPreset preset;
-		//				noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
-		preset.base = { NoiseType::OpenSimplex2,	42,		0.05f,		1.0f,		false,		FractalType::FBm,	2,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
-		preset.mountains = { NoiseType::Cellular, 1337, 0.02f, 0.05f, false, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
-		preset.detail = { NoiseType::Perlin, 7, 0.02f, 0.9f, true, FractalType::FBm, 7, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+
+		preset.mountains = {
+			NoiseType::OpenSimplex2,// noise type
+			42,						// seed
+			0.1f,					// frequency
+			0.5f,					// amplitude
+			FractalType::FBm,		// fractal type
+			5,						// octaves
+			0.2f,					// lacunarity
+			0.3f,					// gain
+			0.0f,					// fractal weighted strength
+			WarpType::OpenSimplex2,	// warp type	
+			0.3f,					// warp amplitude
+		};
+
+		preset.base = {
+			NoiseType::OpenSimplex2,// noise type
+			42,						// seed
+			0.1f,					// frequency
+			0.5f,					// amplitude
+			FractalType::FBm,		// fractal type
+			5,						// octaves
+			0.2f,					// lacunarity
+			0.3f,					// gain
+			0.0f,					// fractal weighted strength
+			WarpType::OpenSimplex2,	// warp type	
+			0.3f,					// warp amplitude
+		};
+
+		preset.detail = {
+			NoiseType::OpenSimplex2,// noise type
+			42,						// seed
+			0.1f,					// frequency
+			0.5f,					// amplitude
+			FractalType::FBm,		// fractal type
+			5,						// octaves
+			0.2f,					// lacunarity
+			0.3f,					// gain
+			0.0f,					// fractal weighted strength
+			WarpType::OpenSimplex2,	// warp type	
+			0.3f,					// warp amplitude
+		};
+
 		preset.globalHeightScale = 15.0f;
 		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);

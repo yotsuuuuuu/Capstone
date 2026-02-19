@@ -8,6 +8,7 @@
 #include "VulkanRenderer.h"
 #include "Chunk.h"
 #include "BaseGridMesh.h"
+//#include "FmodController.h" // onyl needed for struct. should be move to core stuct methinks
 
 
 using namespace MATH;
@@ -27,6 +28,10 @@ private:
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
+	int WORLD_SIZE = 12; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
+	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
+
+	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.
 
 
 	//player
@@ -58,6 +63,8 @@ private:
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
 	void CalculateNormals(std::vector<Vertex>& vertices);
+
+	void LowerAll();
 
 	void CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
 	void CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO);
