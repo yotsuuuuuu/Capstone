@@ -72,9 +72,9 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-	
-	
-		// TODO : Compute Boiler work ( only queue is done)
+		engineContext.assetManager->LoadAsset("./test.json");
+		actorsInScene = engineContext.assetManager->GetActorsInScene();			
+		// TODO : Compute Boiler work
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
 		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders
@@ -83,7 +83,6 @@ bool Scene0::OnCreate() {
 	
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 	/*	 step 1.1 Meshs*/
-		engineContext.assetManager->LoadAsset("./test.json");
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
 	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
 		mesh->OnCreate();	
@@ -145,17 +144,20 @@ bool Scene0::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 		TerrainPreset preset;
-		//	noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
-		preset.base = { NoiseType::Perlin,	42,		0.01f,		1.0f,		true,		FractalType::FBm,	4,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
-		preset.mountains = { NoiseType::OpenSimplex2, 1337, 0.02f, 1.0f, true, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
-		preset.detail = { NoiseType::OpenSimplex2, 7, 0.1f, 0.5f, true, FractalType::FBm, 3, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-		preset.globalHeightScale = 10.0f;
+		//				noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
+		preset.base = { NoiseType::OpenSimplex2,	42,		0.05f,		1.0f,		false,		FractalType::FBm,	2,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
+		preset.mountains = { NoiseType::Cellular, 1337, 0.02f, 0.05f, false, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
+		preset.detail = { NoiseType::Perlin, 7, 0.02f, 0.9f, true, FractalType::FBm, 7, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+		preset.globalHeightScale = 15.0f;
 		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
-
 		
+		actorsInScene.push_back(WorldActor);
+		actorsInScene.push_back(act2);
+		actorsInScene.push_back(act);
+		actorsInScene.push_back(act1);
 		
 		//step 3 Actors being added to the scene.
 		actor = act;
@@ -163,7 +165,6 @@ bool Scene0::OnCreate() {
 		plane = act2;
 		camera = cam;
 		shader = cshade;
-		
 		World = WorldActor;
 		//engineContext.fmodController->playsong(0);
 		
@@ -242,12 +243,13 @@ void Scene0::Render() const {
 
 		
 		{
-			std::vector<Ref<Component>> drawlist;
-			drawlist.push_back(actor);
+		/*	std::vector<Ref<Component>> drawlist;
+			actorsInScene.push_back(plane);*/
+			/*drawlist.push_back(actor);
 			drawlist.push_back(actor1);
 			drawlist.push_back(plane);
-			drawlist.push_back(World);
-			vRenderer->RenderECS(drawlist);// Context obejct
+			drawlist.push_back(World);*/
+			vRenderer->RenderECS(actorsInScene);// Context obejct
 		}
 		break;
 

@@ -1,12 +1,14 @@
 #include "VulkanRenderer.h"
 
-void VulkanRenderer::CreateTerrainBuffers(const std::vector<TerrainVertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers)
+void VulkanRenderer::CreateTerrainBuffers(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers)
 {
-	CreateTerrainVertexBuffer(vertices, outBuffers);
-	CreateTerrainIndexBuffer(indices, outBuffers);
+	//CreateTerrainVertexBuffer(vertices, outBuffers);
+	//CreateTerrainIndexBuffer(indices, outBuffers);
+	CreateVertexBuffer(outBuffers, vertices);
+	CreateIndexBuffer(outBuffers, indices);
 }
 
-void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<TerrainVertex>& vertices, IndexedVertexBuffer& outBuffer)
+void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<Vertex>& vertices, IndexedVertexBuffer& outBuffer) // DEPRECATAED
 {
 	VkDeviceSize bufferSize = sizeof(TerrainVertex) * vertices.size();
 	outBuffer.vertBufferLength = bufferSize; // resize outBuffer length
@@ -35,7 +37,7 @@ void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<TerrainVertex>&
 
 }
 
-void VulkanRenderer::CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers)
+void VulkanRenderer::CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers) // DEPRECATAED
 {
 	VkDeviceSize bufferSize = sizeof(uint32_t) * indices.size();
 	outBuffers.indexBufferLength = bufferSize; // resize outBuffer length
@@ -84,7 +86,7 @@ PipelineInfo VulkanRenderer::CreateTerrainPipeline(VkDescriptorSetLayout descrip
 
 void VulkanRenderer::DrawTerrain(IndexedVertexBuffer chunk)
 {
-	// Convert byte size to element count
+	// convert byte size to element count
 	uint32_t indexCount = static_cast<uint32_t>(chunk.indexBufferLength / sizeof(uint32_t));
 	for (const auto& commandBuffer : primaryCommandBuffer.commandBuffers){
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
@@ -95,6 +97,6 @@ void VulkanRenderer::DrawTerrain(IndexedVertexBuffer chunk)
 
 void VulkanRenderer::CMDRecordDrawTerrainIndex(const VkCommandBuffer& cmd, const IndexedVertexBuffer& mesh)
 {
-	uint32_t indexCount = static_cast<uint32_t>(mesh.indexBufferLength / sizeof(uint32_t));
+	uint32_t indexCount = static_cast<uint32_t>(mesh.indexBufferLength );// / sizeof(uint32_t)
 	vkCmdDrawIndexed(cmd, indexCount, 1, 0, 0, 0);
 }

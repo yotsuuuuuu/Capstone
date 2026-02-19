@@ -523,8 +523,8 @@ public:
 
     // TERRAIN STUFF
 public:
-	void CreateTerrainBuffers(const std::vector<TerrainVertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers);
-    void CreateTerrainVertexBuffer(const std::vector<TerrainVertex>& vertices, IndexedVertexBuffer& outBuffer);
+	void CreateTerrainBuffers(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers);
+    void CreateTerrainVertexBuffer(const std::vector<Vertex>& vertices, IndexedVertexBuffer& outBuffer);
 	void CreateTerrainIndexBuffer(const std::vector<uint32_t>& indices, IndexedVertexBuffer& outBuffers);
     void RenderTerrainChunk(IndexedVertexBuffer& terrainBuffers, const ModelMatrixPushConst& transform, PipelineInfo& pipelineInfo, DescriptorSetInfo descriptorSet);
 	PipelineInfo CreateTerrainPipeline(VkDescriptorSetLayout descriptorSetLayout); // hard coded shaders

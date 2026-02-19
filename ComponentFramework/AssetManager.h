@@ -5,37 +5,51 @@
 #include "json.hpp"
 #include "VulkanRenderer.h"
 #include <unordered_map>
+#include "Component.h"
 // link to examples and documantation https://github.com/nlohmann/json?tab=readme-ov-file#examples
 //link to exception list https://json.nlohmann.me/home/exceptions/
 //helpful video https://www.youtube.com/watch?v=NuWQp_uAvwo&t=119s
-
-template<typename T>
-using Ref = std::shared_ptr<T>;
 
 class CMesh;
 class CMaterial;
 class CShader;
 class CActor;
 class CTransform;
-class Component;
 class AssetManager
 {
 private:
 	//WORK ON TEMPLATING FUNCTIONS 
 	VulkanRenderer* renderer;
 	nlohmann::json jsonLoader;
-	std::unordered_map<std::string, std::shared_ptr<CMesh>> meshMap;
-	std::unordered_map<std::string, std::shared_ptr<CMaterial>> materialMap;
-	std::unordered_map<std::string, std::shared_ptr<CShader>> shaderMap;
+	std::unordered_map<std::string, std::shared_ptr<Component>> assetMap;
 	//make all maps 1 map
 	std::vector<std::shared_ptr<Component>> actorMap;
+	template<typename T>
+	void assetMapInsert(const std::string id, Ref<T> asset)
+	{
+		assetMap[id] = asset;
+	};
+	template<typename T>
+	Ref<T> assetMapGet(const std::string id)
+	{
+		auto checker = assetMap.find(id);
+		Ref<Component> result = checker->second;
+
+
+		if (checker != assetMap.end())
+		{
+			return std::dynamic_pointer_cast<T>(result);
+		
+		}
+		return nullptr;
+	};
 	//give all components a custom id.
 public:
 	AssetManager(VulkanRenderer* renderer_):renderer(renderer_){};
 	~AssetManager();
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
-	std::vector<std::shared_ptr<Component>> GetActorsInScene();
+	std::vector<Ref<Component>> GetActorsInScene();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);

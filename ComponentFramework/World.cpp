@@ -60,7 +60,7 @@ void World::GenerateAllChunks()
 	for (int x = 0; x < WORLD_SIZE; x++) {
 		for (int y = 0; y < WORLD_SIZE; y++) {
 
-			Vec2 chunkWorldPos = Vec2(x * CHUNK_WORLD_SIZE, y * CHUNK_WORLD_SIZE);
+			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
 			//printf("Chunk number: %d\n", i);
 			GenerateChunkHeightmap(tempChunk.get());
@@ -93,22 +93,22 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 
 void World::BuildChunkMeshData(Chunk* chunk)
 {
-	std::vector<TerrainVertex> vertices;
+	std::vector<Vertex> vertices;
 	vertices.reserve(baseChunkMesh->basePositions.size());
 
 	const auto& heightmap = chunk->GetHeightmap();
 	const Vec2& chunkPos = chunk->getChunkPos();
 
 	for (size_t i = 0; i < baseChunkMesh->basePositions.size(); i++) {
-		TerrainVertex vertex;
+		Vertex vertex;
 		Vec3 basePos = baseChunkMesh->basePositions[i]; // original position of the OG mesh
 
-		vertex.position = Vec3( // local space position of vertex in world space, y will be adjusted by heightmap
+		vertex.pos = Vec3( // local space position of vertex in world space, y will be adjusted by heightmap
 			basePos.x,
 			heightmap[i],
 			basePos.z); 
 
-		vertex.uv = baseChunkMesh->baseUVs[i];
+		vertex.texCoord = baseChunkMesh->baseUVs[i];
 		vertex.normal = Vec3(0.0f, 1.0f, 0.0f); // temporary normal, will be calculated later
 		//vertex.position.print("vertext postion");
 		//vertex.uv.print("vertext UV");
@@ -126,8 +126,6 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
-
-
 
 	renderData.isInitialized = true;
 	chunkRenderData[chunkPos] = renderData;
@@ -215,7 +213,7 @@ void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::v
 }
 
 
-void World::CalculateNormals(std::vector<TerrainVertex>& vertices)
+void World::CalculateNormals(std::vector<Vertex>& vertices)
 {
 	for (auto& vertex : vertices) {
 		vertex.normal = Vec3(0.0f, 0.0f, 0.0f); // reset normals
@@ -228,9 +226,9 @@ void World::CalculateNormals(std::vector<TerrainVertex>& vertices)
 		uint32_t index1 = indices[i + 1];
 		uint32_t index2 = indices[i + 2];
 
-		Vec3& v0 = vertices[index0].position;
-		Vec3& v1 = vertices[index1].position;
-		Vec3& v2 = vertices[index2].position;
+		Vec3& v0 = vertices[index0].pos;
+		Vec3& v1 = vertices[index1].pos;
+		Vec3& v2 = vertices[index2].pos;
 
 		Vec3 edge1 = v1 - v0;
 		Vec3 edge2 = v2 - v0;
