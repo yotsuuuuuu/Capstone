@@ -34,8 +34,8 @@ bool VulkanRenderer::OnCreate(){
     }
     
     pickPhysicalDevice();
-    createLogicalDevice();
-    //CreateVkLogicalDevice();
+    //createLogicalDevice();
+    CreateVkLogicalDevice();
     createSwapChain(); 
     createImageViews();
     createRenderPass();
@@ -419,18 +419,24 @@ void VulkanRenderer::CreateVkLogicalDevice()
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
-    // Create queue create infos
+    // Create queue create infos+s
+    bool SingleQueueFlag = false;
     std::vector<float> priorities;
     for (const auto& [familyIndex, requestedCount] : queueCounts) {
 
         // Check if requested count is supported for debugging in case
         if (requestedCount > queueFamilies[familyIndex].queueCount) {
-            throw std::runtime_error(
-                "Requested " + std::to_string(requestedCount) +
-                " queues from Family " + std::to_string(familyIndex) +
-                " but only " + std::to_string(queueFamilies[familyIndex].queueCount) +
-                " supported!"
-            );
+            if (requestedCount == 3 && queueFamilies[familyIndex].queueCount == 1) { // account for a family with all bits but one queue
+                SingleQueueFlag = true; 
+            }
+            else {
+                throw std::runtime_error(
+                    "Requested " + std::to_string(requestedCount) +
+                    " queues from Family " + std::to_string(familyIndex) +
+                    " but only " + std::to_string(queueFamilies[familyIndex].queueCount) +
+                    " supported!"
+                );
+            }
         }
 
         //an array of queue priority equal the number of queue  requested
@@ -439,7 +445,7 @@ void VulkanRenderer::CreateVkLogicalDevice()
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.queueFamilyIndex = familyIndex;
-        queueCreateInfo.queueCount = requestedCount;
+        queueCreateInfo.queueCount = (!SingleQueueFlag) ? requestedCount : 1 ;
         queueCreateInfo.pQueuePriorities = priorities.data();
 
         queueCreateInfos.push_back(queueCreateInfo);
@@ -471,35 +477,42 @@ void VulkanRenderer::CreateVkLogicalDevice()
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
     }
-
-    //create queues 
-    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-
-    //present queue
-    if (indices.presentFamily.value() == indices.graphicsFamily.value()) {
-        uint32_t presentQueueIndex = 1; 
-        vkGetDeviceQueue(device, indices.presentFamily.value(), presentQueueIndex, &presentQueue);
+    
+    if(SingleQueueFlag){
+        vkGetDeviceQueue(device,indices.graphicsFamily.value(),0 , &graphicsQueue);
+        vkGetDeviceQueue(device,indices.graphicsFamily.value(),0 , &presentQueue);
+        vkGetDeviceQueue(device,indices.graphicsFamily.value(),0 , &computeQueue);
     }
-    else {
-        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
-    }
+    else{
+        //create queues 
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 
-    //compute queue
-    if (indices.computeFamily.has_value()) {
-        // check if compute and graphisc share the same family
-        if (indices.computeFamily.value() == indices.graphicsFamily.value()) {
-            // check if the present and grpahics have the same family and set the index accoordenly
-            uint32_t computeQueueIndex = (indices.presentFamily.value() == indices.graphicsFamily.value()) ? 2 : 1;
-            vkGetDeviceQueue(device, indices.computeFamily.value(), computeQueueIndex, &computeQueue);
+        //present queue
+        if (indices.presentFamily.value() == indices.graphicsFamily.value()) {
+            uint32_t presentQueueIndex = 1;
+            vkGetDeviceQueue(device, indices.presentFamily.value(), presentQueueIndex, &presentQueue);
         }
-        else { // compute in is own fmaily
-            vkGetDeviceQueue(device, indices.computeFamily.value(), 0, &computeQueue);
+        else {
+            vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
         }
 
-    }
-    else { // Compute queues is optional in vulkan and some hardware does not support it. This is a warning just for this situation
-        computeQueue = VK_NULL_HANDLE;
-        Debug::Warning("No compute queue available. Handel is null", __FILE__, __LINE__);
+        //compute queue
+        if (indices.computeFamily.has_value()) {
+            // check if compute and graphisc share the same family
+            if (indices.computeFamily.value() == indices.graphicsFamily.value()) {
+                // check if the present and grpahics have the same family and set the index accoordenly
+                uint32_t computeQueueIndex = (indices.presentFamily.value() == indices.graphicsFamily.value()) ? 2 : 1;
+                vkGetDeviceQueue(device, indices.computeFamily.value(), computeQueueIndex, &computeQueue);
+            }
+            else { // compute in is own fmaily
+                vkGetDeviceQueue(device, indices.computeFamily.value(), 0, &computeQueue);
+            }
+
+        }
+        else { // Compute queues is optional in vulkan and some hardware does not support it. This is a warning just for this situation
+            computeQueue = VK_NULL_HANDLE;
+            Debug::Warning("No compute queue available. Handel is null", __FILE__, __LINE__);
+        }
     }
 
 }
