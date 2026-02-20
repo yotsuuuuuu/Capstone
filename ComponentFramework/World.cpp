@@ -126,6 +126,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.modelMatrix = MMath::translate(Vec3(chunkPos.x,0.0f,chunkPos.y)); 
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
+	// make indices once. store in world. then make vertices and pass the indices
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
 
 	renderData.isInitialized = true;

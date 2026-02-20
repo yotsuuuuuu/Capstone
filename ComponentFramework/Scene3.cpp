@@ -166,8 +166,8 @@ bool Scene3::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 
-		preset.concatenate = false;
-		//preset.globalHeightScale = 5.0f;
+		preset.concatenate = true;
+		preset.globalHeightScale = 15.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 42398472;
 		preset.base.frequency = 0.009f;
@@ -248,11 +248,13 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 				else if (sdlEvent.key.key == SDLK_9) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
+					w->OnDestroy();
 					w->InitializeWorld(&preset);
 				}
 				else if (sdlEvent.key.key == SDLK_0) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
+					w->OnDestroy();
 					w->InitializeWorld(&preset2);
 
 				}

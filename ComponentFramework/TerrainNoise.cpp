@@ -99,7 +99,7 @@ float TerrainNoise::sample(float wX, float wZ) const
 {
     float base = baseNoise.GetNoise(wX, wZ);
     float continentalness = continentalNoise.GetNoise(wX, wZ);
-    float valley = PVnoise.GetNoise(wX, wZ);
+    float detail = PVnoise.GetNoise(wX, wZ);
 
     // post-processing for terrain shaping
     //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
@@ -109,7 +109,7 @@ float TerrainNoise::sample(float wX, float wZ) const
 
     //h += base * mask * basePreset.amplitude;
     h += continentalness * continentalPreset.amplitude;
-    h -= valley * PVpreset.amplitude*2;
+    h += (detail-0.5f * PVpreset.amplitude);
 
     // apply additional shaping based on layer properties
     if (terrainConfig.exponent != 1.0f) {
