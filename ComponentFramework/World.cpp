@@ -128,6 +128,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 
 	// make indices once. store in world. then make vertices and pass the indices
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+	//vRenderer->CreateTerrainVertexBuffer
 
 	renderData.isInitialized = true;
 	chunkRenderData[chunkPos] = renderData;

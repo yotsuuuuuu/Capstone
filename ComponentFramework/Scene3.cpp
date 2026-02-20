@@ -56,7 +56,7 @@ bool Scene3::OnCreate() {
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
 		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(0, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
 		float sidelenght = 10.0f;
 		OrthConfig config;
@@ -169,18 +169,25 @@ bool Scene3::OnCreate() {
 		preset.concatenate = true;
 		preset.globalHeightScale = 15.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
-		preset.base.seed = 42398472;
+		preset.base.seed = 3847598;
 		preset.base.frequency = 0.009f;
-		preset.base.amplitude = 2.0f;
+		preset.base.amplitude = 5.0f;
 		preset.base.fractal = FractalType::FBm;
 		preset.base.fractalOctaves = 2;
 		preset.base.gain = 0.3f;
 		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.frequency - 0.01f;
+		preset.continentalness.frequency = 0.1f;
 		preset.continentalness.amplitude = 1.0;
 		preset.continentalness.fractal = FractalType::PingPong;
 		preset.continentalness.cellType = CellularType::Euclidian;
 		preset.continentalness.returnType = ReturnType::Distance; 
+		preset.peaksValleys.type = NoiseType::Cubic;
+		preset.peaksValleys.cellType = CellularType::Hybrid;
+		preset.peaksValleys.returnType = ReturnType::Distance2;
+		preset.peaksValleys.fractal = FractalType::PingPong;
+		preset.peaksValleys.amplitude = 0.9f;
+		preset.peaksValleys.frequency = 9.0f;
+
 		preset.exponent = 1.4f;
 		
 		
@@ -200,7 +207,7 @@ bool Scene3::OnCreate() {
 		WorldActor->OnCreate();
 		
 		actorsInScene.push_back(WorldActor);
-		actorsInScene.push_back(act2);
+		//actorsInScene.push_back(act2);
 		actorsInScene.push_back(act);
 		actorsInScene.push_back(act1);
 		

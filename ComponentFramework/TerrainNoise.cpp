@@ -108,8 +108,7 @@ float TerrainNoise::sample(float wX, float wZ) const
     float h = base * basePreset.amplitude;
 
     //h += base * mask * basePreset.amplitude;
-    h += continentalness * continentalPreset.amplitude;
-    h += (detail-0.5f * PVpreset.amplitude);
+    //h += continentalness * continentalPreset.amplitude;
 
     // apply additional shaping based on layer properties
     if (terrainConfig.exponent != 1.0f) {
@@ -117,16 +116,16 @@ float TerrainNoise::sample(float wX, float wZ) const
     }
 
     // here is where i can check for modifiers
-    if (terrainConfig.concatenate) { return Concatenate(h); };
+    if (terrainConfig.concatenate) { h = Concatenate(h); };
 
+    h += (detail-0.5f * PVpreset.amplitude);
     return h * terrainConfig.globalHeightScale;
 }
 
 
 int TerrainNoise::Concatenate(float h) const
 {
-    int temp = (int)h * terrainConfig.globalHeightScale;
-    //if (temp < 0) { return 0; } for if u  dont want valleys
+    int temp = (int)h;
     return temp;
 }
 
