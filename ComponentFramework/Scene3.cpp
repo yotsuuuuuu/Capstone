@@ -167,85 +167,32 @@ bool Scene3::OnCreate() {
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 
 		preset.concatenate = false;
-		preset.globalHeightScale = 15.0f;
-		preset.exponent = 1.6f;
-		preset.ridge = 9.0f;        // Sharp peaks
-
-		// BASE: Creates the overall mountain shapes
+		//preset.globalHeightScale = 5.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 42398472;
-		preset.base.frequency = 0.05f;        // Slower for larger features
-		preset.base.amplitude = 1.0f;
+		preset.base.frequency = 0.009f;
+		preset.base.amplitude = 2.0f;
 		preset.base.fractal = FractalType::FBm;
-		preset.base.fractalOctaves = 4;         // More octaves for complexity
-		preset.base.lacunarity = 2.1f;
-		preset.base.gain = 0.5f;
-
-		// CONTINENTALNESS: Defines where mountains rise
+		preset.base.fractalOctaves = 2;
+		preset.base.gain = 0.3f;
 		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.seed = 987654;
-		preset.continentalness.frequency = 0.008f;
-		preset.continentalness.amplitude = 1.5f;
+		preset.continentalness.frequency - 0.01f;
+		preset.continentalness.amplitude = 1.0;
 		preset.continentalness.fractal = FractalType::PingPong;
-		preset.continentalness.fractalOctaves = 2;
 		preset.continentalness.cellType = CellularType::Euclidian;
-		preset.continentalness.returnType = ReturnType::Distance;
-		preset.continentalness.cellularJitter = 0.8f;
-
-		// EROSION: Carves valleys and slopes
-		preset.erosion.type = NoiseType::Perlin;
-		preset.erosion.seed = 555123;
-		preset.erosion.frequency = 0.02f;
-		preset.erosion.amplitude = 0.8f;
-		preset.erosion.fractal = FractalType::Ridged;
-		preset.erosion.fractalOctaves = 3;
-
-		// PEAKSVALLEYS: Adds dramatic peaks
-		preset.peaksValleys.type = NoiseType::OpenSimplex2;
-		preset.peaksValleys.seed = 777888;
-		preset.peaksValleys.frequency = 0.015f;
-		preset.peaksValleys.amplitude = 1.2f;
-		preset.peaksValleys.fractal = FractalType::Ridged;
-		preset.peaksValleys.fractalOctaves = 4;
+		preset.continentalness.returnType = ReturnType::Distance; 
+		preset.exponent = 1.4f;
 		
 		
-		preset2.concatenate = false;
-		preset2.globalHeightScale = 3.0f;
-		preset2.exponent = 1.2f;                  // Softer curves
-
-		// BASE: Gentle rolling shape
 		preset2.base.type = NoiseType::Perlin;
-		preset2.base.seed = 421322;
-		preset2.base.frequency = 0.02f;
-		preset2.base.amplitude = 2.5f;
+		preset2.base.seed = 421322;	
+		preset2.base.frequency = 0.03f;
+		preset2.base.amplitude = 5.7f;
 		preset2.base.fractal = FractalType::FBm;
-		preset2.base.fractalOctaves = 3;
-		preset2.base.lacunarity = 2.0f;
-		preset2.base.gain = 0.5f;
-
-		// CONTINENTALNESS: Subtle terrain variation
-		preset2.continentalness.type = NoiseType::OpenSimplex2;
-		preset2.continentalness.seed = 654321;
-		preset2.continentalness.frequency = 0.01f;
-		preset2.continentalness.amplitude = 0.5f;
-		preset2.continentalness.fractal = FractalType::FBm;
-		preset2.continentalness.fractalOctaves = 2;
-
-		// EROSION: Gentle smoothing
-		preset2.erosion.type = NoiseType::Perlin;
-		preset2.erosion.seed = 333444;
-		preset2.erosion.frequency = 0.04f;
-		preset2.erosion.amplitude = 0.3f;
-		preset2.erosion.fractal = FractalType::FBm;
-
-		// PEAKSVALLEYS: Small hills
-		preset2.peaksValleys.type = NoiseType::Value;
-		preset2.peaksValleys.seed = 222333;
-		preset2.peaksValleys.frequency = 0.03f;
-		preset2.peaksValleys.amplitude = 0.6f;
-		preset2.peaksValleys.fractal = FractalType::FBm;
-		preset2.peaksValleys.fractalOctaves = 2;
-
+		preset2.base.fractalOctaves = 5;
+		preset2.base.lacunarity = 0.2f;
+		preset2.base.gain = 0.1f;
+		preset2.exponent = 2.0f;
 
 		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);
