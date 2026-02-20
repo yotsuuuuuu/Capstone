@@ -166,11 +166,17 @@ bool Scene0::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 		TerrainPreset preset;
-		//				noise type,			seed,	frequency,	amplitude,	fractal?	fractal type,		octaves,	lacunarity, gain, warp?,	warp type,					warp freq,	warp amp,	exponent,	ridge,	bias
-		preset.base = { NoiseType::OpenSimplex2,	42,		0.05f,		1.0f,		false,		FractalType::FBm,	2,			2.0f,		0.5f, false,	WarpType::OpenSimplex2,		0.05f,		15.0f,		1.0f,		1.0f,	0.0f };
-		preset.mountains = { NoiseType::Cellular, 1337, 0.02f, 0.05f, false, FractalType::Ridged, 6, 2.0f, 0.5f, false, WarpType::OpenSimplex2, 0.1f, 20.0f, 2.0f, 2.0f, 0.0f };
-		preset.detail = { NoiseType::Perlin, 7, 0.02f, 0.9f, true, FractalType::FBm, 7, 2.0f, 0.5f, false, WarpType::None, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-		preset.globalHeightScale = 15.0f;
+
+		preset.concatenate = true;
+		//preset.globalHeightScale = 5.0f;
+		preset.base.type = NoiseType::OpenSimplex2;
+		preset.base.seed = 42;
+		preset.base.frequency = 0.009f;
+		preset.base.amplitude = 2.0f;
+		preset.base.fractal = FractalType::FBm;
+		preset.base.fractalOctaves = 5;
+		preset.base.gain = 0.3f;
+
 		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);

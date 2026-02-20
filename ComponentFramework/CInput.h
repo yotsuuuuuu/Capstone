@@ -31,7 +31,7 @@ private:
 	float yaw = -90.0f;
 	float pitch = 0.0f;
 	float mouseSensitivity = 0.1f;
-	bool mouseLookActive = true;
+	bool mouseLookActive = false;
 
 	// parameters
 	float moveSpeed = 10.0f; // units per second
