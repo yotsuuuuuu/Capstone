@@ -22,7 +22,7 @@ vec3 DebugLightSpace(vec4 lightPos, int cascadeIndex) {
     // Highlight invalid UVs and Depth
     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 
         || depth < 0.0 || depth > 1.0) {
-        return vec3(0.6, 0.0, 0.6); // magenta for invalid UV
+        return vec3(0.6, 0.0, 0.6); // magenta for invalid
     }
 
 
@@ -43,9 +43,9 @@ void main() {
     // Combine multiple cascades (overlay or choose one)
     // Example: show highest-resolution cascade first
     for (int i = 0; i < MAX_SHADOW_MAPS; i++) {
-        //color = DebugLightSpace(fragLightSpace[i], i);
+        color = DebugLightSpace(fragLightSpace[i], i);
         // Uncomment below to mix cascades with additive debug colors
-         color += DebugLightSpace(fragLightSpace[i], i) / float(MAX_SHADOW_MAPS);
+        //color += DebugLightSpace(fragLightSpace[i], i) / float(MAX_SHADOW_MAPS);
     }
 
     fragColor = vec4(color, 1.0);

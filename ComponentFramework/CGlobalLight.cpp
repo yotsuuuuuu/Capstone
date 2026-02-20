@@ -155,6 +155,10 @@ void CGlobalLight::UpdateViewMatrix() {
 				
 				float texelSizeX = (Othc.xmax - Othc.xmin) / float(SHAWDOW_SIZE);
 				float texelSizeY = (Othc.ymax - Othc.ymin) / float(SHAWDOW_SIZE);
+				float texelSize1X = (Othc.xmax - Othc.xmin) / float(SHAWDOW_SIZE / 2.0f);
+				float texelSize1Y = (Othc.ymax - Othc.ymin) / float(SHAWDOW_SIZE / 2.0f);
+				float texelSize2X = (Othc.xmax - Othc.xmin) / float(SHAWDOW_SIZE / 4.0f);
+				float texelSize2Y = (Othc.ymax - Othc.ymin) / float(SHAWDOW_SIZE / 4.0f);
 				float offset = (Othc.zmax - Othc.zmin) * 0.45f;
 
 				MATH::Vec3 ShadowCenter = CamPos + CameraFoward * offset;
@@ -170,12 +174,12 @@ void CGlobalLight::UpdateViewMatrix() {
 				HighLightPos.y = floor(HighLightPos.y / texelSizeY) * texelSizeY;
 
 				MedLightPos = QMath::rotate(MedLightPos, QMath::conjugate(orientation));
-				MedLightPos.x = floor(MedLightPos.x / texelSizeX) * texelSizeX;
-				MedLightPos.y = floor(MedLightPos.y / texelSizeY) * texelSizeY;
+				MedLightPos.x = floor(MedLightPos.x / texelSize1X) * texelSize1X;
+				MedLightPos.y = floor(MedLightPos.y / texelSize1Y) * texelSize1Y;
 				
 				LowhLightPos = QMath::rotate(LowhLightPos, QMath::conjugate(orientation));
-				LowhLightPos.x = floor(LowhLightPos.x / texelSizeX) * texelSizeX;
-				LowhLightPos.y = floor(LowhLightPos.y / texelSizeY) * texelSizeY;
+				LowhLightPos.x = floor(LowhLightPos.x / texelSize2X) * texelSize2X;
+				LowhLightPos.y = floor(LowhLightPos.y / texelSize2Y) * texelSize2Y;
 
 
 				HighLightPos = QMath::rotate(HighLightPos, orientation);
