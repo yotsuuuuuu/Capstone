@@ -6,7 +6,7 @@ rem Unix, developed at the University California Berkley and later perfected at 
 rem created real shell scripting language(s). Meanwhile, Microsoft floundered in it own stupidity in 
 rem it's early days only to claim world dominance as the best amature crap on our earth. 
 rem "Let's give it a go," as Umer would say - he's too nice. 
-rem update
+rem 
 rem drag and drop a file will set %1 to the name of the file
 set filename=%1
 

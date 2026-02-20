@@ -1323,7 +1323,7 @@ std::vector<VkDescriptorSet> VulkanRenderer::AllocateDescriptorSets(VkDescriptor
 void VulkanRenderer::WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo)
 {
     size_t numberOfSets = descriptorSets.size();
-	std::vector<VkWriteDescriptorSet> descriptorWrites(numberOfSets);
+	std::vector<VkWriteDescriptorSet> descriptorWrites(writeInfo.size());
 	std::vector<VkDescriptorBufferInfo> bufferInfos;
 	std::vector<VkDescriptorImageInfo> imageInfos;
 

@@ -106,6 +106,7 @@ void CGlobalLight::OnDestroy()
 	case RendererType::VULKAN: {
 		VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(renderer);
 		vkrender->DestroyUBO(GL_UBO);
+		vkrender->DestroyUBO(ShadowsUBOs);
 		isCreated = false;
 
 		break;
@@ -232,9 +233,9 @@ void CGlobalLight::UpdateUBO(uint32_t uboindex)
 		CameraData UBO2;
 		UBO2.projectionMatrix = G_data.projectionMatrix[2];
 		UBO2.viewMatrix = G_data.viewMatrix[2];
-		vkrender->UpdateUniformBuffer<CameraData>(UBO0, GL_UBO[uboindex * 3 + 0]);
-		vkrender->UpdateUniformBuffer<CameraData>(UBO1, GL_UBO[uboindex * 3 + 1]);
-		vkrender->UpdateUniformBuffer<CameraData>(UBO2, GL_UBO[uboindex * 3 + 2]);
+		vkrender->UpdateUniformBuffer<CameraData>(UBO0, ShadowsUBOs[uboindex * 3 + 0]);
+		vkrender->UpdateUniformBuffer<CameraData>(UBO1, ShadowsUBOs[uboindex * 3 + 1]);
+		vkrender->UpdateUniformBuffer<CameraData>(UBO2, ShadowsUBOs[uboindex * 3 + 2]);
 
 		break;
 	}

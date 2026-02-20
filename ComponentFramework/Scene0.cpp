@@ -56,9 +56,9 @@ bool Scene0::OnCreate() {
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
 		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(-75, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(0, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
-		float sidelenght = 10.0f;
+		float sidelenght = 14.0f;
 		OrthConfig config;
 		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
 		config.zmax = sidelenght; config.zmin = 0.25f;
@@ -72,8 +72,9 @@ bool Scene0::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		engineContext.assetManager->LoadAsset("./test.json");
-		actorsInScene = engineContext.assetManager->GetActorsInScene();			
+		//engineContext.assetManager->LoadAsset("./test.json");
+		//actorsInScene = engineContext.assetManager->GetActorsInScene();			
+		
 		// TODO : Compute Boiler work
 		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
 		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
@@ -94,8 +95,8 @@ bool Scene0::OnCreate() {
 
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
-		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MainPass.vert.spv", "shaders/ShadowCheck.frag.spv");
+		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/ShadowCheck_2.frag.spv");
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
@@ -288,7 +289,7 @@ void Scene0::OnDestroy() {
 		plane->OnDestroy();
 		
 		
-		}
+	}
 
 	
 }

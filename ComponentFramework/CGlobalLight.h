@@ -10,8 +10,8 @@ class CGlobalLight : public Component
 {
 	enum GLMODE {ORTHO,PRESPECTIVE};
 	OrthConfig Othc;
-	float MedFactor = 2.0f;
-	float LowFactor = 4.0f;
+	float MedFactor = 2.5f;
+	float LowFactor = 6.0f;
 	PerspectiveConfig Perc;
 	GLMODE mode;
 	WeakRef<CTransform> transform;

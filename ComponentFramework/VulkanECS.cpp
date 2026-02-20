@@ -58,7 +58,7 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-    AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3);
     std::vector<DescriptorWriteInfo> writeGlobal;
     AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetMainUBO());
@@ -491,7 +491,7 @@ public:
             for (uint32_t i = 0; i < shadowcntx.NumOFCascadeMaps; i++) { // For each shadow map need it for the 
                 // flat array so my row is the current in flight index my colums are i with a witdh of number of cascademaps
                 // this is used to acess the 3 resoultion cascade maps high med and low.
-                size_t index = framecntx.targetFrameIndex * shadowcntx.NumOFCascadeMaps + i; 
+                size_t index = framecntx.inFlightIndex * shadowcntx.NumOFCascadeMaps + i;
                 VkRenderPassBeginInfo renderinfo{};
                 renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
                 renderinfo.renderPass = shadowcntx.RenderPass;

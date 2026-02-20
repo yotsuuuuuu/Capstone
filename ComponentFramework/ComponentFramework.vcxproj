@@ -248,10 +248,13 @@
     <None Include="shaders\GlobalLight.vert" />
     <None Include="shaders\MainPass.frag" />
     <None Include="shaders\MainPass.vert" />
+    <None Include="shaders\MassPass_2.frag" />
+    <None Include="shaders\MassPass_2.vert" />
     <None Include="shaders\multiPhong.frag" />
     <None Include="shaders\multiPhong.vert" />
     <None Include="shaders\phong.frag" />
     <None Include="shaders\phong.vert" />
+    <None Include="shaders\ShadowCheck_2.frag" />
     <None Include="shaders\ShadowCheck.frag" />
     <None Include="shaders\simplePhong.frag" />
     <None Include="shaders\simplePhong.vert" />
