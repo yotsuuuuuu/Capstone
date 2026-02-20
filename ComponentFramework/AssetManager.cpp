@@ -115,6 +115,18 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		
 	}
 
+    for (auto& [lights, lightData] : jsonLoader["Lights"].items())
+    {
+        //light creation will go here
+        LightConfig ldata;
+        ldata.diffused = Vec4(lightData["diffused"][0].get<float>(), lightData["diffused"][1].get<float>(), lightData["diffused"][2].get<float>(), lightData["diffused"][3].get<float>());
+        ldata.specular = Vec4(lightData["specular"][0].get<float>(), lightData["specular"][1].get<float>(), lightData["specular"][2].get<float>(), lightData["specular"][3].get<float>());
+		ldata.specular = Vec4(lightData["ambient"][0].get<float>(), lightData["ambient"][1].get<float>(), lightData["ambient"][2].get<float>(), lightData["ambient"][3].get<float>());
+		ldata.orientation = QMath::angleAxisRotation(lightData["orientation"][0].get<float>(), Vec3(lightData["orientation"][1].get<float>(), lightData["orientation"][2].get<float>(), lightData["orientation"][3].get<float>()));
+		ldata.distance = lightData["distance"].get<float>();
+		
+		
+    }
     return true;
 }
 
