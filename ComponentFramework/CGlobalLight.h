@@ -10,6 +10,8 @@ class CGlobalLight : public Component
 {
 	enum GLMODE {ORTHO,PRESPECTIVE};
 	OrthConfig Othc;
+	float MedFactor = 2.0f;
+	float LowFactor = 4.0f;
 	PerspectiveConfig Perc;
 	GLMODE mode;
 	WeakRef<CTransform> transform;
@@ -31,7 +33,8 @@ public:
 	virtual void OnDestroy() override;
 	virtual void Update(const float dt) override {}
 
-	std::vector<BufferMemory> GetUBO() { return GL_UBO; }
+	std::vector<BufferMemory> GetMainUBO() { return GL_UBO; }
+	std::vector<BufferMemory> GetShadowUBO() { return ShadowsUBOs; }
 
 	void SetLightData(LightConfig data);
 	void SetLightProjection(OrthConfig config);

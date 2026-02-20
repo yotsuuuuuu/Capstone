@@ -474,10 +474,10 @@ private:
         std::vector<VkFramebuffer> FrameBuffers;	
         //CommandBufferData CMDBuffers;
 		DescriptorSetInfo DesSetInfo;
-        PipelineInfo PipelineInfo;
+        std::vector<PipelineInfo> PipelineInfo;
         //config info
         uint16_t NumOFCascadeMaps;
-        VkExtent2D Exents;
+        std::vector<VkExtent2D> Exents;
         VkFormat format;
         VkImageTiling tile;
         VkImageUsageFlags useFlag;
