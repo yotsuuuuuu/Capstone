@@ -123,61 +123,16 @@ bool Scene2::OnCreate() {
 
 		// Terrain Stuff
 		TerrainPreset preset;
-		preset.base= {		
-			NoiseType::OpenSimplex2,// noise type
-			42,						// seed
-			0.01f,					// frequency
-			0.3f,					// amplitude
-			false,					// fractal?
-			FractalType::FBm,		// fractal type
-			5,						// octaves
-			2.0f,					// lacunarity
-			0.5f,					// gain
-			false,					// warp?
-			WarpType::OpenSimplex2,	// warp type	
-			15.0f,					// warp amplitude
-			1.0f,					// exponent
-			1.0f,					// ridge
-			0.0f					// bias
-		};					
+		preset.concatenate = true;
+		//preset.globalHeightScale = 5.0f;
+		preset.base.type = NoiseType::OpenSimplex2;
+		preset.base.seed = 42;
+		preset.base.frequency = 0.009f;
+		preset.base.amplitude = 2.0f;
+		preset.base.fractal = FractalType::FBm;
+		preset.base.fractalOctaves = 5;
+		preset.base.gain = 0.3f;
 
-		preset.mountains = { 
-			NoiseType::OpenSimplex2, 
-			298347, 
-			0.09f, 
-			0.3f, 
-			false, 
-			FractalType::Ridged,
-			2, 
-			2.0f, 
-			0.5f, 
-			false, 
-			WarpType::OpenSimplex2, 
-			20.0f, 
-			2.0f, 
-			2.0f, 
-			0.0f 
-		};
-
-		preset.detail = { 
-			NoiseType::OpenSimplex2, 
-			723429, 
-			0.02f, 
-			0.02f, 
-			false, 
-			FractalType::FBm, 
-			1, 
-			2.0f,
-			0.5f, 
-			false, 
-			WarpType::None,
-			0.0f, 
-			1.0f, 
-			1.0f, 
-			0.0f 
-		};
-
-		preset.globalHeightScale = 15.0f;
 		world = new World(engineContext.renderer);
 		//world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
 

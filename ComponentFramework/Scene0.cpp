@@ -167,49 +167,16 @@ bool Scene0::OnCreate() {
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 		TerrainPreset preset;
 
-		preset.mountains = {
-			NoiseType::OpenSimplex2,// noise type
-			42,						// seed
-			0.1f,					// frequency
-			0.5f,					// amplitude
-			FractalType::FBm,		// fractal type
-			5,						// octaves
-			0.2f,					// lacunarity
-			0.3f,					// gain
-			0.0f,					// fractal weighted strength
-			WarpType::OpenSimplex2,	// warp type	
-			0.3f,					// warp amplitude
-		};
+		preset.concatenate = true;
+		//preset.globalHeightScale = 5.0f;
+		preset.base.type = NoiseType::OpenSimplex2;
+		preset.base.seed = 42;
+		preset.base.frequency = 0.009f;
+		preset.base.amplitude = 2.0f;
+		preset.base.fractal = FractalType::FBm;
+		preset.base.fractalOctaves = 5;
+		preset.base.gain = 0.3f;
 
-		preset.base = {
-			NoiseType::OpenSimplex2,// noise type
-			42,						// seed
-			0.1f,					// frequency
-			0.5f,					// amplitude
-			FractalType::FBm,		// fractal type
-			5,						// octaves
-			0.2f,					// lacunarity
-			0.3f,					// gain
-			0.0f,					// fractal weighted strength
-			WarpType::OpenSimplex2,	// warp type	
-			0.3f,					// warp amplitude
-		};
-
-		preset.detail = {
-			NoiseType::OpenSimplex2,// noise type
-			42,						// seed
-			0.1f,					// frequency
-			0.5f,					// amplitude
-			FractalType::FBm,		// fractal type
-			5,						// octaves
-			0.2f,					// lacunarity
-			0.3f,					// gain
-			0.0f,					// fractal weighted strength
-			WarpType::OpenSimplex2,	// warp type	
-			0.3f,					// warp amplitude
-		};
-
-		preset.globalHeightScale = 15.0f;
 		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);

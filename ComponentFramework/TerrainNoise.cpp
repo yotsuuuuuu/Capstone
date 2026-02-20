@@ -34,82 +34,99 @@ static FastNoiseLite::FractalType ConvertFractalType(FractalType type)
 	}
 }
 
+static FastNoiseLite::CellularDistanceFunction ConvertCellularType(CellularType type) 
+{
+    switch (type) {
+    case CellularType::Euclidian:   return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    case CellularType::EuclidianSq: return FastNoiseLite::CellularDistanceFunction_EuclideanSq;
+    case CellularType::Manhattan:   return FastNoiseLite::CellularDistanceFunction_Manhattan;
+    case CellularType::Hybrid:      return FastNoiseLite::CellularDistanceFunction_Hybrid;
+    case CellularType::None:        return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    default:                        return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    }
+}
+
+static FastNoiseLite::CellularReturnType ConvertReturnType(ReturnType type)
+{
+    switch (type) {
+    case ReturnType::CellValue:     return FastNoiseLite::CellularReturnType_CellValue;
+    case ReturnType::Distance:      return FastNoiseLite::CellularReturnType_Distance;
+    case ReturnType::Distance2:     return FastNoiseLite::CellularReturnType_Distance2;
+    case ReturnType::None:          return FastNoiseLite::CellularReturnType_CellValue;
+    default:                        return FastNoiseLite::CellularReturnType_CellValue;
+    }
+}
+
 static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& noiseGen)
 {    noiseGen.SetSeed(layerP.seed);
     noiseGen.SetNoiseType(ConvertNoiseType(layerP.type));
 
     noiseGen.SetFrequency(layerP.frequency);
 
-    if (layerP.useFractal && layerP.fractal != FractalType::None) {
+    if (layerP.fractal != FractalType::None) {
         noiseGen.SetFractalType(ConvertFractalType(layerP.fractal));
-        noiseGen.SetFractalOctaves(layerP.octaves);
+        noiseGen.SetFractalOctaves(layerP.fractalOctaves);
         noiseGen.SetFractalLacunarity(layerP.lacunarity);
         noiseGen.SetFractalGain(layerP.gain);
-        noiseGen.SetFractalWeightedStrength(0.0f); // could change
-        noiseGen.SetFractalPingPongStrength(layerP.bias);
+        noiseGen.SetFractalWeightedStrength(layerP.fractalWeightedStrength); // could change
     }
     else {
         noiseGen.SetFractalType(FastNoiseLite::FractalType_None);
     }
 
-    if (layerP.useDomainWarp) {
+    if (layerP.domainWarp != WarpType::None) {
         noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
-        noiseGen.SetDomainWarpAmp(layerP.warpAmp);
+        noiseGen.SetDomainWarpAmp(layerP.warpAmplitude);
     }
 
 
     if (layerP.type == NoiseType::Cellular) {
-        noiseGen.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean);
-        noiseGen.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
-        noiseGen.SetCellularJitter(1.0f);
+        noiseGen.SetCellularDistanceFunction(ConvertCellularType(layerP.cellType));
+        noiseGen.SetCellularReturnType(ConvertReturnType(layerP.returnType)); // this cann be changed for silly effects
+        noiseGen.SetCellularJitter(layerP.cellularJitter);
     }
 }
 
 TerrainNoise::TerrainNoise(const TerrainPreset& preset)
-	:	basePreset(preset.base), 
-		mountainPreset(preset.mountains), 
-		detailPreset(preset.detail),
-		globalHeightScale(preset.globalHeightScale),
-        concatenate(preset.concatenate),
-        concatenateScale(preset.concatenateScale)
+	:	basePreset(preset.base)
 {
 	InitializeNoiseLayer(basePreset, baseNoise);
-	InitializeNoiseLayer(mountainPreset, mountainNoise);
-	InitializeNoiseLayer(detailPreset, detailNoise);
+    terrainConfig = preset;
 }
 
 
 float TerrainNoise::sample(float wX, float wZ) const
 {
     float base = baseNoise.GetNoise(wX, wZ);
-    float mountains = mountainNoise.GetNoise(wX, wZ);
-    float detail = detailNoise.GetNoise(wX, wZ);
+    float continentalness = continentalNoise.GetNoise(wX, wZ);
+    float valley = PVnoise.GetNoise(wX, wZ);
 
     // post-processing for terrain shaping
-    float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
+    //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
     // combine layers with amplitude scaling
-    float h = base *basePreset.amplitude;
-    h += mountains * mask *mountainPreset.amplitude; // mountains only in base areas
-    h += detail * detailPreset.amplitude * 0.25f; // subtle detail everywhere
+    float h = base * basePreset.amplitude;
+
+    //h += base * mask * basePreset.amplitude;
+    h += continentalness * continentalPreset.amplitude;
+    h -= valley * PVpreset.amplitude*2;
 
     // apply additional shaping based on layer properties
-    if (basePreset.exponent != 1.0f) {
-        h = std::pow(std::max(0.0f, h), basePreset.exponent);
+    if (terrainConfig.exponent != 1.0f) {
+        h = std::pow(std::max(0.0f, h), terrainConfig.exponent);
     }
 
-    if (mountainPreset.ridge > 1.0f) {
-        // additional ridge enhancement if needed
-        h *= (1.0f + std::abs(mountains) * (mountainPreset.ridge - 1.0f));
-    }
+    // here is where i can check for modifiers
+    if (terrainConfig.concatenate) { return Concatenate(h); };
 
-    if (concatenate) { return Concatenate(h); };
-
-    return h * globalHeightScale;
+    return h * terrainConfig.globalHeightScale;
 }
+
 
 int TerrainNoise::Concatenate(float h) const
 {
-    return (int)h * globalHeightScale;
+    int temp = (int)h * terrainConfig.globalHeightScale;
+    //if (temp < 0) { return 0; } for if u  dont want valleys
+    return temp;
 }
 
