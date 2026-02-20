@@ -34,89 +34,98 @@ static FastNoiseLite::FractalType ConvertFractalType(FractalType type)
 	}
 }
 
-static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& noiseGen)
+static FastNoiseLite::CellularDistanceFunction ConvertCellularType(CellularType type) 
 {
-	noiseGen.SetSeed(layerP.seed);
-	noiseGen.SetFrequency(layerP.frequency);
-	noiseGen.SetNoiseType(ConvertNoiseType(layerP.type));
+    switch (type) {
+    case CellularType::Euclidian:   return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    case CellularType::EuclidianSq: return FastNoiseLite::CellularDistanceFunction_EuclideanSq;
+    case CellularType::Manhattan:   return FastNoiseLite::CellularDistanceFunction_Manhattan;
+    case CellularType::Hybrid:      return FastNoiseLite::CellularDistanceFunction_Hybrid;
+    case CellularType::None:        return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    default:                        return FastNoiseLite::CellularDistanceFunction_Euclidean;
+    }
+}
 
-	noiseGen.SetFractalType(ConvertFractalType(layerP.fractal));
-	noiseGen.SetFractalOctaves(layerP.octaves);
-	noiseGen.SetFractalLacunarity(layerP.lacunarity);
-	noiseGen.SetFractalGain(layerP.gain);
+static FastNoiseLite::CellularReturnType ConvertReturnType(ReturnType type)
+{
+    switch (type) {
+    case ReturnType::CellValue:     return FastNoiseLite::CellularReturnType_CellValue;
+    case ReturnType::Distance:      return FastNoiseLite::CellularReturnType_Distance;
+    case ReturnType::Distance2:     return FastNoiseLite::CellularReturnType_Distance2;
+    case ReturnType::None:          return FastNoiseLite::CellularReturnType_CellValue;
+    default:                        return FastNoiseLite::CellularReturnType_CellValue;
+    }
+}
 
-	if (layerP.useDomainWarp) {
-		noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
-		noiseGen.SetDomainWarpAmp(layerP.warpAmplitude);
-	}
+static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& noiseGen)
+{    noiseGen.SetSeed(layerP.seed);
+    noiseGen.SetNoiseType(ConvertNoiseType(layerP.type));
+
+    noiseGen.SetFrequency(layerP.frequency);
+
+    if (layerP.fractal != FractalType::None) {
+        noiseGen.SetFractalType(ConvertFractalType(layerP.fractal));
+        noiseGen.SetFractalOctaves(layerP.fractalOctaves);
+        noiseGen.SetFractalLacunarity(layerP.lacunarity);
+        noiseGen.SetFractalGain(layerP.gain);
+        noiseGen.SetFractalWeightedStrength(layerP.fractalWeightedStrength); // could change
+    }
+    else {
+        noiseGen.SetFractalType(FastNoiseLite::FractalType_None);
+    }
+
+    if (layerP.domainWarp != WarpType::None) {
+        noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
+        noiseGen.SetDomainWarpAmp(layerP.warpAmplitude);
+    }
+
+
+    if (layerP.type == NoiseType::Cellular) {
+        noiseGen.SetCellularDistanceFunction(ConvertCellularType(layerP.cellType));
+        noiseGen.SetCellularReturnType(ConvertReturnType(layerP.returnType)); // this cann be changed for silly effects
+        noiseGen.SetCellularJitter(layerP.cellularJitter);
+    }
 }
 
 TerrainNoise::TerrainNoise(const TerrainPreset& preset)
-	:	basePreset(preset.base), 
-		mountainPreset(preset.mountains), 
-		detailPreset(preset.detail),
-		globalHeightScale(preset.globalHeightScale)
+	:	basePreset(preset.base)
 {
 	InitializeNoiseLayer(basePreset, baseNoise);
-	InitializeNoiseLayer(mountainPreset, mountainNoise);
-	InitializeNoiseLayer(detailPreset, detailNoise);
+    terrainConfig = preset;
 }
 
 
 float TerrainNoise::sample(float wX, float wZ) const
 {
+    float base = baseNoise.GetNoise(wX, wZ);
+    float continentalness = continentalNoise.GetNoise(wX, wZ);
+    float detail = PVnoise.GetNoise(wX, wZ);
 
-	float base = evalLayer(basePreset, baseNoise, wX, wZ);
-	float mountains = evalLayer(mountainPreset, mountainNoise, wX, wZ);
-	float detail = evalLayer(detailPreset, detailNoise, wX, wZ);
+    // post-processing for terrain shaping
+    //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
-	float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
-	
-	float h = base;
-	h += mountains * mask; // apply mountains modulated by base mask
-	h += detail * 0.25f; // add some detail
+    // combine layers with amplitude scaling
+    float h = base * basePreset.amplitude;
 
-	return h *= globalHeightScale;
+    //h += base * mask * basePreset.amplitude;
+    //h += continentalness * continentalPreset.amplitude;
 
+    // apply additional shaping based on layer properties
+    if (terrainConfig.exponent != 1.0f) {
+        h = std::pow(std::max(0.0f, h), terrainConfig.exponent);
+    }
+
+    // here is where i can check for modifiers
+    if (terrainConfig.concatenate) { h = Concatenate(h); };
+
+    h += (detail-0.5f * PVpreset.amplitude);
+    return h * terrainConfig.globalHeightScale;
 }
 
-float TerrainNoise::evalLayer(const NoiseLayerPreset& layerP, const FastNoiseLite& noiseGen, float x, float z) const
+
+int TerrainNoise::Concatenate(float h) const
 {
-
-	// all of this is temporary filler, can be adjusted later for what style() we are looking for. 
-	// handles different behaviours and landscapes by modifying the sampled noise value
-
-	float height = 0.0f;
-	float amplitude = layerP.amplitude;
-	float frequency = layerP.frequency;
-
-	for (int i = 0; i < layerP.octaves; i++) { // do this for each octave (compounds the noise each time)
-		float nx = x * frequency;
-		float nz = z * frequency;
-
-		if (layerP.useDomainWarp) {
-			float warp = noiseGen.GetNoise(nx * layerP.warpFrequency, nz * layerP.warpFrequency);
-			nx += warp * layerP.warpAmplitude;
-			nz += warp * layerP.warpAmplitude;
-		}
-
-		float noiseValue = noiseGen.GetNoise(nx, nz); // sample the noise
-		if (layerP.fractal == FractalType::Ridged) {
-			noiseValue = 1.0f - fabs(noiseValue); // make ridges
-			noiseValue *= noiseValue; // square to sharpen
-			noiseValue *= layerP.ridge; // apply ridge factor
-		}
-		else if (layerP.fractal == FractalType::PingPong) {
-			noiseValue = noiseValue * 2.0f; // 
-			if (noiseValue < 0.0f) noiseValue = -noiseValue;
-			if (noiseValue > 1.0f) noiseValue = 2.0f - noiseValue;
-			noiseValue *= layerP.bias;
-		}// if fractal is fBm do nothing special
-
-		height += noiseValue * amplitude;
-		amplitude *= layerP.gain;
-		frequency *= layerP.lacunarity;
-	}
-
-	return height;
+    int temp = (int)h;
+    return temp;
 }
+

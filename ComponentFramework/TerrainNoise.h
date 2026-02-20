@@ -7,14 +7,17 @@ class TerrainNoise
 public:
 	TerrainNoise(const TerrainPreset& preset);
 	float sample(float wX, float wZ) const;
+	float advancedSample(float wX, float wZ) const;
+
+	TerrainPreset terrainConfig;
+	int Concatenate(float h) const;
+	int clamps(float h) const;
+	float spike(float h) const;
 
 private:
-	float evalLayer(const NoiseLayerPreset& layerP,
-					const FastNoiseLite& noiseGen,
-					float x, float z) const;
 
-	NoiseLayerPreset basePreset, mountainPreset, detailPreset;	// different noise layers
-	FastNoiseLite baseNoise, mountainNoise, detailNoise;		// unique noise generators for each layer
-	float globalHeightScale;
+	NoiseLayerPreset basePreset, continentalPreset, erosionPreset, PVpreset;	// different noise layers
+	FastNoiseLite baseNoise, continentalNoise, erosionNoise, PVnoise;		// unique noise generators for each layer
+
 };
 

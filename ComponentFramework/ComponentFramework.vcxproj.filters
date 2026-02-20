@@ -130,6 +130,10 @@
     <ClCompile Include="CWorld.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Scene3.cpp">
+      <Filter>Source\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainPreset.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -282,6 +286,9 @@
     <ClInclude Include="CSkyBox.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Scene3.h">
+      <Filter>Header\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\multiPhong.frag">
@@ -338,6 +345,8 @@
     <None Include="shaders\ShadowCheck.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\TerraintTESTSHADER.frag" />
+    <None Include="shaders\TerraintTESTSHADER.vert" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

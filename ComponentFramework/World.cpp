@@ -6,6 +6,7 @@ void World::Initialize(TerrainPreset* t_)
 	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
+	//baseChunkMesh.reset();
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
 	// TODO: change texture to something real
@@ -125,7 +126,9 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.modelMatrix = MMath::translate(Vec3(chunkPos.x,0.0f,chunkPos.y)); 
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
+	// make indices once. store in world. then make vertices and pass the indices
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+	//vRenderer->CreateTerrainVertexBuffer
 
 	renderData.isInitialized = true;
 	chunkRenderData[chunkPos] = renderData;
@@ -247,6 +250,11 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 		vertex.normal = Vec3 (0.0f,1.0f,0.0f);
 		}
 	}
+
+}
+
+void World::LowerAll()
+{
 
 }
 

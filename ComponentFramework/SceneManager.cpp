@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
+#include "Scene3.h"
 #include "Debug.h"
 
 SceneManager::SceneManager() :
@@ -74,7 +75,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	engineContext.fmodController->AnalyzeAudioOffline(0);
-	BuildScene(SCENE0);
+	BuildScene(SCENE3);
 	
 	return true;
 }
@@ -118,7 +119,7 @@ void SceneManager::GetEvents() {
 				break;
 
 			case SDL_SCANCODE_F3:
-				///BuildScene(SCENE3);
+				BuildScene(SCENE3);
 				break;
 
 			case SDL_SCANCODE_F4:
@@ -179,7 +180,7 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 		break;
 
 	case SCENE3:
-		///currentScene = new Scene3();
+		currentScene = new Scene3(engineContext);
 		status = currentScene->OnCreate();
 		break;
 
