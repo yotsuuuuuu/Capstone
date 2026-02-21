@@ -11,25 +11,32 @@ void FmodController::playsong(int songnum_)
 {
 	bool playing = false;
 	bool stopped = false;
-	if (channel)
-	{
-		channel->isPlaying(&playing);
-	}
 	
-	
-	
-	if (channel == nullptr || playing == false)
-	{
-		result = system->playSound(numOfsounds[songnum_], 0, false, &channel);
-		channel->setVolume(volume / 100.0f);
-	}
-	else
-	{
-		/*channel->setPaused(true);
-		system->playSound(numOfsounds[songnum_], 0, false, &channel);*/
-		channel->stop();
-	}
+
+	result = system->playSound(numOfsounds[songnum_], 0, false, &channel);
+	channel->setVolume(volume / 100.0f);
+
 	result = system->update();
+}
+void FmodController::playsong(AudioState state_)
+{
+	switch (state_)
+	{
+	case AudioState::PLAY:
+		if (channel)
+			channel->setPaused(false);
+		break;
+	case AudioState::PAUSE:
+		if (channel)
+			channel->setPaused(true);
+		break;
+	case AudioState::STOP:
+		if (channel)
+			channel->stop();
+		break;
+	default:
+		break;
+	}
 }
 
 bool FmodController::createSystem()
@@ -75,6 +82,8 @@ void FmodController::Volume(float volume_)
 		channel->setVolume(volume/100.0f);
 	}
 }
+
+
 
 std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 {

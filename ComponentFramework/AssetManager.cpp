@@ -4,7 +4,10 @@
 #include "CMaterial.h"
 #include "CShader.h"
 #include "CTransform.h"
-
+#include "CCamera.h"
+#include "CPhysics.h"
+#include "CInput.h"
+#include "CGlobalLight.h"
 
 using json = nlohmann::json;
 
@@ -115,18 +118,58 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		
 	}
 
-    for (auto& [lights, lightData] : jsonLoader["Lights"].items())
+    if (!jsonLoader.contains("Camera"))
     {
-        //light creation will go here
-        LightConfig ldata;
-        ldata.diffused = Vec4(lightData["diffused"][0].get<float>(), lightData["diffused"][1].get<float>(), lightData["diffused"][2].get<float>(), lightData["diffused"][3].get<float>());
-        ldata.specular = Vec4(lightData["specular"][0].get<float>(), lightData["specular"][1].get<float>(), lightData["specular"][2].get<float>(), lightData["specular"][3].get<float>());
-		ldata.specular = Vec4(lightData["ambient"][0].get<float>(), lightData["ambient"][1].get<float>(), lightData["ambient"][2].get<float>(), lightData["ambient"][3].get<float>());
-		ldata.orientation = QMath::angleAxisRotation(lightData["orientation"][0].get<float>(), Vec3(lightData["orientation"][1].get<float>(), lightData["orientation"][2].get<float>(), lightData["orientation"][3].get<float>()));
-		ldata.distance = lightData["distance"].get<float>();
-		
-		
+		std::cout << "json does not contain an Camera section " << "\n";
+		return false;
     }
+
+	
+		Ref<CActor> cam = std::make_shared<CActor>(nullptr);
+		auto pos = jsonLoader["Camera"]["position"].get<std::vector<float>>();
+		auto rot = jsonLoader["Camera"]["rotation"].get<std::vector<float>>();
+		
+		float fov = jsonLoader["Camera"]["fov"].get<float>();
+		float nearClip = jsonLoader["Camera"]["nearClip"].get<float>();
+		float farClip = jsonLoader["Camera"]["farClip"].get<float>();
+		
+		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, fov, 1.0f, nearClip, farClip));
+		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
+		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
+
+		assetMap["Camera"] = cam;
+    
+
+    if (!jsonLoader.contains("globalLight"))
+    {
+        std::cout << "json does not contain an globalLight section " << "\n";
+        return false;
+    }
+
+    
+    //light creation will go here
+	LightConfig ldata;
+	auto& lightData = jsonLoader["globalLight"];
+    ldata.diffused = Vec4(lightData["diffused"][0].get<float>(), lightData["diffused"][1].get<float>(), lightData["diffused"][2].get<float>(), lightData["diffused"][3].get<float>());        ldata.specular = Vec4(lightData["specular"][0].get<float>(), lightData["specular"][1].get<float>(), lightData["specular"][2].get<float>(), lightData["specular"][3].get<float>());
+	ldata.specular = Vec4(lightData["ambient"][0].get<float>(), lightData["ambient"][1].get<float>(), lightData["ambient"][2].get<float>(), lightData["ambient"][3].get<float>());		ldata.orientation = QMath::angleAxisRotation(lightData["orientation"][0].get<float>(), Vec3(lightData["orientation"][1].get<float>(), lightData["orientation"][2].get<float>(), lightData["orientation"][3].get<float>()));
+	ldata.distance = lightData["distance"].get<float>();
+    OrthConfig config;
+	float sidelength = lightData["orthosidelength"].get<float>();
+	config.xmax = (sidelength * 0.5f); config.xmin = -(sidelength * 0.5f); config.ymax = (sidelength * 0.5f); config.ymin = -(sidelength * 0.5f);
+	config.zmax = sidelength; config.zmin = 0.25f;
+
+	cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(assetMap["Camera"], renderer, config, ldata));
+	assetMap["Camera"] = cam;
+
+	
+    if (!assetMap["Camera"]->OnCreate())
+	{
+		std::cout << "Failed to create camera" << "\n";
+	}
+    
+	renderer->CreateGlobalRources(assetMapGet<CActor>("Camera"));
+	actorMap.push_back(assetMapGet<CActor>("Camera"));
+    
     return true;
 }
 
@@ -138,6 +181,11 @@ bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref
 std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
 {
     return actorMap;
+}
+
+Ref<Component> AssetManager::GetCamera()
+{
+    return assetMap["Camera"];
 }
 
 Ref<CMesh> AssetManager::GetMesh(const std::string& id)

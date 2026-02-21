@@ -218,7 +218,7 @@ bool Scene3::OnCreate() {
 		camera = cam;
 		shader = cshade;
 		world = WorldActor;
-		//engineContext.fmodController->playsong(0);
+		engineContext.fmodController->playsong(0);
 		
 	}
 		break;
@@ -247,7 +247,7 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		case SDL_EVENT_KEY_UP:
 		{
 			if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-			// escape stuff
+				// escape stuff
 				if (sdlEvent.key.key == SDLK_ESCAPE) {
 					mouseLocked = !mouseLocked;
 					SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
@@ -265,9 +265,15 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					w->InitializeWorld(&preset2);
 
 				}
-
+				else if (sdlEvent.key.key == SDLK_B)
+				{
+					engineContext.fmodController->playsong(AudioState::PAUSE);
+				}
+				else if (sdlEvent.key.key == SDLK_N)
+				{
+					engineContext.fmodController->playsong(AudioState::PLAY);
+				}
 			}
-
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
 			if (playerController) {

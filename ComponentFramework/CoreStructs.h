@@ -222,3 +222,28 @@ struct TerrainChunkData { // shared terrain mesh topology data
 	ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;
 };
+
+struct AudioBands
+{
+    float sub; //20 Hz-60 Hz
+    float bass; //60 Hz-130 Hz
+    float highBass; //130 Hz-262 Hz
+    float lowMid; //250 Hz-523 Hz
+    float midMid; //523 Hz-1046 Hz
+    float highMid; //1 kHz-2093 Hz
+    float lowHigh; //2 kHz-41896 Hz
+    float midHigh; //4 kHz-8 kHz
+    float highHigh; //8 kHz-12 kHz
+    float air; //12 kHz-20 kHz
+
+
+};
+
+enum class AudioState
+{
+	PLAY,
+	PAUSE,
+    NEXT,
+	PREV,
+	STOP
+};
