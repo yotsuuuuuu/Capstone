@@ -116,6 +116,8 @@ void VulkanRenderer::DrawIndexed(IndexedVertexBuffer mesh) {
     }
 }
 
+
+
 void VulkanRenderer::DestroyIndexedMesh(IndexedVertexBuffer mesh){
     vkDestroyBuffer(device, mesh.vertBufferID, nullptr);
     vkFreeMemory(device, mesh.vertBufferMemoryID, nullptr);

@@ -14,6 +14,19 @@ struct BufferMemory {
     VkDeviceSize bufferMemoryLength;
 };
 
+
+struct IndexBuffer {
+    VkBuffer indexBufferID;
+    VkDeviceMemory indexBufferMemoryID;
+    VkDeviceSize indexBufferLength;
+};
+
+struct VertexBuffer {
+    VkBuffer vertBufferID;
+    VkDeviceMemory vertBufferMemoryID;
+    VkDeviceSize vertBufferLength;
+};
+
 struct Sampler2D {
     VkImage image;
     VkDeviceMemory imageDeviceMemory;
@@ -219,6 +232,7 @@ struct TerrainVertex {
 
 struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
-	ModelMatrixPushConst transform; // unique per chunk
+    //VertexBuffer vertexBuffer;
+    ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;
 };

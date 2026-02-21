@@ -6,6 +6,8 @@ void VulkanRenderer::CreateTerrainBuffers(const std::vector<Vertex>& vertices, c
 	//CreateTerrainIndexBuffer(indices, outBuffers);
 	CreateVertexBuffer(outBuffers, vertices);
 	CreateIndexBuffer(outBuffers, indices);
+
+
 }
 
 void VulkanRenderer::CreateTerrainVertexBuffer(const std::vector<Vertex>& vertices, IndexedVertexBuffer& outBuffer) // DEPRECATAED

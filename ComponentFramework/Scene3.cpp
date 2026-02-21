@@ -166,30 +166,26 @@ bool Scene3::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 
-		preset.concatenate = true;
-		preset.globalHeightScale = 15.0f;
+		//preset.concatenate = true;
+		//preset.globalHeightScale = 15.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 3847598;
-		preset.base.frequency = 0.009f;
-		preset.base.amplitude = 5.0f;
+		preset.base.frequency = 0.003f;
+		preset.base.amplitude = 9.0f;
+		preset.exponent = 1.4f;
 		preset.base.fractal = FractalType::FBm;
-		preset.base.fractalOctaves = 2;
-		preset.base.gain = 0.3f;
+		preset.base.lacunarity = 2;
+		preset.base.fractalOctaves = 8;
 		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.frequency = 0.1f;
-		preset.continentalness.amplitude = 1.0;
+		preset.continentalness.frequency = 0.4f;
+		preset.continentalness.amplitude = 1.0f;
 		preset.continentalness.fractal = FractalType::PingPong;
 		preset.continentalness.cellType = CellularType::Euclidian;
-		preset.continentalness.returnType = ReturnType::Distance; 
-		preset.peaksValleys.type = NoiseType::Cubic;
-		preset.peaksValleys.cellType = CellularType::Hybrid;
-		preset.peaksValleys.returnType = ReturnType::Distance2;
-		preset.peaksValleys.fractal = FractalType::PingPong;
-		preset.peaksValleys.amplitude = 0.9f;
-		preset.peaksValleys.frequency = 9.0f;
+		preset.continentalness.returnType = ReturnType::Distance2;
 
-		preset.exponent = 1.4f;
-		
+		//preset.base.domainWarp = WarpType::OpenSimplex2;
+
+
 		
 		preset2.base.type = NoiseType::Perlin;
 		preset2.base.seed = 421322;	
@@ -255,13 +251,13 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 				else if (sdlEvent.key.key == SDLK_9) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
+
 					w->InitializeWorld(&preset);
 				}
 				else if (sdlEvent.key.key == SDLK_0) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
+
 					w->InitializeWorld(&preset2);
 
 				}

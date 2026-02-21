@@ -98,30 +98,59 @@ TerrainNoise::TerrainNoise(const TerrainPreset& preset)
 float TerrainNoise::sample(float wX, float wZ) const
 {
     float base = baseNoise.GetNoise(wX, wZ);
-    float continentalness = continentalNoise.GetNoise(wX, wZ);
     float detail = PVnoise.GetNoise(wX, wZ);
-
+    float continentalness = continentalNoise.GetNoise(wX, wZ);
     // post-processing for terrain shaping
     //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
     // combine layers with amplitude scaling
-    float h = base * basePreset.amplitude;
+    float h = base;
 
     //h += base * mask * basePreset.amplitude;
     //h += continentalness * continentalPreset.amplitude;
 
     // apply additional shaping based on layer properties
     if (terrainConfig.exponent != 1.0f) {
-        h = std::pow(std::max(0.0f, h), terrainConfig.exponent);
+        if (h >= 0) {
+            h = -std::pow(abs(h), terrainConfig.exponent);
+            //h = 0;
+        }
+        else{
+            h = std::pow(abs(h), terrainConfig.exponent);
+        }
     }
 
-    // here is where i can check for modifiers
-    if (terrainConfig.concatenate) { h = Concatenate(h); };
+    float cv = EvaluateContinental(continentalness);
+    cv = continentalness;
 
-    h += (detail-0.5f * PVpreset.amplitude);
-    return h * terrainConfig.globalHeightScale;
+    // here is where i can check for modifiers
+    //if (terrainConfig.concatenate) { h = Concatenate(h); };
+    if (h != h) {
+        printf("null");
+    }
+    //h += (detail-0.5f * PVpreset.amplitude);
+    return h * terrainConfig.base.amplitude + cv*continentalPreset.amplitude;
 }
 
+
+float TerrainNoise::EvaluateContinental(float c) const
+{
+    if (c <= 0.3f) {
+        return 2.0f; // add 5 to floor height
+    }
+    else if (0.3f < c <= 0.5f) {
+        return 5.0f;
+    }
+    else if (0.5f < c <= 0.9f) {
+        return 7.0f;
+    }
+    else if (0.9f < c) {
+        return 8.0f;
+    }
+    else {
+        return 0.0f;
+    }
+}
 
 int TerrainNoise::Concatenate(float h) const
 {

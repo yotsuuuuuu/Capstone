@@ -20,7 +20,6 @@ void World::Initialize(TerrainPreset* t_)
 void World::RenderWorld()
 {
 
-
 	for (const auto& chunk : chunks) {
 		const Vec2& position = chunk->getChunkPos();
 
@@ -43,6 +42,8 @@ void World::OnDelete()
 	//vRenderer->DestroyPipeline(worldPipeline);
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
+		
+		//vRenderer->
 	}
 
 	//vRenderer->DestroyDescriptorSet(worldDescriptorSet);
@@ -86,7 +87,7 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 			float worldZ = chunkPos.y + float(z);
 
 			heightmap[z * CHUNK_SIZE + x] = terrainNoise->sample(worldX, worldZ);
-			//printf("heightValue: %f X:%f, Y %f \t", heightmap[z * CHUNK_SIZE + x],worldX,worldZ);
+			//printf("heightValue: %f X:%f, Y %f \t", heightmap[z * CHUNK_SIZE + x],worldX,worldZ,"\n");
 		}
 	}
 	chunk->SetHeightmap(std::move(heightmap));

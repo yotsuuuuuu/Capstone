@@ -10,6 +10,7 @@ public:
 	float advancedSample(float wX, float wZ) const;
 
 	TerrainPreset terrainConfig;
+	float EvaluateContinental(float c) const;
 	int Concatenate(float h) const;
 	int clamps(float h) const;
 	float spike(float h) const;
