@@ -56,7 +56,7 @@ bool Scene0::OnCreate() {
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
 		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 1.0f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(-90, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(-30, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
 		float sidelenght = 15.0f;
 		OrthConfig config;

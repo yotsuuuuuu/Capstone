@@ -64,7 +64,7 @@ void main() {
 		shadow = min(s,s1);
 	}
 	else if (!(isInCasede0) &&  !(isInCasede1) && (isInCasede2)) {
-		shadow = ShadowCheck(2,1);
+		shadow = ShadowCheck(2,0);
 	}
 
 
