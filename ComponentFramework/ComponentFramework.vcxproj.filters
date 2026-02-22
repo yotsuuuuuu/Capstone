@@ -345,8 +345,15 @@
     <None Include="shaders\ShadowCheck.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\TerraintTESTSHADER.frag" />
-    <None Include="shaders\TerraintTESTSHADER.vert" />
+    <None Include="shaders\MassPass_2.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MassPass_2.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ShadowCheck_2.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

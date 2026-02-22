@@ -16,7 +16,6 @@
 #include <optional>
 #include <set>
 #include <unordered_map>
-#include <array>
 #include <queue>
 
 #include "CoreStructs.h"
@@ -32,6 +31,7 @@
 #include <memory>
 
 constexpr uint32_t SHAWDOW_SIZE = 1024;
+//constexpr uint32_t SHAWDOW_SIZE = 2048;
 
 using namespace MATH;
 
@@ -66,63 +66,6 @@ struct QueueFamilyIndices {
     }
 };
 
-
-
-struct Vertex {
-    Vec3 pos;
-    Vec3 normal;
-    Vec2 texCoord;
-
-    /// Used in vertex deduplication
-    bool operator == (const Vertex& other) const {
-        return pos == other.pos && normal == other.normal && texCoord == other.texCoord;
-    }   
-
-    static VkVertexInputBindingDescription getBindingDescription() {
-        VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(Vertex);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        return bindingDescription;
-    }
-
-    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(Vertex, normal);
-
-        attributeDescriptions[2].binding = 0;
-        attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-        return attributeDescriptions;
-    }
-       
-}; 
-
-
-/// Generate a hash of a Vertex, used in vertex deduplication
-/// Adding this to namespace std is called a namespace injection
-namespace std {
-    template<> struct hash<Vertex> {
-        size_t operator()(Vertex const& vertex) const noexcept {
-            size_t hash1 = hash<Vec3>()(vertex.pos);
-            size_t hash2 = hash<Vec3>()(vertex.normal);
-            size_t hash3 = hash<Vec2>()(vertex.texCoord);
-            size_t result = ((hash1 ^ (hash2 << 1)) >> 1) ^ (hash3 << 1);
-            return result;
-        }
-    };
-}
 
 
 
@@ -204,14 +147,16 @@ public:
     SDL_Window* getWindow() { return window; }
     VkDevice getDevice() { return device; }
     uint32_t getNumSwapchains() { return numSwapchains; }
+    uint32_t getNumberOfFramesInFlight() { return MAX_FRAMES_IN_FLIGHT; }
    
-
+    // PER FRAME UBOS
     template<class T>
     std::vector<BufferMemory> CreateUniformBuffers() {
         std::vector<BufferMemory> ubo;
         VkDeviceSize bufferSize = sizeof(T);
-        ubo.resize(numSwapchains);
-        for (size_t i = 0; i < numSwapchains; i++) {
+        size_t numberOfBuffers = getNumberOfFramesInFlight();
+        ubo.resize(numberOfBuffers);
+        for (size_t i = 0; i < numberOfBuffers; i++) {
             ubo[i].bufferMemoryLength = bufferSize;
             CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -219,21 +164,33 @@ public:
         }
         return ubo;
     }
-
+    // UPDATE ALL UBO PER FRAME
     template <class T>
     void UpdateUniformBuffers(const T& srcData, const std::vector<BufferMemory> bufferMemory) {
         void* data;
-        int num = static_cast<int>(numSwapchains);
+        size_t num = getNumberOfFramesInFlight();
 		size_t size = sizeof(T);
 		VkDeviceSize bufferSize = static_cast<VkDeviceSize>(size);
 
-        for (int i = 0; i < num; ++i) {
+        for (size_t i = 0; i < num; ++i) {
             vkMapMemory(device, bufferMemory[i].bufferMemoryID, 0, bufferSize, 0, &data);
             memcpy(data, &srcData, static_cast<size_t>(bufferMemory[i].bufferMemoryLength));
             vkUnmapMemory(device, bufferMemory[i].bufferMemoryID);
         }
     };
 
+    // CREATE ONE UBO
+    template <class T>
+    BufferMemory CreateUniformBuffer() {
+        BufferMemory ubo;
+        VkDeviceSize bufferSize = sizeof(T);
+        ubo.bufferMemoryLength = bufferSize;
+        CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            ubo.bufferID, ubo.bufferMemoryID);
+        return ubo;
+    }
+    // UPDATE A SPECIFIC UBO
     template <class T>
     void UpdateUniformBuffer(const T& srcData, const BufferMemory bufferMemory) {
         void* data;      
@@ -294,7 +251,7 @@ private:
     void createSurface();
     void createLogicalDevice();
     void createSwapChain();
-    void createImageViews();
+    void CreateSwapImageViews();
     
     void CreateVkLogicalDevice();
     QueueFamilyIndices VkFindQueueFamilies(VkPhysicalDevice device);
@@ -385,7 +342,7 @@ public:
 
 	VkDescriptorSetLayout CreateDescriptorSetLayout(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo);
 	VkDescriptorPool CreateDescriptorPool(const std::vector<SingleDescriptorSetLayoutInfo>& descriptorInfo, uint32_t count);
-	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout);
+	std::vector<VkDescriptorSet> AllocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout,size_t count = 0 );
     void WriteDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets,const std::vector<DescriptorWriteInfo>& writeInfo);
 
     // ECS Rendering
@@ -455,16 +412,15 @@ private:
     {
         //Rendering handles
         VkRenderPass RenderPass;
+        VkSampler ShadowSampler;
 		std::vector<Sampler2D> ShadowTextures2D;
-        std::vector<VkFramebuffer> FrameBuffers;
-		std::vector<VkSemaphore> WaitSemaphores;// 2 for the number of frames in flight
-		std::vector<VkSemaphore> SignalSemaphores;// 2
-		std::vector<VkFence> InFlightFences; //2 
+        std::vector<VkFramebuffer> FrameBuffers;	
         //CommandBufferData CMDBuffers;
 		DescriptorSetInfo DesSetInfo;
-        PipelineInfo PipelineInfo;
+        std::vector<PipelineInfo> PipelineInfo;
         //config info
-        VkExtent2D Exents;
+        uint16_t NumOFCascadeMaps;
+        std::vector<VkExtent2D> Exents;
         VkFormat format;
         VkImageTiling tile;
         VkImageUsageFlags useFlag;
