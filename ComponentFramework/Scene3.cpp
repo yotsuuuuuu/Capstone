@@ -54,9 +54,9 @@ bool Scene3::OnCreate() {
 		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.8f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(-45, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(-10, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
 		float sidelenght = 15.0f;
 		OrthConfig config;

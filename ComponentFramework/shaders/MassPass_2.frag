@@ -51,7 +51,15 @@ void main() {
 
 	if(isInCasede0 && isInCasede1 && isInCasede2  ) {
 		shadow = ShadowCheck(0,1);
-		
+		if(shadow >= 0.01){
+			float medshadow = ShadowCheck(1,2);
+			if(medshadow < 1.0){
+			shadow = (medshadow < shadow) ? medshadow : shadow;
+			}else {
+				float lowshadow = ShadowCheck(2,2);
+				shadow = (lowshadow < shadow)? lowshadow : shadow;
+			}
+		}
 
 	}else if( !(isInCasede0) &&  (isInCasede1) && !(isInCasede2) ){
 		shadow = ShadowCheck(1,1);
