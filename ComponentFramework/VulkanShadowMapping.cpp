@@ -121,7 +121,7 @@ void VulkanRenderer::CreateGlobalShadowPipelineResources(std::string vertFile, s
 	shadowMappingInfo.PipelineInfo.resize(3);
 	PipeLineConfig config;
 	config.renderPass = shadowMappingInfo.RenderPass;
-	config.cullMode = VK_CULL_MODE_FRONT_BIT; //VK_CULL_MODE_BACK_BIT VK_CULL_MODE_FRONT_BIT
+	config.cullMode = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT VK_CULL_MODE_FRONT_BIT VK_CULL_MODE_NONE
 	config.depthBias = VK_TRUE;
 	config.depthBiasConstantFactor = 0.7f;
 	config.depthBiasSlopeFactor = 2.75f;

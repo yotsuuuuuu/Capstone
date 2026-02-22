@@ -43,9 +43,9 @@ void main() {
     // Combine multiple cascades (overlay or choose one)
     // Example: show highest-resolution cascade first
     for (int i = 0; i < MAX_SHADOW_MAPS; i++) {
-        color = DebugLightSpace(fragLightSpace[i], i);
+        //color = DebugLightSpace(fragLightSpace[i], i);
         // Uncomment below to mix cascades with additive debug colors
-        //color += DebugLightSpace(fragLightSpace[i], i) / float(MAX_SHADOW_MAPS);
+        color += DebugLightSpace(fragLightSpace[i], i) / float(MAX_SHADOW_MAPS);
     }
 
     fragColor = vec4(color, 1.0);

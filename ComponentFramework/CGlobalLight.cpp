@@ -8,9 +8,9 @@ CGlobalLight::CGlobalLight(Ref<Component> parent_, Renderer* renderer_, OrthConf
 	G_data.ambient = data.ambient;
 	G_data.diffused = data.diffused;
 	G_data.specular = data.specular;
-	G_data.projectionMatrix[0] = MMath::orthographicVK(config.xmin, config.xmax, config.ymin, config.ymax, config.zmin, config.zmax);	
-	G_data.projectionMatrix[1] = MMath::orthographicVK(config.xmin * MedFactor, config.xmax * MedFactor, config.ymin * MedFactor, config.ymax * MedFactor, config.zmin * MedFactor, config.zmax * MedFactor);
-	G_data.projectionMatrix[2] = MMath::orthographicVK(config.xmin * LowFactor, config.xmax * LowFactor, config.ymin * LowFactor, config.ymax * LowFactor, config.zmin * LowFactor, config.zmax * LowFactor);
+	G_data.projectionMatrix[0] = MMath::orthographicVK(config.xmin, config.xmax, config.ymin, config.ymax, config.zmin, config.zmax );	
+	G_data.projectionMatrix[1] = MMath::orthographicVK(config.xmin * MedFactor, config.xmax * MedFactor, config.ymin * MedFactor, config.ymax * MedFactor, config.zmin , config.zmax * MedFactor);
+	G_data.projectionMatrix[2] = MMath::orthographicVK(config.xmin * LowFactor, config.xmax * LowFactor, config.ymin * LowFactor, config.ymax * LowFactor, config.zmin , config.zmax * LowFactor);
 	G_data.direction = Vec4(VMath::normalize(QMath::rotate(Vec3(0, 0, -1), data.orientation)),0);
 	orientation = data.orientation;
 	distance = data.distance;
@@ -161,6 +161,7 @@ void CGlobalLight::UpdateViewMatrix() {
 				float texelSize2Y = (Othc.ymax - Othc.ymin) / float(SHAWDOW_SIZE / 4.0f);
 				float offset = (Othc.zmax - Othc.zmin) * 0.45f;
 
+				//MATH::Vec3 ShadowCenter = CamPos;
 				MATH::Vec3 ShadowCenter = CamPos + CameraFoward * offset;
 				MATH::Vec3 LightPos0 = ShadowCenter - LightDir *  offset;
 				MATH::Vec3 LightPos1 = ShadowCenter - LightDir * offset * MedFactor;

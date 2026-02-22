@@ -49,16 +49,16 @@ bool Scene0::OnCreate() {
 		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
 		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
 		LightConfig ldata;
-		//ldata.diffused = Vec4(0.5f, 0.6f, 0.0f, 0.0f);
-		//ldata.specular = Vec4(0.0f, 0.3f, 0.0f, 0.0f);
+		//ldata.diffused = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		//ldata.specular = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
 		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 1.0f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(0, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(-90, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
-		float sidelenght = 14.0f;
+		float sidelenght = 15.0f;
 		OrthConfig config;
 		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
 		config.zmax = sidelenght; config.zmin = 0.25f;
@@ -95,8 +95,8 @@ bool Scene0::OnCreate() {
 
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/ShadowCheck_2.frag.spv");
+		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/ShadowCheck_2.frag.spv");
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/MassPass_2.frag.spv");
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
@@ -125,13 +125,13 @@ bool Scene0::OnCreate() {
 
 		// step 2 create actors
 		Ref<CActor> act = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1,1,1));
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 1, -1), Quaternion(), Vec3(1,1,1));
 		act->AddComponent<CTransform>(t);
 		act->AddComponent<CMesh>(mesh);
 		act->AddComponent<CMaterial>(mat);
 
 		Ref<CActor> act1 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1.5, -0.5, 0),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
+		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1.5, 1.5, -1),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
 		act1->AddComponent<CTransform>(t1);
 		act1->AddComponent<CMesh>(mesh);
 		act1->AddComponent<CMaterial>(mat1);
