@@ -5,13 +5,13 @@
   },
   "Shaders": {
     "main": {
-        "frag":"shaders/MainPass.frag.spv",
-        "vert": "shaders/MainPass.vert.spv",
-        "binding": 0,
-        "type": 1,
-        "stage": 16,
-        "pass": 1,
-        "opaque": 0
+      "frag": "shaders/MassPass_2.frag.spv",
+      "vert": "shaders/MassPass_2.vert.spv",
+      "binding": 0,
+      "type": 1,
+      "stage": 16,
+      "pass": 1,
+      "opaque": 0
 
     }
   },

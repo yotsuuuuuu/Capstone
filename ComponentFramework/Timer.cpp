@@ -1,4 +1,5 @@
 #include "SDL3/SDL.h"
+#include "Debug.h"
 #include "Timer.h"
 #include <algorithm>
 
@@ -20,6 +21,9 @@ void Timer::StartFrameTime()
 	dt = static_cast<float>(currFrame - prevFrame) / static_cast<float>(frequency);
 	// Capped dt should change the max to a variable later
 	// Calculate dt and cache it for this frame
+	if (dt > 0.3f) {
+		Debug::Warning("Delta Time lasted more than 0.3f",__FILE__,__LINE__);
+	}
 	dt = SDL_clamp(dt, 0.0f, 0.03f);
 	prevFrame = currFrame;
 }
@@ -28,7 +32,9 @@ void Timer::EndFrameTime()
 {
 
 	uint64_t frameTime = SDL_GetPerformanceCounter() - currFrame;
-
+	if (targetFrameTime - frameTime < 0) {
+		Debug::Warning("frameTime lasted more than targetFrameTime", __FILE__, __LINE__);
+	}
 	uint64_t sleepTime = std::max<int64_t>(0, targetFrameTime - frameTime);
 
 	//conversion form ticks to milliseconds

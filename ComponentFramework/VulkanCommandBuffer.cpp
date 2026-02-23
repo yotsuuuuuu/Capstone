@@ -13,7 +13,7 @@ void VulkanRenderer::createCommandPool() {
     }
 }
 
-
+//Per SwapChainResource
 void VulkanRenderer::CreateCommandBuffers() {
     primaryCommandBuffer.commandBuffers.resize(numSwapchains);
 

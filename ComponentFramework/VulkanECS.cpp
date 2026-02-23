@@ -58,11 +58,11 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-    AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3);
     std::vector<DescriptorWriteInfo> writeGlobal;
-    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetUBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, shadowMappingInfo.ShadowTextures2D);
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetMainUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, shadowMappingInfo.ShadowTextures2D);
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
     //
@@ -414,6 +414,7 @@ public:
         //  Normal forward pass
         //  Post process bloom pass
         //  ImGUI 
+        //TODO: (KEV) ADJUT FOR PER FRAME DATA NOT PER SWAP CHAIN
         ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -424,18 +425,17 @@ public:
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
         VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
-        // TODO: Update UBOs for current frame ??? needs to be done
+        // 1.1.1 UPDATE PER FRAME UBO
         if (auto cam = VKRNDR->camera.lock()) {
             auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
             //context get data form fmdo  then update buffer.
-            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.targetFrameIndex);
-            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.targetFrameIndex);
+            MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.inFlightIndex);
+            MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
 
         VkPipelineLayout line;
         // 1.1 get draw items
-        std::unordered_map<VkPipeline, std::vector<DrawItem>> DrawingBuckets;
-        std::unordered_map<VkPipeline, std::vector<DrawItem>> ChunkDraw;
+        std::unordered_map<VkPipeline, std::vector<DrawItem>> DrawingBuckets;      
         for (const auto& comp : drawlist) {
             Ref<CActor> a = std::dynamic_pointer_cast<CActor>(comp);
             if (a) {
@@ -450,17 +450,17 @@ public:
                 }       
                 auto world = a->GetComponent<CWorld>();
                 if (world && mat) {
-                    PipelineInfo info = mat->GetPipelineInfo();;
-                    VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.targetFrameIndex];
+                    PipelineInfo info = mat->GetPipelineInfo();
+                    VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.inFlightIndex];
                     auto chunkMap = world->GetChunkRenderData();
                     for (const auto& pair : chunkMap) {
                         DrawItem item;
                         item.mesh = pair.second.vertexBuffer;
                         item.push = pair.second.transform;
-                        item.setID = mat->GetSetValue();;
+                        item.setID = mat->GetSetValue();
                         item.pipeInfo = info;
                         item.set = set;
-                        ChunkDraw[item.pipeInfo.pipeline].push_back(item);
+                        DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
                     }
                 }
 
@@ -473,48 +473,51 @@ public:
            auto CskyBox = MainCamera->GetComponent<CSkyBox>();
            skybox.mesh = CskyBox->GetMesh();
            skybox.pipeInfo = CskyBox->GetPipeline();
-           skybox.set = CskyBox->GetSet()[framecntx.targetFrameIndex];
+           skybox.set = CskyBox->GetSet()[framecntx.inFlightIndex];
            skybox.setID = 1;
         }
         else {
             throw std::runtime_error("Main Camera is in valid");
         }
-      
+        // TODO: REDO FOR CASTCADING SHAHOW MAPS.
         // 3 Start recording
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
-            VkRenderPassBeginInfo renderinfo{};
-            renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderinfo.renderPass = shadowcntx.RenderPass;           
-            renderinfo.framebuffer = shadowcntx.FrameBuffers[framecntx.targetFrameIndex];
-            renderinfo.renderArea.offset = { 0,0 };
-            renderinfo.renderArea.extent = shadowcntx.Exents;
+
+            auto cachedLayout = shadowcntx.PipelineInfo[0].pipelineLayout;
             std::array<VkClearValue, 1> clearValue{};
             clearValue[0].depthStencil = { 1.0f,0 };
-            renderinfo.clearValueCount = static_cast<uint32_t>(clearValue.size());
-            renderinfo.pClearValues = clearValue.data();
-            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
-            VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
-            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                &shadowcntx.DesSetInfo.descriptorSet[framecntx.targetFrameIndex]);
-            //For stuff not terrain
-            for (const auto& pair : DrawingBuckets) {
-                for (const auto& item : pair.second) {
-                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
-                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
-                    VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
+
+            for (uint32_t i = 0; i < shadowcntx.NumOFCascadeMaps; i++) { // For each shadow map need it for the 
+                // flat array so my row is the current in flight index my colums are i with a witdh of number of cascademaps
+                // this is used to acess the 3 resoultion cascade maps high med and low.
+                size_t index = framecntx.inFlightIndex * shadowcntx.NumOFCascadeMaps + i;
+                VkRenderPassBeginInfo renderinfo{};
+                renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+                renderinfo.renderPass = shadowcntx.RenderPass;
+                renderinfo.framebuffer = shadowcntx.FrameBuffers[index];
+                renderinfo.renderArea.offset = { 0,0 };
+                // there are number of exents that match the number of CascadeMaps
+                renderinfo.renderArea.extent = shadowcntx.Exents[i];
+                renderinfo.clearValueCount = static_cast<uint32_t>(clearValue.size());
+                renderinfo.pClearValues = clearValue.data();
+                VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
+                // there are number of pipeline that match the number of CascadeMaps
+                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, shadowcntx.PipelineInfo[i].pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, cachedLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    &shadowcntx.DesSetInfo.descriptorSet[index]);
+
+                for (const auto& pair : DrawingBuckets) {
+                    for (const auto& item : pair.second) {
+                        VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                        VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, cachedLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
+                        VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                    }
                 }
-            }
-            // For terrain
-            for (const auto& pair : ChunkDraw) {
-                for (const auto& item : pair.second) {
-                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
-                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, shadowcntx.PipelineInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
-                    VKRNDR->CMDRecordDrawTerrainIndex(framecntx.CMDBuffer, item.mesh);
-                }
+
+                VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
             }
 
-            VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
    
         // An image must leave a render pass in the layout it will be used in next.
@@ -536,12 +539,13 @@ public:
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
-            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.targetFrameIndex]);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.inFlightIndex]);
             // draw sky box
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, skybox.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
             VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
+            // draw the rest of the items
             for (const auto& pair : DrawingBuckets) {
                 VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, pair.first, VK_PIPELINE_BIND_POINT_GRAPHICS);
                 for (const auto& item : pair.second) {
@@ -551,16 +555,7 @@ public:
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
             }
-            //for terrain
-            for (const auto& pair : ChunkDraw) {
-                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, pair.first, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                for (const auto& item : pair.second) {
-                    VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &item.set, item.setID);
-                    VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
-                    VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, item.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
-                    VKRNDR->CMDRecordDrawTerrainIndex(framecntx.CMDBuffer, item.mesh);
-                }
-            }
+           
             VKRNDR->imGuiSystem->RecordCMDBuffer(framecntx.CMDBuffer);
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
@@ -575,6 +570,7 @@ public:
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 
     }
+
     static DrawItem GetDrawItem(const Ref<CActor>& actor,const VulkanRenderer::FrameContext& cntx) {
 
         auto mat = actor->GetComponent<CMaterial>();
@@ -586,7 +582,7 @@ public:
         item.push.normalMatrix = MMath::transpose(MMath::inverse(item.push.modelMatrix));
         item.pipeInfo = mat->GetPipelineInfo();
         item.mesh = mesh->GetMesh();
-        item.set = mat->GetDescriptorSet()[cntx.targetFrameIndex];
+        item.set = mat->GetDescriptorSet()[cntx.inFlightIndex];
         item.setID = mat->GetSetValue();
         return item;
     }

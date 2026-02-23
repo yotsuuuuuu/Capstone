@@ -19,17 +19,7 @@ bool CShader::OnCreate()
         PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
-       
-        //Temp Fix for now probly will needs to be changed
-       /* const char* vert = (vertShaderFile.empty()) ? nullptr : vertShaderFile.c_str();
-        const char* frag = (fragShaderFile.empty()) ? nullptr : fragShaderFile.c_str();
-        const char* tesC = (tesCShaderFile.empty()) ? nullptr : tesCShaderFile.c_str();
-        const char* tesE = (tesEShaderFile.empty()) ? nullptr : tesEShaderFile.c_str();
-        const char* geo =  (geomShaderFile.empty()) ? nullptr : geomShaderFile.c_str();        
-
-
-        pipelineInfo = vkrender->CreateGraphicsPipeline(arr, vert, frag,
-            tesC, tesE, geo);*/
+      
 
         isCreated = true;
         return true;
@@ -66,10 +56,8 @@ std::vector<VkDescriptorSet> CShader::AllocateDescriptorSet(std::vector<Sampler2
     if (vkrender) {
         std::vector<DescriptorWriteInfo> write;
         for (size_t i = 0; i < layoutInfo.size(); i++) {
-            vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::TEXTURE,
-                layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { arrySampler[i] });
-            //vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::TEXTURE,
-             //   layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { &arrySampler[i] });
+            vkrender->AddToDescrisptorLayoutWrite(write, layoutInfo[i].binding, layoutInfo[i].descriptorType, DescriptorWriteInfo::Destype::STATIC_SAMPLER,
+                layoutInfo[i].stageFlags, layoutInfo[i].descriptorCount, { arrySampler[i] });            
         }
         std::vector<VkDescriptorSet> set = vkrender->AllocateDescriptorSets(desInfo.descriptorPool, desInfo.descriptorSetLayout);
 
