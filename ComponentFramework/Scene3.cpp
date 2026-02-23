@@ -39,7 +39,8 @@ bool Scene3::OnCreate() {
 		
 
 		SDL_GetWindowSize(vRenderer->getWindow(), &width, &height);
-		aspectRatio = static_cast<float>(width) / static_cast<float>(height);	
+		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+		SDL_SetWindowRelativeMouseMode(vRenderer->getWindow(), mouseLocked);
 		
 		// step 1 Create the  GLOBAL componetes
 		
@@ -177,7 +178,7 @@ bool Scene3::OnCreate() {
 		preset.base.lacunarity = 2;
 		preset.base.fractalOctaves = 8;
 		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.frequency = 0.4f;
+		preset.continentalness.frequency = 0.002f;
 		preset.continentalness.amplitude = 1.0f;
 		preset.continentalness.fractal = FractalType::PingPong;
 		preset.continentalness.cellType = CellularType::Euclidian;
