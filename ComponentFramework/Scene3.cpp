@@ -54,11 +54,11 @@ bool Scene3::OnCreate() {
 		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
 		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
 		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.1f;
+		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 0.8f;
 		
-		ldata.orientation =  QMath::angleAxisRotation(0, Vec3(1, 0, 0));
+		ldata.orientation =  QMath::angleAxisRotation(-10, Vec3(1, 0, 0));
 		ldata.distance = 2.0f;
-		float sidelenght = 10.0f;
+		float sidelenght = 15.0f;
 		OrthConfig config;
 		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
 		config.zmax = sidelenght; config.zmin = 0.25f;
@@ -116,8 +116,8 @@ bool Scene3::OnCreate() {
 
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
 		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MainPass.vert.spv", "shaders/MainPass.frag.spv");
-		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MainPass.vert.spv", "shaders/ShadowCheck.frag.spv");
+		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/MassPass_2.frag.spv");
+		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/ShadowCheck_2.frag.spv");
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
@@ -214,7 +214,7 @@ bool Scene3::OnCreate() {
 		camera = cam;
 		shader = cshade;
 		world = WorldActor;
-		//engineContext.fmodController->playsong(0);
+		engineContext.fmodController->playsong(0);
 		
 	}
 		break;
@@ -243,7 +243,7 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		case SDL_EVENT_KEY_UP:
 		{
 			if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-			// escape stuff
+				// escape stuff
 				if (sdlEvent.key.key == SDLK_ESCAPE) {
 					mouseLocked = !mouseLocked;
 					SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
@@ -261,9 +261,15 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					w->InitializeWorld(&preset2);
 
 				}
-
+				else if (sdlEvent.key.key == SDLK_B)
+				{
+					engineContext.fmodController->playsong(AudioState::PAUSE);
+				}
+				else if (sdlEvent.key.key == SDLK_N)
+				{
+					engineContext.fmodController->playsong(AudioState::PLAY);
+				}
 			}
-
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
 			if (playerController) {

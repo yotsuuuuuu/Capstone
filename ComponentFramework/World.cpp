@@ -146,72 +146,72 @@ void World::CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vecto
 
 void World::CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO)
 {
-	// this will probly change due to write changes
-	std::vector<SingleDescriptorSetLayoutInfo> terrainLayoutInfo;
+	//// this will probly change due to write changes
+	//std::vector<SingleDescriptorSetLayoutInfo> terrainLayoutInfo;
 
-	SingleDescriptorSetLayoutInfo cameraBinding{};
-	cameraBinding.binding = 0;
-	cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	cameraBinding.descriptorCount = 1;
-	cameraBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	terrainLayoutInfo.push_back(cameraBinding);
-
-
-	SingleDescriptorSetLayoutInfo lightsBinding{};
-	lightsBinding.binding = 1;
-	lightsBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	lightsBinding.descriptorCount = 1;
-	lightsBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-	terrainLayoutInfo.push_back(lightsBinding);
-
-	SingleDescriptorSetLayoutInfo textureBinding{};
-	textureBinding.binding = 2;
-	textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	textureBinding.descriptorCount = 1;
-	textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	terrainLayoutInfo.push_back(textureBinding);
+	//SingleDescriptorSetLayoutInfo cameraBinding{};
+	//cameraBinding.binding = 0;
+	//cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	//cameraBinding.descriptorCount = 1;
+	//cameraBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	//terrainLayoutInfo.push_back(cameraBinding);
 
 
-	VkDescriptorSetLayout terrainLayout = vRenderer->CreateDescriptorSetLayout(terrainLayoutInfo);
+	//SingleDescriptorSetLayoutInfo lightsBinding{};
+	//lightsBinding.binding = 1;
+	//lightsBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	//lightsBinding.descriptorCount = 1;
+	//lightsBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	//terrainLayoutInfo.push_back(lightsBinding);
+
+	//SingleDescriptorSetLayoutInfo textureBinding{};
+	//textureBinding.binding = 2;
+	//textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	//textureBinding.descriptorCount = 1;
+	//textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	//terrainLayoutInfo.push_back(textureBinding);
 
 
-	VkDescriptorPool terrainPool = vRenderer->CreateDescriptorPool(terrainLayoutInfo, 1);
+	//VkDescriptorSetLayout terrainLayout = vRenderer->CreateDescriptorSetLayout(terrainLayoutInfo);
 
 
-	std::vector<VkDescriptorSet> terrainSets = vRenderer->AllocateDescriptorSets(terrainPool, terrainLayout);
-
-	std::vector<DescriptorWriteInfo> terrainWriteInfo;
-
-	DescriptorWriteInfo cameraWrite{};
-	cameraWrite.binding = 0;
-	cameraWrite.type = DescriptorWriteInfo::Destype::UBO;
-	cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	cameraWrite.descriptorCount = 1;
-	cameraWrite.bufferMem = cameraUBO; 
-	terrainWriteInfo.push_back(cameraWrite);
-
-	DescriptorWriteInfo lightsWrite{};
-	lightsWrite.binding = 1;
-	lightsWrite.type = DescriptorWriteInfo::Destype::UBO;
-	lightsWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	lightsWrite.descriptorCount = 1;
-	lightsWrite.bufferMem = lightsUBO;  
-	terrainWriteInfo.push_back(lightsWrite);
-
-	DescriptorWriteInfo textureWrite{};
-	textureWrite.binding = 2;
-	textureWrite.type = DescriptorWriteInfo::Destype::TEXTURE;
-	textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	textureWrite.descriptorCount = 1;
-	textureWrite.samplers = { terrainTexture };
-	terrainWriteInfo.push_back(textureWrite);
-
-	vRenderer->WriteDescriptorSets(terrainSets, terrainWriteInfo);
+	//VkDescriptorPool terrainPool = vRenderer->CreateDescriptorPool(terrainLayoutInfo, 1);
 
 
-	worldDescriptorSet.descriptorSetLayout = terrainLayout;
-	worldDescriptorSet.descriptorPool = terrainPool;
-	worldDescriptorSet.descriptorSet = terrainSets;
+	//std::vector<VkDescriptorSet> terrainSets = vRenderer->AllocateDescriptorSets(terrainPool, terrainLayout);
+
+	//std::vector<DescriptorWriteInfo> terrainWriteInfo;
+
+	//DescriptorWriteInfo cameraWrite{};
+	//cameraWrite.binding = 0;
+	//cameraWrite.type = DescriptorWriteInfo::Destype::UBO;
+	//cameraWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	//cameraWrite.descriptorCount = 1;
+	//cameraWrite.bufferMem = cameraUBO; 
+	//terrainWriteInfo.push_back(cameraWrite);
+
+	//DescriptorWriteInfo lightsWrite{};
+	//lightsWrite.binding = 1;
+	//lightsWrite.type = DescriptorWriteInfo::Destype::UBO;
+	//lightsWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	//lightsWrite.descriptorCount = 1;
+	//lightsWrite.bufferMem = lightsUBO;  
+	//terrainWriteInfo.push_back(lightsWrite);
+
+	//DescriptorWriteInfo textureWrite{};
+	//textureWrite.binding = 2;
+	//textureWrite.type = DescriptorWriteInfo::Destype::TEXTURE;
+	//textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	//textureWrite.descriptorCount = 1;
+	//textureWrite.samplers = { terrainTexture };
+	//terrainWriteInfo.push_back(textureWrite);
+
+	//vRenderer->WriteDescriptorSets(terrainSets, terrainWriteInfo);
+
+
+	//worldDescriptorSet.descriptorSetLayout = terrainLayout;
+	//worldDescriptorSet.descriptorPool = terrainPool;
+	//worldDescriptorSet.descriptorSet = terrainSets;
 
 
 }
