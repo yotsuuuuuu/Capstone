@@ -43,7 +43,6 @@ bool Scene0::OnCreate() {
 		
 		// step 1 Create the  GLOBAL componetes
 		
-		engineContext.assetManager->LoadAsset("./test.json");
 		actorsInScene = engineContext.assetManager->GetActorsInScene();			
 		
 
@@ -178,7 +177,6 @@ void Scene0::OnDestroy() {
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
-		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
 		engineContext.fmodController->playsong(0);
 		World->OnDestroy();
 		
