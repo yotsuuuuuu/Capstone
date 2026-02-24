@@ -88,9 +88,12 @@ static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& 
 }
 
 TerrainNoise::TerrainNoise(const TerrainPreset& preset)
-	:	basePreset(preset.base)
+	:	basePreset(preset.base), continentalPreset(preset.continentalness), erosionPreset(preset.erosion), PVpreset(preset.peaksValleys)
 {
 	InitializeNoiseLayer(basePreset, baseNoise);
+    InitializeNoiseLayer(continentalPreset, continentalNoise);
+    InitializeNoiseLayer(erosionPreset, erosionNoise);
+    InitializeNoiseLayer(PVpreset, PVnoise);
     terrainConfig = preset;
 }
 
@@ -129,7 +132,9 @@ float TerrainNoise::sample(float wX, float wZ) const
         printf("null");
     }
     //h += (detail-0.5f * PVpreset.amplitude);
-    return h * terrainConfig.base.amplitude + cv*continentalPreset.amplitude;
+    h = h * terrainConfig.base.amplitude + cv * continentalPreset.amplitude;
+    //std::cout << h << std::endl;
+    return h;//  *terrainConfig.globalHeightScale;
 }
 
 

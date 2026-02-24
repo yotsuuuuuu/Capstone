@@ -73,8 +73,8 @@ bool Scene3::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		engineContext.assetManager->LoadAsset("./test.json");
-		actorsInScene = engineContext.assetManager->GetActorsInScene();	
+		//engineContext.assetManager->LoadAsset("./test.json");
+		//actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
@@ -171,16 +171,20 @@ bool Scene3::OnCreate() {
 		//preset.globalHeightScale = 15.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 3847598;
-		preset.base.frequency = 0.003f;
-		preset.base.amplitude = 9.0f;
+		preset.base.frequency = 0.009f;
+		preset.base.amplitude = 15.0f;
 		preset.exponent = 1.4f;
 		preset.base.fractal = FractalType::FBm;
-		preset.base.lacunarity = 2;
-		preset.base.fractalOctaves = 8;
-		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.frequency = 0.002f;
-		preset.continentalness.amplitude = 1.0f;
+		preset.base.lacunarity = 6;
+		preset.base.fractalOctaves = 3;
+		preset.continentalness.type = NoiseType::Cubic;
+		preset.continentalness.amplitude = -0.4f;
+		preset.continentalness.frequency = 0.01f;
 		preset.continentalness.fractal = FractalType::PingPong;
+		preset.continentalness.fractalOctaves = 3;
+		preset.continentalness.gain = 0.10f;
+		preset.continentalness.lacunarity = 2;
+		preset.continentalness.fractalWeightedStrength = 15.090f;
 		preset.continentalness.cellType = CellularType::Euclidian;
 		preset.continentalness.returnType = ReturnType::Distance2;
 
@@ -190,15 +194,27 @@ bool Scene3::OnCreate() {
 		
 		preset2.base.type = NoiseType::Perlin;
 		preset2.base.seed = 421322;	
-		preset2.base.frequency = 0.03f;
-		preset2.base.amplitude = 5.7f;
+		preset2.base.frequency = 0.008f;
+		preset2.base.amplitude = 1.0f;
 		preset2.base.fractal = FractalType::FBm;
 		preset2.base.fractalOctaves = 5;
 		preset2.base.lacunarity = 0.2f;
-		preset2.base.gain = 0.1f;
+		preset2.base.gain = 0.5f;
 		preset2.exponent = 2.0f;
 
-		wC->InitializeWorld(&preset);
+		preset2.continentalness.type = NoiseType::Cellular;
+		preset2.continentalness.seed = 234908;
+		preset2.continentalness.frequency = 0.006f;
+		preset2.continentalness.fractal = FractalType::Ridged;
+		preset2.continentalness.amplitude = 1.0f;
+		preset2.continentalness.fractalOctaves = 3;
+		preset2.continentalness.gain = 0.90f;
+		preset2.continentalness.lacunarity = 2;
+		preset2.continentalness.fractalWeightedStrength = 20.0f;
+		preset2.continentalness.cellType = CellularType::Euclidian;
+		preset2.continentalness.returnType = ReturnType::Distance2;
+
+		wC->InitializeWorld(&preset2);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();

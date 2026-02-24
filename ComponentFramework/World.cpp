@@ -55,6 +55,7 @@ void World::OnDelete()
 void World::GenerateAllChunks()
 {
 	chunks.clear();
+	chunks.shrink_to_fit();
 	chunkRenderData.clear();
 
 	// create grid of chunks
