@@ -29,6 +29,7 @@ private:
 
 	TerrainPreset preset;
 	TerrainPreset preset2;
+	TerrainPreset preset3;
 	
 	
 	

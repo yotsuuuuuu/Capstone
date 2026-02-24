@@ -106,7 +106,6 @@ float TerrainNoise::sample(float wX, float wZ) const
     // post-processing for terrain shaping
     //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
-    // combine layers with amplitude scaling
     float h = base;
 
     //h += base * mask * basePreset.amplitude;
@@ -124,17 +123,21 @@ float TerrainNoise::sample(float wX, float wZ) const
     }
 
     float cv = EvaluateContinental(continentalness);
-    cv = continentalness;
+    //cv = continentalness;
 
     // here is where i can check for modifiers
-    //if (terrainConfig.concatenate) { h = Concatenate(h); };
+    h = h * terrainConfig.base.amplitude + cv * continentalPreset.amplitude;
+
+    h += detail * PVpreset.amplitude;
+
+
+    if (terrainConfig.concatenate) { h = Concatenate(h); };
     if (h != h) {
         printf("null");
     }
     //h += (detail-0.5f * PVpreset.amplitude);
-    h = h * terrainConfig.base.amplitude + cv * continentalPreset.amplitude;
     //std::cout << h << std::endl;
-    return h;//  *terrainConfig.globalHeightScale;
+    return h * terrainConfig.globalHeightScale;
 }
 
 

@@ -73,8 +73,8 @@ bool Scene3::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		//engineContext.assetManager->LoadAsset("./test.json");
-		//actorsInScene = engineContext.assetManager->GetActorsInScene();	
+		engineContext.assetManager->LoadAsset("./test.json");
+		actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
@@ -168,7 +168,7 @@ bool Scene3::OnCreate() {
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 
 		//preset.concatenate = true;
-		//preset.globalHeightScale = 15.0f;
+		preset.globalHeightScale = 2.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 3847598;
 		preset.base.frequency = 0.009f;
@@ -177,11 +177,11 @@ bool Scene3::OnCreate() {
 		preset.base.fractal = FractalType::FBm;
 		preset.base.lacunarity = 6;
 		preset.base.fractalOctaves = 3;
-		preset.continentalness.type = NoiseType::Cubic;
-		preset.continentalness.amplitude = -0.4f;
-		preset.continentalness.frequency = 0.01f;
+		preset.continentalness.type = NoiseType::Cellular;
+		preset.continentalness.amplitude = 0.4f;
+		preset.continentalness.frequency = 0.005f;
 		preset.continentalness.fractal = FractalType::PingPong;
-		preset.continentalness.fractalOctaves = 3;
+		preset.continentalness.fractalOctaves = 9;
 		preset.continentalness.gain = 0.10f;
 		preset.continentalness.lacunarity = 2;
 		preset.continentalness.fractalWeightedStrength = 15.090f;
@@ -214,7 +214,33 @@ bool Scene3::OnCreate() {
 		preset2.continentalness.cellType = CellularType::Euclidian;
 		preset2.continentalness.returnType = ReturnType::Distance2;
 
-		wC->InitializeWorld(&preset2);
+		preset3.concatenate = true;
+		preset3.globalHeightScale = 2.0f;
+		preset3.base.type = NoiseType::OpenSimplex2;
+		preset3.base.seed = 3847598;
+		preset3.base.frequency = 0.009f;
+		preset3.base.amplitude = 5.0f;
+		preset3.base.fractal = FractalType::FBm;
+		preset3.base.fractalOctaves = 2;
+		preset3.base.gain = 0.3f;
+		preset3.continentalness.type = NoiseType::Cellular;
+		preset3.continentalness.frequency = 0.002f;
+		preset3.continentalness.amplitude = 1.6;
+		preset3.continentalness.fractal = FractalType::FBm;
+		preset3.continentalness.gain = 0.9f;
+		preset3.continentalness.fractalWeightedStrength = 15.0f;
+		preset3.continentalness.cellType = CellularType::Euclidian;
+		preset3.continentalness.returnType = ReturnType::Distance;
+		preset3.peaksValleys.type = NoiseType::Cubic;
+		preset3.peaksValleys.cellType = CellularType::Hybrid;
+		preset3.peaksValleys.returnType = ReturnType::Distance2;
+		preset3.peaksValleys.fractal = FractalType::PingPong;
+		preset3.peaksValleys.amplitude = 5.9f;
+		preset3.peaksValleys.frequency = 0.05f;
+
+		preset3.exponent = 1.4f;
+
+		wC->InitializeWorld(&preset3);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
@@ -268,13 +294,14 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 				else if (sdlEvent.key.key == SDLK_9) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
-
+					
+					w->OnDestroy();
 					w->InitializeWorld(&preset);
 				}
 				else if (sdlEvent.key.key == SDLK_0) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
-
+					w->OnDestroy();
 					w->InitializeWorld(&preset2);
 
 				}

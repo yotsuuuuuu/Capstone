@@ -1,7 +1,10 @@
 #include "World.h"
 
 
-void World::Initialize(TerrainPreset* t_)
+void World::Initialize(TerrainPreset* t_) 
+// change to OnCreate only needing the enginge context and a song filepath, 
+// then when calling initialize just ask the engine context to load up and 
+// analyze the song an use that to populate the preset.
 {
 	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
 
@@ -38,15 +41,13 @@ void World::RenderWorld()
 
 void World::OnDelete()
 {
-	//vRenderer->DestroySampler2D(terrainTexture);
-	//vRenderer->DestroyPipeline(worldPipeline);
+	delete terrainNoise;
+	baseChunkMesh.reset();
+	vkDeviceWaitIdle(vRenderer->getDevice());
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
 		
-		//vRenderer->
 	}
-
-	//vRenderer->DestroyDescriptorSet(worldDescriptorSet);
 
 
 }
@@ -265,7 +266,6 @@ void World::LowerAll()
 World::~World()
 {
 	chunks.clear();
-	delete terrainNoise;
 }
 
 
