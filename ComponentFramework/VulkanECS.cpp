@@ -352,10 +352,28 @@ void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& 
 
 }
 
+void VulkanRenderer::CMDSubmitComputeQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence, VkPipelineStageFlags* stageFlags, VkSemaphore* waitSema, uint32_t wait_count, VkSemaphore* readySema, uint32_t ready_count)
+{
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    submitInfo.waitSemaphoreCount = wait_count;
+    submitInfo.pWaitSemaphores = waitSema;
+    submitInfo.pWaitDstStageMask = stageFlags;
+
+    submitInfo.commandBufferCount = cmd_count;
+    submitInfo.pCommandBuffers = cmds;
+
+    submitInfo.signalSemaphoreCount = ready_count;
+    submitInfo.pSignalSemaphores = readySema;
+
+    if (vkQueueSubmit(computeQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+}
 
 
-
-void VulkanRenderer::CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,
+void VulkanRenderer::CMDSubmitGraphicsQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,
     VkPipelineStageFlags* stageFlags, VkSemaphore* waitSema, uint32_t wait_count, VkSemaphore* readySema, uint32_t ready_count)
 {
     VkSubmitInfo submitInfo{};
@@ -565,7 +583,7 @@ public:
          /*   printf("%d cmd\t%d framefence\t%d waitSemaphore\t%d singalSemaphore\n", (int)framecntx.CMDBuffer, 
                 (int)framecntx.currentFrameFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
         // 5 submit
-            VKRNDR->CMDSubmitGraphics(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
+            VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
         // 6 present
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 

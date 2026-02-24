@@ -64,6 +64,9 @@ struct QueueFamilyIndices {
     bool isVkComplete() {
         return graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
     }
+    bool isNotDifferentQueueFamilys() {
+        return (graphicsFamily.value() == presentFamily.value()) && (graphicsFamily.value() == computeFamily.value()) ;
+    }
 };
 
 
@@ -224,7 +227,7 @@ private: /// Private member variables
     VkSwapchainKHR swapChain;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
-
+    QueueFamilyIndices queueFamilys;
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
@@ -359,8 +362,8 @@ private:
         uint32_t inFlightIndex;
         VkExtent2D extent;
     };
-
     VulkanRenderer::FrameContext GetCurrentFrameContext();
+ public:
     void CMDBeginRecord(const VkCommandBuffer&);
     void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPassBeginInfo&);
     // proble this one needs bit of rework
@@ -377,9 +380,11 @@ private:
         VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
         uint32_t baseMip = 0, uint32_t levelCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
-    void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
+    void CMDSubmitComputeQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
+    void CMDSubmitGraphicsQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
 
+ private:
     struct ECSRenderer;
 
     //Global Descriptorset
@@ -458,9 +463,10 @@ public:
     PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
 
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
+    PipelineInfo CreateGraphicsPipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
     , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
 
+    PipelineInfo CreateComputePipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, std::optional<std::string> computeFile, std::optional<uint32_t> pushConstSize = std::nullopt);
     //Skybox
     Sampler2D SkyBoxSampler(std::vector<std::string> paths);
 
