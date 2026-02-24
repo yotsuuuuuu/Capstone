@@ -43,104 +43,14 @@ bool Scene0::OnCreate() {
 		
 		// step 1 Create the  GLOBAL componetes
 		
-		Ref<CActor> cam = std::make_shared<CActor>();
-		cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, engineContext.renderer, 70.0f, aspectRatio, 0.25f, 500.0f));
-		//cam->AddComponent<CTransform>(std::make_shared<CTransform>(nullptr, Vec3(0, 0, 5), QMath::angleAxisRotation(0.0f, Vec3(0, 1, 0)), Vec3()));
-		cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
-		cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
-		LightConfig ldata;
-		//ldata.diffused = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-		//ldata.specular = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-		//ldata.ambient = Vec4(0.1f, 0.1f, 0.1f, 0.0f);
-		ldata.diffused = Vec4(0.5f, 0.6f, 0.8f, 0.0f);
-		ldata.specular = Vec4(0.9f, 0.9f, 1.0f, 0.0f);
-		ldata.ambient = Vec4(0.1f, 0.1f, 0.2f, 0.0f) * 1.0f;
+		engineContext.assetManager->LoadAsset("./test.json");
+		actorsInScene = engineContext.assetManager->GetActorsInScene();			
 		
-		ldata.orientation =  QMath::angleAxisRotation(-30, Vec3(1, 0, 0));
-		ldata.distance = 2.0f;
-		float sidelenght = 15.0f;
-		OrthConfig config;
-		config.xmax = (sidelenght * 0.5f); config.xmin = -(sidelenght * 0.5f); config.ymax = (sidelenght * 0.5f); config.ymin = -(sidelenght * 0.5f);
-		config.zmax = sidelenght; config.zmin = 0.25f;
-		/*PerspectiveConfig config;
-		config.aspectRatio = aspectRatio;
-		config.far = 100.0f;
-		config.near = 0.5f;
-		config.fovy = 45.0f;*/
-		cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(cam, engineContext.renderer, config, ldata));
-		if (!cam->OnCreate()) {
-			printf(" FAILED TO CREATE CAMERA \n");
-		}
-		vRenderer->CreateGlobalRources(cam);
-		//engineContext.assetManager->LoadAsset("./test.json");
-		//actorsInScene = engineContext.assetManager->GetActorsInScene();			
-		
-		// TODO : Compute Boiler work
-		// TODO : START ON CLUSETER LIGHTING: PROBLY GOING TO NEED A LIGHT SYSTEM
-		//  WHERE componets LIGTHS REGISTERY AND GET ADDE  TO SSBO
-		// THIS WILL NEED BOTH COMPUTE AND GRaphic Shaders
-		// TODO: FIXING RESIZING THE SCREEN
-		
-	
-		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
-	/*	 step 1.1 Meshs*/
-		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
-	/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
-		mesh->OnCreate();	
-		Ref<CMesh> mesh1 = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Plane.obj");
-		/*	Ref<CMesh> mesh = assetManager.GetMesh("mario");*/
-		mesh1->OnCreate();
 
-		// step 1.2 shaders
+		std::vector<std::string> filepaths = { "./textures/rock.png" };
 
-		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		vRenderer->AddToDescriptorLayoutCollection(layoutInfo, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-		//Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer,layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/ShadowCheck_2.frag.spv");
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, engineContext.renderer, layoutInfo, "shaders/MassPass_2.vert.spv", "shaders/MassPass_2.frag.spv");
-		//Ref<CShader> cshade = assetManager.GetShader("phong");
-		cshade->OnCreate();
-		
-		
-		//step 1.3 Materials
-		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
-		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths,cshade);
-		//Ref<CMaterial> mat = assetManager.GetMat("mario");
-		mat->OnCreate();
-
-		filepaths = { "./textures/mario_fire.png" };
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
-		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
-		mat1->OnCreate();
-
-		filepaths = { "./textures/texture_07.png" };
-
-		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
-		mat2->OnCreate();
-
-
-		filepaths = { "./textures/rock.png" };
-
-		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("main"));
 		mat3->OnCreate();
-
-		// step 2 create actors
-		Ref<CActor> act = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 1, -1), Quaternion(), Vec3(1,1,1));
-		act->AddComponent<CTransform>(t);
-		act->AddComponent<CMesh>(mesh);
-		act->AddComponent<CMaterial>(mat);
-
-		Ref<CActor> act1 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1.5, 1.5, -1),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
-		act1->AddComponent<CTransform>(t1);
-		act1->AddComponent<CMesh>(mesh);
-		act1->AddComponent<CMaterial>(mat1);
-
-		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
-		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(5, 5, 1));
-		act2->AddComponent<CTransform>(t2);
-		act2->AddComponent<CMesh>(mesh1);
-		act2->AddComponent<CMaterial>(mat2);
 
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
@@ -160,21 +70,12 @@ bool Scene0::OnCreate() {
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
-		
-		actorsInScene.push_back(WorldActor);
-		actorsInScene.push_back(act2);
-		actorsInScene.push_back(act);
-		actorsInScene.push_back(act1);
-		
 		//step 3 Actors being added to the scene.
-		actor = act;
-		actor1 = act1;
-		plane = act2;
-		camera = cam;
-		shader = cshade;
 		World = WorldActor;
 		//engineContext.fmodController->playsong(0);
-		
+
+		actorsInScene.push_back(World);
+
 	}
 		break;
 
@@ -208,7 +109,7 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 				SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
 			}
 
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+			auto p1 = std::dynamic_pointer_cast<CActor>(engineContext.assetManager->GetCamera());
 			auto playerController = p1->GetComponent<CInput>();
 			if (playerController) {
 				playerController->HandleKeyboardInput(sdlEvent);
@@ -218,7 +119,7 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 
 		case SDL_EVENT_MOUSE_MOTION:
 		{
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+			auto p1 = std::dynamic_pointer_cast<CActor>(engineContext.assetManager->GetCamera());
 			auto playerController = p1->GetComponent<CInput>();
 			if (playerController) {
 				playerController->HandleMouseMotion(sdlEvent);
@@ -230,7 +131,7 @@ void Scene0::HandleEvents(const SDL_Event& sdlEvent) {
 	
 }
 void Scene0::Update(const float deltaTime) {
-	auto player = std::dynamic_pointer_cast<CActor>(camera);
+	auto player = std::dynamic_pointer_cast<CActor>(engineContext.assetManager->GetCamera());
 	if (player) {
 		auto playerController =player->GetComponent<CInput>();
 		auto phys  =player->GetComponent<CPhysics>();
@@ -250,12 +151,7 @@ void Scene0::Render() const {
 
 		
 		{
-		/*	std::vector<Ref<Component>> drawlist;
-			actorsInScene.push_back(plane);*/
-			/*drawlist.push_back(actor);
-			drawlist.push_back(actor1);
-			drawlist.push_back(plane);
-			drawlist.push_back(World);*/
+		
 			vRenderer->RenderECS(actorsInScene);// Context obejct
 		}
 		break;
@@ -283,17 +179,10 @@ void Scene0::OnDestroy() {
 		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
 		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
-		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
-	
-		vRenderer->DestroyUBO(lightsUBO);
-		
 		engineContext.fmodController->playsong(0);
-		camera->OnDestroy();
-		actor->OnDestroy();
 		World->OnDestroy();
-		actor1->OnDestroy();
-		plane->OnDestroy();
 		
+	
 		
 	}
 

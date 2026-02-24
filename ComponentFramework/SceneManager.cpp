@@ -75,7 +75,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	engineContext.fmodController->AnalyzeAudioOffline(0);
-	BuildScene(SCENE3);
+	BuildScene(SCENE0);
 	
 	return true;
 }
