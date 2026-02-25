@@ -54,7 +54,9 @@ void World::OnDelete()
 void World::GenerateAllChunks()
 {
 	chunks.clear();
+	chunks.shrink_to_fit();
 	chunkRenderData.clear();
+
 	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
 	int i = 0;
