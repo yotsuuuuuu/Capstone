@@ -13,9 +13,9 @@ class CWorld : public Component {
 
 
 public:
-	CWorld(Ref<Component> parent_, Renderer* renderer_, const TerrainPreset& config) : Component(parent_),
+	CWorld(Ref<Component> parent_, EngineContext& engineContext_, const TerrainPreset& config) : Component(parent_),
 	worldConfig(config){
-		C_World = new World(renderer_);
+		C_World = new World(engineContext_);
 	}
 	~CWorld();
 

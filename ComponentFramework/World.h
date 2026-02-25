@@ -17,13 +17,14 @@ class World {
 private:
 	Renderer* renderer;
 	VulkanRenderer* vRenderer;
+	EngineContext engineContext;
 	TerrainNoise* terrainNoise;
 
 	// chunks
 	std::unique_ptr<BaseGridMesh> baseChunkMesh; // base mesh for chunks
 	std::vector<std::unique_ptr<Chunk>> chunks; 
 	std::unordered_map<Vec2, TerrainChunkData> chunkRenderData; // map chunk positions to their render data
-
+	IndexedVertexBuffer chunkIndexBuffer;
 	// vulkan
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
@@ -47,7 +48,7 @@ private:
 
 public:
 	
-	World(Renderer* renderer_) : renderer(renderer_), terrainNoise(nullptr) {}
+	World(EngineContext& engineContext_) : engineContext(engineContext_), terrainNoise(nullptr) {}
 	~World();
 
 	void Initialize(TerrainPreset* t_);

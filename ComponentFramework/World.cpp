@@ -41,6 +41,7 @@ void World::OnDelete()
 {
 	//vRenderer->DestroySampler2D(terrainTexture);
 	//vRenderer->DestroyPipeline(worldPipeline);
+	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
 	}
@@ -55,7 +56,7 @@ void World::GenerateAllChunks()
 {
 	chunks.clear();
 	chunkRenderData.clear();
-
+	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
 	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
@@ -127,6 +128,10 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
 	// make indices once. store in world. then make vertices and pass the indices
+	renderData.vertexBuffer.indexBufferID = chunkIndexBuffer.indexBufferID;
+	renderData.vertexBuffer.indexBufferLength = chunkIndexBuffer.indexBufferLength;
+	renderData.vertexBuffer.indexBufferMemoryID = chunkIndexBuffer.indexBufferMemoryID;
+
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
 	//vRenderer->CreateTerrainVertexBuffer
 

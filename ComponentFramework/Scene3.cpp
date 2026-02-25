@@ -51,42 +51,80 @@ bool Scene3::OnCreate() {
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
 
-		preset.concatenate = true;
-		preset.globalHeightScale = 15.0f;
+		//preset.concatenate = true;
+		preset.globalHeightScale = 2.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 3847598;
 		preset.base.frequency = 0.009f;
-		preset.base.amplitude = 5.0f;
-		preset.base.fractal = FractalType::FBm;
-		preset.base.fractalOctaves = 2;
-		preset.base.gain = 0.3f;
-		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.frequency = 0.1f;
-		preset.continentalness.amplitude = 1.0;
-		preset.continentalness.fractal = FractalType::PingPong;
-		preset.continentalness.cellType = CellularType::Euclidian;
-		preset.continentalness.returnType = ReturnType::Distance; 
-		preset.peaksValleys.type = NoiseType::Cubic;
-		preset.peaksValleys.cellType = CellularType::Hybrid;
-		preset.peaksValleys.returnType = ReturnType::Distance2;
-		preset.peaksValleys.fractal = FractalType::PingPong;
-		preset.peaksValleys.amplitude = 0.9f;
-		preset.peaksValleys.frequency = 9.0f;
-
+		preset.base.amplitude = 15.0f;
 		preset.exponent = 1.4f;
-		
-		
+		preset.base.fractal = FractalType::FBm;
+		preset.base.lacunarity = 6;
+		preset.base.fractalOctaves = 3;
+		preset.continentalness.type = NoiseType::Cellular;
+		preset.continentalness.amplitude = 0.4f;
+		preset.continentalness.frequency = 0.005f;
+		preset.continentalness.fractal = FractalType::PingPong;
+		preset.continentalness.fractalOctaves = 9;
+		preset.continentalness.gain = 0.10f;
+		preset.continentalness.lacunarity = 2;
+		preset.continentalness.fractalWeightedStrength = 15.090f;
+		preset.continentalness.cellType = CellularType::Euclidian;
+		preset.continentalness.returnType = ReturnType::Distance2;
+
+		//preset.base.domainWarp = WarpType::OpenSimplex2;
+
+
+
 		preset2.base.type = NoiseType::Perlin;
-		preset2.base.seed = 421322;	
-		preset2.base.frequency = 0.03f;
-		preset2.base.amplitude = 5.7f;
+		preset2.base.seed = 421322;
+		preset2.base.frequency = 0.008f;
+		preset2.base.amplitude = 1.0f;
 		preset2.base.fractal = FractalType::FBm;
 		preset2.base.fractalOctaves = 5;
 		preset2.base.lacunarity = 0.2f;
-		preset2.base.gain = 0.1f;
+		preset2.base.gain = 0.5f;
 		preset2.exponent = 2.0f;
 
-		wC->InitializeWorld(&preset);
+		preset2.continentalness.type = NoiseType::Cellular;
+		preset2.continentalness.seed = 234908;
+		preset2.continentalness.frequency = 0.006f;
+		preset2.continentalness.fractal = FractalType::Ridged;
+		preset2.continentalness.amplitude = 1.0f;
+		preset2.continentalness.fractalOctaves = 3;
+		preset2.continentalness.gain = 0.90f;
+		preset2.continentalness.lacunarity = 2;
+		preset2.continentalness.fractalWeightedStrength = 20.0f;
+		preset2.continentalness.cellType = CellularType::Euclidian;
+		preset2.continentalness.returnType = ReturnType::Distance2;
+
+		preset3.concatenate = true;
+		preset3.globalHeightScale = 2.0f;
+		preset3.base.type = NoiseType::OpenSimplex2;
+		preset3.base.seed = 3847598;
+		preset3.base.frequency = 0.009f;
+		preset3.base.amplitude = 5.0f;
+		preset3.base.fractal = FractalType::FBm;
+		preset3.base.fractalOctaves = 2;
+		preset3.base.gain = 0.3f;
+		preset3.continentalness.type = NoiseType::Cellular;
+		preset3.continentalness.frequency = 0.002f;
+		preset3.continentalness.amplitude = 1.6;
+		preset3.continentalness.fractal = FractalType::FBm;
+		preset3.continentalness.gain = 0.9f;
+		preset3.continentalness.fractalWeightedStrength = 15.0f;
+		preset3.continentalness.cellType = CellularType::Euclidian;
+		preset3.continentalness.returnType = ReturnType::Distance;
+		preset3.peaksValleys.type = NoiseType::Cubic;
+		preset3.peaksValleys.cellType = CellularType::Hybrid;
+		preset3.peaksValleys.returnType = ReturnType::Distance2;
+		preset3.peaksValleys.fractal = FractalType::PingPong;
+		preset3.peaksValleys.amplitude = 5.9f;
+		preset3.peaksValleys.frequency = 0.05f;
+
+		preset3.exponent = 1.4f;
+
+		wC->InitializeWorld(&preset3);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
