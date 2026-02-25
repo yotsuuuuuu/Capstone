@@ -15,6 +15,9 @@ class CMaterial;
 class CShader;
 class CActor;
 class CTransform;
+class CGlobalLight;
+class CCamera;
+
 class AssetManager
 {
 private:
@@ -50,6 +53,7 @@ public:
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
 	std::vector<Ref<Component>> GetActorsInScene();
+	Ref<Component> GetCamera();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);

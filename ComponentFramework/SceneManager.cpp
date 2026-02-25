@@ -28,12 +28,14 @@ SceneManager::~SceneManager() {
 	}
 	
 	delete assetManager;
+	dynamic_cast<VulkanRenderer*>(renderer)->DestroyGlobalResources();
 	renderer->OnDestroy();
 	engineContext.renderer = nullptr;
 	engineContext.assetManager = nullptr;	
 	engineContext.fmodController = nullptr;
 	delete fmodController;
 	delete renderer;
+
 	Debug::Info("Deleting the GameSceneManager", __FILE__, __LINE__);
 
 }
@@ -74,6 +76,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
+	engineContext.assetManager->LoadAsset("./test.json");
 	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);
 	
@@ -171,12 +174,12 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 
 	case SCENE1:
 		///currentScene = new Scene1();
-		status = currentScene->OnCreate();
+		//status = currentScene->OnCreate();
 		break;
 
 	case SCENE2:
-		currentScene = new Scene2(engineContext);
-		status = currentScene->OnCreate();
+		//currentScene = new Scene2(engineContext);
+		//status = currentScene->OnCreate();
 		break;
 
 	case SCENE3:
