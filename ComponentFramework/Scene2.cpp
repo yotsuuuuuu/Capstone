@@ -79,6 +79,7 @@ bool Scene2::OnCreate() {
 		//"./meshes/Mario.obj" , "./textures/mario_mime.png" , "./textures/mario_fire.png"
 		// step 1.1 Meshs
 		//Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer,"./meshes/Mario.obj" );
+		assetManager.LoadAsset("./test.json");
 		//Ref<CMesh> mesh = assetManager.GetMesh("mario"); // asset manager needs to know about engine context, currently crashes
 
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, engineContext.renderer, "./meshes/Mario.obj");
@@ -292,6 +293,7 @@ void Scene2::OnDestroy() {
 		//vRenderer->DestroyCommandBuffers(); 
 
 		
+		vRenderer->DestroyGlobalDescriptionSet();
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 		vRenderer->DestroyUBO(lightsUBO);
 		std::dynamic_pointer_cast<CActor>(player)->OnDestroy();
