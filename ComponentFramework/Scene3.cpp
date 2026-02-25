@@ -165,7 +165,7 @@ bool Scene3::OnCreate() {
 		act2->AddComponent<CMaterial>(mat2);
 
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
-		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
+		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
 
 		//preset.concatenate = true;
 		preset.globalHeightScale = 2.0f;

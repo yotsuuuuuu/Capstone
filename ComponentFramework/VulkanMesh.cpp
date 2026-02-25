@@ -54,7 +54,6 @@ IndexedVertexBuffer VulkanRenderer::LoadModelIndexed(const char* filename) {
     return indexedVertexBuffer;
 }
 
-
 void VulkanRenderer::CreateVertexBuffer(IndexedVertexBuffer& indexedBufferMemory, const std::vector<Vertex>& vertices) {
     indexedBufferMemory.vertBufferLength = vertices.size();
     VkDeviceSize bufferSize = indexedBufferMemory.vertBufferLength * sizeof(Vertex);
@@ -115,8 +114,6 @@ void VulkanRenderer::DrawIndexed(IndexedVertexBuffer mesh) {
         vkCmdDrawIndexed(primaryCommandBuffer.commandBuffers[i], static_cast<uint32_t>(mesh.indexBufferLength), 1, 0, 0, 0);
     }
 }
-
-
 
 void VulkanRenderer::DestroyIndexedMesh(IndexedVertexBuffer mesh){
     vkDestroyBuffer(device, mesh.vertBufferID, nullptr);

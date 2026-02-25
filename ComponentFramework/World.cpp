@@ -6,7 +6,7 @@ void World::Initialize(TerrainPreset* t_)
 // then when calling initialize just ask the engine context to load up and 
 // analyze the song an use that to populate the preset.
 {
-	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
 	//baseChunkMesh.reset();
@@ -18,6 +18,12 @@ void World::Initialize(TerrainPreset* t_)
 	//CreateWorldPipeline(cameraUBO_, lightsUBO_);
 
 	GenerateAllChunks();
+}
+
+void World::Initialize(std::vector<std::string> songPath)
+{
+	// get song filepath,
+
 }
 
 void World::RenderWorld()
@@ -59,6 +65,7 @@ void World::GenerateAllChunks()
 	chunks.shrink_to_fit();
 	chunkRenderData.clear();
 
+	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
 	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
@@ -130,7 +137,16 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
 	// make indices once. store in world. then make vertices and pass the indices
-	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+	//vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+	vRenderer->CreateTerrainVertexBuffer(vertices, renderData.vertexBuffer);
+	
+	// maybe this is better??? at least were not recreating it and jsut setting it, still a waste of memory i guess
+	// would be better if we could just reuse theindex buffer but that would require a major rewrite of how we render things
+	// pain in the BUTT !!!
+	renderData.vertexBuffer.indexBufferID = chunkIndexBuffer.indexBufferID;
+	renderData.vertexBuffer.indexBufferLength = chunkIndexBuffer.indexBufferLength;
+	renderData.vertexBuffer.indexBufferMemoryID = chunkIndexBuffer.indexBufferMemoryID;
+
 	//vRenderer->CreateTerrainVertexBuffer
 
 	renderData.isInitialized = true;
