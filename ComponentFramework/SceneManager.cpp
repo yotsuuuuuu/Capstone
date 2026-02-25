@@ -171,12 +171,12 @@ void SceneManager::BuildScene(SCENE_NUMBER scene) {
 
 	case SCENE1:
 		///currentScene = new Scene1();
-		//status = currentScene->OnCreate();
+		status = currentScene->OnCreate();
 		break;
 
 	case SCENE2:
-		//currentScene = new Scene2(engineContext);
-		//status = currentScene->OnCreate();
+		currentScene = new Scene2(engineContext);
+		status = currentScene->OnCreate();
 		break;
 
 	case SCENE3:

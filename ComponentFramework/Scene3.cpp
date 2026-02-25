@@ -34,7 +34,6 @@ bool Scene3::OnCreate() {
 	case RendererType::VULKAN:
 	{
 		VulkanRenderer* vRenderer;
-<<<<<<< HEAD
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 		
 		
@@ -123,21 +122,47 @@ bool Scene3::OnCreate() {
 		//Ref<CShader> cshade = assetManager.GetShader("phong");
 		cshade->OnCreate();
 		
-=======
-		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
->>>>>>> master
 		
-		actorsInScene = engineContext.assetManager->GetActorsInScene();
 		//step 1.3 Materials
+		std::vector<std::string> filepaths = { "./textures/mario_mime.png" };
+		Ref<CMaterial> mat = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths,cshade);
+		//Ref<CMaterial> mat = assetManager.GetMat("mario");
+		mat->OnCreate();
 
-		 std::vector<std::string> filepaths = { "./textures/rock.png" };
+		filepaths = { "./textures/mario_fire.png" };
+		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
+		//Ref<CMaterial> mat1 = assetManager.GetMat("mario");
+		mat1->OnCreate();
 
-		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("main"));
+		filepaths = { "./textures/texture_07.png" };
+
+		Ref<CMaterial> mat2 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
+		mat2->OnCreate();
+
+
+		filepaths = { "./textures/rock.png" };
+
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, cshade);
 		mat3->OnCreate();
 
 		// step 2 create actors
-		
+		Ref<CActor> act = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(-1, 0, 0), Quaternion(), Vec3(1,1,1));
+		act->AddComponent<CTransform>(t);
+		act->AddComponent<CMesh>(mesh);
+		act->AddComponent<CMaterial>(mat);
 
+		Ref<CActor> act1 = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t1 = std::make_shared<CTransform>(nullptr, Vec3(1.5, -0.5, 0),QMath::angleAxisRotation(90,Vec3(0,1,0)), Vec3(1, 1, 1));
+		act1->AddComponent<CTransform>(t1);
+		act1->AddComponent<CMesh>(mesh);
+		act1->AddComponent<CMaterial>(mat1);
+
+		Ref<CActor> act2 = std::make_shared<CActor>(nullptr);
+		Ref<CTransform> t2 = std::make_shared<CTransform>(nullptr, Vec3(0,-1.5,0), QMath::angleAxisRotation(-90, Vec3(1, 0, 0)), Vec3(5, 5, 1));
+		act2->AddComponent<CTransform>(t2);
+		act2->AddComponent<CMesh>(mesh1);
+		act2->AddComponent<CMaterial>(mat2);
 
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
@@ -221,10 +246,16 @@ bool Scene3::OnCreate() {
 		WorldActor->OnCreate();
 		
 		actorsInScene.push_back(WorldActor);
-	
+		//actorsInScene.push_back(act2);
+		actorsInScene.push_back(act);
+		actorsInScene.push_back(act1);
 		
 		//step 3 Actors being added to the scene.
-		camera = engineContext.assetManager->GetCamera();	
+		actor = act;
+		actor1 = act1;
+		plane = act2;
+		camera = cam;
+		shader = cshade;
 		world = WorldActor;
 		engineContext.fmodController->playsong(0);
 		
@@ -357,21 +388,20 @@ void Scene3::OnDestroy() {
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
-<<<<<<< HEAD
 		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
-=======
->>>>>>> master
 	
 		vRenderer->DestroyUBO(lightsUBO);
 		
 		engineContext.fmodController->playsong(0);
-
+		camera->OnDestroy();
+		actor->OnDestroy();
 		world->OnDestroy();
-	
+		actor1->OnDestroy();
+		plane->OnDestroy();
 		
 		
-	}
+		}
 
 	
 }
