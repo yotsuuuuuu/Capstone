@@ -13,7 +13,7 @@ private:
 	FMOD::Channel* channel = nullptr;
 	FMOD_RESULT result = FMOD_OK;
 	void* extradriverdata = 0;
-	float volume = 50.0f;
+	float volume = 0.0f;
 
 public:
 	FmodController(){};

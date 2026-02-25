@@ -72,9 +72,7 @@ bool Scene3::OnCreate() {
 		if (!cam->OnCreate()) {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
-		vRenderer->CreateGlobalRources(cam);
-		engineContext.assetManager->LoadAsset("./test.json");
-		actorsInScene = engineContext.assetManager->GetActorsInScene();	
+		//actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
@@ -388,7 +386,6 @@ void Scene3::OnDestroy() {
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
-		vRenderer->DestroyGlobalResources();// note eventaully need to get moved out of the scene.
 		std::dynamic_pointer_cast<CShader>(shader)->OnDestroy();
 	
 		vRenderer->DestroyUBO(lightsUBO);
