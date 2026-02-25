@@ -132,7 +132,7 @@ bool Scene2::OnCreate() {
 		preset.base.fractalOctaves = 5;
 		preset.base.gain = 0.3f;
 
-		world = new World(engineContext.renderer);
+		world = new World(engineContext);
 		//world->Initialize(&preset, camera->GetCameraUBO(),lightsUBO);
 
 	}

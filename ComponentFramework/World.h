@@ -9,7 +9,7 @@
 #include "Chunk.h"
 #include "BaseGridMesh.h"
 //#include "FmodController.h" // onyl needed for struct. should be move to core stuct methinks
-
+#include "EngineContext.h"
 
 using namespace MATH;
 

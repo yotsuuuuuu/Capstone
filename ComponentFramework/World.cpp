@@ -39,15 +39,14 @@ void World::RenderWorld()
 
 void World::OnDelete()
 {
-	//vRenderer->DestroySampler2D(terrainTexture);
-	//vRenderer->DestroyPipeline(worldPipeline);
+	delete terrainNoise;
+	baseChunkMesh.reset();
+	vkDeviceWaitIdle(vRenderer->getDevice());
 	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
+
 	}
-
-	//vRenderer->DestroyDescriptorSet(worldDescriptorSet);
-
 
 }
 
