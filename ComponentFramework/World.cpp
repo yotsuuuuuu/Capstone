@@ -3,7 +3,7 @@
 
 void World::Initialize(TerrainPreset* t_)
 {
-	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
 	//baseChunkMesh.reset();
@@ -47,9 +47,7 @@ void World::OnDelete()
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
 
 	}
-
 }
-
 
 void World::GenerateAllChunks()
 {
@@ -269,7 +267,6 @@ void World::LowerAll()
 World::~World()
 {
 	chunks.clear();
-	delete terrainNoise;
 }
 
 
