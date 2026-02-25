@@ -73,8 +73,8 @@ bool Scene3::OnCreate() {
 			printf(" FAILED TO CREATE CAMERA \n");
 		}
 		vRenderer->CreateGlobalRources(cam);
-		engineContext.assetManager->LoadAsset("./test.json");
-		actorsInScene = engineContext.assetManager->GetActorsInScene();	
+		//engineContext.assetManager->LoadAsset("./test.json");
+		//actorsInScene = engineContext.assetManager->GetActorsInScene();	
 		//cam->GetComponent<CPhysics>()->SetPosition(Vec3(0, 0, 5));
 		//cam->GetComponent<CPhysics>()->SetRotation(Quaternion());
 
