@@ -36,11 +36,9 @@ private:
 	//Components
 	std::vector<Ref<Component>> actorsInScene;
 	Ref<Component> camera;
-	Ref<Component> plane;
-	Ref<Component> world;
-	Ref<Component> actor;
-	Ref<Component> actor1;	
 	Ref<Component> shader;
+	Ref<Component> world;
+	
 	
 
 public:

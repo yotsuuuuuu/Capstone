@@ -27,6 +27,66 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		return false;
 	}
 
+    if (!jsonLoader.contains("Camera"))
+    {
+        std::cout << "json does not contain an Camera section " << "\n";
+        return false;
+    }
+
+
+    Ref<CActor> cam = std::make_shared<CActor>(nullptr);
+    auto pos = jsonLoader["Camera"]["position"].get<std::vector<float>>();
+    auto rot = jsonLoader["Camera"]["rotation"].get<std::vector<float>>();
+
+    float fov = jsonLoader["Camera"]["fov"].get<float>();
+    float nearClip = jsonLoader["Camera"]["nearClip"].get<float>();
+    float farClip = jsonLoader["Camera"]["farClip"].get<float>();
+    
+    int height = 0, width = 0;
+    float aspectRatio;
+	SDL_GetWindowSize(renderer->getWindow(), &width, &height);
+	aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+    cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, fov, aspectRatio, nearClip, farClip));
+    cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
+    cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
+
+    assetMap["Camera"] = cam;
+
+
+    if (!jsonLoader.contains("globalLight"))
+    {
+        std::cout << "json does not contain an globalLight section " << "\n";
+        return false;
+    }
+
+
+    //light creation will go here
+    LightConfig ldata;
+    auto& lightData = jsonLoader["globalLight"];
+    ldata.diffused = Vec4(lightData["diffused"][0].get<float>(), lightData["diffused"][1].get<float>(), lightData["diffused"][2].get<float>(), lightData["diffused"][3].get<float>());        
+    ldata.specular = Vec4(lightData["specular"][0].get<float>(), lightData["specular"][1].get<float>(), lightData["specular"][2].get<float>(), lightData["specular"][3].get<float>());
+    ldata.ambient = Vec4(lightData["ambient"][0].get<float>(), lightData["ambient"][1].get<float>(), lightData["ambient"][2].get<float>(), lightData["ambient"][3].get<float>());		
+    ldata.orientation = QMath::angleAxisRotation(lightData["orientation"][0].get<float>(), Vec3(lightData["orientation"][1].get<float>(), lightData["orientation"][2].get<float>(), lightData["orientation"][3].get<float>()));
+    ldata.distance = lightData["distance"].get<float>();
+    OrthConfig config;
+    float sidelength = lightData["orthosidelength"].get<float>();
+    config.xmax = (sidelength * 0.5f); config.xmin = -(sidelength * 0.5f); config.ymax = (sidelength * 0.5f); config.ymin = -(sidelength * 0.5f);
+    config.zmax = sidelength; config.zmin = 0.25f;
+
+    cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(assetMap["Camera"], renderer, config, ldata));
+    assetMap["Camera"] = cam;
+
+
+    if (!assetMap["Camera"]->OnCreate())
+    {
+        std::cout << "Failed to create camera" << "\n";
+    }
+
+    renderer->CreateGlobalRources(assetMapGet<CActor>("Camera"));
+
+    actorMap.push_back(assetMapGet<CActor>("Camera"));
+
 	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
 	{
 		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, meshPath.get<std::string>());
