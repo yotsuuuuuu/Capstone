@@ -71,7 +71,6 @@ struct NoiseLayerPreset
     WarpType domainWarp = WarpType::None;
     float warpAmplitude = 0.2f;
 
-
 };
 
 struct TerrainPreset {

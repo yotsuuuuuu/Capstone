@@ -52,6 +52,7 @@ public:
 	~World();
 
 	void Initialize(TerrainPreset* t_);
+	void Initialize(std::vector<std::string> songPath);
 	void RenderWorld();
 	void OnDelete();
 

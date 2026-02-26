@@ -17,6 +17,11 @@ void World::Initialize(TerrainPreset* t_)
 	GenerateAllChunks();
 }
 
+void World::Initialize(std::vector<std::string> songPath)
+{
+
+}
+
 void World::RenderWorld()
 {
 
