@@ -52,7 +52,7 @@ bool Scene0::OnCreate() {
 		mat3->OnCreate();
 
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
-		auto wC = std::make_shared<CWorld>(nullptr, engineContext.renderer, TerrainPreset{});
+		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
 		TerrainPreset preset;
 
 		preset.concatenate = true;

@@ -3,7 +3,7 @@
 
 void World::Initialize(TerrainPreset* t_)
 {
-	vRenderer = dynamic_cast<VulkanRenderer*>(renderer);
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
 	//baseChunkMesh.reset();
@@ -39,23 +39,23 @@ void World::RenderWorld()
 
 void World::OnDelete()
 {
-	//vRenderer->DestroySampler2D(terrainTexture);
-	//vRenderer->DestroyPipeline(worldPipeline);
+	delete terrainNoise;
+	baseChunkMesh.reset();
+	vkDeviceWaitIdle(vRenderer->getDevice());
+	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
 	for (const auto& pair : chunkRenderData) {
 		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
+
 	}
-
-	//vRenderer->DestroyDescriptorSet(worldDescriptorSet);
-
-
 }
-
 
 void World::GenerateAllChunks()
 {
 	chunks.clear();
+	chunks.shrink_to_fit();
 	chunkRenderData.clear();
 
+	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
 	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
@@ -127,6 +127,10 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.transform.normalMatrix = MMath::transpose(MMath::inverse(renderData.transform.modelMatrix)); 
 
 	// make indices once. store in world. then make vertices and pass the indices
+	renderData.vertexBuffer.indexBufferID = chunkIndexBuffer.indexBufferID;
+	renderData.vertexBuffer.indexBufferLength = chunkIndexBuffer.indexBufferLength;
+	renderData.vertexBuffer.indexBufferMemoryID = chunkIndexBuffer.indexBufferMemoryID;
+
 	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
 	//vRenderer->CreateTerrainVertexBuffer
 
@@ -263,7 +267,6 @@ void World::LowerAll()
 World::~World()
 {
 	chunks.clear();
-	delete terrainNoise;
 }
 
 
