@@ -108,12 +108,12 @@ TerrainNoise::TerrainNoise(const TerrainPreset& preset)
 float TerrainNoise::sample(float wX, float wZ) const
 {
     float base = baseNoise.GetNoise(wX, wZ);
-    float detail = PVnoise.GetNoise(wX, wZ);
+    float pv = PVnoise.GetNoise(wX, wZ);
     float continentalness = continentalNoise.GetNoise(wX, wZ);
     // post-processing for terrain shaping
-    //float mask = std::clamp(base * 0.5f + 0.5f, 0.0f, 1.0f); // create a mask from base layer
 
-    float h = base;
+    float h = base * basePreset.amplitude;
+
 
     //h += base * mask * basePreset.amplitude;
     //h += continentalness * continentalPreset.amplitude;
@@ -133,25 +133,28 @@ float TerrainNoise::sample(float wX, float wZ) const
     //cv = continentalness;
 
     // here is where i can check for modifiers
-    h += cv;// *continentalPreset.amplitude;
+    h += cv * continentalPreset.amplitude;
 
-    h += detail;// *PVpreset.amplitude;
+    h += pv * PVpreset.amplitude;
 
-    h = cv;
+	h *= terrainConfig.globalHeightScale;
 
 
-    //if (terrainConfig.concatenate) { h = Concatenate(h); };
+    if (terrainConfig.concatenate) { h = Concatenate(h); };
+
     if (h != h) {
         printf("null");
     }
     //h += (detail-0.5f * PVpreset.amplitude);
     //std::cout << h << std::endl;
-    return h * terrainConfig.globalHeightScale;
+    return h;
 }
 
 
 float TerrainNoise::EvaluateContinental(float c) const
 {
+	c = std::clamp(c, 0.0f, 1.0f); // ensure c is between 0 and 1
+
     float percent;
 
     float cv1 = 0.2f;
@@ -174,11 +177,11 @@ float TerrainNoise::EvaluateContinental(float c) const
     }
     else if (c <= 0.9f) {
         percent = (c - 0.5f) / (0.9f - 0.5f); // 0 to 1 as c goes from 0.5 to 0.9
-        return sv3 + percent * (sv3 - sv2); // scale to 5 to 7
+        return sv2 + percent * (sv3 - sv2); // scale to 5 to 7
     }
     else {
         percent = (c - 0.9f) / (1.0f - 0.9f); // 0 to 1 as c goes from 0.9 to 1
-        return sv4 + percent * (sv4 - sv3); // scale to 7 to 8
+        return sv3 + percent * (sv4 - sv3); // scale to 7 to 8
 	}
 }
 
