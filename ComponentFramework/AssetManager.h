@@ -6,6 +6,7 @@
 #include "VulkanRenderer.h"
 #include <unordered_map>
 #include "Component.h"
+#include "EngineContext.h"
 // link to examples and documantation https://github.com/nlohmann/json?tab=readme-ov-file#examples
 //link to exception list https://json.nlohmann.me/home/exceptions/
 //helpful video https://www.youtube.com/watch?v=NuWQp_uAvwo&t=119s
@@ -22,10 +23,10 @@ class AssetManager
 {
 private:
 	//WORK ON TEMPLATING FUNCTIONS 
-	VulkanRenderer* renderer;
+	EngineContext engineContext;
+	Ref<CActor> camera;
 	nlohmann::json jsonLoader;
 	std::unordered_map<std::string, std::shared_ptr<Component>> assetMap;
-	//make all maps 1 map
 	std::vector<std::shared_ptr<Component>> actorMap;
 	template<typename T>
 	void assetMapInsert(const std::string id, Ref<T> asset)
@@ -48,8 +49,13 @@ private:
 	};
 	//give all components a custom id.
 public:
-	AssetManager(VulkanRenderer* renderer_):renderer(renderer_){};
+	AssetManager(){};
 	~AssetManager();
+	bool set(EngineContext context_)
+	{
+		engineContext = context_;
+		return true;
+	}
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
 	std::vector<Ref<Component>> GetActorsInScene();

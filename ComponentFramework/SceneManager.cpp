@@ -71,11 +71,12 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		Debug::FatalError("Failed to initialize Timer object", __FILE__, __LINE__);
 		return false;
 	}
-	assetManager = new AssetManager(static_cast<VulkanRenderer*>(renderer));
 	fmodController = new FmodController();
+	assetManager = new AssetManager();
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
+	assetManager->set(engineContext);
 	engineContext.assetManager->LoadAsset("./test.json");
 	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);

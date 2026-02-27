@@ -29,7 +29,6 @@ Scene2::~Scene2() {
 bool Scene2::OnCreate() {
 	int width = 0, height = 0;
 	float aspectRatio;
-	AssetManager assetManager(static_cast<VulkanRenderer*>(engineContext.renderer));
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
