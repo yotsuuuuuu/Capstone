@@ -113,6 +113,30 @@ struct GlobalLightData {
     Vec4 specular;
     Vec4 direction;
 };
+
+struct CLightData {
+    Vec4 position_radius;
+    Vec4 colour_intensity;
+    Vec4 direction_inner;
+    Vec4 outer_type_pad;
+};
+struct alignas(16) SYS_LIGHT_DATA {
+    Matrix4 inverseProjection;      //64 : 64
+    uint32_t screenDimensions[2];   // 8 : 72
+    uint32_t _pad0[2];              // 8 : 80
+    uint32_t gridSize[3];           // 12 : 92
+    uint32_t _pad1;                 // 4  : 96
+    float zPlanes[2];               // 8  : 104
+    float _pad2[2];                 // 8  : 112
+};
+
+struct alignas(16)  Cluster
+{
+    Vec4 minPoint;
+    Vec4 maxPoint;
+    uint32_t count;
+    uint32_t lightIndices[100];
+};
 struct OrthConfig {
     float xmin;
     float xmax;

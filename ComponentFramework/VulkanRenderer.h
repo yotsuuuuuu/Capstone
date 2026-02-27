@@ -182,7 +182,7 @@ public:
         }
     };
 
-    // CREATE ONE UBO
+    // CREATE ONE UBO of T type
     template <class T>
     BufferMemory CreateUniformBuffer() {
         BufferMemory ubo;
@@ -190,6 +190,16 @@ public:
         ubo.bufferMemoryLength = bufferSize;
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            ubo.bufferID, ubo.bufferMemoryID);
+        return ubo;
+    }
+
+    //Create any type of buffer
+    BufferMemory CreateBuffer(VkBufferUsageFlags useFlags, VkMemoryPropertyFlags propFlags,VkDeviceSize size) {
+        BufferMemory ubo;
+        VkDeviceSize bufferSize = size;
+        ubo.bufferMemoryLength = bufferSize;
+        CreateBuffer(bufferSize, useFlags, propFlags,
             ubo.bufferID, ubo.bufferMemoryID);
         return ubo;
     }

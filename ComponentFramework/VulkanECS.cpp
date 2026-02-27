@@ -432,7 +432,7 @@ public:
         //  Normal forward pass
         //  Post process bloom pass
         //  ImGUI 
-        //TODO: (KEV) ADJUT FOR PER FRAME DATA NOT PER SWAP CHAIN
+      
         ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
