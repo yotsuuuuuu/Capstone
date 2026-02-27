@@ -31,6 +31,9 @@ public:
 	virtual void Update(const float dt) override {}
 	
 	std::vector<BufferMemory> GetCameraUBO() { return cameraUBO; }
+	Matrix4 GetProjection() { return projectionMatrix; }
+	Matrix4 GetViewMatrix() { return viewMatrix; }
+	Vec2 GetzPlanes() { return Vec2(nearClip, farClip); }
 
 	void UpdateUBO(uint32_t uboindex);
 

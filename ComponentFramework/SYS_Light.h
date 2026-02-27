@@ -31,13 +31,21 @@ class SYS_Light
 	DescriptorSetInfo CL_DescriptorSetInfo;
 
 	EngineContext* cntx;
+	WeakRef<Component> camera;
 
 	std::unordered_map<uint32_t, CLight* > HandelsMap;
 
 public:
-	SYS_Light(EngineContext* cntx_, uint32_t ClusterCapacity, uint32_t LightCapacity_)
-		: cntx(cntx_), ClusterCount(ClusterCapacity), LightCapacity(LightCapacity_), LightCount(0), ScreenClustersSSBO({}),
-		systemDataUBO({}), ActiveSceneLightSSBO({}), CC_Pipelineinfo({}), CL_Pipelineinfo({}) {}
+	SYS_Light(EngineContext* cntx_, uint32_t Gridx, uint32_t Gridy, uint32_t Gridz, uint32_t LightCapacity_)
+		: cntx(cntx_),  LightCapacity(LightCapacity_), LightCount(0), ScreenClustersSSBO({}),
+		systemDataUBO({}), ActiveSceneLightSSBO({}), CC_Pipelineinfo({}), CL_Pipelineinfo({}) 
+	{
+		// part data has been filled in rest has to be filled on the Init
+		ClusterCount = Gridx * Gridy * Gridz;
+		data.gridSize[0] = Gridx;
+		data.gridSize[1] = Gridy;
+		data.gridSize[2] = Gridz;
+	}
 
 	~SYS_Light();
 

@@ -460,6 +460,7 @@ public:
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
+    std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
 
     void CreateGlobalRources(std::shared_ptr<Component> cameraActor);
     void DestroyGlobalResources();
