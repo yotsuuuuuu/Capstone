@@ -14,13 +14,15 @@ using json = nlohmann::json;
 bool AssetManager::LoadAsset(const std::string& filepath_)
 {
     std::ifstream file(filepath_);
+
     if (!file.is_open())
     {
         std::cerr << "Failed to open asset database: " << filepath_ << "\n";
         return false;
     }
-    jsonLoader = json::parse(file);
 
+        jsonLoader = nlohmann::json::parse(file);
+   
 	if (!jsonLoader.contains("Meshes"))
 	{
 		std::cout << "json does not contain meshes" << "\n";
@@ -33,8 +35,9 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
         return false;
     }
 
+	VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
-    Ref<CActor> cam = std::make_shared<CActor>(nullptr);
+    camera = std::make_shared<CActor>(nullptr);
     auto pos = jsonLoader["Camera"]["position"].get<std::vector<float>>();
     auto rot = jsonLoader["Camera"]["rotation"].get<std::vector<float>>();
 
@@ -47,11 +50,9 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 	SDL_GetWindowSize(renderer->getWindow(), &width, &height);
 	aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
-    cam->AddComponent<CCamera>(std::make_shared<CCamera>(cam, renderer, fov, aspectRatio, nearClip, farClip));
-    cam->AddComponent<CPhysics>(std::make_shared<CPhysics>(cam));
-    cam->AddComponent<CInput>(std::make_shared<CInput>(cam));
-
-    assetMap["Camera"] = cam;
+    camera->AddComponent<CCamera>(std::make_shared<CCamera>(camera, renderer, fov, aspectRatio, nearClip, farClip));
+    camera->AddComponent<CPhysics>(std::make_shared<CPhysics>(camera));
+    camera->AddComponent<CInput>(std::make_shared<CInput>(camera));
 
 
     if (!jsonLoader.contains("globalLight"))
@@ -74,18 +75,16 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
     config.xmax = (sidelength * 0.5f); config.xmin = -(sidelength * 0.5f); config.ymax = (sidelength * 0.5f); config.ymin = -(sidelength * 0.5f);
     config.zmax = sidelength; config.zmin = 0.25f;
 
-    cam->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(assetMap["Camera"], renderer, config, ldata));
-    assetMap["Camera"] = cam;
+    camera->AddComponent<CGlobalLight>(std::make_shared<CGlobalLight>(camera, renderer, config, ldata));
+    
 
 
-    if (!assetMap["Camera"]->OnCreate())
+    if (!camera->OnCreate())
     {
         std::cout << "Failed to create camera" << "\n";
     }
 
-    renderer->CreateGlobalRources(assetMapGet<CActor>("Camera"));
-
-    actorMap.push_back(assetMapGet<CActor>("Camera"));
+    renderer->CreateGlobalRources(camera);
 
 
 	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
@@ -196,13 +195,13 @@ std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
 
 Ref<Component> AssetManager::GetCamera()
 {
-    return assetMap["Camera"];
+    return camera;
 }
 
 Ref<CMesh> AssetManager::GetMesh(const std::string& id)
 {
     auto checker = assetMapGet<CMesh>(id);
-
+    VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
     if (checker)
     {
 		return checker;
@@ -231,7 +230,8 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
         std::cout << "json does not contain meshes" << id << "\n";
         return nullptr;
     }
-
+   
+    VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
     std::vector<std::string> filepathtexture;
     filepathtexture.push_back(jsonLoader["Material"][id]["texture"].get<std::string>());
     Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, filepathtexture, GetShader(jsonLoader["Material"][id]["shader"]));
@@ -256,7 +256,8 @@ Ref<CShader> AssetManager::GetShader(const std::string& id)
         std::cout << "json does not contain shader" << id << "\n";
         return nullptr;
     }
-
+    
+    VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
     std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
     std::pair<std::string, std::string> shaderPaths;
     shaderPaths.first = jsonLoader["Shaders"][id]["frag"].get<std::string>();
@@ -285,6 +286,6 @@ AssetManager::~AssetManager()
 	}
 	actorMap.clear();
 
- 
-	renderer = nullptr;
+	camera->OnDestroy();
+    camera = nullptr;
 }
