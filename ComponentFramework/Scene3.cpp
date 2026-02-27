@@ -56,7 +56,7 @@ bool Scene3::OnCreate() {
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 3847598;
 		preset.base.frequency = 0.009f;
-		preset.base.amplitude = 15.0f;
+		preset.base.amplitude = 5.0f;
 		preset.exponent = 1.4f;
 		preset.base.fractal = FractalType::FBm;
 		preset.base.lacunarity = 6;
@@ -65,12 +65,12 @@ bool Scene3::OnCreate() {
 		preset.continentalness.amplitude = 0.4f;
 		preset.continentalness.frequency = 0.005f;
 		preset.continentalness.fractal = FractalType::PingPong;
-		preset.continentalness.fractalOctaves = 9;
+		preset.continentalness.fractalOctaves = 2;
 		preset.continentalness.gain = 0.10f;
 		preset.continentalness.lacunarity = 2;
-		preset.continentalness.fractalWeightedStrength = 15.090f;
+		preset.continentalness.fractalWeightedStrength = 2;
 		preset.continentalness.cellType = CellularType::Euclidian;
-		preset.continentalness.returnType = ReturnType::Distance2;
+		preset.continentalness.returnType = ReturnType::Distance2Sub;
 
 		//preset.base.domainWarp = WarpType::OpenSimplex2;
 
@@ -85,7 +85,6 @@ bool Scene3::OnCreate() {
 		preset2.base.lacunarity = 0.2f;
 		preset2.base.gain = 0.5f;
 		preset2.exponent = 2.0f;
-
 		preset2.continentalness.type = NoiseType::Cellular;
 		preset2.continentalness.seed = 234908;
 		preset2.continentalness.frequency = 0.006f;
@@ -108,23 +107,30 @@ bool Scene3::OnCreate() {
 		preset3.base.fractalOctaves = 2;
 		preset3.base.gain = 0.3f;
 		preset3.continentalness.type = NoiseType::Cellular;
-		preset3.continentalness.frequency = 0.002f;
+		preset3.continentalness.frequency = 0.004f;
 		preset3.continentalness.amplitude = 1.6;
 		preset3.continentalness.fractal = FractalType::FBm;
-		preset3.continentalness.gain = 0.9f;
-		preset3.continentalness.fractalWeightedStrength = 15.0f;
-		preset3.continentalness.cellType = CellularType::Euclidian;
-		preset3.continentalness.returnType = ReturnType::Distance;
+		preset3.continentalness.fractalOctaves = 2;
+		preset3.continentalness.gain = 4.2f;
+		preset3.continentalness.fractalWeightedStrength = 9.0f;
+		preset3.continentalness.cellType = CellularType::Manhattan;
+		preset3.continentalness.returnType = ReturnType::CellValue;
+		preset3.continentalness.cellularJitter = 1.5f;
+		preset3.continentalness.domainWarp = WarpType::OpenSimplex2;
+		preset3.continentalness.warpAmplitude = -20.5f;
 		preset3.peaksValleys.type = NoiseType::Cubic;
 		preset3.peaksValleys.cellType = CellularType::Hybrid;
 		preset3.peaksValleys.returnType = ReturnType::Distance2;
 		preset3.peaksValleys.fractal = FractalType::PingPong;
+		preset3.peaksValleys.fractalOctaves = 4;
+		preset3.peaksValleys.gain = 1.5f;
+		preset3.peaksValleys.fractalWeightedStrength = 1.8f;
 		preset3.peaksValleys.amplitude = 5.9f;
-		preset3.peaksValleys.frequency = 0.05f;
+		preset3.peaksValleys.frequency = 0.5f;
 
 		preset3.exponent = 1.4f;
 
-		wC->InitializeWorld(&preset3);
+		wC->InitializeWorld(&preset);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
@@ -169,19 +175,26 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					mouseLocked = !mouseLocked;
 					SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
 				}
-				else if (sdlEvent.key.key == SDLK_9) {
+				else if (sdlEvent.key.key == SDLK_1) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
 					w->InitializeWorld(&preset);
 				}
-				else if (sdlEvent.key.key == SDLK_0) {
+				else if (sdlEvent.key.key == SDLK_2) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
 					w->InitializeWorld(&preset2);
 
 				}
+				else if (sdlEvent.key.key == SDLK_3) {
+					auto wA = std::dynamic_pointer_cast<CActor>(world);
+					auto w = wA->GetComponent<CWorld>();
+					w->OnDestroy();
+					w->InitializeWorld(&preset3);
+				}
+
 				else if (sdlEvent.key.key == SDLK_B)
 				{
 					engineContext.fmodController->playsong(AudioState::PAUSE);

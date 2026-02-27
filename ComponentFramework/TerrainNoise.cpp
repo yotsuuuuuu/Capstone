@@ -53,6 +53,10 @@ static FastNoiseLite::CellularReturnType ConvertReturnType(ReturnType type)
     case ReturnType::CellValue:     return FastNoiseLite::CellularReturnType_CellValue;
     case ReturnType::Distance:      return FastNoiseLite::CellularReturnType_Distance;
     case ReturnType::Distance2:     return FastNoiseLite::CellularReturnType_Distance2;
+	case ReturnType::Distance2Add:  return FastNoiseLite::CellularReturnType_Distance2Add;
+	case ReturnType::Distance2Sub:  return FastNoiseLite::CellularReturnType_Distance2Sub;
+	case ReturnType::Distance2Mul:  return FastNoiseLite::CellularReturnType_Distance2Mul;
+	case ReturnType::Distance2Div:  return FastNoiseLite::CellularReturnType_Distance2Div;
     case ReturnType::None:          return FastNoiseLite::CellularReturnType_CellValue;
     default:                        return FastNoiseLite::CellularReturnType_CellValue;
     }
@@ -79,6 +83,7 @@ static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& 
     if (layerP.domainWarp != WarpType::None) {
         noiseGen.SetDomainWarpType(ConvertWarpType(layerP.domainWarp));
         noiseGen.SetDomainWarpAmp(layerP.warpAmplitude);
+        
     }
 
 
@@ -128,12 +133,14 @@ float TerrainNoise::sample(float wX, float wZ) const
     //cv = continentalness;
 
     // here is where i can check for modifiers
-    h = h * terrainConfig.base.amplitude + cv * continentalPreset.amplitude;
+    h += cv;// *continentalPreset.amplitude;
 
-    h += detail * PVpreset.amplitude;
+    h += detail;// *PVpreset.amplitude;
+
+    h = cv;
 
 
-    if (terrainConfig.concatenate) { h = Concatenate(h); };
+    //if (terrainConfig.concatenate) { h = Concatenate(h); };
     if (h != h) {
         printf("null");
     }
@@ -145,21 +152,34 @@ float TerrainNoise::sample(float wX, float wZ) const
 
 float TerrainNoise::EvaluateContinental(float c) const
 {
+    float percent;
+
+    float cv1 = 0.2f;
+	float cv2 = 0.5f;
+	float cv3 = 0.8f;
+	float cv4 = 1.0f;
+
+	float sv1 = 2.0f;
+	float sv2 = 3.0f;
+	float sv3 = 8.0f;
+	float sv4 = 11.0f;
+
     if (c <= 0.3f) {
-        return 2.0f; // add 5 to floor height
+        percent = c / 0.3f; // 0 to 1 as c goes from 0 to 0.3
+        return percent * sv1; // scale to spline 1 to spline 2 
     }
-    else if (0.3f < c <= 0.5f) {
-        return 5.0f;
+    else if (c <= 0.5f) {
+        percent = (c - 0.3f) / (0.5f - 0.3f); // 0 to 1 as c goes from 0.3 to 0.5
+        return sv1 + percent * (sv2 - sv1); // scale to 2 to 5
     }
-    else if (0.5f < c <= 0.9f) {
-        return 7.0f;
-    }
-    else if (0.9f < c) {
-        return 8.0f;
+    else if (c <= 0.9f) {
+        percent = (c - 0.5f) / (0.9f - 0.5f); // 0 to 1 as c goes from 0.5 to 0.9
+        return sv3 + percent * (sv3 - sv2); // scale to 5 to 7
     }
     else {
-        return 0.0f;
-    }
+        percent = (c - 0.9f) / (1.0f - 0.9f); // 0 to 1 as c goes from 0.9 to 1
+        return sv4 + percent * (sv4 - sv3); // scale to 7 to 8
+	}
 }
 
 int TerrainNoise::Concatenate(float h) const

@@ -34,8 +34,8 @@ private:
 	bool mouseLookActive = false;
 
 	// parameters
-	float moveSpeed = 10.0f; // units per second
-	float sprintMultiplier = 1.7f;
+	float moveSpeed = 20.0f; // units per second
+	float sprintMultiplier = 2.0f;
 	float jumpStrength = 5.0f; // units per second
 	float airControl = 0.03f;
 

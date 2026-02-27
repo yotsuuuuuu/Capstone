@@ -29,7 +29,7 @@ private:
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
-	int WORLD_SIZE = 12; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
+	int WORLD_SIZE = 32; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
 	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.

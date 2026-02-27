@@ -77,7 +77,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	engineContext.assetManager->LoadAsset("./test.json");
-	engineContext.fmodController->AnalyzeAudioOffline(0);
+	//engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);
 	
 	return true;
@@ -136,10 +136,10 @@ void SceneManager::GetEvents() {
 			case SDL_SCANCODE_F6:
 				///BuildScene(SCENE6);
 				break;
-			case SDL_SCANCODE_1:
+			case SDL_SCANCODE_EQUALS:
 				engineContext.fmodController->Volume(10);
 				break;
-			case SDL_SCANCODE_2:
+			case SDL_SCANCODE_MINUS:
 				engineContext.fmodController->Volume(-10);
 				break;
 			default:

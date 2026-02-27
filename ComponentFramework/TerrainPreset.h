@@ -36,7 +36,11 @@ enum class ReturnType {
     None,
     CellValue,
     Distance,
-    Distance2
+    Distance2,
+	Distance2Add,
+    Distance2Sub,
+	Distance2Mul,
+	Distance2Div
 };
 
 // TODO: (andres) what does what
@@ -57,6 +61,7 @@ struct NoiseLayerPreset
     uint32_t seed = 1337;
     float frequency = 0.01f;
     float amplitude = 1.0f;
+
     FractalType fractal = FractalType::None;
     int fractalOctaves = 1;
     float lacunarity = 0.1f;
@@ -70,6 +75,7 @@ struct NoiseLayerPreset
 
     WarpType domainWarp = WarpType::None;
     float warpAmplitude = 0.2f;
+
 
 };
 

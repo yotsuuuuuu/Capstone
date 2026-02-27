@@ -19,6 +19,10 @@ void World::Initialize(TerrainPreset* t_)
 
 void World::Initialize(std::vector<std::string> songPath)
 {
+	TerrainPreset preset;
+	//AudioBands ab = engineContext.fmodController->AnalyzeAudioOffline(0);
+	//preset.CreateFromAudio(engineContext.fmodController->GetAudioBands(songPath));
+
 
 }
 
