@@ -122,3 +122,10 @@ void VulkanRenderer::DestroyIndexedMesh(IndexedVertexBuffer mesh){
     vkDestroyBuffer(device, mesh.indexBufferID, nullptr);
     vkFreeMemory(device, mesh.indexBufferMemoryID, nullptr);
 }
+
+void VulkanRenderer::DestroyTerrainVertexBuffers(IndexedVertexBuffer terrainBuffers)
+{
+    vkDestroyBuffer(device, terrainBuffers.vertBufferID, nullptr);
+	vkFreeMemory(device, terrainBuffers.vertBufferMemoryID, nullptr);
+}
+

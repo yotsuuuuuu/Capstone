@@ -53,8 +53,7 @@ void World::OnDelete()
 	vkDeviceWaitIdle(vRenderer->getDevice());
 	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
 	for (const auto& pair : chunkRenderData) {
-		vRenderer->DestroyIndexedMesh(pair.second.vertexBuffer);
-
+		vRenderer->DestroyTerrainVertexBuffers(pair.second.vertexBuffer);
 	}
 }
 
@@ -140,8 +139,8 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.vertexBuffer.indexBufferLength = chunkIndexBuffer.indexBufferLength;
 	renderData.vertexBuffer.indexBufferMemoryID = chunkIndexBuffer.indexBufferMemoryID;
 
-	vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
-	//vRenderer->CreateTerrainVertexBuffer
+	//vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
+	vRenderer->CreateTerrainVertexBuffer(vertices, renderData.vertexBuffer);
 
 	renderData.isInitialized = true;
 	chunkRenderData[chunkPos] = renderData;

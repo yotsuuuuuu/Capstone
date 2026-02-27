@@ -472,6 +472,7 @@ public:
     void RenderTerrainChunk(IndexedVertexBuffer& terrainBuffers, const ModelMatrixPushConst& transform, PipelineInfo& pipelineInfo, DescriptorSetInfo descriptorSet);
 	PipelineInfo CreateTerrainPipeline(VkDescriptorSetLayout descriptorSetLayout); // hard coded shaders
     void DrawTerrain(IndexedVertexBuffer chunk);
+	void DestroyTerrainVertexBuffers(IndexedVertexBuffer terrainBuffers);
   
 };
 #endif 

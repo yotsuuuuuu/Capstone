@@ -78,7 +78,7 @@ bool Scene3::OnCreate() {
 		preset.peaksValleys.amplitude = 0.9f;
 		preset.peaksValleys.frequency = 0.9f;
 
-		/// PRESET 2 ///
+		/// PRESET 2 /// WINNING COMBO SO FAR
 		preset2.base.type = NoiseType::Perlin;
 		preset2.base.seed = 421322;
 		preset2.base.frequency = 0.008f;
@@ -107,30 +107,30 @@ bool Scene3::OnCreate() {
 		preset3.base.seed = 123;
 		preset3.base.frequency = 0.009f;
 		preset3.base.amplitude = 5.0f;
-		preset3.base.fractal = FractalType::PingPong;
+		//preset3.base.fractal = FractalType::Ridged;
 
 		preset3.continentalness.type = NoiseType::Cellular;
-		preset3.continentalness.frequency = 0.004f;
+		preset3.continentalness.frequency = 0.0008f;
 		preset3.continentalness.amplitude = 1.0;
 		preset3.continentalness.fractal = FractalType::FBm;
-		preset3.continentalness.fractalOctaves = 4;
-		preset3.continentalness.gain = 1.2f;
+		preset3.continentalness.fractalOctaves = 2;
+		preset3.continentalness.gain = 0.7f;
 		preset3.continentalness.cellType = CellularType::Manhattan;
 		preset3.continentalness.returnType = ReturnType::Distance;
-		preset3.continentalness.cellularJitter = 1.5f;
+		preset3.continentalness.cellularJitter = 1.2f;
 		preset3.continentalness.domainWarp = WarpType::OpenSimplex2;
 		preset3.continentalness.warpAmplitude = 0.5f;
 
-		preset3.peaksValleys.type = NoiseType::Cellular;
+		preset3.peaksValleys.type = NoiseType::Value;
 		preset3.peaksValleys.cellType = CellularType::Hybrid;
 		preset3.peaksValleys.returnType = ReturnType::Distance2;
 		preset3.peaksValleys.fractal = FractalType::Ridged;
-		preset3.peaksValleys.fractalOctaves = 4;
-		preset3.peaksValleys.gain = 1.5f;
+		preset3.peaksValleys.fractalOctaves = 3;
+		preset3.peaksValleys.gain = 0.8f;
 		preset3.peaksValleys.fractalWeightedStrength = 1.8f;
 		preset3.peaksValleys.amplitude = 0.9f;
 		preset3.peaksValleys.frequency = 0.09f;
-		preset3.exponent = 1.4f;
+		preset3.exponent = 2.0f;
 
 		wC->InitializeWorld(&preset3);
 		WorldActor->AddComponent<CWorld>(wC);
