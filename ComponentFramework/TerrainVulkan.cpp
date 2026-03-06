@@ -53,3 +53,4 @@ void VulkanRenderer::CMDRecordDrawTerrainIndex(const VkCommandBuffer& cmd, const
 	uint32_t indexCount = static_cast<uint32_t>(mesh.indexBufferLength );// / sizeof(uint32_t)
 	vkCmdDrawIndexed(cmd, indexCount, 1, 0, 0, 0);
 }
+

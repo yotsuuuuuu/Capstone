@@ -133,7 +133,15 @@
     <ClCompile Include="Scene3.cpp">
       <Filter>Source\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainPreset.cpp" />
+    <ClCompile Include="TerrainPreset.cpp">
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="SYS_Light.cpp">
+      <Filter>Source\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="CLight.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -288,6 +296,12 @@
     </ClInclude>
     <ClInclude Include="Scene3.h">
       <Filter>Header\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SYS_Light.h">
+      <Filter>Header\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="CLight.h">
+      <Filter>Header\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

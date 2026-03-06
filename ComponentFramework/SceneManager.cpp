@@ -76,6 +76,11 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
+	// load the camers form json
+	// i need load light sys
+	// then load vulkan resources
+	// 
+
 	//TODO: (Kev) I need the creation of the Camera to be done as it is needed for the light system but before
 	// the global resources are done creating.
 	engineContext.assetManager->LoadAsset("./test.json");

@@ -133,8 +133,11 @@ struct alignas(16) SYS_LIGHT_DATA { // This needs to match the shader
     Matrix4 inverseProjection;      //64 : 64
     uint32_t gridSize[3];           // 12 : 76
     uint32_t _pad1;                 // 4  : 80
-    uint32_t screenDimensions[2];   // 8 : 86
-    float zPlanes[2];              // 8  : 96   
+    uint32_t screenDimensions[2];   // 8 : 88
+    float zPlanes[2];              // 8  : 96 
+    uint32_t lightCount;            // 4  : 100
+    uint32_t clusterCount;          // 4  : 104
+    uint32_t _pad2[2];              // 8  : 112 
 };
 
 

@@ -18,17 +18,25 @@ class SYS_Light
 	BufferMemory ScreenClustersSSBO;
 	uint32_t ClusterCount;
 	SYS_LIGHT_DATA data;
+	bool systemDataUBOOutOfDate;
 	BufferMemory systemDataUBO;
 	BufferMemory ActiveSceneLightSSBO;
 	uint32_t LightCount;
 	uint32_t LightCapacity;
-	//TODO: add pipelines and descriptor sets
 	// need 1 for Computing the Clusters
 	PipelineInfo CC_Pipelineinfo;
 	DescriptorSetInfo CC_DescriptorSetInfo;
 	// need 1 for Computing the Lights in the Clusters
 	PipelineInfo CL_Pipelineinfo;
 	DescriptorSetInfo CL_DescriptorSetInfo;
+	// also need semaphors and maybe a command buffer so it can be submitted own its own an
+	// sync with the semaphore
+	VkCommandBuffer ComputeCmd;
+	VkCommandPool ComputePool;
+	//sync objects
+	VkSemaphore SignalSema;	
+	VkFence Fence;
+	
 
 	EngineContext* cntx;
 	WeakRef<Component> camera;
@@ -36,16 +44,8 @@ class SYS_Light
 	std::unordered_map<uint32_t, CLight* > HandelsMap;
 
 public:
-	SYS_Light(EngineContext* cntx_, uint32_t Gridx, uint32_t Gridy, uint32_t Gridz, uint32_t LightCapacity_)
-		: cntx(cntx_),  LightCapacity(LightCapacity_), LightCount(0), ScreenClustersSSBO({}),
-		systemDataUBO({}), ActiveSceneLightSSBO({}), CC_Pipelineinfo({}), CL_Pipelineinfo({}) 
-	{
-		// part data has been filled in rest has to be filled on the Init
-		ClusterCount = Gridx * Gridy * Gridz;
-		data.gridSize[0] = Gridx;
-		data.gridSize[1] = Gridy;
-		data.gridSize[2] = Gridz;
-	}
+	SYS_Light(EngineContext* cntx_, uint32_t LightCapacity_);
+		
 
 	~SYS_Light();
 
@@ -62,11 +62,13 @@ public:
 	// Calcualtes Which ligths Affects which Clusters
 	// Based on the Cameras view Matrix
 	// has to be done everyframe.
-	void ComputeLightClusters();
+	void ComputeLightClusters(uint32_t frameIndex);
 
 	bool RegisterLight(CLight* Light);
 	bool DeregisterLight(CLight* Light);
 	bool UpdateLightData(CLight* Light);
+
+	// TODO ADD FUNCTIONS TO : CHANGE OF SCREEN SIZE
 
 };
 

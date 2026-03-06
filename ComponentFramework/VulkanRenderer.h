@@ -151,6 +151,7 @@ public:
     VkDevice getDevice() { return device; }
     uint32_t getNumSwapchains() { return numSwapchains; }
     uint32_t getNumberOfFramesInFlight() { return MAX_FRAMES_IN_FLIGHT; }
+    QueueFamilyIndices getQueueFamilys() {return queueFamilys ;}
    
     // PER FRAME UBOS
     template<class T>
@@ -237,7 +238,6 @@ private: /// Private member variables
     VkSwapchainKHR swapChain;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
-    QueueFamilyIndices queueFamilys;
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
@@ -250,6 +250,7 @@ private: /// Private member variables
     VkQueue graphicsQueue;
     VkQueue presentQueue;
     VkQueue computeQueue;
+    QueueFamilyIndices queueFamilys;
  
     CommandBufferData primaryCommandBuffer{};
     std::vector<Sampler2D> textures2D;
@@ -383,7 +384,7 @@ private:
     void CMDRecordBindIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDrawTerrainIndex(const VkCommandBuffer&, const IndexedVertexBuffer&);
-
+    void CMDRecordDistpatch(const VkCommandBuffer&, uint32_t groupX, uint32_t groupY, uint32_t groupz);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
@@ -403,14 +404,21 @@ private:
     
     std::weak_ptr<Component> camera;
 
-
+ public:
     //Creation Helper functions
     void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE,VkBool32 = VK_TRUE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
     void CreateFence(VkFence& fence);
-
+    VkCommandPool CreateCMDPool(uint32_t queueFamilyIndex,VkCommandPoolCreateFlags flags);
+    //allocate one CMD
+    VkCommandBuffer AllocatedCMDbuffer(const VkCommandPool& cmd,VkCommandBufferLevel level);
+    //allocate multiple 
+    std::vector<VkCommandBuffer> AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level,  uint32_t count);
+    
+    void DestroyCommandPool(VkCommandPool&);
+    void DestroyCommandBuffer(std::vector<VkCommandBuffer>&, const VkCommandPool&);
 	void DestroyRenderPass(VkRenderPass& renderpass);
     void DestroyFrameBuffer(VkFramebuffer& frameBuffer);
     void DestroySemaphore(VkSemaphore& semaphore);
@@ -423,6 +431,7 @@ private:
     void CopyBufferToImage(VkBuffer, VkImage, uint32_t, uint32_t, VkImageAspectFlags, uint32_t, uint32_t, uint32_t);
     void CubeImageLayoutTransition(VkImage, VkImageLayout srcLay, VkImageLayout dtsLay, VkPipelineStageFlags srdFlag, VkPipelineStageFlags dtsFlag,VkAccessFlags srcAcss, VkAccessFlags dtsAcss);
 	//Shadow Mapping
+    private:
     struct GlobalShadowMappingInfo
     {
         //Rendering handles
@@ -461,6 +470,7 @@ public:
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
     std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
+    
 
     void CreateGlobalRources(std::shared_ptr<Component> cameraActor);
     void DestroyGlobalResources();

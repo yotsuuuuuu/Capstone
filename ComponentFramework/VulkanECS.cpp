@@ -214,6 +214,78 @@ void VulkanRenderer::CreateFence(VkFence& fence)
     }
 }
 
+VkCommandPool VulkanRenderer::CreateCMDPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags)
+{
+
+    VkCommandPool cmd = VK_NULL_HANDLE; 
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = queueFamilyIndex;
+    poolInfo.flags = flags;
+
+    if (vkCreateCommandPool(device, &poolInfo, nullptr, &cmd) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create graphics command pool!");
+    }
+
+    return cmd;
+}
+
+VkCommandBuffer VulkanRenderer::AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level)
+{
+    VkCommandBuffer CMDBUFFER;
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = cmd;
+    allocInfo.level = level;
+    allocInfo.commandBufferCount = (uint32_t)(1);
+
+    if (vkAllocateCommandBuffers(device, &allocInfo, &CMDBUFFER) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+    return CMDBUFFER;
+
+}
+
+std::vector<VkCommandBuffer> VulkanRenderer::AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level,  uint32_t count)
+{
+
+    std::vector<VkCommandBuffer> CMDBUFFER;
+    CMDBUFFER.resize(count);
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = cmd;
+    allocInfo.level = level;
+    allocInfo.commandBufferCount = count;
+
+    if (vkAllocateCommandBuffers(device, &allocInfo, CMDBUFFER.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+    return CMDBUFFER;
+   
+}
+
+void VulkanRenderer::DestroyCommandPool(VkCommandPool& cmdPool)
+{
+    if (cmdPool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(device, cmdPool, nullptr);
+        cmdPool = VK_NULL_HANDLE;
+    }
+}
+
+void VulkanRenderer::DestroyCommandBuffer(std::vector<VkCommandBuffer>& CMDBuffer, const VkCommandPool& pool)
+{
+    if (!CMDBuffer.empty()) {
+
+        vkFreeCommandBuffers(device,
+            pool,
+            static_cast<uint32_t>(CMDBuffer.size()),
+            CMDBuffer.data());
+
+        CMDBuffer.clear();
+    }
+}
+
 void VulkanRenderer::DestroyRenderPass(VkRenderPass& renderpass)
 {
     if (renderpass != VK_NULL_HANDLE) {
@@ -295,7 +367,7 @@ void VulkanRenderer::CMDRecordBindPipeline(const VkCommandBuffer& cmd, const VkP
 void VulkanRenderer::CMDRecordDescriptorSet(const VkCommandBuffer& cmd, const VkPipelineLayout& layout, 
     VkPipelineBindPoint flag, const VkDescriptorSet* DesSet, uint32_t fristSet, uint32_t count, uint32_t desOffset, const uint32_t* DynamicOffset)
 {
-    vkCmdBindDescriptorSets(cmd, flag, layout, fristSet, count, DesSet, desOffset, nullptr);
+    vkCmdBindDescriptorSets(cmd, flag, layout, fristSet, count, DesSet, desOffset, DynamicOffset);
 }
 
 void VulkanRenderer::CMDRecordBindIndexedMesh(const VkCommandBuffer& cmd, const IndexedVertexBuffer& mesh)
@@ -323,6 +395,12 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
         throw std::runtime_error("failed to record command buffer!");
     }
 }
+
+void VulkanRenderer::CMDRecordDistpatch(const VkCommandBuffer& cmd, uint32_t groupX, uint32_t groupY, uint32_t groupz)
+{
+    vkCmdDispatch(cmd, groupX, groupY, groupz);
+}
+
 
 void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage,
     VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess,
