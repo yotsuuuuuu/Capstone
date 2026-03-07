@@ -38,26 +38,36 @@ bool SYS_Light::Initilize()
 		VulkanRenderer* vk = static_cast<VulkanRenderer*>(cntx->renderer);
 		VkDeviceSize size = ClusterCount * sizeof(Cluster);
 		//Allocation of SSBO's
+		ScreenClustersSSBO.bufferMemoryLength = size;
 		ScreenClustersSSBO = vk->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,size);
+		
+		
 		size = LightCapacity * sizeof(CLightData);
+		ActiveSceneLightSSBO.bufferMemoryLength = size;
 		ActiveSceneLightSSBO = vk->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size);
+		if (vkMapMemory(vk->getDevice(), ActiveSceneLightSSBO.bufferMemoryID, 0, ActiveSceneLightSSBO.bufferMemoryLength, 0, &mapppedLightSSBO) != VK_SUCCESS)
+			throw std::runtime_error("Failed to map light SSBO memory");
+		camera = vk->GetCurrentCamera();
 		auto cam = std::dynamic_pointer_cast<CActor>(vk->GetCurrentCamera())->GetComponent<CCamera>();
 		// updating rest of data
 		systemDataUBO = vk->CreateUniformBuffer<SYS_LIGHT_DATA>();
+		// next four  var are dependent on the Camera
+		// if the cameras projection matrix changes (most likly due to screen size change)
+		// these values should get updated.
 		data.inverseProjection = MMath::inverse(cam->GetProjection());
 		auto planes = cam->GetzPlanes();
 		data.zPlanes[0] = planes.x;
 		data.zPlanes[1] = planes.y;
 		int width, height;
-		SDL_GetWindowSize(vk->getWindow(), &width, &height);
+		SDL_GetWindowSize(vk->getWindow(), &width, &height); // depends on the window size  needs to update on screen size change
 		data.screenDimensions[0] = static_cast<uint32_t>(width);
 		data.screenDimensions[1] = static_cast<uint32_t>(height);
-		data.lightCount = LightCount;
-		data.clusterCount = ClusterCount;
+		data.lightCount = LightCount; // should start at 0 
+		data.clusterCount = ClusterCount; // fixed
 		vk->UpdateUniformBuffer<SYS_LIGHT_DATA>(data, systemDataUBO);
 		systemDataUBOOutOfDate = false;
-		// got the ubos and ssbos need to create the description sets and pipelines for each 
-		//Cluster AABB compute
+		// Create the description sets and pipelines for each 
+		// Cluster AABB compute and Light Cull
 		std::vector<SingleDescriptorSetLayoutInfo> layout;
 		vk->AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
 		vk->AddToDescriptorLayoutCollection(layout, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
@@ -68,6 +78,7 @@ bool SYS_Light::Initilize()
 		vk->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { ScreenClustersSSBO });
 		vk->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { systemDataUBO });
 		vk->WriteDescriptorSets(CC_DescriptorSetInfo.descriptorSet, write);
+		//TODO: SET FILE PATH
 		CC_Pipelineinfo = vk->CreateComputePipeline({ CC_DescriptorSetInfo.descriptorSetLayout }, "FILE_PATH");
 		// Light Culling pass
 		layout.clear();
@@ -87,6 +98,7 @@ bool SYS_Light::Initilize()
 		vk->AddToDescrisptorLayoutWrite(write, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { ActiveSceneLightSSBO });
 
 		vk->WriteDescriptorSets(CL_DescriptorSetInfo.descriptorSet, write);
+		//TODO: SET FILE PATH
 		CL_Pipelineinfo = vk->CreateComputePipeline({ CL_DescriptorSetInfo.descriptorSetLayout }, "FILE_PATH");
 		// Command pool and buffer.
 		ComputePool = vk->CreateCMDPool(vk->getQueueFamilys().computeFamily.value(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
@@ -110,6 +122,7 @@ void SYS_Light::ShutDonw()
 		VulkanRenderer* vk = static_cast<VulkanRenderer*>(cntx->renderer);
 		vkDeviceWaitIdle(vk->getDevice());
 
+		vkUnmapMemory(vk->getDevice(), ActiveSceneLightSSBO.bufferMemoryID);
 		vk->DestroySemaphore(SignalSema);
 		vk->DestroyFence(Fence);
 
@@ -187,22 +200,69 @@ void SYS_Light::ComputeLightClusters(uint32_t frameIndex)
 bool SYS_Light::RegisterLight(CLight* Light)
 { 
 	// ADD LIGHT TO SSBO
-	if(LightCount > LightCapacity)
+	if(LightCount >= LightCapacity)
+		return false;
+	if (HandelsMap.find(Light->ssboIndex) != HandelsMap.end())
 		return false;
 	//Update interal map
 	HandelsMap[LightCount] = Light;
+	Light->ssboIndex = LightCount;
+	
+	CLightData ldata = Light->GetUpdatedData();	
+	// index to the place in the array and copy over the data
+	size_t offset = LightCount * sizeof(CLightData);
+	memcpy((char*)mapppedLightSSBO + offset, &ldata, sizeof(CLightData));
+	
 
+	LightCount++;
+	data.lightCount = LightCount;
+	systemDataUBOOutOfDate = true;
 	return true;
 }
 
 bool SYS_Light::DeregisterLight(CLight* Light)
 {
 	// REMOVE LIGHT FORM SSBO
-	return false;
+
+	if (LightCount == 0)
+		return false;
+	if (HandelsMap.find(Light->ssboIndex) == HandelsMap.end())
+		return false;
+
+	if (LightCount > 1) { // for more thant 1 element 
+		uint32_t removeHandel = Light->ssboIndex;
+		uint32_t lastLightIndex = LightCount - 1;
+
+		if (removeHandel != lastLightIndex) { // check if the element is not the last one
+			CLight* last = HandelsMap[lastLightIndex];
+			HandelsMap.erase(lastLightIndex);
+			HandelsMap[removeHandel] = last;
+			last->ssboIndex = removeHandel;
+			CLightData ldata = last->GetUpdatedData();
+			size_t offset = removeHandel * sizeof(CLightData);
+			memcpy((char*)mapppedLightSSBO + offset, &ldata, sizeof(CLightData));
+		}
+		else {
+			HandelsMap.erase(removeHandel);		
+		}
+	}
+	else { // for the case of 1 element left
+		HandelsMap.clear();	
+	}
+	LightCount--;
+	data.lightCount = LightCount;
+	systemDataUBOOutOfDate = true;
+	return true;
 }
 
 bool SYS_Light::UpdateLightData(CLight* Light)
 {
 	// UPDATE LIGHT DATA AT CURRENT INDEX IN THE SSBO
-	return false;
+	if(HandelsMap.find(Light->ssboIndex) == HandelsMap.end())
+		return false;
+	CLightData ldata = Light->GetUpdatedData();
+	size_t offset = Light->ssboIndex * sizeof(CLightData);
+	memcpy((char*)mapppedLightSSBO + offset, &ldata, sizeof(CLightData));
+
+	return true;
 }

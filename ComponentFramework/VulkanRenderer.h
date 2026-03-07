@@ -36,6 +36,7 @@ constexpr uint32_t SHAWDOW_SIZE = 1024;
 using namespace MATH;
 
 class Component;
+class EngineContext;
 
 #ifdef NDEBUG /// only use validation layers if in debug mode
 const bool enableValidationLayers = false;
@@ -469,10 +470,11 @@ public:
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
-    std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
     
+    std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
+    void SetCurrentCamera(std::shared_ptr<Component> cam) { camera = cam; }
 
-    void CreateGlobalRources(std::shared_ptr<Component> cameraActor);
+    bool CreateGlobalRources(EngineContext& Ecntx);
     void DestroyGlobalResources();
 
     void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);

@@ -162,7 +162,7 @@ void VulkanRenderer::DestroySampler2D(Sampler2D& texture2D) {
 
 Sampler2D VulkanRenderer::SkyBoxSampler(std::vector<std::string> paths)
 {
-    if (paths.size() < 6) {
+    if (paths.size() == 6) {
         throw::std::runtime_error("SkyBox File Paths Not Set");
     }
 

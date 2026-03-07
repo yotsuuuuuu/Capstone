@@ -6,21 +6,18 @@
 class SYS_Light
 {
 	//TODO (Kev) Light system
-	// creates Light SSBO that holds the light data gobally loaded
-	// probly going to need an UBO for light system info
-	//  Able to add/remove/and update the SSBO
-	//	It should give back the handle back to the light component to hold
-	//  and light system should hold a weakpointer to it so it can call funtctions form it and set values but dosent own their lifetime
-	//  Hold the Compute Logic for clusters  and cluster SSBO
-	// there needs Caculate the Clusters every frame
-	//  to do that it needs needs the cameras proj and view matrix,
-	//  also needs the SSBO of Light and Clusters
+	// CREATE THE COMPUTE SHADERS 
+	// CREATE SYSTEM IN THE SCENE MANAGER
+	// IMPLEMENT INTO THE MAIN REDNER LOOP
+	// UPDATE MAIN SHADERS TO USE THE LIGHT SYSTEM.
+	// NEED TO ACCOUNT FOR RESIZEING OF THE SCREEN
 	BufferMemory ScreenClustersSSBO;
 	uint32_t ClusterCount;
 	SYS_LIGHT_DATA data;
 	bool systemDataUBOOutOfDate;
 	BufferMemory systemDataUBO;
 	BufferMemory ActiveSceneLightSSBO;
+	void* mapppedLightSSBO;
 	uint32_t LightCount;
 	uint32_t LightCapacity;
 	// need 1 for Computing the Clusters

@@ -9,7 +9,8 @@
 #include "CTransform.h"
 #include "CWorld.h"
 #include "CSkyBox.h"
-
+#include "EngineContext.h"
+#include "AssetManager.h"
 #include "imgui.h"
 #include <unordered_map>
 
@@ -26,35 +27,44 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
-void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
-{
 
-    auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
-    if (!cam) {
+bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
+{
+  
+    auto MainCamera = Ecntx.assetManager->GetCamera();
+    if (!MainCamera) {
+        Debug::FatalError("CAMERA NOT SET", __FILE__, __LINE__);
+        return false;
+    }
+    camera = MainCamera;
+
+    auto CameraActor = std::dynamic_pointer_cast<CActor>(MainCamera);
+    if (!CameraActor) {
         Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
-        return;
+        return false;
     }
 
-    auto Glight = cam->GetComponent<CGlobalLight>();
+    auto Glight = CameraActor->GetComponent<CGlobalLight>();
     if (!Glight) {
         Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
-        return;
+        return false;
     }
 
-    auto Camera = cam->GetComponent<CCamera>();
+    auto Camera = CameraActor->GetComponent<CCamera>();
     if (!Glight) {
         Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
-        return;
+        return false;
     }
-    camera = cameraActor;
+
     uint32_t shadowmapsize = SHAWDOW_SIZE * 1;
     // create the shadow resources
     CreateGlobalShadowMappingResources(shadowmapsize, shadowmapsize, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
-    
+
     // then create global resources
+    //TODO: ADD THE LIGTH SYSTEM SSBOs TO THE GLOBAL SET
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -70,9 +80,12 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
     std::vector<std::string> skyboxFiles = { "./textures/skybox/px.png","./textures/skybox/nx.png",
                                              "./textures/skybox/py.png","./textures/skybox/ny.png",
                                              "./textures/skybox/pz.png","./textures/skybox/nz.png" };
-    Ref<CSkyBox> sky = std::make_shared<CSkyBox>(nullptr,this, skyboxFiles);
-    sky->OnCreate();
-    cam->AddComponent<CSkyBox>(sky);
+    Ref<CSkyBox> sky = std::make_shared<CSkyBox>(nullptr, this, skyboxFiles);
+    if (!sky->OnCreate()) {
+        Debug::FatalError("FAILED TO CREATE SKYBOX", __FILE__, __LINE__);
+        return false;
+    }
+    CameraActor->AddComponent<CSkyBox>(sky);
 }
 
 void VulkanRenderer::DestroyGlobalResources()

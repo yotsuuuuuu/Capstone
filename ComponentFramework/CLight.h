@@ -7,7 +7,9 @@ class SYS_Light;
 class CLight :
     public Component
 {
+
     friend SYS_Light;
+    uint32_t ssboIndex;
     CLightData data;
     Vec3 Colour;
     float radius;
@@ -18,7 +20,7 @@ class CLight :
     int Type;
     WeakRef<CTransform> transform;
     SYS_Light* LightSystem = nullptr;
-    // TODO: (Kev) fill out this info
+   
 public:
     CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour);
     CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour,
