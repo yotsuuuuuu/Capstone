@@ -293,12 +293,27 @@ void Scene3::FrustumCheck()
 	for (Ref<Component>& a : actorsInScene) {
 		auto actor = std::dynamic_pointer_cast<CActor>(a);
 		Vec3 viewSpacePos = actor->GetComponent<CTransform>()->GetPosition();
-		actor->isInFrustum = true;
+		actor->culled = false;
 		for (const MATHEX::Plane& p : fusturm) {
 			float d = MATHEX::PMath::distance(viewSpacePos, p);
 			if (d < 0) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
 
-				actor->isInFrustum = false;
+				actor->culled = true;
+				break;
+			}
+		}
+	}
+	auto worldActor = std::dynamic_pointer_cast<CActor>(world);
+	//std::unordered_map<Vec2, TerrainChunkData> chunkMap = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
+	auto chunks = worldActor->GetComponent<CWorld>()->GetChunks();
+	for (const auto& c : chunks) {
+		Vec3 chunkPos = c->GetWorldPos();
+		c->culled = false;
+		for (const MATHEX::Plane& p : fusturm) {
+			float d = MATHEX::PMath::distance(chunkPos, p);
+			if (d < 0) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
+
+				c->culled = true;
 				break;
 			}
 		}

@@ -282,6 +282,7 @@ struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
 	ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;
+	bool isCulled = false;
 };
 
 struct AudioBands

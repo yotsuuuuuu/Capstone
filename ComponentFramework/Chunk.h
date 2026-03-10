@@ -14,8 +14,8 @@ class Chunk
 	float max;
 	
 	// for culling just figure out the centre world position
-
 public:
+	bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
 
 	Chunk() { position = Vec2(); }
 
@@ -35,6 +35,7 @@ public:
 
 	float getMin() const { return min; }
 	float getMax() const { return max; }
+
 
 
 };

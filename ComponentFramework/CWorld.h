@@ -31,6 +31,7 @@ public:
 	//PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
 	//std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
 	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return C_World->GetChunkRenderData(); }
+	std::vector<std::unique_ptr<Chunk>> GetChunks() { return C_World->GetChunks(); }
 
 	void InitializeWorld(TerrainPreset* t_);
 

@@ -29,7 +29,7 @@ private:
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
-	int WORLD_SIZE = 32; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
+	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
 	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.
@@ -59,6 +59,10 @@ public:
 	PipelineInfo const GetPipeline() { return worldPipeline; }
 	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
 	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return chunkRenderData; }
+	std::vector<std::unique_ptr<Chunk>> GetChunks() { return std::move(chunks); }
+
+	std::vector<TerrainChunkData> GetCulledChunkData();
+	// get culled chunk data
 
 
 private:

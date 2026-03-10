@@ -53,6 +53,21 @@ void World::OnDelete()
 	}
 }
 
+std::vector<TerrainChunkData> World::GetCulledChunkData()
+{
+	std::vector<TerrainChunkData> culledData;
+	for (const auto& chunk : chunks) {
+		if (!chunk->culled) {
+			const Vec2& position = chunk->getChunkPos();
+			auto it = chunkRenderData.find(position);
+			if (it != chunkRenderData.end()) {
+				culledData.push_back(it->second);
+			}
+		}
+	}
+	return culledData;
+}
+
 void World::GenerateAllChunks()
 {
 	chunks.clear();
