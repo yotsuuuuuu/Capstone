@@ -139,7 +139,7 @@ bool Scene3::OnCreate() {
 		
 		actorsInScene.push_back(WorldActor);
 
-		actorsInScene.push_back(engineContext.assetManager->GetCamera());
+		//actorsInScene.push_back(engineContext.assetManager->GetCamera());
 
 		//step 3 Actors being added to the scene.
 		camera = engineContext.assetManager->GetCamera();	

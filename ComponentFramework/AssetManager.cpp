@@ -11,9 +11,9 @@
 
 using json = nlohmann::json;
 
-bool AssetManager::LoadAsset(const std::string& filepath_)
+bool AssetManager::LoadCamera(const std::string& filepath_)
 {
-    std::ifstream file(filepath_);
+      std::ifstream file(filepath_);
 
     if (!file.is_open())
     {
@@ -22,12 +22,6 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
     }
 
         jsonLoader = nlohmann::json::parse(file);
-   
-	if (!jsonLoader.contains("Meshes"))
-	{
-		std::cout << "json does not contain meshes" << "\n";
-		return false;
-	}
 
     if (!jsonLoader.contains("Camera"))
     {
@@ -82,9 +76,38 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
     if (!camera->OnCreate())
     {
         std::cout << "Failed to create camera" << "\n";
+        return false;
     }
 
-    renderer->CreateGlobalRources(camera);
+    return true;
+}
+
+bool AssetManager::LoadAsset(const std::string& filepath_)
+{
+    std::ifstream file(filepath_);
+
+    if (!file.is_open())
+    {
+        std::cerr << "Failed to open asset database: " << filepath_ << "\n";
+        return false;
+    }
+
+        jsonLoader = nlohmann::json::parse(file);
+
+    if (!jsonLoader.contains("Camera"))
+    {
+        std::cout << "json does not contain an Camera section " << "\n";
+        return false;
+    }
+
+	VulkanRenderer* renderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+
+
+    if (!jsonLoader.contains("Meshes"))
+    {
+        std::cout << "json does not contain meshes" << "\n";
+        return false;
+    }
 
 
 	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
@@ -163,19 +186,22 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
         auto pos = actorData["Transform"]["position"].get<std::vector<float>>();
         auto rot = actorData["Transform"]["rotation"].get<std::vector<float>>();
 
-		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0], pos[1], pos[2]), QMath::angleAxisRotation(rot[0],Vec3(rot[1],rot[2],rot[3])), Vec3(1, 1, 1));
-
-		act->AddComponent<CTransform>(t);
         Ref<CMesh> temp = assetMapGet<CMesh>(actorData["Mesh"].get<std::string>());
-		act->AddComponent<CMesh>(temp);
-		act->AddComponent<CMaterial>(assetMapGet<CMaterial>(actorData["Mat"].get<std::string>()));
+        act->AddComponent<CMesh>(temp);
+        act->AddComponent<CMaterial>(assetMapGet<CMaterial>(actorData["Mat"].get<std::string>()));
+
+		assetMap[actorname] = act;
+
+        //will remove this after just here for testing purposes
+		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0], pos[1], pos[2]), QMath::angleAxisRotation(rot[0],Vec3(rot[1],rot[2],rot[3])), Vec3(1, 1, 1));
+        act->AddComponent<CTransform>(t);
+   
 
         if (!act->OnCreate())
         {
 			std::cout << "Failed to create actor :" << actorname << "\n";
         }
 		actorMap.push_back(act);
-		
 	}
 
  
@@ -186,6 +212,20 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_)
 {
     return false;
+}
+
+std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, int amount_, std::vector<CTransform> trans_)
+{
+	std::vector<Ref<CActor>> requestedActors;
+    for (int i = 0; i <= amount_; i++)
+    {
+       Ref<CActor> actor = assetMapGet<CActor>(actorId);
+       actor->AddComponent<CTransform>(trans_[i]);
+	   actorMap.push_back(actor);
+	   requestedActors.push_back(actor);
+    }
+
+    return requestedActors;
 }
 
 std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()

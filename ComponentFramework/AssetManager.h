@@ -29,11 +29,6 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Component>> assetMap;
 	std::vector<std::shared_ptr<Component>> actorMap;
 	template<typename T>
-	void assetMapInsert(const std::string id, Ref<T> asset)
-	{
-		assetMap[id] = asset;
-	};
-	template<typename T>
 	Ref<T> assetMapGet(const std::string id)
 	{
 		auto checker = assetMap.find(id);
@@ -56,8 +51,10 @@ public:
 		engineContext = context_;
 		return true;
 	}
+	bool LoadCamera(const std::string& filepath_);
 	bool LoadAsset(const std::string& filepath_);
 	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
+	std::vector<Ref<CActor>> CreateActor(const std::string& actorId, int amount_ , std::vector<CTransform> trans_);
 	std::vector<Ref<Component>> GetActorsInScene();
 	Ref<Component> GetCamera();
 	Ref<CMesh> GetMesh(const std::string& id);

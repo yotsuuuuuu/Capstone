@@ -77,6 +77,8 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	assetManager->set(engineContext);
+	engineContext.assetManager->LoadCamera("./test.json");		
+	static_cast<VulkanRenderer*>(renderer)->CreateGlobalRources(engineContext.assetManager->GetCamera());
 	engineContext.assetManager->LoadAsset("./test.json");
 	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);
