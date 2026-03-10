@@ -239,7 +239,7 @@ std::vector<MATHEX::Plane> Scene3::GenerateFrustumPLane()
 	MATHEX::Plane left, right, top, bottom, near, far;
 	left.x = proj[3] + proj[0];
 	left.y = proj[7] + proj[4];
-	left.z = proj[11] + proj[8];
+	left.z = proj[11] + proj[8];	
 	left.d = (proj[15] + proj[12]);
 
 	right.x = proj[3] - proj[0];
