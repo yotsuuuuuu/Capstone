@@ -78,7 +78,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadAsset("./test.json");
-	engineContext.fmodController->AnalyzeAudioOffline(0);
+	//engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);
 	
 	return true;

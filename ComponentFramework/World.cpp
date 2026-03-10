@@ -6,13 +6,9 @@ void World::Initialize(TerrainPreset* t_)
 	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 	terrainNoise = new TerrainNoise(*t_);
-	//baseChunkMesh.reset();
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
-	// TODO: change texture to something real
-	//terrainTexture = vRenderer->Create2DTextureImage("./textures/rock.png");
 
-	//CreateWorldPipeline(cameraUBO_, lightsUBO_);
 
 	GenerateAllChunks();
 }
@@ -69,6 +65,7 @@ void World::GenerateAllChunks()
 	for (int x = 0; x < WORLD_SIZE; x++) {
 		for (int y = 0; y < WORLD_SIZE; y++) {
 
+			// it might be better to keep internal pos and world position as separate var.
 			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
 			//printf("Chunk number: %d\n", i);
@@ -85,6 +82,8 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 {
 	std::vector<float> heightmap(CHUNK_SIZE*CHUNK_SIZE);
 	Vec2 chunkPos = chunk->getChunkPos();
+	float minHeight = std::numeric_limits<float>::max();
+	float maxHeight = std::numeric_limits<float>::lowest();
 
 	for (int z = 0; z < CHUNK_SIZE; z++) {
 		for (int x = 0; x < CHUNK_SIZE; x++) {
@@ -92,12 +91,18 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 			// get world position
 			float worldX = chunkPos.x + float(x);
 			float worldZ = chunkPos.y + float(z);
+			float heightValue = terrainNoise->sample(worldX, worldZ);
 
-			heightmap[z * CHUNK_SIZE + x] = terrainNoise->sample(worldX, worldZ);
-			//printf("heightValue: %f X:%f, Y %f \t", heightmap[z * CHUNK_SIZE + x],worldX,worldZ);
+			heightmap[z * CHUNK_SIZE + x] = heightValue;
+
+			if (heightValue < minHeight) minHeight = heightValue;
+			if (heightValue > maxHeight) maxHeight = heightValue;
 		}
 	}
 	chunk->SetHeightmap(std::move(heightmap));
+	chunk->setMin(minHeight);
+	chunk->setMax(maxHeight);
+	chunk->SetWorldPos((minHeight + maxHeight) / 2.0f); // set world pos y to the middle of the chunk height range for culling
 }
 
 void World::BuildChunkMeshData(Chunk* chunk)
@@ -139,7 +144,6 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.vertexBuffer.indexBufferLength = chunkIndexBuffer.indexBufferLength;
 	renderData.vertexBuffer.indexBufferMemoryID = chunkIndexBuffer.indexBufferMemoryID;
 
-	//vRenderer->CreateTerrainBuffers(vertices, baseChunkMesh->baseIndices, renderData.vertexBuffer);
 	vRenderer->CreateTerrainVertexBuffer(vertices, renderData.vertexBuffer);
 
 	renderData.isInitialized = true;

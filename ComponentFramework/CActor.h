@@ -15,6 +15,7 @@ class CActor : public Component {
 protected:
 	std::vector<Ref<Component>> components;
 public:
+	bool isInFrustum = false;
 	CActor(Ref<Component> parent_ = nullptr) : Component(parent_) {}
 	virtual ~CActor() {}
 	

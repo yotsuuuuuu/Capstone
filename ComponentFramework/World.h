@@ -60,6 +60,7 @@ public:
 	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
 	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return chunkRenderData; }
 
+
 private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);

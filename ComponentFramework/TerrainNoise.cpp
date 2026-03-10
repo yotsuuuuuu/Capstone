@@ -121,8 +121,8 @@ float TerrainNoise::sample(float wX, float wZ) const
     // apply additional shaping based on layer properties
     if (terrainConfig.exponent != 1.0f) {
         if (h >= 0) {
-            //h = -std::pow(abs(h), terrainConfig.exponent);
-            h = 0;
+            h = -std::pow(abs(h), terrainConfig.exponent);
+            //h = 0;
         }
         else {
             h = std::pow(abs(h), terrainConfig.exponent);

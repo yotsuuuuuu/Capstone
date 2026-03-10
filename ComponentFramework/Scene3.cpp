@@ -228,6 +228,83 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		}
 	
 }
+std::vector<MATHEX::Plane> Scene3::GenerateFrustumPLane()
+{
+	std::vector<MATHEX::Plane> fusturm;
+	//Matrix4 proj = camera->getProjectionMatrix() * camera->getViewMatrix();
+	auto cam = std::dynamic_pointer_cast<CActor>(camera);
+	auto camComp = cam->GetComponent<CCamera>();
+	Matrix4 proj = camComp->GetProjectionMatrix() * camComp->GetViewMatrix();
+	
+	MATHEX::Plane left, right, top, bottom, near, far;
+	left.x = proj[3] + proj[0];
+	left.y = proj[7] + proj[4];
+	left.z = proj[11] + proj[8];
+	left.d = (proj[15] + proj[12]);
+
+	right.x = proj[3] - proj[0];
+	right.y = proj[7] - proj[4];
+	right.z = proj[11] - proj[8];
+	right.d = (proj[15] - proj[12]);
+
+	bottom.x = proj[3] + proj[1];
+	bottom.y = proj[7] + proj[5];
+	bottom.z = proj[11] + proj[9];
+	bottom.d = (proj[15] + proj[13]);
+
+	top.x = proj[3] - proj[1];
+	top.y = proj[7] - proj[5];
+	top.z = proj[11] - proj[9];
+	top.d = (proj[15] - proj[13]);
+
+	near.x = proj[3] + proj[2];
+	near.y = proj[7] + proj[6];
+	near.z = proj[11] + proj[10];
+	near.d = proj[15] + proj[14];
+
+	far.x = proj[3] - proj[2];
+	far.y = proj[7] - proj[6];
+	far.z = proj[11] - proj[10];
+	far.d = (proj[15] - proj[14]);
+
+	// Normalizaiont matters if we care for the actual distance
+	// when we do the dot product.
+	// if we are just checking below or above 0 then 
+	// no need to normalize.
+	left = MATHEX::PMath::normalize(left);
+	right = MATHEX::PMath::normalize(right);
+	bottom = MATHEX::PMath::normalize(bottom);
+	top = MATHEX::PMath::normalize(top);
+	near = MATHEX::PMath::normalize(near);
+	far = MATHEX::PMath::normalize(far);
+
+	fusturm.push_back(left);
+	fusturm.push_back(right);
+	fusturm.push_back(bottom);
+	fusturm.push_back(top);
+	fusturm.push_back(near);
+	fusturm.push_back(far);
+	return fusturm;
+}
+
+void Scene3::FrustumCheck()
+{
+	std::vector<MATHEX::Plane> fusturm = GenerateFrustumPLane();
+	for (Ref<Component>& a : actorsInScene) {
+		auto actor = std::dynamic_pointer_cast<CActor>(a);
+		Vec3 viewSpacePos = actor->GetComponent<CTransform>()->GetPosition();
+		actor->isInFrustum = true;
+		for (const MATHEX::Plane& p : fusturm) {
+			float d = MATHEX::PMath::distance(viewSpacePos, p);
+			if (d < 0) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
+
+				actor->isInFrustum = false;
+				break;
+			}
+		}
+	}
+}
+
 void Scene3::Update(const float deltaTime) {
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
