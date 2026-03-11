@@ -121,7 +121,8 @@ struct alignas(16) CLightData {
     Vec4 direction_inner;
     Vec4 outer_type_pad;
 };
-struct Cluster
+
+struct  Cluster
 {
     Vec4 minPoint;
     Vec4 maxPoint;

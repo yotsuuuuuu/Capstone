@@ -79,15 +79,16 @@ bool SYS_Light::Initilize()
 		vk->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { systemDataUBO });
 		vk->WriteDescriptorSets(CC_DescriptorSetInfo.descriptorSet, write);
 		//TODO: SET FILE PATH
-		CC_Pipelineinfo = vk->CreateComputePipeline({ CC_DescriptorSetInfo.descriptorSetLayout }, "FILE_PATH");
+		CC_Pipelineinfo = vk->CreateComputePipeline({ CC_DescriptorSetInfo.descriptorSetLayout }, "shaders/ClusterCompute.comp.spv");
 		// Light Culling pass
 		layout.clear();
 		write.clear();
 
 		std::vector<SingleDescriptorSetLayoutInfo> layout;
 		vk->AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
-		vk->AddToDescriptorLayoutCollection(layout, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+		vk->AddToDescriptorLayoutCollection(layout, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
 		vk->AddToDescriptorLayoutCollection(layout, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+		vk->AddToDescriptorLayoutCollection(layout, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
 		CL_DescriptorSetInfo.descriptorSetLayout = vk->CreateDescriptorSetLayout(layout);
 		CL_DescriptorSetInfo.descriptorPool = vk->CreateDescriptorPool(layout, 1);
 		CL_DescriptorSetInfo.descriptorSet = vk->AllocateDescriptorSets(CL_DescriptorSetInfo.descriptorPool, CL_DescriptorSetInfo.descriptorSetLayout, 2);
@@ -99,7 +100,7 @@ bool SYS_Light::Initilize()
 
 		vk->WriteDescriptorSets(CL_DescriptorSetInfo.descriptorSet, write);
 		//TODO: SET FILE PATH
-		CL_Pipelineinfo = vk->CreateComputePipeline({ CL_DescriptorSetInfo.descriptorSetLayout }, "FILE_PATH");
+		CL_Pipelineinfo = vk->CreateComputePipeline({ CL_DescriptorSetInfo.descriptorSetLayout }, "shaders/LightCullCompute.comp.spv");
 		// Command pool and buffer.
 		ComputePool = vk->CreateCMDPool(vk->getQueueFamilys().computeFamily.value(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 		ComputeCmd = vk->AllocatedCMDbuffer(ComputePool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
