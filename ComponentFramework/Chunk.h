@@ -10,12 +10,12 @@ class Chunk
 	Vec3 worldPos;
 	// with min and max and the chunk size we can calculate a bounding box for the chunk.
 	// can be used for culling and collision detection.
-	float min;
-	float max;
+	float minY;
+	float maxY;
+	bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
 	
 	// for culling just figure out the centre world position
 public:
-	bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
 
 	Chunk() { position = Vec2(); }
 
@@ -30,13 +30,14 @@ public:
 	Vec3 GetWorldPos() const { return worldPos; }
 	Vec2 getChunkPos() const { return position; }
 
-	void setMin(float min_) { min = min_; }
-	void setMax(float max_) { max = max_; }
+	void setMinY(float min_) { minY = min_; }
+	void setMaxY(float max_) { maxY = max_; }
 
-	float getMin() const { return min; }
-	float getMax() const { return max; }
+	float getMinY() const { return minY; }
+	float getMaxY() const { return maxY; }
 
-
+	void SetCulled(bool culled_) { culled = culled_; }
+	bool IsCulled() const { return culled; }
 
 };
 

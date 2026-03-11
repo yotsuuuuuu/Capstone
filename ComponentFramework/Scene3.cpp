@@ -290,34 +290,48 @@ std::vector<MATHEX::Plane> Scene3::GenerateFrustumPLane()
 void Scene3::FrustumCheck()
 {
 	std::vector<MATHEX::Plane> fusturm = GenerateFrustumPLane();
-	for (Ref<Component>& a : actorsInScene) {
-		auto actor = std::dynamic_pointer_cast<CActor>(a);
-		Vec3 viewSpacePos = actor->GetComponent<CTransform>()->GetPosition();
-		actor->culled = false;
-		for (const MATHEX::Plane& p : fusturm) {
-			float d = MATHEX::PMath::distance(viewSpacePos, p);
-			if (d < 0) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
 
-				actor->culled = true;
-				break;
-			}
-		}
-	}
 	auto worldActor = std::dynamic_pointer_cast<CActor>(world);
-	//std::unordered_map<Vec2, TerrainChunkData> chunkMap = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
-	auto chunks = worldActor->GetComponent<CWorld>()->GetChunks();
-	for (const auto& c : chunks) {
-		Vec3 chunkPos = c->GetWorldPos();
-		c->culled = false;
-		for (const MATHEX::Plane& p : fusturm) {
-			float d = MATHEX::PMath::distance(chunkPos, p);
-			if (d < 0) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
+	auto chunksData = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
+	for (auto& pair : *chunksData) {
+		auto& c = pair.second;
+		c.isCulled = false;
 
-				c->culled = true;
+		for (int i = 0; i < 6; i++) {
+	
+			const MATHEX::Plane& p = fusturm[i];
+
+			Vec3 pVertex;
+
+			pVertex.x = (p.n.x > 0) ? c.aabb.max.x : c.aabb.min.x;
+			pVertex.y = (p.n.y > 0) ? c.aabb.max.y : c.aabb.min.y;
+			pVertex.z = (p.n.z > 0) ? c.aabb.max.z : c.aabb.min.z;
+
+			float dot = p.n.x * pVertex.x + 
+						p.n.y * pVertex.y + 
+						p.n.z * pVertex.z;
+
+			if (dot < -p.d) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
+				c.isCulled = true;
+				//std::cout << "culled chunk at pos: " << std::endl;
 				break;
 			}
+
+			// just to check if it intersects probs not needed
+			//Vec3 nVertex = Vec3((p.n.x > 0) ? c.aabb.min.x : c.aabb.max.x,
+			//					(p.n.y > 0) ? c.aabb.min.y : c.aabb.max.y,
+			//					(p.n.z > 0) ? c.aabb.min.z : c.aabb.max.z);
+
+			//float dot2 = p.n.x * nVertex.x + 
+			//			 p.n.y * nVertex.y + 
+			//			 p.n.z * nVertex.z;
+
+			//if (dot2 <= -p.d) {
+			//	c.isCulled = false;
+			//}
 		}
 	}
+
 }
 
 void Scene3::Update(const float deltaTime) {
@@ -330,6 +344,9 @@ void Scene3::Update(const float deltaTime) {
 			phys->Update(deltaTime);
 		}
 	}
+
+	FrustumCheck();
+
 }
 
 void Scene3::Render() const {

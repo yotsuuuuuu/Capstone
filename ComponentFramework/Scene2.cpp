@@ -252,7 +252,7 @@ void Scene2::Render() const {
 				vRenderer->DrawIndexed(meshdata);// 6 draw
 
 				// render terrain
-				world->RenderWorld();
+
 			}
 
 

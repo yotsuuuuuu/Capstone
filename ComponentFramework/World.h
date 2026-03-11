@@ -23,13 +23,13 @@ private:
 	// chunks
 	std::unique_ptr<BaseGridMesh> baseChunkMesh; // base mesh for chunks
 	std::vector<std::unique_ptr<Chunk>> chunks; 
-	std::unordered_map<Vec2, TerrainChunkData> chunkRenderData; // map chunk positions to their render data
+	std::unordered_map<Vec3, TerrainChunkData> chunkRenderData; // map chunk positions to their render data
 	IndexedVertexBuffer chunkIndexBuffer;
 	// vulkan
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
-	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
+	int WORLD_SIZE = 32; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
 	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.
@@ -53,15 +53,12 @@ public:
 
 	void Initialize(TerrainPreset* t_);
 	void Initialize(std::vector<std::string> songPath);
-	void RenderWorld();
 	void OnDelete();
 
 	PipelineInfo const GetPipeline() { return worldPipeline; }
 	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
-	std::unordered_map<Vec2, TerrainChunkData> GetChunkRenderData() { return chunkRenderData; }
-	std::vector<std::unique_ptr<Chunk>> GetChunks() { return std::move(chunks); }
-
-	std::vector<TerrainChunkData> GetCulledChunkData();
+	std::unordered_map<Vec3, TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
+	std::vector<std::unique_ptr<Chunk>>* GetChunks() { return &chunks; }
 	// get culled chunk data
 
 
@@ -70,9 +67,4 @@ private:
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
 	void CalculateNormals(std::vector<Vertex>& vertices);
-
-	void LowerAll();
-
-	void CreateWorldPipeline(std::vector<BufferMemory> cameraUBO_, std::vector<BufferMemory> lightsUBO_);
-	void CreateWorldDescriptorSet(std::vector<BufferMemory> cameraUBO, std::vector<BufferMemory> lightsUBO);
 };

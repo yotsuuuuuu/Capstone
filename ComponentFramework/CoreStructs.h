@@ -278,11 +278,18 @@ struct TerrainVertex {
     Vec2 uv;
 };
 
+struct AABB
+{
+    Vec3 min;
+    Vec3 max;
+};
+
 struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
 	ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;
 	bool isCulled = false;
+	AABB aabb;
 };
 
 struct AudioBands
@@ -300,6 +307,7 @@ struct AudioBands
 
 
 };
+
 
 enum class AudioState
 {
