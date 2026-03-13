@@ -27,7 +27,7 @@ void World::Initialize(int songIndex)
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();
 	
-	WORLD_SIZE = preset.pAudio.songLength / 200; // this is a really rough way to determine world size based on song length.
+	WORLD_SIZE = preset.pAudio.songLength / 250; // this is a really rough way to determine world size based on song length.
 
 	GenerateAllChunks();
 

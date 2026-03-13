@@ -133,7 +133,9 @@
     <ClCompile Include="Scene3.cpp">
       <Filter>Source\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainPreset.cpp" />
+    <ClCompile Include="TerrainPreset.cpp">
+      <Filter>Source\Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">

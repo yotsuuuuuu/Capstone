@@ -74,9 +74,7 @@ void CCamera::UpdateUBO(uint32_t index) {
 		if (T->needsUBOupdate) {
 			UpdateViewMatrix();
 		}
-		else {
-			return;
-		}
+		
 
 		switch (renderer->getRendererType())
 		{
@@ -86,7 +84,8 @@ void CCamera::UpdateUBO(uint32_t index) {
 			data.projectionMatrix = projectionMatrix;
 			data.viewMatrix = viewMatrix;
 			// should update all buffers cause it might flicker at times	
-			vkrender->UpdateUniformBuffers<CameraData>(data, cameraUBO);
+			//vkrender->UpdateUniformBuffers<CameraData>(data, cameraUBO);
+			vkrender->UpdateUniformBuffer<CameraData>(data, cameraUBO[index]);
 			T->needsUBOupdate = false;
 			break;
 		}

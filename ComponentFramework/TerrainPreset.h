@@ -21,8 +21,8 @@ enum class WarpType {
 enum class FractalType {
     None = 0,
     FBm, // layers more noise on top of itself. each layer is more detail at smaller scale. high octaves can make it noisey
-    PingPong, // inset mountains with dramatic peaks.
-	Ridged // creates sharp bright peaks. good for mountains. high octaves can create more peaks but also more noise. 
+	Ridged, // creates sharp bright peaks. good for mountains. high octaves can create more peaks but also more noise. 
+    PingPong // inset mountains with dramatic peaks.
 };
 
 enum class CellularType {

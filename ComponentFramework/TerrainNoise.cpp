@@ -120,9 +120,9 @@ float TerrainNoise::sample(float wX, float wZ) const
 
     // apply additional shaping based on layer properties
     if (terrainConfig.exponent != 1.0f) {
-        if (h >= 0) {
-            h = -std::pow(abs(h), terrainConfig.exponent);
-            //h = 0;
+        if (h <= 0) { // h is negative just return 0
+            //h = -std::pow(abs(h), terrainConfig.exponent);
+            h = 0;
         }
         else {
             h = std::pow(abs(h), terrainConfig.exponent);
@@ -133,7 +133,7 @@ float TerrainNoise::sample(float wX, float wZ) const
     //cv = continentalness;
 
     // here is where i can check for modifiers
-    h += cv * continentalPreset.amplitude;
+    //h += cv * continentalPreset.amplitude;
 
     h += pv * PVpreset.amplitude;
 
@@ -147,6 +147,9 @@ float TerrainNoise::sample(float wX, float wZ) const
     }
     //h += (detail-0.5f * PVpreset.amplitude);
     //std::cout << h << std::endl;
+
+    //h = base * basePreset.amplitude; // for just testing base
+
     return h;
 }
 
@@ -157,11 +160,13 @@ float TerrainNoise::EvaluateContinental(float c) const
 
     float percent;
 
+    // continental value
     float cv1 = 0.2f;
 	float cv2 = 0.5f;
 	float cv3 = 0.8f;
 	float cv4 = 1.0f;
 
+	// height value (spline value)
 	float sv1 = 2.0f;
 	float sv2 = 3.0f;
 	float sv3 = 8.0f;

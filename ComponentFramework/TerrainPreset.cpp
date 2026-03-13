@@ -5,14 +5,16 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	pAudio = GetLayerValuesFromAudio(ab);
 
 	CreateBase();
-	CreatePeaksValleys();
+	//CreatePeaksValleys();
 	//CreateErosion();
-	CreateContinentalness();
-	
+	//CreateContinentalness();
+	exponent = 1.0f + (int(pAudio.bassMaxSum * pAudio.midMaxSum - pAudio.bassAvgSum * pAudio.highMaxSum) % 2) * pAudio.bassAvgSum;
+	std::cout << exponent << std::endl;
 	int why = 0;
 	// TODO: (andres) exponents, 
 	// TODO: (andres) global height scale, 
 	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
+	// TODO: (andres) continentallness heights
 	// TODO: (andres) randomize actor placement (lights, etc) ( x % worldsize, then x % chunksize)
 
 
@@ -274,10 +276,10 @@ void TerrainPreset::CreateBase()
 	AudioBands avgBands = pAudio.avgBands;
 
 	// base could use some sprinkling from highs for fractals or something
-	base.type = ChooseNoise(0, (pAudio.bassAvgSum + pAudio.highAvgSum) * (pAudio.midAvgSum + pAudio.highAvgSum*25)); // for base decide it with bass
+	base.type = ChooseNoise(0, avgBands.bass); // for base decide it with bass
 	base.seed = pAudio.seed * (pAudio.bassAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	base.frequency = 0.005f + (avgBands.bass * 0.03f); // for base keep it very very low. 0.001-0.01
-	base.amplitude = 2.0f + (avgBands.sub * 3.0f); // 5 is a good starting point. nothing more than 10
+	base.frequency = 0.005f + (avgBands.sub * 0.03f); // for base keep it very very low. 0.001-0.01
+	base.amplitude = 2.0f + (avgBands.highBass * 3.0f); // 5 is a good starting point. nothing more than 10
 	base.fractal = ChooseFractal(0, pAudio.bassAvgSum * 2); // for base DO NOT USE PINGPONG OR RIDGED. its too crazy.
 	
 	if (base.fractal != FractalType::None) {
@@ -289,27 +291,28 @@ void TerrainPreset::CreateBase()
 
 	// no need for cell
 
-	base.domainWarp = ChooseWarp(0, pAudio.midAvgSum * pAudio.highMaxSum); // highs because why not ??
+	base.domainWarp = ChooseWarp(0, pAudio.bassAvgSum); // highs because why not ??
 	if (base.domainWarp != WarpType::None) {
-		base.warpAmplitude = 0.2f + (pAudio.bassAvgSum * 0.6f); // keep low .2-.8
+		base.warpAmplitude = 0.2f + (avgBands.highBass * 0.6f); // keep low .2-.8
 	}
 }
 
 void TerrainPreset::CreatePeaksValleys()
 {
-	peaksValleys.type = ChooseNoise(1, (pAudio.midAvgSum * pAudio.highAvgSum) * (pAudio.bassAvgSum + pAudio.midAvgSum)); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
+	AudioBands avgBands = pAudio.avgBands;
+	peaksValleys.type = ChooseNoise(1, pAudio.highAvgSum); // avg sum cause alone they tiny 
 	peaksValleys.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	peaksValleys.frequency = 0.05f + (pAudio.midAvgSum * 0.1f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
-	peaksValleys.amplitude = 0.5f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
-	peaksValleys.fractal = ChooseFractal(1, pAudio.midAvgSum * 2); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
+	peaksValleys.frequency = 0.05f + (pAudio.highAvgSum * 0.1f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
+	peaksValleys.amplitude = 0.3f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
+	peaksValleys.fractal = ChooseFractal(1, pAudio.highAvgSum); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
 	if (peaksValleys.fractal != FractalType::None) {
-		peaksValleys.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 5); // influenced by mids since they are in the middle
+		peaksValleys.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 3); // influenced by mids since they are in the middle
 		peaksValleys.gain = 0.3f + ((pAudio.midAvgSum) * 0.4f); // if using fractal, 0.3-0.7 is good for peaks and valleys
 		peaksValleys.lacunarity = 2.0f + (pAudio.midAvgSum * 0.5f);
-		peaksValleys.fractalWeightedStrength = (pAudio.midAvgSum) * 1.5f; // can be used to create more dramatic peaks by increasing the influence of higher octaves.
+		peaksValleys.fractalWeightedStrength = (pAudio.highAvgSum) * 1.5f; 
 	}
 
-	peaksValleys.domainWarp = ChooseWarp(1, pAudio.midAvgSum * pAudio.highMaxSum); // highs because why not ??
+	peaksValleys.domainWarp = ChooseWarp(1, pAudio.midAvgSum + pAudio.highMaxSum); 
 	if (peaksValleys.domainWarp != WarpType::None) {
 		peaksValleys.warpAmplitude = 0.2f + (pAudio.midAvgSum * 0.6f); // keep low .2-.8
 	}
