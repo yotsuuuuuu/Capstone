@@ -195,7 +195,7 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 			if (i + j < lengthPCM)//make sure that it gets even the last samples that are less than the fft size
 			{
-				int index = (i + j) * channels;
+				int index = (i + j);
 				sample = static_cast<double>(samples[index]) / 32768.0; // Normalize PCM16
 			}
 			// Hann window
