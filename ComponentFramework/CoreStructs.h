@@ -307,27 +307,35 @@ struct TerrainVertex {
     Vec2 uv;
 };
 
+struct AABB
+{
+    Vec3 min;
+    Vec3 max;
+};
+
 struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
 	ModelMatrixPushConst transform; // unique per chunk
     bool isInitialized = false;
+	bool isCulled = false;
+	AABB aabb;
 };
 
 struct AudioBands
 {
-    float sub; //20 Hz-60 Hz
-    float bass; //60 Hz-130 Hz
-    float highBass; //130 Hz-262 Hz
-    float lowMid; //250 Hz-523 Hz
-    float midMid; //523 Hz-1046 Hz
-    float highMid; //1 kHz-2093 Hz
-    float lowHigh; //2 kHz-41896 Hz
-    float midHigh; //4 kHz-8 kHz
-    float highHigh; //8 kHz-12 kHz
-    float air; //12 kHz-20 kHz
-
+    float sub = 0.0f;       // 20 Hz    -  60 Hz
+    float bass = 0.0f;      // 61 Hz    - 130 Hz
+    float highBass = 0.0f;  // 131 Hz   - 262 Hz
+    float lowMid = 0.0f;    // 263 Hz   - 523 Hz
+    float midMid = 0.0f;    // 524 Hz   - 1046 Hz
+    float highMid = 0.0f;   // 1047 Hz  - 2093 Hz
+    float lowHigh = 0.0f;   // 2094 Hz  - 4186 Hz
+    float midHigh = 0.0f;   // 4187 Hz  - 8000 Hz
+    float highHigh = 0.0f;  // 8000 Hz  - 12000 Hz
+    float air = 0.0f;       // 12001 Hz - 20000 Hz
 
 };
+
 
 enum class AudioState
 {

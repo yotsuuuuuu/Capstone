@@ -159,9 +159,6 @@
     <ClInclude Include="CCameraActor.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Chunk.h">
-      <Filter>Header\Components</Filter>
-    </ClInclude>
     <ClInclude Include="CMaterial.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
@@ -302,6 +299,9 @@
     </ClInclude>
     <ClInclude Include="CLight.h">
       <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Header\Terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

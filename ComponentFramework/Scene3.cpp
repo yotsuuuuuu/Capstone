@@ -132,7 +132,9 @@ bool Scene3::OnCreate() {
 		preset3.peaksValleys.frequency = 0.09f;
 		preset3.exponent = 2.0f;
 
-		wC->InitializeWorld(&preset3);
+		//wC->InitializeWorld(&preset3);
+		wC->InitializeWorld(0);
+		//wC->InitializeWorld(1);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
@@ -182,20 +184,20 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset);
+					w->InitializeWorld(0);
 				}
 				else if (sdlEvent.key.key == SDLK_2) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset2);
+					w->InitializeWorld(1);
 
 				}
 				else if (sdlEvent.key.key == SDLK_3) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset3);
+					w->InitializeWorld(2);
 				}
 
 				else if (sdlEvent.key.key == SDLK_B)
@@ -228,6 +230,112 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		}
 	
 }
+std::vector<MATHEX::Plane> Scene3::GenerateFrustumPLane()
+{
+	std::vector<MATHEX::Plane> fusturm;
+	//Matrix4 proj = camera->getProjectionMatrix() * camera->getViewMatrix();
+	auto cam = std::dynamic_pointer_cast<CActor>(camera);
+	auto camComp = cam->GetComponent<CCamera>();
+	Matrix4 proj = camComp->GetProjectionMatrix() * camComp->GetViewMatrix();
+	
+	MATHEX::Plane left, right, top, bottom, near, far;
+	left.x = proj[3] + proj[0];
+	left.y = proj[7] + proj[4];
+	left.z = proj[11] + proj[8];	
+	left.d = (proj[15] + proj[12]);
+
+	right.x = proj[3] - proj[0];
+	right.y = proj[7] - proj[4];
+	right.z = proj[11] - proj[8];
+	right.d = (proj[15] - proj[12]);
+
+	bottom.x = proj[3] + proj[1];
+	bottom.y = proj[7] + proj[5];
+	bottom.z = proj[11] + proj[9];
+	bottom.d = (proj[15] + proj[13]);
+
+	top.x = proj[3] - proj[1];
+	top.y = proj[7] - proj[5];
+	top.z = proj[11] - proj[9];
+	top.d = (proj[15] - proj[13]);
+
+	near.x = proj[3] + proj[2];
+	near.y = proj[7] + proj[6];
+	near.z = proj[11] + proj[10];
+	near.d = proj[15] + proj[14];
+
+	far.x = proj[3] - proj[2];
+	far.y = proj[7] - proj[6];
+	far.z = proj[11] - proj[10];
+	far.d = (proj[15] - proj[14]);
+
+	// Normalizaiont matters if we care for the actual distance
+	// when we do the dot product.
+	// if we are just checking below or above 0 then 
+	// no need to normalize.
+	left = MATHEX::PMath::normalize(left);
+	right = MATHEX::PMath::normalize(right);
+	bottom = MATHEX::PMath::normalize(bottom);
+	top = MATHEX::PMath::normalize(top);
+	near = MATHEX::PMath::normalize(near);
+	far = MATHEX::PMath::normalize(far);
+
+	fusturm.push_back(left);
+	fusturm.push_back(right);
+	fusturm.push_back(bottom);
+	fusturm.push_back(top);
+	fusturm.push_back(near);
+	fusturm.push_back(far);
+	return fusturm;
+}
+
+void Scene3::FrustumCheck()
+{
+	std::vector<MATHEX::Plane> fusturm = GenerateFrustumPLane();
+
+	auto worldActor = std::dynamic_pointer_cast<CActor>(world);
+	auto chunksData = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
+	for (auto& pair : *chunksData) {
+		auto& c = pair.second;
+		c.isCulled = false;
+
+		for (int i = 0; i < 6; i++) {
+	
+			const MATHEX::Plane& p = fusturm[i];
+
+			Vec3 pVertex;
+
+			pVertex.x = (p.n.x > 0) ? c.aabb.max.x : c.aabb.min.x;
+			pVertex.y = (p.n.y > 0) ? c.aabb.max.y : c.aabb.min.y;
+			pVertex.z = (p.n.z > 0) ? c.aabb.max.z : c.aabb.min.z;
+
+			float dot = p.n.x * pVertex.x + 
+						p.n.y * pVertex.y + 
+						p.n.z * pVertex.z;
+
+			if (dot < -p.d) { // Can easly Changed to a Radius of a sphere around the Postion by -r instead of 0
+				c.isCulled = true;
+				//std::cout << "culled chunk at pos: " << std::endl;
+				break;
+			}
+
+			// just to check if it intersects probs not needed
+			//Vec3 nVertex = Vec3((p.n.x > 0) ? c.aabb.min.x : c.aabb.max.x,
+			//					(p.n.y > 0) ? c.aabb.min.y : c.aabb.max.y,
+			//					(p.n.z > 0) ? c.aabb.min.z : c.aabb.max.z);
+
+			//float dot2 = p.n.x * nVertex.x + 
+			//			 p.n.y * nVertex.y + 
+			//			 p.n.z * nVertex.z;
+
+			//if (dot2 <= -p.d) {
+			//	c.isCulled = false;
+			//}
+		}
+	}
+
+}
+
 void Scene3::Update(const float deltaTime) {
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
@@ -238,6 +346,9 @@ void Scene3::Update(const float deltaTime) {
 			phys->Update(deltaTime);
 		}
 	}
+
+	FrustumCheck();
+
 }
 
 void Scene3::Render() const {

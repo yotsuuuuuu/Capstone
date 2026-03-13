@@ -40,6 +40,10 @@ public:
 	void UpdateProjectionMatrix(float FOVY,float aspectRatio,float nearClip,float farClip);
 	void UpdateViewMatrix();
 
+	Matrix4 GetProjectionMatrix() const { return projectionMatrix; }
+	Matrix4 GetViewMatrix() const { return viewMatrix; }
+
+
 	// input stuff
 	MATH::Vec3 GetFrontVector() const;
 	MATH::Vec3 GetRightVector() const;

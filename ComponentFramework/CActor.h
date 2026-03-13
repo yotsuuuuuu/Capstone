@@ -14,6 +14,7 @@ class CActor : public Component {
 	CActor& operator=(CActor&&) = delete;
 protected:
 	std::vector<Ref<Component>> components;
+	bool culled = false;
 public:
 	CActor(Ref<Component> parent_ = nullptr) : Component(parent_) {}
 	virtual ~CActor() {}
@@ -26,6 +27,8 @@ public:
 	void ListComponents() const;
 
 	MATH::Matrix4 GetModelMatrix() const;
+	void SetCulled(bool culled_) { culled = culled_; }
+	bool IsCulled() const { return culled; }
 
 	//Ref<Component> GetParent() const { return parent; }
 

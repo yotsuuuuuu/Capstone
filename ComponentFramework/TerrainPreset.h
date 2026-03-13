@@ -1,31 +1,32 @@
 #pragma once
 #include <cstdint>
-//#include <vector>
-#include "FmodController.h"
+#include <vector>
+#include "CoreStructs.h"
+//#include "FmodController.h"
 
 enum class NoiseType {
+	Perlin = 0, // also creates smooth terrain, but can be a bit more "blobby" and less detailed than OpenSimplex2. good for rolling hills and gentle landscapes.
 	OpenSimplex2, // it creates smooth, natural-looking terrain. more contrast between light and dark compared to perlin.
-	Perlin, // also creates smooth terrain, but can be a bit more "blobby" and less detailed than OpenSimplex2. good for rolling hills and gentle landscapes.
-	Cellular, // globby , island-like terrain. dark massese with sharp white edges
 	Value, // square-ish, more blocky terrain. 
-	Cubic // similar to value but smoother transitions between values, more natural look while still maintaining some blockiness. 
+	Cubic, // similar to value but smoother transitions between values, more natural look while still maintaining some blockiness. 
+	Cellular // globby , island-like terrain. dark massese with sharp white edges
 };
 
 enum class WarpType {
-	None, // no domain warping, just regular noise
+	None = 0, // no domain warping, just regular noise
 	OpenSimplex2, // displaces the noise using another layer of OpenSimplex2 noise, can create complex and interesting terrain features. high amplitude creates distorded but still squareish patterns
 	BasicGrid // displaces using a grid. high amplitude creates square patters
 };
 
 enum class FractalType {
-    None,
+    None = 0,
     FBm, // layers more noise on top of itself. each layer is more detail at smaller scale. high octaves can make it noisey
 	Ridged, // creates sharp bright peaks. good for mountains. high octaves can create more peaks but also more noise. 
     PingPong // inset mountains with dramatic peaks.
 };
 
 enum class CellularType {
-    None,
+    None = 0,
     Euclidian, // generally gray network of white lines. some darker blobs
 	EuclidianSq, // similar to euclidian but with sharper lines and more contrast between light and dark areas. good for more defined, blocky terrain features.
 	Manhattan, // almost crystalline looking, with straight lines and sharp angles. 
@@ -33,27 +34,38 @@ enum class CellularType {
 };
 
 enum class ReturnType {
-    None,
-    CellValue, // blocky, no transition between values, blocky and sharp edges 
-    Distance, //  default return 
+    None = 0,
     Distance2, // similar to distance but less contrast, everything becomes lighter except with hybrid where its more contrast
     Distance2Add, // everything becomes lighter, good for more mountainous terrain
+    Distance, //  default return 
+    Distance2Div, // the brighest whites, sharpers lines
     Distance2Sub, // creates more contrast, more inset looking terrain
     Distance2Mul, //  like add but now everything is darker
-    Distance2Div // the brighest whites, sharpers lines
+    CellValue // blocky, no transition between values, blocky and sharp edges 
 };
 
-// TODO: (andres) what does what
-// length: num chunks
-// frequency: how often the noise pattern repeats across the world (higher frequency = more variation in smaller areas)
-// loudness (amplitude): how much the noise affects the height (higher amplitude = taller mountains/ deeper valleys)
-// have different base presets (biomes) depending on what we read from the song
-// 
-// clamp the height can be one biome
-// maybe have some layers that only affect the heightmap in certain height ranges (a layer that only adds detail to the mountains but doesn't affect the plains)
-// highs can affect num of layers
-//
 
+
+struct ProcessedAudio
+{
+    AudioBands avgBands;
+    AudioBands maxBands;
+
+	float averageLoudness = 0;
+	float maxLoudness = 0;
+	float tempo = 0;
+	int songLength = 0; // based on number of windows
+    uint32_t seed = 0;
+
+    float bassAvgSum = 0.0f;
+    float midAvgSum = 0.0f;
+    float highAvgSum = 0.0f;
+    
+	float bassMaxSum = 0.0f;
+	float midMaxSum = 0.0f;
+	float highMaxSum = 0.0f;
+
+};
 
 struct NoiseLayerPreset 
 {
@@ -75,8 +87,6 @@ struct NoiseLayerPreset
 
 	WarpType domainWarp = WarpType::None; // the type of domain warping to apply to the noise, which can create more complex and interesting terrain
     float warpAmplitude = 1.0f; // controls the intensity of the domain warping
-
-
 };
 
 struct TerrainPreset {
@@ -95,5 +105,19 @@ struct TerrainPreset {
     NoiseLayerPreset erosion; // maybe ??
     NoiseLayerPreset peaksValleys; // maybe??
 
-    void CreateFromAudio(AudioBands ab);
+	ProcessedAudio pAudio; // store processed audio data for use in noise generation
+
+	void CreateFromAudio(std::vector<AudioBands> ab);
+	ProcessedAudio GetLayerValuesFromAudio(std::vector<AudioBands> ab);
+    NoiseType ChooseNoise(int layer, float value);
+	FractalType ChooseFractal(int layer, float value);
+    WarpType ChooseWarp(int layer, float value);
+	CellularType ChooseCellular(int layer, float value);
+	ReturnType ChooseReturn(int layer, float value);
+
+    void CreateBase();
+	void CreateContinentalness();
+	void CreateErosion();
+	void CreatePeaksValleys();
+
 };

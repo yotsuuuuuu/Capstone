@@ -2,7 +2,6 @@
 #include "Chunk.h"
 #include "Component.h" 
 
-//TODO: (andres) MAKE A WRAPPER FOR THIS CLASS SO THAT WE CAN USE IT AS A COMPONENT IN THE ECS
 
 class CChunk : public Component 
 {
