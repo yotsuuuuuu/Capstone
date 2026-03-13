@@ -132,7 +132,9 @@ bool Scene3::OnCreate() {
 		preset3.peaksValleys.frequency = 0.09f;
 		preset3.exponent = 2.0f;
 
-		wC->InitializeWorld(&preset3);
+		//wC->InitializeWorld(&preset3);
+		wC->InitializeWorld(0);
+		//wC->InitializeWorld(1);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
@@ -182,20 +184,20 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset);
+					w->InitializeWorld(0);
 				}
 				else if (sdlEvent.key.key == SDLK_2) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset2);
+					w->InitializeWorld(1);
 
 				}
 				else if (sdlEvent.key.key == SDLK_3) {
 					auto wA = std::dynamic_pointer_cast<CActor>(world);
 					auto w = wA->GetComponent<CWorld>();
 					w->OnDestroy();
-					w->InitializeWorld(&preset3);
+					w->InitializeWorld(2);
 				}
 
 				else if (sdlEvent.key.key == SDLK_B)

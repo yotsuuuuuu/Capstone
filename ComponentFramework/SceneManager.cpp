@@ -73,7 +73,11 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	}
 	fmodController = new FmodController();
 	assetManager = new AssetManager();
-	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
+	fmodController->addSong("./audio/I_Will_Fail_You.mp3"); // 0
+	fmodController->addSong("./audio/Education.mp3"); // 1
+	fmodController->addSong("./audio/Exciting_Vacation.mp3"); // 2
+	fmodController->addSong("./audio/Expression_II_Will.mp3"); // 3
+	fmodController->addSong("./audio/Shopping_With_Palmira_Ore.mp3"); // 4
 	fmodController->createSystem();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	assetManager->set(engineContext);

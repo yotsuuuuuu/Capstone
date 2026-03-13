@@ -1,7 +1,6 @@
 #pragma once
 #include "World.h"
 #include "Component.h"
-//TODO: (andres) MAKE A WRAPPER FOR THIS CLASS SO THAT WE CAN USE IT AS A COMPONENT IN THE ECS
 class Renderer;
 
 class CWorld : public Component {
@@ -33,5 +32,6 @@ public:
 	std::unordered_map<Vec3, TerrainChunkData>* GetChunkRenderData() { return C_World->GetChunkRenderData(); }
 	std::vector<std::unique_ptr<Chunk>>* GetChunks() { return C_World->GetChunks(); }
 	void InitializeWorld(TerrainPreset* t_);
+	void InitializeWorld(int songIndex);
 
 };

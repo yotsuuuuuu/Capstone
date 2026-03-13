@@ -1,4 +1,5 @@
 #include "World.h"
+#include "FmodController.h"
 
 
 void World::Initialize(TerrainPreset* t_)
@@ -8,17 +9,27 @@ void World::Initialize(TerrainPreset* t_)
 	terrainNoise = new TerrainNoise(*t_);
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
-
+	//std::vector<AudioBands> ab = engineContext.fmodController->AnalyzeAudioOffline(0); // TODO: pass in song num
+	//ProcessedAudio pa = t_->GetLayerValuesFromAudio(ab);
 
 	GenerateAllChunks();
 }
 
-void World::Initialize(std::vector<std::string> songPath)
+void World::Initialize(int songIndex)
 {
-	TerrainPreset preset;
-	//AudioBands ab = engineContext.fmodController->AnalyzeAudioOffline(0);
-	//preset.CreateFromAudio(engineContext.fmodController->GetAudioBands(songPath));
+	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
+
+	TerrainPreset preset;
+	std::vector<AudioBands> ab = engineContext.fmodController->AnalyzeAudioOffline(songIndex); // TODO: pass in song num
+	preset.CreateFromAudio(ab);
+	terrainNoise = new TerrainNoise(preset);
+	// WorldActors worldActors = preset.DecideActors();
+	
+	WORLD_SIZE = preset.pAudio.songLength / 200; // this is a really rough way to determine world size based on song length.
+
+	GenerateAllChunks();
 
 }
 

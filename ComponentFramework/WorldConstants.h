@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr int CHUNK_SIZE = 16;
+constexpr int CHUNK_SIZE = 32;
 constexpr float CHUNK_WORLD_SIZE = float(CHUNK_SIZE - 1);
 
 // these need to be able to be changed (should move to world class)

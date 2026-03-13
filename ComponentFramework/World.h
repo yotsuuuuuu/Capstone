@@ -13,6 +13,8 @@
 
 using namespace MATH;
 
+class FmodController; // forward declaration
+
 class World {
 private:
 	Renderer* renderer;
@@ -29,7 +31,7 @@ private:
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
 
-	int WORLD_SIZE = 32; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
+	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
 	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.
@@ -43,16 +45,14 @@ private:
 
 	// TODO: (andres) collision meshes
 	// TODO: (andres) LOD/ render distance
-	// TODO: (andres) turn this into a component
-	// TODO: (andres) tweak the pipeline more and maybe use compute shaders for heightmap generation and normal calculation. avoids reusing the mesh
-
+	
 public:
 	
 	World(EngineContext& engineContext_) : engineContext(engineContext_), terrainNoise(nullptr) {}
 	~World();
 
 	void Initialize(TerrainPreset* t_);
-	void Initialize(std::vector<std::string> songPath);
+	void Initialize(int songIndex);
 	void OnDelete();
 
 	PipelineInfo const GetPipeline() { return worldPipeline; }

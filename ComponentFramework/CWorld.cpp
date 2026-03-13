@@ -12,8 +12,6 @@ CWorld::~CWorld()
 bool CWorld::OnCreate() {
 	if (isCreated)
 		return true;
-	// TODO: needs adjustment
-	//C_World->Initialize(&worldConfig,);
 
 	isCreated = true;
 	return true;
@@ -27,5 +25,10 @@ void CWorld::OnDestroy() {
 void CWorld::InitializeWorld(TerrainPreset* t_)
 {
 	C_World->Initialize(t_);
+}
+
+void CWorld::InitializeWorld(int songIndex)
+{
+	C_World->Initialize(songIndex);
 }
 

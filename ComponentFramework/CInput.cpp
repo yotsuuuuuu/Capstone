@@ -37,9 +37,9 @@ void CInput::OnDestroy()
 	if (!isCreated) return;
 }
 
-// TODO: refactor handle input stuff to be one call on scene,
-// TODO: maybe make playerComponent that can update all required components in one call.
-// TODO: click to enable mouse lock (?)
+// TODO: (andres) refactor handle input stuff to be one call on scene,
+// TODO: (andres) maybe make playerComponent that can update all required components in one call.
+// TODO: (andres) click to enable mouse lock (?)
 
 void CInput::HandleKeyboardInput(const SDL_Event& event)
 {
