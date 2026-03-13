@@ -177,7 +177,6 @@ void Scene0::OnDestroy() {
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());				
 		
-		engineContext.fmodController->playsong(0);
 		World->OnDestroy();
 		
 	

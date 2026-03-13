@@ -146,7 +146,6 @@ bool Scene3::OnCreate() {
 		//step 3 Actors being added to the scene.
 		camera = engineContext.assetManager->GetCamera();	
 		world = WorldActor;
-		engineContext.fmodController->playsong(0);
 		
 	}
 		break;
