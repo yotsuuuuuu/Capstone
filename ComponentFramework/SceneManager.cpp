@@ -73,8 +73,13 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	}
 	fmodController = new FmodController();
 	assetManager = new AssetManager();
-	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
+	/*if (!fmodController->AddSonginFile())
+	{
+		Debug::Error("Failed to add songs in file to the list", __FILE__, __LINE__);
+	}*/
+	fmodController->AddSonginFile();
 	fmodController->createSystem();
+	fmodController->InitilizeSongs();
 	engineContext.Set(*renderer, *assetManager,*fmodController);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./test.json");		
@@ -144,6 +149,12 @@ void SceneManager::GetEvents() {
 				break;
 			case SDL_SCANCODE_MINUS:
 				engineContext.fmodController->Volume(-10);
+				break;
+			case SDL_SCANCODE_KP_0:
+				engineContext.fmodController->playsong(0);
+				break;
+			case SDL_SCANCODE_KP_1:
+				engineContext.fmodController->playsong(1);
 				break;
 			default:
 				//BuildScene(SCENE0);

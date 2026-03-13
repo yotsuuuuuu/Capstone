@@ -1,20 +1,83 @@
 #include "FmodController.h"
 #include <fftw3.h>
 #include <cmath>
+#include <filesystem>
 
 void FmodController::addSong(const char* wave_)
 {
 	nameOfsounds.push_back(wave_);
 }
+void FmodController::addSong(const std::vector<const char*>& wave_)
+{
+	for (size_t i = 0; i < wave_.size(); i++)
+	{
+		nameOfsounds.push_back(wave_[i]);
+	}
+}
+bool FmodController::AddSonginFile()
+{
+	std::string path = "./audio/";
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		if (!entry.is_regular_file())
+		{
+			std::cout << "Not a regular file: " << entry.path() << std::endl;
+			continue;
+		}
 
+		std::string name = entry.path().string();
+		if (std::find(nameOfsounds.begin(), nameOfsounds.end(), name) == nameOfsounds.end())
+		{
+			nameOfsounds.push_back(name);
+		}
+		else
+		{
+			std::cout << "File already exists in the list: " << name << std::endl;
+		}
+
+	}
+	return true;
+}
+
+void FmodController::InitilizeSongs()
+{
+	sounds.resize(nameOfsounds.size());
+
+	for (size_t i = 0; i < sounds.size(); i++)
+	{
+		result = system->createSound(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
+
+		if (result != FMOD_OK)
+		{
+			std::cout << "FMOD error loading "
+				<< nameOfsounds[i]
+				<< ": "
+					<< std::endl;
+		}
+	}
+}
 void FmodController::playsong(int songnum_)
 {
 	bool playing = false;
 	bool stopped = false;
 	
+	
+	channel->isPlaying(&playing);
 
-	result = system->playSound(numOfsounds[songnum_], 0, false, &channel);
+	if (playing)
+	{
+		channel->stop();
+	}
+	result = system->playSound(sounds[songnum_], 0, false, &channel);
 	channel->setVolume(volume / 100.0f);
+	
+	FMOD::Sound* sound = nullptr;
+	channel->getCurrentSound(&sound);
+	char name[256];
+
+	sound->getName(name, 256);
+
+	std::cout << "Currently playing: " << name << std::endl;
 
 	result = system->update();
 }
@@ -50,15 +113,6 @@ bool FmodController::createSystem()
 	
 	if (result != FMOD_OK)
 		return false;
-
-	numOfsounds.resize(nameOfsounds.size());
-
-	for (size_t i = 0; i < numOfsounds.size(); i++)
-	{
-		result = system->createSound(nameOfsounds[i], FMOD_DEFAULT, 0, &numOfsounds[i]);
-	}
-
-
 
 	return true;
 }
@@ -99,9 +153,9 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	FMOD_SOUND_TYPE type;
 
 	//gets the format of te sound ex: pcm16 memeory format after fmod decodes it
-	numOfsounds[songnum_]->getFormat(&type, &format, &channels, &bits);	
+	sounds[songnum_]->getFormat(&type, &format, &channels, &bits);	
 	//gets the length  of the sound in PCM
-	numOfsounds[songnum_]->getLength(&lengthPCM, FMOD_TIMEUNIT_PCM);
+	sounds[songnum_]->getLength(&lengthPCM, FMOD_TIMEUNIT_PCM);
 	//
 	//system->mixerSuspend(); // Suspend the mixer to safely access sound data
 
@@ -111,12 +165,12 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 	//flexible sample rate if the song is not 44100 it will still work
 	float sampleRate;
-	numOfsounds[songnum_]->getDefaults(&sampleRate, nullptr);
+	sounds[songnum_]->getDefaults(&sampleRate, nullptr);
 
 
 	// gets the size get ptr1 is where it starts in memory and len1 is the size of the sound in memory
 	//	ptr2 is the second block of the memeory if the sond is long len2 is the size of the second block of memory
-	numOfsounds[songnum_]->lock(0, lengthPCM * channels * (bits / 8), &ptr1, &ptr2, &len1, &len2); 
+	sounds[songnum_]->lock(0, lengthPCM * channels * (bits / 8), &ptr1, &ptr2, &len1, &len2); 
 	//have to unlock it later
 	short* samples = static_cast<short*>(ptr1);  // access PCM16 samples
 	
@@ -141,7 +195,8 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 			if (i + j < lengthPCM)//make sure that it gets even the last samples that are less than the fft size
 			{
-				sample = static_cast<double>(samples[i + j]) / 32768.0; // Normalize PCM16
+				int index = (i + j) * channels;
+				sample = static_cast<double>(samples[index]) / 32768.0; // Normalize PCM16
 			}
 			// Hann window
 			double hann = 0.5 * (1.0 - cos(2.0 * pi * j / (fftSize - 1)));
@@ -211,20 +266,29 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	fftw_free(in);
 	fftw_free(out);
 
-	numOfsounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
+	sounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
 	
 	system->mixerResume(); // Resume the mixer after processing
 
 	return bandHolder;
 }
 
+std::vector<AudioBands> FmodController::AnalyzeAudioOnline()
+{
+	return std::vector<AudioBands>();
+}
+
 
 
 FmodController::~FmodController()
 {
-	for (size_t i = 0; i < numOfsounds.size(); i++)
+	for (size_t i = 0; i < sounds.size(); i++)
 	{
-		numOfsounds[i]->release();
+		sounds[i]->release();
+	}
+	for (int i = 0; i < nameOfsounds.size(); i++)
+	{
+		nameOfsounds[i].clear();
 	}
 	system->close();
 	system->release();
