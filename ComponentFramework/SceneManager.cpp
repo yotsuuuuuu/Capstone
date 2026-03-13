@@ -4,6 +4,7 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 #include "FmodController.h"
+#include "SYS_Light.h"
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
@@ -27,6 +28,10 @@ SceneManager::~SceneManager() {
 		timer = nullptr;
 	}
 	
+	if (LightSystem) {
+		LightSystem->ShutDonw();
+		delete LightSystem;
+	}
 	delete assetManager;
 	dynamic_cast<VulkanRenderer*>(renderer)->DestroyGlobalResources();
 	renderer->OnDestroy();
@@ -72,16 +77,20 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		return false;
 	}
 	fmodController = new FmodController();
+	LightSystem = new SYS_Light(&engineContext, 500);
 	assetManager = new AssetManager();
+	engineContext.Set(*renderer, *assetManager,*fmodController,*LightSystem);
+
 	fmodController->addSong("./audio/I_Will_Fail_You.mp3");
 	fmodController->createSystem();
-	engineContext.Set(*renderer, *assetManager,*fmodController);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./test.json");		
-	static_cast<VulkanRenderer*>(renderer)->CreateGlobalRources(engineContext.assetManager->GetCamera());
+	if (!static_cast<VulkanRenderer*>(renderer)->CreateGlobalRources(engineContext)) {
+		return false;
+	}
 	engineContext.assetManager->LoadAsset("./test.json");
 	engineContext.fmodController->AnalyzeAudioOffline(0);
-	BuildScene(SCENE3);
+	BuildScene(SCENE0);
 	
 	return true;
 }

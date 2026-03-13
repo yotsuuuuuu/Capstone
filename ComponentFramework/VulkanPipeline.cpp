@@ -397,7 +397,7 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetL
     return graphicsPipeInfo;
 }
 
-PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile, std::optional<std::string> tessCtrlFile, std::optional<std::string> tessEvalFile, std::optional<std::string> geomFile)
+PipelineInfo VulkanRenderer::CreateGraphicsPipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile, std::optional<std::string> tessCtrlFile, std::optional<std::string> tessEvalFile, std::optional<std::string> geomFile)
 {
     PipelineInfo graphicsPipeInfo{};
 
@@ -626,6 +626,65 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(std::vector<VkDescriptorSetL
     
 
     return graphicsPipeInfo;
+}
+
+PipelineInfo VulkanRenderer::CreateComputePipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, std::optional<std::string> computeFile, std::optional<uint32_t> pushConstSize)
+{
+    PipelineInfo ComputePipeInfo;
+
+    VkPipelineShaderStageCreateInfo computeInfo{};
+    VkShaderModule module;
+    if(!computeFile)
+        throw std::runtime_error("No File Provided for Compute Shaders");
+    if((pushConstSize.has_value() && pushConstSize.value() <= 0))
+        throw std::runtime_error("Invalid PushConstant Value");
+
+    module = createShaderModule(readFile(computeFile.value()));
+
+    computeInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    computeInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    computeInfo.module = module;
+    computeInfo.pName = "main";
+
+    
+    VkPushConstantRange range{};
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayout.size());
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayout.data();
+    if (pushConstSize.has_value() && pushConstSize.value() > 0) {      
+        range.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        range.offset = 0;
+        range.size =  pushConstSize.value();
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &range;
+    }
+    else {
+        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    }
+
+
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &ComputePipeInfo.pipelineLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create pipeline layout!");
+    }
+
+
+    VkComputePipelineCreateInfo computePipelineCreateInfo{};
+    computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    computePipelineCreateInfo.layout = ComputePipeInfo.pipelineLayout;
+    computePipelineCreateInfo.stage = computeInfo;
+    computePipelineCreateInfo.flags = 0 ;
+    computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+    computePipelineCreateInfo.basePipelineIndex = -1 ;
+
+    if ( vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &ComputePipeInfo.pipeline) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create compute pipeline!");
+    }
+
+
+    vkDestroyShaderModule(device, module, nullptr);
+    return ComputePipeInfo;
 }
 
 

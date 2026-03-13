@@ -113,6 +113,35 @@ struct GlobalLightData {
     Vec4 specular;
     Vec4 direction;
 };
+
+// SSBO Padding for lights
+struct alignas(16) CLightData {
+    Vec4 position_radius;
+    Vec4 colour_intensity;
+    Vec4 direction_inner;
+    Vec4 outer_type_pad;
+};
+
+struct  Cluster
+{
+    Vec4 minPoint;
+    Vec4 maxPoint;
+    uint32_t count;
+    uint32_t lightIndices[100];
+};
+
+struct alignas(16) SYS_LIGHT_DATA { // This needs to match the shader
+    Matrix4 inverseProjection;      //64 : 64
+    uint32_t gridSize[3];           // 12 : 76
+    uint32_t _pad1;                 // 4  : 80
+    uint32_t screenDimensions[2];   // 8 : 88
+    float zPlanes[2];              // 8  : 96 
+    uint32_t lightCount;            // 4  : 100
+    uint32_t clusterCount;          // 4  : 104
+    uint32_t _pad2[2];              // 8  : 112 
+};
+
+
 struct OrthConfig {
     float xmin;
     float xmax;

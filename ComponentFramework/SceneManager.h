@@ -39,6 +39,7 @@ private:
 	Renderer* renderer;
 	AssetManager* assetManager;
 	FmodController* fmodController;
+	SYS_Light* LightSystem;
 	unsigned int fps;
 	bool isRunning;
 	void BuildScene(SCENE_NUMBER scene_);

@@ -46,9 +46,8 @@ bool CGlobalLight::OnCreate()
 	if (!T)
 		return false;
 	transform = T;
-	UpdateViewMatrix(); // NEEDS ADJSUTMENT
-	//TODO CREAT 6 UBO FOR SHADOW APSS
-	// TOD CREAT 2 UBOS FOR MAIN PASS
+	UpdateViewMatrix(); 
+	
 	switch (renderer->getRendererType())
 	{
 	case RendererType::VULKAN: {
@@ -137,7 +136,7 @@ void CGlobalLight::SetLightProjection(PerspectiveConfig config)
 	Perc = config;
 	mode = GLMODE::PRESPECTIVE;
 }
-// TODO: ACCOUNT FOR MULTIPLE ORTHO VOLUMES
+
 void CGlobalLight::UpdateViewMatrix() {
 	auto T = transform.lock();
 	if (T) {

@@ -36,6 +36,7 @@ constexpr uint32_t SHAWDOW_SIZE = 1024;
 using namespace MATH;
 
 class Component;
+struct  EngineContext;
 
 #ifdef NDEBUG /// only use validation layers if in debug mode
 const bool enableValidationLayers = false;
@@ -63,6 +64,9 @@ struct QueueFamilyIndices {
     }
     bool isVkComplete() {
         return graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
+    }
+    bool isNotDifferentQueueFamilys() {
+        return (graphicsFamily.value() == presentFamily.value()) && (graphicsFamily.value() == computeFamily.value()) ;
     }
 };
 
@@ -148,6 +152,7 @@ public:
     VkDevice getDevice() { return device; }
     uint32_t getNumSwapchains() { return numSwapchains; }
     uint32_t getNumberOfFramesInFlight() { return MAX_FRAMES_IN_FLIGHT; }
+    QueueFamilyIndices getQueueFamilys() {return queueFamilys ;}
    
     // PER FRAME UBOS
     template<class T>
@@ -179,7 +184,7 @@ public:
         }
     };
 
-    // CREATE ONE UBO
+    // CREATE ONE UBO of T type
     template <class T>
     BufferMemory CreateUniformBuffer() {
         BufferMemory ubo;
@@ -187,6 +192,16 @@ public:
         ubo.bufferMemoryLength = bufferSize;
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            ubo.bufferID, ubo.bufferMemoryID);
+        return ubo;
+    }
+
+    //Create any type of buffer
+    BufferMemory CreateBuffer(VkBufferUsageFlags useFlags, VkMemoryPropertyFlags propFlags,VkDeviceSize size) {
+        BufferMemory ubo;
+        VkDeviceSize bufferSize = size;
+        ubo.bufferMemoryLength = bufferSize;
+        CreateBuffer(bufferSize, useFlags, propFlags,
             ubo.bufferID, ubo.bufferMemoryID);
         return ubo;
     }
@@ -224,7 +239,6 @@ private: /// Private member variables
     VkSwapchainKHR swapChain;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
-
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
@@ -237,6 +251,7 @@ private: /// Private member variables
     VkQueue graphicsQueue;
     VkQueue presentQueue;
     VkQueue computeQueue;
+    QueueFamilyIndices queueFamilys;
  
     CommandBufferData primaryCommandBuffer{};
     std::vector<Sampler2D> textures2D;
@@ -359,8 +374,8 @@ private:
         uint32_t inFlightIndex;
         VkExtent2D extent;
     };
-
     VulkanRenderer::FrameContext GetCurrentFrameContext();
+ public:
     void CMDBeginRecord(const VkCommandBuffer&);
     void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPassBeginInfo&);
     // proble this one needs bit of rework
@@ -370,16 +385,18 @@ private:
     void CMDRecordBindIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDrawTerrainIndex(const VkCommandBuffer&, const IndexedVertexBuffer&);
-
+    void CMDRecordDistpatch(const VkCommandBuffer&, uint32_t groupX, uint32_t groupY, uint32_t groupz);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
         VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
         uint32_t baseMip = 0, uint32_t levelCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
 
-    void CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
+    void CMDSubmitComputeQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
+    void CMDSubmitGraphicsQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
 
+ private:
     struct ECSRenderer;
 
     //Global Descriptorset
@@ -388,14 +405,21 @@ private:
     
     std::weak_ptr<Component> camera;
 
-
+ public:
     //Creation Helper functions
     void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE,VkBool32 = VK_TRUE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
     void CreateFence(VkFence& fence);
-
+    VkCommandPool CreateCMDPool(uint32_t queueFamilyIndex,VkCommandPoolCreateFlags flags);
+    //allocate one CMD
+    VkCommandBuffer AllocatedCMDbuffer(const VkCommandPool& cmd,VkCommandBufferLevel level);
+    //allocate multiple 
+    std::vector<VkCommandBuffer> AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level,  uint32_t count);
+    
+    void DestroyCommandPool(VkCommandPool&);
+    void DestroyCommandBuffer(std::vector<VkCommandBuffer>&, const VkCommandPool&);
 	void DestroyRenderPass(VkRenderPass& renderpass);
     void DestroyFrameBuffer(VkFramebuffer& frameBuffer);
     void DestroySemaphore(VkSemaphore& semaphore);
@@ -408,6 +432,7 @@ private:
     void CopyBufferToImage(VkBuffer, VkImage, uint32_t, uint32_t, VkImageAspectFlags, uint32_t, uint32_t, uint32_t);
     void CubeImageLayoutTransition(VkImage, VkImageLayout srcLay, VkImageLayout dtsLay, VkPipelineStageFlags srdFlag, VkPipelineStageFlags dtsFlag,VkAccessFlags srcAcss, VkAccessFlags dtsAcss);
 	//Shadow Mapping
+    private:
     struct GlobalShadowMappingInfo
     {
         //Rendering handles
@@ -445,8 +470,11 @@ public:
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
+    
+    std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
+    void SetCurrentCamera(std::shared_ptr<Component> cam) { camera = cam; }
 
-    void CreateGlobalRources(std::shared_ptr<Component> cameraActor);
+    bool CreateGlobalRources(EngineContext& Ecntx);
     void DestroyGlobalResources();
 
     void CreateGlobalDescriptionSet(const std::vector<SingleDescriptorSetLayoutInfo>& LayOutInfo,const std::vector<DescriptorWriteInfo>& WriteInfo);
@@ -458,9 +486,10 @@ public:
     PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, const char* vertFile, const char* fragFile,
         const char* tessCtrlFile = nullptr, const char* tessEvalFile = nullptr, const char* geomFile = nullptr);
 
-    PipelineInfo CreateGraphicsPipeline(std::vector <VkDescriptorSetLayout> descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
+    PipelineInfo CreateGraphicsPipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, PipeLineConfig config, std::optional<std::string> vertFile, std::optional<std::string> fragFile
     , std::optional<std::string> tessCtrlFile = std::nullopt, std::optional<std::string> tessEvalFile = std::nullopt, std::optional<std::string> geomFile = std::nullopt);
 
+    PipelineInfo CreateComputePipeline(const std::vector <VkDescriptorSetLayout>& descriptorSetLayout, std::optional<std::string> computeFile, std::optional<uint32_t> pushConstSize = std::nullopt);
     //Skybox
     Sampler2D SkyBoxSampler(std::vector<std::string> paths);
 

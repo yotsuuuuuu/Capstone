@@ -514,7 +514,7 @@ void VulkanRenderer::CreateVkLogicalDevice()
             Debug::Warning("No compute queue available. Handel is null", __FILE__, __LINE__);
         }
     }
-
+    queueFamilys = indices;
 }
 
 //Per SwapChainResource

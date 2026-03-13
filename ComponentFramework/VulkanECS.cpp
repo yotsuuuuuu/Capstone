@@ -9,7 +9,8 @@
 #include "CTransform.h"
 #include "CWorld.h"
 #include "CSkyBox.h"
-
+#include "EngineContext.h"
+#include "AssetManager.h"
 #include "imgui.h"
 #include <unordered_map>
 
@@ -26,35 +27,44 @@ void VulkanRenderer::DestroyGlobalDescriptionSet()
     DestroyDescriptorSet(GlobalSet);
 }
 
-void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
-{
 
-    auto cam = std::dynamic_pointer_cast<CActor>(cameraActor);
-    if (!cam) {
+bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
+{
+  
+    auto MainCamera = Ecntx.assetManager->GetCamera();
+    if (!MainCamera) {
+        Debug::FatalError("CAMERA NOT SET", __FILE__, __LINE__);
+        return false;
+    }
+    camera = MainCamera;
+
+    auto CameraActor = std::dynamic_pointer_cast<CActor>(MainCamera);
+    if (!CameraActor) {
         Debug::FatalError("NO VALID ACTOR", __FILE__, __LINE__);
-        return;
+        return false;
     }
 
-    auto Glight = cam->GetComponent<CGlobalLight>();
+    auto Glight = CameraActor->GetComponent<CGlobalLight>();
     if (!Glight) {
         Debug::FatalError("NO VALID GLOBAL LIGHT COMPONENT", __FILE__, __LINE__);
-        return;
+        return false;
     }
 
-    auto Camera = cam->GetComponent<CCamera>();
+    auto Camera = CameraActor->GetComponent<CCamera>();
     if (!Glight) {
         Debug::FatalError("NO VALID CAMERA COMPONENT", __FILE__, __LINE__);
-        return;
+        return false;
     }
-    camera = cameraActor;
+
     uint32_t shadowmapsize = SHAWDOW_SIZE * 1;
     // create the shadow resources
     CreateGlobalShadowMappingResources(shadowmapsize, shadowmapsize, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
-    
+
     // then create global resources
+    //TODO: ADD THE LIGTH SYSTEM SSBOs TO THE GLOBAL SET
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -70,9 +80,14 @@ void VulkanRenderer::CreateGlobalRources(std::shared_ptr<Component> cameraActor)
     std::vector<std::string> skyboxFiles = { "./textures/skybox/px.png","./textures/skybox/nx.png",
                                              "./textures/skybox/py.png","./textures/skybox/ny.png",
                                              "./textures/skybox/pz.png","./textures/skybox/nz.png" };
-    Ref<CSkyBox> sky = std::make_shared<CSkyBox>(nullptr,this, skyboxFiles);
-    sky->OnCreate();
-    cam->AddComponent<CSkyBox>(sky);
+    Ref<CSkyBox> sky = std::make_shared<CSkyBox>(nullptr, this, skyboxFiles);
+    if (!sky->OnCreate()) {
+        Debug::FatalError("FAILED TO CREATE SKYBOX", __FILE__, __LINE__);
+        return false;
+    }
+    CameraActor->AddComponent<CSkyBox>(sky);
+
+    return true;
 }
 
 void VulkanRenderer::DestroyGlobalResources()
@@ -214,6 +229,78 @@ void VulkanRenderer::CreateFence(VkFence& fence)
     }
 }
 
+VkCommandPool VulkanRenderer::CreateCMDPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags)
+{
+
+    VkCommandPool cmd = VK_NULL_HANDLE; 
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = queueFamilyIndex;
+    poolInfo.flags = flags;
+
+    if (vkCreateCommandPool(device, &poolInfo, nullptr, &cmd) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create graphics command pool!");
+    }
+
+    return cmd;
+}
+
+VkCommandBuffer VulkanRenderer::AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level)
+{
+    VkCommandBuffer CMDBUFFER;
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = cmd;
+    allocInfo.level = level;
+    allocInfo.commandBufferCount = (uint32_t)(1);
+
+    if (vkAllocateCommandBuffers(device, &allocInfo, &CMDBUFFER) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+    return CMDBUFFER;
+
+}
+
+std::vector<VkCommandBuffer> VulkanRenderer::AllocatedCMDbuffer(const VkCommandPool& cmd, VkCommandBufferLevel level,  uint32_t count)
+{
+
+    std::vector<VkCommandBuffer> CMDBUFFER;
+    CMDBUFFER.resize(count);
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = cmd;
+    allocInfo.level = level;
+    allocInfo.commandBufferCount = count;
+
+    if (vkAllocateCommandBuffers(device, &allocInfo, CMDBUFFER.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+    return CMDBUFFER;
+   
+}
+
+void VulkanRenderer::DestroyCommandPool(VkCommandPool& cmdPool)
+{
+    if (cmdPool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(device, cmdPool, nullptr);
+        cmdPool = VK_NULL_HANDLE;
+    }
+}
+
+void VulkanRenderer::DestroyCommandBuffer(std::vector<VkCommandBuffer>& CMDBuffer, const VkCommandPool& pool)
+{
+    if (!CMDBuffer.empty()) {
+
+        vkFreeCommandBuffers(device,
+            pool,
+            static_cast<uint32_t>(CMDBuffer.size()),
+            CMDBuffer.data());
+
+        CMDBuffer.clear();
+    }
+}
+
 void VulkanRenderer::DestroyRenderPass(VkRenderPass& renderpass)
 {
     if (renderpass != VK_NULL_HANDLE) {
@@ -295,7 +382,7 @@ void VulkanRenderer::CMDRecordBindPipeline(const VkCommandBuffer& cmd, const VkP
 void VulkanRenderer::CMDRecordDescriptorSet(const VkCommandBuffer& cmd, const VkPipelineLayout& layout, 
     VkPipelineBindPoint flag, const VkDescriptorSet* DesSet, uint32_t fristSet, uint32_t count, uint32_t desOffset, const uint32_t* DynamicOffset)
 {
-    vkCmdBindDescriptorSets(cmd, flag, layout, fristSet, count, DesSet, desOffset, nullptr);
+    vkCmdBindDescriptorSets(cmd, flag, layout, fristSet, count, DesSet, desOffset, DynamicOffset);
 }
 
 void VulkanRenderer::CMDRecordBindIndexedMesh(const VkCommandBuffer& cmd, const IndexedVertexBuffer& mesh)
@@ -323,6 +410,12 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
         throw std::runtime_error("failed to record command buffer!");
     }
 }
+
+void VulkanRenderer::CMDRecordDistpatch(const VkCommandBuffer& cmd, uint32_t groupX, uint32_t groupY, uint32_t groupz)
+{
+    vkCmdDispatch(cmd, groupX, groupY, groupz);
+}
+
 
 void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage,
     VkPipelineStageFlags dstStage, VkAccessFlags srcAccess, VkAccessFlags dstAccess,
@@ -352,10 +445,28 @@ void VulkanRenderer::CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& 
 
 }
 
+void VulkanRenderer::CMDSubmitComputeQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence, VkPipelineStageFlags* stageFlags, VkSemaphore* waitSema, uint32_t wait_count, VkSemaphore* readySema, uint32_t ready_count)
+{
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    submitInfo.waitSemaphoreCount = wait_count;
+    submitInfo.pWaitSemaphores = waitSema;
+    submitInfo.pWaitDstStageMask = stageFlags;
+
+    submitInfo.commandBufferCount = cmd_count;
+    submitInfo.pCommandBuffers = cmds;
+
+    submitInfo.signalSemaphoreCount = ready_count;
+    submitInfo.pSignalSemaphores = readySema;
+
+    if (vkQueueSubmit(computeQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+}
 
 
-
-void VulkanRenderer::CMDSubmitGraphics(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,
+void VulkanRenderer::CMDSubmitGraphicsQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence,
     VkPipelineStageFlags* stageFlags, VkSemaphore* waitSema, uint32_t wait_count, VkSemaphore* readySema, uint32_t ready_count)
 {
     VkSubmitInfo submitInfo{};
@@ -414,7 +525,7 @@ public:
         //  Normal forward pass
         //  Post process bloom pass
         //  ImGUI 
-        //TODO: (KEV) ADJUT FOR PER FRAME DATA NOT PER SWAP CHAIN
+      
         ImGuiIO& io = ImGui::GetIO();
         VKRNDR->imGuiSystem->BeginFrame();
         ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -565,7 +676,7 @@ public:
          /*   printf("%d cmd\t%d framefence\t%d waitSemaphore\t%d singalSemaphore\n", (int)framecntx.CMDBuffer, 
                 (int)framecntx.currentFrameFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
         // 5 submit
-            VKRNDR->CMDSubmitGraphics(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
+            VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
         // 6 present
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 
