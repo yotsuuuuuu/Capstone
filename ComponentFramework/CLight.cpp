@@ -61,6 +61,8 @@ void CLight::UpdateLight()
 
 void CLight::UpdateData()
 {
+	if (!isCreated)
+		return;
 	Vec3 Position;
 	if (auto T = transform.lock()) {
 		Position = T->GetPosition();
