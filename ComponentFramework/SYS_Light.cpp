@@ -33,6 +33,10 @@ bool SYS_Light::Initilize()
 {
 	if (cntx == nullptr || cntx->renderer == nullptr)
 		return false;
+	if (isInit == true)
+		return true;
+
+
 	switch (cntx->renderer->getRendererType()) {
 	case RendererType::VULKAN: {
 		VulkanRenderer* vk = static_cast<VulkanRenderer*>(cntx->renderer);
@@ -46,9 +50,15 @@ bool SYS_Light::Initilize()
 		ActiveSceneLightSSBO.bufferMemoryLength = size;
 		ActiveSceneLightSSBO = vk->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size);
 		if (vkMapMemory(vk->getDevice(), ActiveSceneLightSSBO.bufferMemoryID, 0, ActiveSceneLightSSBO.bufferMemoryLength, 0, &mapppedLightSSBO) != VK_SUCCESS)
-			throw std::runtime_error("Failed to map light SSBO memory");
+			return false;
+		
 		camera = vk->GetCurrentCamera();
-		auto cam = std::dynamic_pointer_cast<CActor>(vk->GetCurrentCamera())->GetComponent<CCamera>();
+		auto tempCam = camera.lock();
+		if (!tempCam) 
+			return false;
+
+		auto cam = std::dynamic_pointer_cast<CActor>(tempCam)->GetComponent<CCamera>();
+	
 		// updating rest of data
 		systemDataUBO = vk->CreateUniformBuffer<SYS_LIGHT_DATA>();
 		// next four  var are dependent on the Camera
@@ -78,13 +88,12 @@ bool SYS_Light::Initilize()
 		vk->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { ScreenClustersSSBO });
 		vk->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { systemDataUBO });
 		vk->WriteDescriptorSets(CC_DescriptorSetInfo.descriptorSet, write);
-		//TODO: SET FILE PATH
 		CC_Pipelineinfo = vk->CreateComputePipeline({ CC_DescriptorSetInfo.descriptorSetLayout }, "shaders/ClusterCompute.comp.spv");
 		// Light Culling pass
 		layout.clear();
 		write.clear();
 
-		std::vector<SingleDescriptorSetLayoutInfo> layout;
+		
 		vk->AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
 		vk->AddToDescriptorLayoutCollection(layout, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
 		vk->AddToDescriptorLayoutCollection(layout, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1);
@@ -92,7 +101,7 @@ bool SYS_Light::Initilize()
 		CL_DescriptorSetInfo.descriptorSetLayout = vk->CreateDescriptorSetLayout(layout);
 		CL_DescriptorSetInfo.descriptorPool = vk->CreateDescriptorPool(layout, 1);
 		CL_DescriptorSetInfo.descriptorSet = vk->AllocateDescriptorSets(CL_DescriptorSetInfo.descriptorPool, CL_DescriptorSetInfo.descriptorSetLayout, 2);
-		std::vector<DescriptorWriteInfo> write;
+		
 		vk->AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, cam->GetCameraUBO());
 		vk->AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { systemDataUBO });
 		vk->AddToDescrisptorLayoutWrite(write, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_COMPUTE_BIT, 1, { ScreenClustersSSBO });
@@ -113,11 +122,16 @@ bool SYS_Light::Initilize()
 	}
 		
 	}
+
+	isInit = true;
 	return true;
 }
 
 void SYS_Light::ShutDonw()
 {
+	if (isInit == false)
+		return;
+
 	switch (cntx->renderer->getRendererType()) {
 	case RendererType::VULKAN: {
 		VulkanRenderer* vk = static_cast<VulkanRenderer*>(cntx->renderer);
@@ -143,6 +157,8 @@ void SYS_Light::ShutDonw()
 	}
 
 	}
+
+	isInit = false;
 }
 
 void SYS_Light::ComputeClusters()

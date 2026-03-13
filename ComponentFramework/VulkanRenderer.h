@@ -36,7 +36,7 @@ constexpr uint32_t SHAWDOW_SIZE = 1024;
 using namespace MATH;
 
 class Component;
-class EngineContext;
+struct  EngineContext;
 
 #ifdef NDEBUG /// only use validation layers if in debug mode
 const bool enableValidationLayers = false;

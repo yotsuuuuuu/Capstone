@@ -86,6 +86,8 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
         return false;
     }
     CameraActor->AddComponent<CSkyBox>(sky);
+
+    return true;
 }
 
 void VulkanRenderer::DestroyGlobalResources()

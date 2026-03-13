@@ -6,8 +6,6 @@
 class SYS_Light
 {
 	//TODO (Kev) Light system
-	// CREATE THE COMPUTE SHADERS 
-	// CREATE SYSTEM IN THE SCENE MANAGER
 	// IMPLEMENT INTO THE MAIN REDNER LOOP
 	// UPDATE MAIN SHADERS TO USE THE LIGHT SYSTEM.
 	// NEED TO ACCOUNT FOR RESIZEING OF THE SCREEN
@@ -33,6 +31,8 @@ class SYS_Light
 	//sync objects
 	VkSemaphore SignalSema;	
 	VkFence Fence;
+
+	bool isInit = false;
 	
 
 	EngineContext* cntx;

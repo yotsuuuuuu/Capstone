@@ -61,10 +61,14 @@ void CLight::UpdateLight()
 
 void CLight::UpdateData()
 {
+	Vec3 Position;
+	if (auto T = transform.lock()) {
+		Position = T->GetPosition();
+	}
 	data.colour_intensity = Vec4(Colour, intensity);
-	data.position_radius = Vec4(transform.lock()->GetPosition(), radius);
+	data.position_radius = Vec4(Position, radius);
 	data.direction_inner = Vec4(Direction, inner_Outer.x);
-	data.outer_type_pad = Vec4(inner_Outer.y, Type, 0, 0);
+	data.outer_type_pad = Vec4(inner_Outer.y, static_cast<float>(Type), 0, 0);
 }
 
 CLightData CLight::GetUpdatedData()
