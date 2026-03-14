@@ -31,31 +31,22 @@
   "Actor": {
     "mario": {
       "Mat": "marioMat",
-      "Mesh": "marioMesh",
-      "Transform": {
-        "position": [ -1.0, 0.0, 0.0 ],
-        "rotation": [ 90, 0, 1, 0 ],
-        "scale": [ 1, 1, 1 ]
-      }
+      "Mesh": "marioMesh"
     },
     "luigi": {
       "Mat": "marioMat",
-      "Mesh": "marioMesh",
-      "Transform": {
-        "position": [ 1.5, -0.5, 0 ],
-        "rotation": [ -90, 0, 1, 0 ],
-        "scale": [ 1, 1, 1 ]
-      }
+      "Mesh": "marioMesh"
     },
-    "Sphere": {
+    "DebugSphere": {
       "Mat": "marioMat",
-      "Mesh": "sphereMesh",
-      "Transform": {
-        "position": [ 0, 0, 0 ],
-        "rotation": [ 0, 0, 1, 0 ],
-        "scale": [ 1, 1, 1 ]
-      }
+      "Mesh": "sphereMesh"
+    },
+    "light": {
+      "radius": 1.0,
+      "intensity": 1.0,
+      "color": [ 0.0, 0.0, 0.0 ]        
     }
+
   },
   "Camera": {
     "position": [ 0, 0, -5 ],

@@ -53,8 +53,8 @@ public:
 	}
 	bool LoadCamera(const std::string& filepath_);
 	bool LoadAsset(const std::string& filepath_);
-	bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
-	std::vector<Ref<CActor>> CreateActor(const std::string& actorId, int amount_ , std::vector<CTransform> trans_);
+	//bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
+	bool CreateActor(const std::string& actorId, int amount_);
 	std::vector<Ref<Component>> GetActorsInScene();
 	Ref<Component> GetCamera();
 	Ref<CMesh> GetMesh(const std::string& id);

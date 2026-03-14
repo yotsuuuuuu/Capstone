@@ -8,6 +8,7 @@
 #include "CPhysics.h"
 #include "CInput.h"
 #include "CGlobalLight.h"
+#include "CLight.h"
 
 using json = nlohmann::json;
 
@@ -79,6 +80,8 @@ bool AssetManager::LoadCamera(const std::string& filepath_)
         return false;
     }
 
+    file.close();
+
     return true;
 }
 
@@ -112,12 +115,7 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 
 	for (auto& [meshId, meshPath] : jsonLoader["Meshes"].items())
 	{
-		Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, meshPath.get<std::string>());
-        
-        if (!mesh->OnCreate())
-        {
-			std::cout << "Failed to create mesh :" << meshId << "\n";
-        }
+        Ref<CMesh> mesh = std::make_shared<CMesh>(nullptr, renderer, meshPath.get<std::string>());
 
 		assetMap[meshId] = mesh;
 	}
@@ -167,65 +165,105 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer,texName, assetMapGet<CShader>(matData["shader"]));
         assetMap[matId] = mat1;
         
-        if (!mat1->OnCreate())
-        {
-			std::cout << "Failed to create material :"  << matId << "\n";
-        }
-
     }
 
-	if (!jsonLoader.contains("Actor"))
-	{
-		std::cout << "json does not contain an actor section " << "\n";
-		return false;
-	}
-
-	for (auto& [actorname, actorData] : jsonLoader["Actor"].items())
-	{
-		Ref<CActor> act = std::make_shared<CActor>(nullptr);
-        auto pos = actorData["Transform"]["position"].get<std::vector<float>>();
-        auto rot = actorData["Transform"]["rotation"].get<std::vector<float>>();
-
-        Ref<CMesh> temp = assetMapGet<CMesh>(actorData["Mesh"].get<std::string>());
-        act->AddComponent<CMesh>(temp);
-        act->AddComponent<CMaterial>(assetMapGet<CMaterial>(actorData["Mat"].get<std::string>()));
-
-		assetMap[actorname] = act;
-
-        //will remove this after just here for testing purposes
-		Ref<CTransform> t = std::make_shared<CTransform>(nullptr, Vec3(pos[0], pos[1], pos[2]), QMath::angleAxisRotation(rot[0],Vec3(rot[1],rot[2],rot[3])), Vec3(1, 1, 1));
-        act->AddComponent<CTransform>(t);
-   
-
-        if (!act->OnCreate())
-        {
-			std::cout << "Failed to create actor :" << actorname << "\n";
-        }
-		actorMap.push_back(act);
-	}
-
- 
-    
+	file.close();
     return true;
 }
 
-bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_)
-{
-    return false;
-}
+//bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_)
+//{
+//    return false;
+//}
 
-std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, int amount_, std::vector<CTransform> trans_)
+bool AssetManager::CreateActor(const std::string& actorId, int amount_)
 {
-	std::vector<Ref<CActor>> requestedActors;
-    for (int i = 0; i <= amount_; i++)
+
+    if (!jsonLoader.contains("Actor"))
     {
-       Ref<CActor> actor = assetMapGet<CActor>(actorId);
-       actor->AddComponent<CTransform>(trans_[i]);
-	   actorMap.push_back(actor);
-	   requestedActors.push_back(actor);
+        std::cout << "json does not contain an actor section " << "\n";
+        return false;
+    }
+   
+    if (!jsonLoader["Actor"].contains(actorId))
+    {
+        std::cout << "json does not contain actor with id: " << actorId << "\n";
+		return false;
     }
 
-    return requestedActors;
+    auto& actorData = jsonLoader["Actor"][actorId];
+
+    std::string name;
+ 
+
+    for (int i = 0; i < amount_; i++)
+    {
+
+
+        Ref<CActor> act = std::make_shared<CActor>(nullptr);
+        Ref<CTransform> trans = std::make_shared<CTransform>();
+       
+        if (actorData.contains("Mesh"))
+        {
+			name = actorData["Mesh"].get<std::string>();
+			if (assetMapGet<CMesh>(name))
+			{
+				act->AddComponent<CMesh>(assetMapGet<CMesh>(name));
+			}
+            else
+            {
+				std::cout << "Mesh with id: " << name << " not found for actor. default mesh given " << actorId << "\n";
+				act->AddComponent<CMesh>(assetMapGet<CMesh>(jsonLoader["Actor"]["DebugSphere"]["Mesh"].get<std::string>()));
+ 
+            }
+        }
+
+        if (actorData.contains("Mat"))
+        {
+			name = actorData["Mat"].get<std::string>();
+            if (assetMapGet<CMaterial>(name))
+            {
+				act->AddComponent<CMaterial>(assetMapGet<CMaterial>(name));
+            }
+            else
+            {
+				std::cout << "Material with id: " << name << " not found for actor. default material given " << actorId << "\n";
+				act->AddComponent<CMaterial>(assetMapGet<CMaterial>(jsonLoader["Actor"]["DebugSphere"]["Mat"].get<std::string>()));
+            }
+        }
+
+        act->AddComponent<CTransform>(trans);
+     
+        float radius = 0.0f;
+		float intensity = 0.0f; 
+		Vec3 colour = Vec3(0.0,0.0,255.0);
+
+		if (actorData.contains("radius"))
+		{
+			radius = actorData["radius"].get<float>();
+		}
+        
+        if (actorData.contains("intensity"))
+        {
+			intensity = actorData["intensity"].get<float>();
+        }
+
+        if (jsonLoader["Actor"][actorId].contains("intensity"))
+        {
+           Ref<CLight>light = std::make_shared<CLight>(act,engineContext.lightSys,radius,intensity,colour);
+		   act->AddComponent<CLight>(light);
+        }
+            
+        if (!act->OnCreate())
+        {
+            std::cout << "Failed to create actor :" << actorId << "\n";
+        }
+
+      actorMap.push_back(act);
+        
+    }
+
+    return true;
 }
 
 std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()

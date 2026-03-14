@@ -36,7 +36,11 @@ bool Scene3::OnCreate() {
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
 		
+		engineContext.assetManager->CreateActor("light", 1);
+		engineContext.assetManager->CreateActor("mario",1);
+
 		actorsInScene = engineContext.assetManager->GetActorsInScene();
+
 		//step 1.3 Materials
 
 		 std::vector<std::string> filepaths = { "./textures/rock.png" };
