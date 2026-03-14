@@ -27,6 +27,9 @@ bool CLight::OnCreate() {
 		return false;
 	transform = T;
 
+	if (!LightSystem)
+		return false;
+
 	if (!LightSystem->RegisterLight(this)) // assume that it populates the data when resgisters
 		return false;
 

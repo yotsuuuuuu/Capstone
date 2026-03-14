@@ -7,12 +7,13 @@ class SYS_Light
 {
 	//TODO (Kev) Light system
 	// IMPLEMENT INTO THE MAIN REDNER LOOP
+	// 
 	// UPDATE MAIN SHADERS TO USE THE LIGHT SYSTEM.
 	// NEED TO ACCOUNT FOR RESIZEING OF THE SCREEN
 	BufferMemory ScreenClustersSSBO;
 	uint32_t ClusterCount;
 	SYS_LIGHT_DATA data;
-	bool systemDataUBOOutOfDate;
+	bool systemDataUBOOutOfDate = false;
 	BufferMemory systemDataUBO;
 	BufferMemory ActiveSceneLightSSBO;
 	void* mapppedLightSSBO;

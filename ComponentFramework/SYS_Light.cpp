@@ -17,7 +17,7 @@ SYS_Light::SYS_Light(EngineContext* cntx_, uint32_t LightCapacity_)
 	: cntx(cntx_), LightCapacity(LightCapacity_), LightCount(0), ScreenClustersSSBO({}),
 	systemDataUBO({}), ActiveSceneLightSSBO({}), CC_Pipelineinfo({}), CL_Pipelineinfo({}),
 	ComputeCmd(VK_NULL_HANDLE),ComputePool(VK_NULL_HANDLE),SignalSema(VK_NULL_HANDLE),
-	Fence(VK_NULL_HANDLE)
+	Fence(VK_NULL_HANDLE), mapppedLightSSBO(nullptr)
 {
 	// part data has been filled in rest has to be filled on the Init
 	ClusterCount = LIGHT_SYS_CONST::TOTAL_CLUSTERS;
@@ -216,6 +216,8 @@ void SYS_Light::ComputeLightClusters(uint32_t frameIndex)
 
 bool SYS_Light::RegisterLight(CLight* Light)
 { 
+	if (!mapppedLightSSBO || !isInit)
+		return false;
 	// ADD LIGHT TO SSBO
 	if(LightCount >= LightCapacity)
 		return false;
@@ -240,6 +242,8 @@ bool SYS_Light::RegisterLight(CLight* Light)
 bool SYS_Light::DeregisterLight(CLight* Light)
 {
 	// REMOVE LIGHT FORM SSBO
+	if (!mapppedLightSSBO || !isInit)
+		return false;
 
 	if (LightCount == 0)
 		return false;
@@ -274,6 +278,8 @@ bool SYS_Light::DeregisterLight(CLight* Light)
 
 bool SYS_Light::UpdateLightData(CLight* Light)
 {
+	if (!mapppedLightSSBO || !isInit)
+		return false;
 	// UPDATE LIGHT DATA AT CURRENT INDEX IN THE SSBO
 	if(HandelsMap.find(Light->ssboIndex) == HandelsMap.end())
 		return false;
