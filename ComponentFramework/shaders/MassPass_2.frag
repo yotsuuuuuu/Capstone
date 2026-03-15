@@ -7,9 +7,15 @@ layout (location = 0) in vec3 vertNormal;
 layout (location = 1) in vec3 eyeDir;
 layout (location = 2) in vec2 fragTexCoords;
 layout (location = 3) in vec3 lightDir;
-layout (location = 4) in vec4 fragLightSpace[MAX_SHADOW_MAPS];
+layout (location = 4) in vec4 fragViewPos;
+layout (location = 5) in vec4 fragLightSpace[MAX_SHADOW_MAPS];
 
 layout (location = 0) out vec4 fragColor;
+
+layout(set = 0 , binding = 0) uniform CameraUBO {
+    mat4 projectionMatrix;
+	mat4 viewMatrix;
+} Camera;
 
 layout(set = 0, binding = 1) uniform GLightData{
 	mat4 projectionMatrix[MAX_SHADOW_MAPS];
@@ -20,17 +26,56 @@ layout(set = 0, binding = 1) uniform GLightData{
 	vec4 dir;
 } GLData;
 
-
 layout(set = 0, binding = 2) uniform sampler2DShadow shadowMap[MAX_SHADOW_MAPS];
+
+layout(std140, set = 0 , binding = 3) uniform SYS_LIGHT_DATA {
+    mat4 inverse_proj;
+    uvec3 gridSize;
+    uint _pad1; 
+    uvec2 screenDimensions;
+    float zNear;
+    float zFar;
+    uint lightCount;
+    uint clusterCount;
+    uint _pad2; 
+    uint _pad3; 
+} DataSys;
+
+struct Cluster
+{
+    vec4 minPoint;
+    vec4 maxPoint;
+    uint count;
+    uint lightIndices[100];
+};
+
+layout(std430, set = 0, binding = 4) readonly restrict buffer clusterSSBO
+{
+    Cluster clusters[];
+};
+
+struct PointLight
+{
+    vec4 position_radius;
+    vec4 color_intensity;
+    vec4 direction_inner;
+    vec4 outer_type_pad;
+};
+
+layout(std430, set = 0 , binding = 5) readonly restrict buffer lightSSBO
+{
+    PointLight pointLight[];
+};
+
 
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 
 
 float ShadowCheck(int index, int sampleSize);
-
-
 bool insideCascade(int index);
+
+vec4 ClusterLightsColour(vec4 ktColour);
 
 void main() { 
 	vec3 reflection;
@@ -40,9 +85,8 @@ void main() {
 	vec4 kd = GLData.diffuse;
 	vec4 ks = GLData.specular;
 	vec4 kt = texture(texSampler, fragTexCoords);
-	
-	// Ambient 
 	vec4 phongResult = ka * kt;
+	// Ambient 
 	bool isInCasede0 = insideCascade(0);
 	bool isInCasede1 = insideCascade(1);
 	bool isInCasede2 = insideCascade(2);
@@ -84,9 +128,12 @@ void main() {
 	
 	// Add diffuse and specular
 	phongResult += (shadow * ((diff * kd) + (spec * ks)) ) * kt;
+	phongResult += ClusterLightsColour(kt);
 	//vec4 phongResult = vec4(max(dot(vertNormal, lightDir), 0));
 	fragColor = phongResult;
 	//fragColor = shadow * vec4(1.0,1.0,1.0,1.0);
+
+	
 } 
 
 
@@ -143,4 +190,56 @@ bool insideCascade(int index)
            abs(ndc.y) < 1.0 - eps &&
            ndc.z > 0 + eps &&
            ndc.z < 1.0 - eps;
+}
+
+vec4 ClusterLightsColour(vec4 ktColour) {
+	vec4 Result = vec4(0.0);
+	
+	uint zTile = uint((log(abs(fragViewPos.z) / DataSys.zNear) * float(DataSys.gridSize.z)) / log(DataSys.zFar / DataSys.zNear));
+	vec2 tileSize = vec2(DataSys.screenDimensions) / vec2(DataSys.gridSize.xy);
+    uvec3 tile = uvec3(gl_FragCoord.xy / tileSize, zTile);
+    uint tileIndex =
+        tile.x + (tile.y *  DataSys.gridSize.x) + (tile.z *  DataSys.gridSize.x *  DataSys.gridSize.y);
+
+    uint lightCount = clusters[tileIndex].count;
+	if (lightCount > 95) {
+     //getting close to limit. Output red color and dip
+     Result = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+     return Result;
+	}
+
+	for (int i = 0; i < lightCount; ++i)
+    {
+        uint lightIndex = clusters[tileIndex].lightIndices[i];
+        PointLight light = pointLight[lightIndex];
+       
+	    // need to shift light pos to the right space
+		vec4 LightInView = Camera.viewMatrix *  vec4(light.position_radius.xyz,1.0);
+		vec3 pointLightPos  = LightInView.xyz;
+
+        float radius     = light.position_radius.w;
+        vec4 pointLightColor = vec4(light.color_intensity.xyz, 1.0);
+        float intensity  = light.color_intensity.w;
+
+		vec3 fragToLight = pointLightPos - fragViewPos.xyz;
+		float dist = length(fragToLight);
+		vec3 dirFragToLight = normalize(fragToLight);
+
+		float attenuation = clamp(1.0 - (dist/radius),0.0,1.0);
+		attenuation *= attenuation;
+
+		float diff = max(dot(vertNormal, dirFragToLight), 0);	
+		vec3 reflection = normalize(reflect(-dirFragToLight, vertNormal));
+		float spec = max(dot(eyeDir, reflection), 0.0);
+		spec = pow(spec, 14.0);
+		spec *= diff > 0.0 ? 1.0 : 0.0;
+
+		Result += intensity * attenuation * ((diff * pointLightColor) + ( spec * pointLightColor)) * ktColour;
+		//Result += intensity  * ((diff * pointLightColor) + ( spec * pointLightColor)) * ktColour;
+		
+    }
+
+
+	
+	return Result;
 }

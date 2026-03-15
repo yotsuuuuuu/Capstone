@@ -10,6 +10,7 @@
 #include "CWorld.h"
 #include "CSkyBox.h"
 #include "EngineContext.h"
+#include "SYS_Light.h"
 #include "AssetManager.h"
 #include "imgui.h"
 #include <unordered_map>
@@ -66,13 +67,20 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     // then create global resources
     //TODO: ADD THE LIGTH SYSTEM SSBOs TO THE GLOBAL SET
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
-    AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3);
+    AddToDescriptorLayoutCollection(layoutGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+
     std::vector<DescriptorWriteInfo> writeGlobal;
-    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT, 1, Camera->GetCameraUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Camera->GetCameraUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetMainUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, shadowMappingInfo.ShadowTextures2D);
+    AddToDescrisptorLayoutWrite(writeGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetSysUBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
     //
@@ -519,7 +527,7 @@ private:
         ModelMatrixPushConst push;
     };
 public:
-    static void Render(VulkanRenderer* VKRNDR, const std::vector<std::shared_ptr<Component>>& drawlist) {
+    static void Render(VulkanRenderer* VKRNDR, const EngineContext& Ecntx, const std::vector<std::shared_ptr<Component>>& drawlist) {
         //  Passes i want to do currently doing forward rendering
         //  Sky light shadow pass : the Main light source that affects the scene
         //  Normal forward pass
@@ -535,6 +543,8 @@ public:
         VKRNDR->imGuiSystem->EndFrame();
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
+
+
         VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
         // 1.1.1 UPDATE PER FRAME UBO
         if (auto cam = VKRNDR->camera.lock()) {
@@ -543,6 +553,7 @@ public:
             MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.inFlightIndex);
             MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
+        Ecntx.lightSys->ComputeLightClusters(framecntx.inFlightIndex);
 
         VkPipelineLayout line;
         // 1.1 get draw items
@@ -676,11 +687,23 @@ public:
         }
         // 4 Stop recording
             VKRNDR->CMDEndRecord(framecntx.CMDBuffer);
-            VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-         /*   printf("%d cmd\t%d framefence\t%d waitSemaphore\t%d singalSemaphore\n", (int)framecntx.CMDBuffer, 
-                (int)framecntx.currentFrameFence, (int)framecntx.waitSemaphores, (int)framecntx.signalSemaphores);*/
+
+
+            //Temp for Testing idealy later on the main pass waits on the fragemnt stage for
+            // depth shadows too
+            auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
+            
+            VkSemaphore waitSems[] = {
+                 framecntx.waitSemaphores,       
+                 lightCullingDoneSemaphore       
+            };
+
+            VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  
+                                                   VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT          
+            };
+         
         // 5 submit
-            VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, &framecntx.waitSemaphores, 1, &framecntx.signalSemaphores, 1);
+            VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, waitSems, 2, &framecntx.signalSemaphores, 1);
         // 6 present
             VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 
@@ -703,7 +726,7 @@ public:
     }
 };
 
-void VulkanRenderer::RenderECS(const std::vector<Ref<Component>>& drawlist)
+void VulkanRenderer::RenderECS(const EngineContext& Ecntx,const std::vector<Ref<Component>>& drawlist)
 {
-    VulkanRenderer::ECSRenderer::Render(this, drawlist);
+    VulkanRenderer::ECSRenderer::Render(this, Ecntx,drawlist);
 }

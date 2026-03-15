@@ -127,6 +127,7 @@ struct  Cluster
     Vec4 minPoint;
     Vec4 maxPoint;
     uint32_t count;
+    uint32_t pad[3];
     uint32_t lightIndices[100];
 };
 

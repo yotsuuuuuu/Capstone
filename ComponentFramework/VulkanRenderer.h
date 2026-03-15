@@ -466,7 +466,7 @@ private:
     void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , std::shared_ptr<Component> globaLight);
 
 public:
-    void RenderECS(const std::vector<std::shared_ptr<Component>>& drawlist);
+    void RenderECS(const EngineContext& Ecntx,const std::vector<std::shared_ptr<Component>>& drawlist);
 
     PipeLineConfig GetMainPassPipeLineConfig();
     VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }

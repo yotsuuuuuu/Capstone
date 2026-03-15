@@ -1,5 +1,6 @@
 #include "SYS_Light.h"
 #include "VulkanRenderer.h"
+#include "AssetManager.h"	
 #include "CCamera.h"
 #include "CActor.h"
 #include "MMath.h"
@@ -9,6 +10,9 @@ namespace LIGHT_SYS_CONST {
 	constexpr uint32_t  GRID_X = 12;
 	constexpr uint32_t  GRID_Y = 12;
 	constexpr uint32_t  GRID_Z = 24;
+	//constexpr uint32_t  GRID_X = 40;
+	//constexpr uint32_t  GRID_Y = 23;
+	//constexpr uint32_t  GRID_Z = 24;
 	constexpr uint32_t  TOTAL_CLUSTERS = GRID_X * GRID_Y * GRID_Z;
 	constexpr uint32_t  GROUP_COUNT = (TOTAL_CLUSTERS + LOCAL_SIZE - 1) / LOCAL_SIZE;
 }
@@ -16,7 +20,7 @@ namespace LIGHT_SYS_CONST {
 SYS_Light::SYS_Light(EngineContext* cntx_, uint32_t LightCapacity_)
 	: cntx(cntx_), LightCapacity(LightCapacity_), LightCount(0), ScreenClustersSSBO({}),
 	systemDataUBO({}), ActiveSceneLightSSBO({}), CC_Pipelineinfo({}), CL_Pipelineinfo({}),
-	ComputeCmd(VK_NULL_HANDLE),ComputePool(VK_NULL_HANDLE),SignalSema(VK_NULL_HANDLE),
+	ComputePool(VK_NULL_HANDLE),SignalSema(VK_NULL_HANDLE),
 	Fence(VK_NULL_HANDLE), mapppedLightSSBO(nullptr)
 {
 	// part data has been filled in rest has to be filled on the Init
@@ -43,7 +47,7 @@ bool SYS_Light::Initilize()
 		VkDeviceSize size = ClusterCount * sizeof(Cluster);
 		//Allocation of SSBO's
 		ScreenClustersSSBO.bufferMemoryLength = size;
-		ScreenClustersSSBO = vk->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,size);
+		ScreenClustersSSBO = vk->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,size); //VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		
 		
 		size = LightCapacity * sizeof(CLightData);
@@ -52,7 +56,7 @@ bool SYS_Light::Initilize()
 		if (vkMapMemory(vk->getDevice(), ActiveSceneLightSSBO.bufferMemoryID, 0, ActiveSceneLightSSBO.bufferMemoryLength, 0, &mapppedLightSSBO) != VK_SUCCESS)
 			return false;
 		
-		camera = vk->GetCurrentCamera();
+		camera = cntx->assetManager->GetCamera();
 		auto tempCam = camera.lock();
 		if (!tempCam) 
 			return false;
@@ -112,7 +116,8 @@ bool SYS_Light::Initilize()
 		CL_Pipelineinfo = vk->CreateComputePipeline({ CL_DescriptorSetInfo.descriptorSetLayout }, "shaders/LightCullCompute.comp.spv");
 		// Command pool and buffer.
 		ComputePool = vk->CreateCMDPool(vk->getQueueFamilys().computeFamily.value(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-		ComputeCmd = vk->AllocatedCMDbuffer(ComputePool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+		ComputeCmd.push_back( vk->AllocatedCMDbuffer(ComputePool, VK_COMMAND_BUFFER_LEVEL_PRIMARY));
+		ComputeCmd.push_back(vk->AllocatedCMDbuffer(ComputePool, VK_COMMAND_BUFFER_LEVEL_PRIMARY));
 		// sync objects
 		vk->CreateSemaphore(SignalSema);
 		vk->CreateFence(Fence);
@@ -141,8 +146,8 @@ void SYS_Light::ShutDonw()
 		vk->DestroySemaphore(SignalSema);
 		vk->DestroyFence(Fence);
 
-		std::vector< VkCommandBuffer> cmdB = { ComputeCmd };
-		vk->DestroyCommandBuffer(cmdB, ComputePool);
+		
+		vk->DestroyCommandBuffer(ComputeCmd, ComputePool);
 		vk->DestroyCommandPool(ComputePool);
 
 		vk->DestroyDescriptorSet(CC_DescriptorSetInfo);
@@ -173,17 +178,29 @@ void SYS_Light::ComputeClusters()
 			vk->UpdateUniformBuffer<SYS_LIGHT_DATA>(data, systemDataUBO);
 			systemDataUBOOutOfDate = false;
 		}
-		vk->CMDBeginRecord(ComputeCmd);
-		vk->CMDRecordBindPipeline(ComputeCmd, CC_Pipelineinfo.pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
-		vk->CMDRecordDescriptorSet(ComputeCmd, CC_Pipelineinfo.pipelineLayout, VK_PIPELINE_BIND_POINT_COMPUTE, &CC_DescriptorSetInfo.descriptorSet.front());
+		vk->CMDBeginRecord(ComputeCmd.front());
+		vk->CMDRecordBindPipeline(ComputeCmd.front(), CC_Pipelineinfo.pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
+		vk->CMDRecordDescriptorSet(ComputeCmd.front(), CC_Pipelineinfo.pipelineLayout, VK_PIPELINE_BIND_POINT_COMPUTE, &CC_DescriptorSetInfo.descriptorSet.front());
 		//  now distpatch
-		vk->CMDRecordDistpatch(ComputeCmd, LIGHT_SYS_CONST::GRID_X, LIGHT_SYS_CONST::GRID_Y, LIGHT_SYS_CONST::GRID_Z);
+		vk->CMDRecordDistpatch(ComputeCmd.front(), LIGHT_SYS_CONST::GRID_X, LIGHT_SYS_CONST::GRID_Y, LIGHT_SYS_CONST::GRID_Z);
 		// end record
-		vk->CMDEndRecord(ComputeCmd);
+		vk->CMDEndRecord(ComputeCmd.front());
 		// submit
-		vk->CMDSubmitComputeQueue(&ComputeCmd, 1, Fence);
+		vk->CMDSubmitComputeQueue(&ComputeCmd.front(), 1, Fence);
 		vkWaitForFences(device, 1, &Fence, VK_TRUE, UINT64_MAX);
-
+		////// Temporary debug readback
+		//	void* mappedData;
+		//vkMapMemory(device, ScreenClustersSSBO.bufferMemoryID, 0, sizeof(Cluster) * 5, 0, &mappedData);
+		//Cluster* clusters = (Cluster*)mappedData;
+		//for (int i = 0; i < 435; i++)
+		//{
+		//	if (i == 0 || i == 1 || i == 2 || i == 3 || i == 4) {
+		//		printf("Cluster %d min: %.5f %.5f %.5f | max: %.5f %.5f %.5f\n", i,
+		//			clusters[i].minPoint.x, clusters[i].minPoint.y, clusters[i].minPoint.z,
+		//			clusters[i].maxPoint.x, clusters[i].maxPoint.y, clusters[i].maxPoint.z);
+		//	}
+		//}
+		//vkUnmapMemory(device, ScreenClustersSSBO.bufferMemoryID);
 	   break;
 	}
 	}
@@ -193,7 +210,7 @@ void SYS_Light::ComputeClusters()
 
 void SYS_Light::ComputeLightClusters(uint32_t frameIndex)
 {
-
+	auto cmd = ComputeCmd[frameIndex];
 	switch (cntx->renderer->getRendererType()) {
 	case RendererType::VULKAN: {
 		VulkanRenderer* vk = static_cast<VulkanRenderer*>(cntx->renderer);
@@ -202,13 +219,15 @@ void SYS_Light::ComputeLightClusters(uint32_t frameIndex)
 			vk->UpdateUniformBuffer<SYS_LIGHT_DATA>(data, systemDataUBO);
 			systemDataUBOOutOfDate = false;
 		}
-		vk->CMDBeginRecord(ComputeCmd);
-		vk->CMDRecordBindPipeline(ComputeCmd, CL_Pipelineinfo.pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
-		vk->CMDRecordDescriptorSet(ComputeCmd, CC_Pipelineinfo.pipelineLayout, VK_PIPELINE_BIND_POINT_COMPUTE, &CL_DescriptorSetInfo.descriptorSet[frameIndex]);
-		vk->CMDRecordDistpatch(ComputeCmd, LIGHT_SYS_CONST::GROUP_COUNT, 1, 1);
-		vk->CMDEndRecord(ComputeCmd);
+		vkWaitForFences(device, 1, &Fence, VK_TRUE, UINT64_MAX);
+		vkResetFences(device, 1, &Fence);
+		vk->CMDBeginRecord(cmd);
+		vk->CMDRecordBindPipeline(cmd, CL_Pipelineinfo.pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
+		vk->CMDRecordDescriptorSet(cmd, CL_Pipelineinfo.pipelineLayout, VK_PIPELINE_BIND_POINT_COMPUTE, &CL_DescriptorSetInfo.descriptorSet[frameIndex]);
+		vk->CMDRecordDistpatch(cmd, LIGHT_SYS_CONST::GROUP_COUNT, 1, 1);
+		vk->CMDEndRecord(cmd);
 		
-		vk->CMDSubmitComputeQueue(&ComputeCmd, 1, VK_NULL_HANDLE, nullptr, nullptr,0,&SignalSema,1);
+		vk->CMDSubmitComputeQueue(&cmd, 1, Fence, nullptr, nullptr,0,&SignalSema,1);
 		break;
 	}
 	}

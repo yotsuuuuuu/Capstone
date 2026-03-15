@@ -27,13 +27,13 @@ SceneManager::~SceneManager() {
 		delete timer;
 		timer = nullptr;
 	}
+	delete assetManager;
+	dynamic_cast<VulkanRenderer*>(renderer)->DestroyGlobalResources();
 	
 	if (LightSystem) {
 		LightSystem->ShutDonw();
 		delete LightSystem;
 	}
-	delete assetManager;
-	dynamic_cast<VulkanRenderer*>(renderer)->DestroyGlobalResources();
 	renderer->OnDestroy();
 	engineContext.renderer = nullptr;
 	engineContext.assetManager = nullptr;	
@@ -77,7 +77,8 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		return false;
 	}
 	fmodController = new FmodController();
-	LightSystem = new SYS_Light(&engineContext, 500);
+	LightSystem = new SYS_Light(&engineContext, 1000);
+
 	assetManager = new AssetManager();
 	/*if (!fmodController->AddSonginFile())
 	{
@@ -89,6 +90,14 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./test.json");		
+	
+	if (!LightSystem->Initilize()) {
+		Debug::FatalError("Failed to initialize Light System", __FILE__, __LINE__);
+		return false;
+	}
+	LightSystem->ComputeClusters();
+
+
 	if (!static_cast<VulkanRenderer*>(renderer)->CreateGlobalRources(engineContext)) {
 		return false;
 	}

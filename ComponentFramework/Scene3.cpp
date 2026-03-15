@@ -15,6 +15,7 @@
 #include "CPhysics.h"
 #include "CGlobalLight.h"
 #include "VulkanRenderer.h"
+#include "SYS_Light.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 #include "FmodController.h"
@@ -28,19 +29,68 @@ Scene3::~Scene3() {
 }
 
 bool Scene3::OnCreate() {
-	int width = 0, height = 0;
-	float aspectRatio;
+	
 	switch (engineContext.renderer->getRendererType()){
 	case RendererType::VULKAN:
 	{
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
 		
-		engineContext.assetManager->CreateActor("light", 1);
+		engineContext.assetManager->CreateActor("light", 500);
+
 		engineContext.assetManager->CreateActor("mario",1);
 
 		actorsInScene = engineContext.assetManager->GetActorsInScene();
 
+		// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
+		const float spacing = 20.0f;
+		int gridSize = static_cast<int>(std::ceil(std::sqrt(actorsInScene.size())));
+		
+		static const Vec3 testColors[] = {
+			{1.0f, 0.0f, 0.0f},   // red
+			{0.0f, 1.0f, 0.0f},   // green
+			{0.0f, 0.0f, 1.0f},   // blue
+			{1.0f, 1.0f, 0.0f},   // yellow
+			{0.0f, 1.0f, 1.0f},   // cyan
+			{1.0f, 0.0f, 1.0f},   // magenta
+			{1.0f, 0.5f, 0.0f},   // orange
+			{0.5f, 0.0f, 1.0f},   // purple
+			{0.0f, 1.0f, 0.5f},   // spring green
+			{1.0f, 0.0f, 0.5f},   // rose
+		};
+		const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
+
+		int index = 0;
+		for (auto& actor : actorsInScene)
+		{
+			auto act = std::dynamic_pointer_cast<CActor>(actor);
+			auto light = act->GetComponent<CLight>();
+			auto transform = act->GetComponent<CTransform>();
+
+			if (!light || !transform)
+				continue;
+
+			// Calculate grid position on XZ plane
+			int row = index / gridSize;
+			int col = index % gridSize;
+
+			float offsetX = (gridSize - 1) * spacing * 0.5f;
+			float offsetZ = (gridSize - 1) * spacing * 0.5f;
+
+			float x = (col * spacing) - offsetX;
+			float z = (row * spacing) - offsetZ;
+
+			transform->SetPosition(Vec3(x, 0.5f, z));
+
+			// Cycle through distinct colors
+			Vec3 color = testColors[index % colorCount];
+			light->UpdateRadius(10.0f);
+			light->UpdateIntensity(3.0f);
+			light->UpdateColour(color);
+			light->UpdateLight();
+
+			index++;
+		}
 		//step 1.3 Materials
 
 		 std::vector<std::string> filepaths = { "./textures/rock.png" };
@@ -233,6 +283,7 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		}
 	
 }
+
 std::vector<MATHEX::Plane> Scene3::GenerateFrustumPLane()
 {
 	std::vector<MATHEX::Plane> fusturm;
@@ -349,9 +400,9 @@ void Scene3::Update(const float deltaTime) {
 			phys->Update(deltaTime);
 		}
 	}
-
+	
 	FrustumCheck();
-
+	
 }
 
 void Scene3::Render() const {
@@ -369,7 +420,7 @@ void Scene3::Render() const {
 			drawlist.push_back(actor1);
 			drawlist.push_back(plane);
 			drawlist.push_back(World);*/
-			vRenderer->RenderECS(actorsInScene);// Context obejct
+			vRenderer->RenderECS(engineContext,actorsInScene);// Context obejct
 		}
 		break;
 

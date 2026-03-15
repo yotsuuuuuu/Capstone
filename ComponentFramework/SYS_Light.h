@@ -27,7 +27,7 @@ class SYS_Light
 	DescriptorSetInfo CL_DescriptorSetInfo;
 	// also need semaphors and maybe a command buffer so it can be submitted own its own an
 	// sync with the semaphore
-	VkCommandBuffer ComputeCmd;
+	std::vector<VkCommandBuffer> ComputeCmd;
 	VkCommandPool ComputePool;
 	//sync objects
 	VkSemaphore SignalSema;	
@@ -66,7 +66,10 @@ public:
 	bool DeregisterLight(CLight* Light);
 	bool UpdateLightData(CLight* Light);
 
-	// TODO ADD FUNCTIONS TO : CHANGE OF SCREEN SIZE
+	VkSemaphore GetLightCullReadySingal() { return SignalSema; }
 
+	std::vector< BufferMemory> GetSysUBO() { return { systemDataUBO }; }
+	std::vector< BufferMemory> GetClusterSSBO() { return { ScreenClustersSSBO }; }
+	std::vector< BufferMemory> GetLightSSBO() { return { ActiveSceneLightSSBO }; }
 };
 

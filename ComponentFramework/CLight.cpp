@@ -30,11 +30,12 @@ bool CLight::OnCreate() {
 	if (!LightSystem)
 		return false;
 
-	if (!LightSystem->RegisterLight(this)) // assume that it populates the data when resgisters
-		return false;
-
-
 	isCreated = true;
+	if (!LightSystem->RegisterLight(this)) { // assume that it populates the data when resgisters
+		isCreated = false;
+		return false;
+	}
+
 	return true;
 
 }

@@ -32,6 +32,7 @@ public:
     void Update(const float dt) {}
 
     void UpdateColour(const Vec3& c) { Colour = c; }
+    void UpdateRadius(const float& r) { radius = r; }
     void UpdateIntensity(float inten) { intensity = inten; }
     void UpdateDirection(const Vec3& dir) { Direction = dir; }
     void UpdateInner_Outer(const Vec2& in_out) { inner_Outer = in_out; }

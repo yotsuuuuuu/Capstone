@@ -31,7 +31,8 @@ layout (location = 0) out vec3 vertNormal;
 layout (location = 1) out vec3 eyeDir;
 layout (location = 2) out vec2 fragTexCoords;
 layout (location = 3) out vec3 lightDir;
-layout (location = 4) out vec4 fragLightSpace[MAX_SHADOW_MAPS];
+layout (location = 4) out vec4 fragViewPos;
+layout (location = 5) out vec4 fragLightSpace[MAX_SHADOW_MAPS];
 
 
 void main() {
@@ -40,8 +41,8 @@ void main() {
 	mat3 normalMatrix = mat3(transpose(inverse(camera.viewMatrix * push.modelMatrix)));
 	vertNormal = normalize(normalMatrix * vNormal.xyz);
 	// Position in view space
-	vec4 viewPos = camera.viewMatrix * push.modelMatrix * vVertex;
-	vec3 viewVertPos = vec3(viewPos);
+	fragViewPos = camera.viewMatrix * push.modelMatrix * vVertex;
+	vec3 viewVertPos = vec3(fragViewPos);
 	// Eye direction 
 	eyeDir = normalize(-viewVertPos);
 
@@ -54,5 +55,5 @@ void main() {
 	}
 	// Final Pos
 	// viewpos  =  camera.viewMatrix * push.modelMatrix * vVertex;
-	gl_Position = camera.projectionMatrix * viewPos;
+	gl_Position = camera.projectionMatrix * fragViewPos;
 }

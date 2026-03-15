@@ -151,7 +151,7 @@ void Scene0::Render() const {
 		
 		{
 		
-			vRenderer->RenderECS(actorsInScene);// Context obejct
+			vRenderer->RenderECS(engineContext,actorsInScene);// Context obejct
 		}
 		break;
 

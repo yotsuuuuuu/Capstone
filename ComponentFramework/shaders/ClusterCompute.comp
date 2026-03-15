@@ -36,10 +36,10 @@ void main()
     uint tileIndex = gl_WorkGroupID.x + (gl_WorkGroupID.y * DataSys.gridSize.x) +
             (gl_WorkGroupID.z * DataSys.gridSize.x * DataSys.gridSize.y);
     
-    vec2 tileSize = DataSys.screenDimensions / DataSys.gridSize.xy;
+    vec2 tileSize = vec2(DataSys.screenDimensions) / vec2(DataSys.gridSize.xy);
     // tile in screen-space
-    vec2 minTile_screenspace = gl_WorkGroupID.xy * tileSize;
-    vec2 maxTile_screenspace = (gl_WorkGroupID.xy + 1) * tileSize;
+    vec2 minTile_screenspace = vec2(gl_WorkGroupID.xy) * tileSize;
+    vec2 maxTile_screenspace = minTile_screenspace + tileSize;
 
     // convert tile to view space sitting on the near plane
     vec3 minTile = screenToView(minTile_screenspace);
@@ -61,8 +61,11 @@ void main()
     vec3 maxPointFar =
         lineIntersectionWithZPlane(vec3(0, 0, 0), maxTile, planeFar);
 
-    clusters[tileIndex].minPoint = vec4(min(minPointNear, minPointFar), 0.0);
-    clusters[tileIndex].maxPoint = vec4(max(maxPointNear, maxPointFar), 0.0);
+    vec3 clusterMin = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
+    vec3 clusterMax = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
+    clusters[tileIndex].minPoint = vec4(clusterMin, 0.0);
+    clusters[tileIndex].maxPoint = vec4(clusterMax, 0.0);    
+   
 }
 
 // Returns the intersection point of an infinite line and a
@@ -82,9 +85,31 @@ vec3 screenToView(vec2 screenCoord)
 {
     // Vulkan NDC:XY range is [-1,1] and Z range is [0, 1], so near plane is 0.0 (unlike OpenGL's -1.0)
     vec4 ndc;
-    ndc = vec4(screenCoord / DataSys.screenDimensions * 2.0 - 1.0 , 0.0, 1.0);  
+    ndc = vec4(screenCoord / vec2(DataSys.screenDimensions)  * 2.0 - 1.0 , 0.0, 1.0);  
+    //ndc.y = -ndc.y;
     vec4 viewCoord;
     viewCoord = DataSys.inverse_proj * ndc;
     viewCoord /= viewCoord.w;
     return viewCoord.xyz;
 }
+
+//vec3 screenToView(vec2 screenCoord)
+//{
+//    // Convert screen coord to UV [0,1]
+//    vec2 uv = screenCoord / vec2(DataSys.screenDimensions);
+//    
+//    // Convert to NDC [-1,1]
+//    vec2 ndc = uv * 2.0 - 1.0;
+//    
+//    // Directly compute view space direction using FOV
+//    // halfFovX = tan(fovY/2) * aspect, halfFovY = tan(fovY/2)
+//    float halfFovY = 0.70021; // tan(35 degrees)
+//    float halfFovX = 1.24481; // halfFovY * aspectRatio
+//    
+//    // View space point on near plane
+//    float x = ndc.x * halfFovX;
+//    float y = ndc.y * halfFovY;
+//    
+//    // Return point in view space looking down -Z
+//    return vec3(x, y, -1.0);
+//}

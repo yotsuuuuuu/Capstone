@@ -39,7 +39,7 @@ layout(std140, set = 0 , binding = 1) uniform SYS_LIGHT_DATA {
 } DataSys;
 
 
-layout(std430, set = 0, binding = 2) restrict buffer clusterSSBO
+layout(std430, set = 0, binding = 2) coherent restrict buffer clusterSSBO
 {
     Cluster clusters[];
 };
@@ -51,35 +51,34 @@ layout(std430, set = 0 , binding = 3) restrict buffer lightSSBO
 
 
 
-bool testSphereAABB(uint i, Cluster c);
+bool testSphereAABB(uint i, uint index);
 
 
 void main()
 {
-    // i want the have a max capaisty of lights but be able to add an remove on run time
-    // so  DataSys.lightCount should the number of active element in the SSBO of the lights
-    // unsure aobut this one commented out  and replace with sysdata
-    // uint lightCount = pointLight.length();
-    uint lightCount = DataSys.lightCount;
+    
 
-    uint index = gl_GlobalInvocationID.x;
+    uint index =  gl_WorkGroupID.x * LOCAL_SIZE + gl_LocalInvocationID.x;
     // check  for bounds check using total amount of cluster form sys data
     if (index >= DataSys.clusterCount) return;
-    Cluster cluster = clusters[index];
+    //Cluster cluster = clusters[index];
 
     // we need to reset count because culling runs every frame.
     // otherwise it would accumulate.
-    cluster.count = 0;
+
+    uint lightCount = DataSys.lightCount;
+    uint clusterLightCount = 0;
 
     for (uint i = 0; i < lightCount; ++i)
     {
-        if (testSphereAABB(i, cluster) && cluster.count < 100)
+        if (testSphereAABB(i, index) && clusterLightCount < 100)
         {
-            cluster.lightIndices[cluster.count] = i;
-            cluster.count++;
+            clusters[index].lightIndices[clusterLightCount] = i;
+            clusterLightCount++;
         }
     }
-    clusters[index] = cluster;
+    clusters[index].count = clusterLightCount;
+   // clusters[index] = cluster;
 }
 
 bool sphereAABBIntersection(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax)
@@ -92,14 +91,15 @@ bool sphereAABBIntersection(vec3 center, float radius, vec3 aabbMin, vec3 aabbMa
 }
 
 // this just unpacks data for sphereAABBIntersection
-bool testSphereAABB(uint i, Cluster cluster)
+bool testSphereAABB(uint i, uint  index)
 {
     vec4 lightpos = vec4(pointLight[i].position_radius.xyz,1.0);
-    vec3 center = vec3(Camera.viewMatrix * lightpos);
+    vec3 center = vec3( Camera.viewMatrix * lightpos);
     float radius = pointLight[i].position_radius.w;
 
-    vec3 aabbMin = cluster.minPoint.xyz;
-    vec3 aabbMax = cluster.maxPoint.xyz;
+    
+    vec3 aabbMin = clusters[index].minPoint.xyz;
+    vec3 aabbMax = clusters[index].maxPoint.xyz;
 
     return sphereAABBIntersection(center, radius, aabbMin, aabbMax);
 }
