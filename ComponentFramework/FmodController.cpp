@@ -14,6 +14,20 @@ void FmodController::addSong(const std::vector<const char*>& wave_)
 		nameOfsounds.push_back(wave_[i]);
 	}
 }
+std::string FmodController::getSongName(int songnum_)
+{
+	if (songnum_ >= 0 && songnum_ < nameOfsounds.size())
+	{
+		char name[256];
+		sounds[songnum_]->getName(name ,256);
+		std::cout << name << std::endl;
+		return static_cast<std::string>(name);
+	}
+	else
+	{
+		return "Invalid song number";
+	}
+}
 bool FmodController::AddSonginFile()
 {
 	std::string path = "./audio/";
@@ -45,8 +59,8 @@ void FmodController::InitilizeSongs()
 
 	for (size_t i = 0; i < sounds.size(); i++)
 	{
-		result = system->createSound(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
-
+	//	result = system->createSound(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
+		result = system->createStream(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
 		if (result != FMOD_OK)
 		{
 			std::cout << "FMOD error loading "
@@ -144,6 +158,9 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	//creates audio bands object
 	std::vector<AudioBands> bandHolder;
 
+	FMOD::Sound* tempsound = nullptr;
+
+	system->createSound(nameOfsounds[songnum_].c_str(), FMOD_DEFAULT, 0, &tempsound);
 	
 	unsigned int lengthPCM = 0;//length cannot be negatice
 	int channels = 0;
@@ -153,9 +170,9 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	FMOD_SOUND_TYPE type;
 
 	//gets the format of te sound ex: pcm16 memeory format after fmod decodes it
-	sounds[songnum_]->getFormat(&type, &format, &channels, &bits);	
+	tempsound->getFormat(&type, &format, &channels, &bits);	
 	//gets the length  of the sound in PCM
-	sounds[songnum_]->getLength(&lengthPCM, FMOD_TIMEUNIT_PCM);
+	tempsound->getLength(&lengthPCM, FMOD_TIMEUNIT_PCM);
 	//
 	//system->mixerSuspend(); // Suspend the mixer to safely access sound data
 
@@ -165,12 +182,12 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 	//flexible sample rate if the song is not 44100 it will still work
 	float sampleRate;
-	sounds[songnum_]->getDefaults(&sampleRate, nullptr);
+	tempsound->getDefaults(&sampleRate, nullptr);
 
 
 	// gets the size get ptr1 is where it starts in memory and len1 is the size of the sound in memory
 	//	ptr2 is the second block of the memeory if the sond is long len2 is the size of the second block of memory
-	sounds[songnum_]->lock(0, lengthPCM * channels * (bits / 8), &ptr1, &ptr2, &len1, &len2); 
+	tempsound->lock(0, lengthPCM * channels * (bits / 8), &ptr1, &ptr2, &len1, &len2); 
 	//have to unlock it later
 	short* samples = static_cast<short*>(ptr1);  // access PCM16 samples
 	
@@ -266,8 +283,9 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	fftw_free(in);
 	fftw_free(out);
 
-	sounds[songnum_]->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
+	tempsound->unlock(ptr1, ptr2, len1, len2); // Unlock the sound data after processing
 	
+	tempsound->release(); // Release the temporary sound object
 	system->mixerResume(); // Resume the mixer after processing
 
 	return bandHolder;

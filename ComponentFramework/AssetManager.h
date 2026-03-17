@@ -32,6 +32,11 @@ private:
 	Ref<T> assetMapGet(const std::string id)
 	{
 		auto checker = assetMap.find(id);
+		if (checker == assetMap.end())
+		{
+			return nullptr;
+		}
+		
 		Ref<Component> result = checker->second;
 
 
@@ -53,9 +58,9 @@ public:
 	}
 	bool LoadCamera(const std::string& filepath_);
 	bool LoadAsset(const std::string& filepath_);
-	//bool CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_);
-	bool CreateActor(const std::string& actorId, int amount_);
+	std::vector<Ref<CActor>> CreateActor(const std::string& actorId, int amount_);
 	std::vector<Ref<Component>> GetActorsInScene();
+	void clearActorsInScene() { actorMap.clear(); }
 	Ref<Component> GetCamera();
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);

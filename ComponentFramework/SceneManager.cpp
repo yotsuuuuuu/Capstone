@@ -80,12 +80,14 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	LightSystem = new SYS_Light(&engineContext, 1000);
 
 	assetManager = new AssetManager();
-	/*if (!fmodController->AddSonginFile())
+	if (!fmodController->AddSonginFile())
 	{
 		Debug::Error("Failed to add songs in file to the list", __FILE__, __LINE__);
-	}*/
-	fmodController->AddSonginFile();
-	fmodController->createSystem();
+	}
+	if (!fmodController->createSystem())
+	{
+		Debug::Error("Failed to create fmod system", __FILE__, __LINE__);
+	}
 	fmodController->InitilizeSongs();
 	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem);
 	assetManager->set(engineContext);
@@ -126,6 +128,7 @@ void SceneManager::Run() {
 
 void SceneManager::GetEvents() {
 	SDL_Event sdlEvent;
+	std::string songnametest;
 	while (SDL_PollEvent(&sdlEvent)) {
 		if (sdlEvent.type == SDL_EventType::SDL_EVENT_QUIT) {
 			isRunning = false;
@@ -169,8 +172,10 @@ void SceneManager::GetEvents() {
 				break;
 			case SDL_SCANCODE_KP_0:
 				engineContext.fmodController->playsong(0);
+				songnametest = engineContext.fmodController->getSongName(0);
 				break;
 			case SDL_SCANCODE_KP_1:
+				songnametest = engineContext.fmodController->getSongName(1);
 				engineContext.fmodController->playsong(1);
 				break;
 			default:

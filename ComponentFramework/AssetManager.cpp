@@ -9,6 +9,7 @@
 #include "CInput.h"
 #include "CGlobalLight.h"
 #include "CLight.h"
+#include "Debug.h"
 
 using json = nlohmann::json;
 
@@ -171,24 +172,19 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
     return true;
 }
 
-//bool AssetManager::CreateActor(const std::string& actorId, Ref<CMesh> mesh_, Ref<CMaterial> tex_, Ref<CShader> shader_)
-//{
-//    return false;
-//}
 
-bool AssetManager::CreateActor(const std::string& actorId, int amount_)
+std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, int amount_)
 {
-
+    std::vector<Ref<CActor>> actorsMade;
     if (!jsonLoader.contains("Actor"))
     {
         std::cout << "json does not contain an actor section " << "\n";
-        return false;
+
     }
    
     if (!jsonLoader["Actor"].contains(actorId))
     {
         std::cout << "json does not contain actor with id: " << actorId << "\n";
-		return false;
     }
 
     auto& actorData = jsonLoader["Actor"][actorId];
@@ -212,7 +208,8 @@ bool AssetManager::CreateActor(const std::string& actorId, int amount_)
 			}
             else
             {
-				std::cout << "Mesh with id: " << name << " not found for actor. default mesh given " << actorId << "\n";
+				std::string a = "Mesh with id: " + name + " not found for actor. default mesh given " + actorId + "\n";
+				Debug::Error(a,__FILE__,__LINE__);
 				act->AddComponent<CMesh>(assetMapGet<CMesh>(jsonLoader["Actor"]["DebugSphere"]["Mesh"].get<std::string>()));
  
             }
@@ -236,7 +233,7 @@ bool AssetManager::CreateActor(const std::string& actorId, int amount_)
      
         float radius = 0.0f;
 		float intensity = 0.0f; 
-		Vec3 colour = Vec3(0.0,0.0,255.0);
+		Vec3 colour = Vec3(0.0,0.0,0.0);
 
 		if (actorData.contains("radius"))
 		{
@@ -250,6 +247,7 @@ bool AssetManager::CreateActor(const std::string& actorId, int amount_)
 
         if (jsonLoader["Actor"][actorId].contains("intensity"))
         {
+		   colour = Vec3(actorData["color"][0].get<float>(), actorData["color"][1].get<float>(), actorData["color"][2].get<float>());
            Ref<CLight>light = std::make_shared<CLight>(act,engineContext.lightSys,radius,intensity,colour);
 		   act->AddComponent<CLight>(light);
         }
@@ -260,10 +258,11 @@ bool AssetManager::CreateActor(const std::string& actorId, int amount_)
         }
 
       actorMap.push_back(act);
-        
+	  actorsMade.push_back(act);
+      //change it to return what was requested
     }
 
-    return true;
+    return actorsMade;
 }
 
 std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
