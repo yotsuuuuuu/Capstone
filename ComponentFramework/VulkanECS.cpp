@@ -681,26 +681,26 @@ public:
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
         // 4 Stop recording
-            VKRNDR->CMDEndRecord(framecntx.CMDBuffer);
+        VKRNDR->CMDEndRecord(framecntx.CMDBuffer);
 
 
-            //Temp for Testing idealy later on the main pass waits on the fragemnt stage for
-            // depth shadows too
-            auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
-            
-            VkSemaphore waitSems[] = {
-                 framecntx.waitSemaphores,       
-                 lightCullingDoneSemaphore       
-            };
+        //Temp for Testing idealy later on the main pass waits on the fragemnt stage for
+        // depth shadows too
+        auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
+        
+        VkSemaphore waitSems[] = {
+             framecntx.waitSemaphores,       
+             lightCullingDoneSemaphore       
+        };
 
-            VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  
-                                                   VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT          
-            };
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  
+                                               VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT          
+        };
          
         // 5 submit
-            VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, waitSems, 2, &framecntx.signalSemaphores, 1);
+        VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, waitSems, 2, &framecntx.signalSemaphores, 1);
         // 6 present
-            VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
+        VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 
     }
 
