@@ -120,7 +120,7 @@ void SceneManager::Run() {
 
 		currentScene->Update(timer->getDeltaTime());		
 		currentScene->Render();
-
+		//engineContext.fmodController->AnalyzeAudioOnline();
 		GetEvents();		
 		timer->EndFrameTime();
 	}

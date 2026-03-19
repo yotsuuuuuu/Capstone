@@ -125,6 +125,20 @@ bool FmodController::createSystem()
 
 	result = system->init(512, FMOD_INIT_NORMAL, nullptr);
 	
+	//dsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, 1024);//sets window size can playa round with this 1024 is average so the audio wqont be to "noisy" but will be clean and update enough to give data fast
+	//dsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FMOD_DSP_FFT_WINDOW_HANNING);
+	//channel->addDSP(0, dsp); // Add the DSP to the channel at index 0 (before the sound is processed)
+	//dsp->setActive(true);
+	system->getMasterChannelGroup(&masterGroup);
+
+	system->createDSPByType(FMOD_DSP_TYPE_FFT, &dsp);
+	dsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, 1024);
+	dsp->setParameterInt(FMOD_DSP_FFT_WINDOW, FMOD_DSP_FFT_WINDOW_HANNING);
+	dsp->setActive(true);
+
+	// Add DSP to master group before any sounds are played
+	masterGroup->addDSP(0, dsp);
+
 	if (result != FMOD_OK)
 		return false;
 
@@ -149,6 +163,16 @@ void FmodController::Volume(float volume_)
 	{
 		channel->setVolume(volume/100.0f);
 	}
+}
+
+float FmodController::getTimeOfSong(int index_)
+{
+	return 0.0f;
+}
+
+float FmodController::getCurrentTime()
+{
+	return 0.0f;
 }
 
 
@@ -291,9 +315,103 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	return bandHolder;
 }
 
-std::vector<AudioBands> FmodController::AnalyzeAudioOnline()
+AudioBands FmodController::AnalyzeAudioOnline()
 {
-	return std::vector<AudioBands>();
+	float sampleRate = 48000.0f; // Default sample rate, can be updated based on the actual sound being played
+	AudioBands bands;
+
+	// Get the FFT data from the DSP
+	system->update(); // Update the FMOD system to process audio and DSP
+	FMOD_DSP_PARAMETER_FFT* fftData = nullptr;
+	unsigned int length = 0; // will be filled with size of the fft data in bytes
+
+	dsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void**)&fftData, &length,nullptr,0);//fills fftdata witht he data we want and lenght with the size
+
+
+	if (fftData->length > 0)
+	{
+		int bins = fftData->length; // Number of frequency bins
+		int windowSize = bins * 2; //creates the window size of 1024
+		float peak = 0.0f; // the peak magnitude
+		for (int i = 0; i < bins; i++)
+		{
+			float magnitude = fftData->spectrum[0][i];//fft mag for the bin we are in
+			float freq = i * sampleRate / windowSize; //coverting the index toa f req
+			
+			//Assign magnitude to band
+			if (freq >= 20.0f && freq <= 60.0f) {
+				bands.sub = std::max(bands.sub, magnitude);
+				peak = std::max(peak, bands.sub);
+			}
+			else if (freq >= 61.0f && freq <= 130.0f) {
+				bands.bass = std::max(bands.bass, magnitude);
+				peak = std::max(peak, bands.bass);
+			}
+			else if (freq >= 131.0f && freq <= 262.0f) {
+				bands.highBass = std::max(bands.highBass, magnitude);
+				peak = std::max(peak, bands.highBass);
+			}
+			else if (freq >= 263.0f && freq <= 523.0f) {
+				bands.lowMid = std::max(bands.lowMid, magnitude);
+				peak = std::max(peak, bands.lowMid);
+			}
+			else if (freq >= 524.0f && freq <= 1046.0f) {
+				bands.midMid = std::max(bands.midMid, magnitude);
+				peak = std::max(peak, bands.midMid);
+			}
+			else if (freq >= 1047.0f && freq <= 2093.0f) {
+				bands.highMid = std::max(bands.highMid, magnitude);
+				peak = std::max(peak, bands.highMid);
+			}
+			else if (freq >= 2094.0f && freq <= 4186.0f) {
+				bands.lowHigh = std::max(bands.lowHigh, magnitude);
+				peak = std::max(peak, bands.lowHigh);
+			}
+			else if (freq >= 4187.0f && freq <= 8000.0f) {
+				bands.midHigh = std::max(bands.midHigh, magnitude);
+				peak = std::max(peak, bands.midHigh);
+			}
+			else if (freq >= 8001.0f && freq <= 12000.0f) {
+				bands.highHigh = std::max(bands.highHigh, magnitude);
+				peak = std::max(peak, bands.highHigh);
+			}
+			else if (freq >= 12001.0f && freq <= 20000.0f) {
+				bands.air = std::max(bands.air, magnitude);
+				peak = std::max(peak, bands.air);
+			}
+
+		}
+		//log f flattens the values before normalizing them in order to create better values tpo use for shader
+		if (peak > 0.0f) // avoid division by zero
+		{
+			bands.sub = logf(bands.sub / peak + 1.0f);
+			bands.bass = logf(bands.bass / peak + 1.0f);
+			bands.highBass = logf(bands.highBass / peak + 1.0f);
+			bands.lowMid = logf(bands.lowMid / peak + 1.0f);
+			bands.midMid = logf(bands.midMid / peak + 1.0f);
+			bands.highMid = logf(bands.highMid / peak + 1.0f);
+			bands.lowHigh = logf(bands.lowHigh / peak + 1.0f);
+			bands.midHigh = logf(bands.midHigh / peak + 1.0f);
+			bands.highHigh = logf(bands.highHigh / peak + 1.0f);
+			bands.air = logf(bands.air / peak + 1.0f);
+		}
+	}
+
+	// Print to console
+	std::cout
+		<< "Sub: " << bands.sub << "  "
+		<< "Bass: " << bands.bass << "  "
+		<< "HighBass: " << bands.highBass << "  "
+		<< "LowMid: " << bands.lowMid << "  "
+		<< "MidMid: " << bands.midMid << "  "
+		<< "HighMid: " << bands.highMid << "  "
+		<< "LowHigh: " << bands.lowHigh << "  "
+		<< "MidHigh: " << bands.midHigh << "  "
+		<< "HighHigh: " << bands.highHigh << "  "
+		<< "Air: " << bands.air << std::endl;
+
+
+	return bands;
 }
 
 
@@ -308,6 +426,7 @@ FmodController::~FmodController()
 	{
 		nameOfsounds[i].clear();
 	}
+	dsp->release();
 	system->close();
 	system->release();
 }
