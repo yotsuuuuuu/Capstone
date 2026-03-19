@@ -149,6 +149,8 @@
     <ClCompile Include="CActor.cpp" />
     <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CCameraActor.cpp" />
+    <ClCompile Include="CCapsuleCollider.cpp" />
+    <ClCompile Include="CCollider.cpp" />
     <ClCompile Include="CGlobalLight.cpp" />
     <ClCompile Include="CInput.cpp" />
     <ClCompile Include="CLight.cpp" />
@@ -199,7 +201,9 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CCameraActor.h" />
+    <ClInclude Include="CCapsuleCollider.h" />
     <ClInclude Include="CChunk.h" />
+    <ClInclude Include="CCollider.h" />
     <ClInclude Include="CGlobalLight.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="CInput.h" />

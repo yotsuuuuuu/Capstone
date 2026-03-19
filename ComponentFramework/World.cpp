@@ -9,9 +9,6 @@ void World::Initialize(TerrainPreset* t_)
 	terrainNoise = new TerrainNoise(*t_);
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
-	//std::vector<AudioBands> ab = engineContext.fmodController->AnalyzeAudioOffline(0); // TODO: pass in song num
-	//ProcessedAudio pa = t_->GetLayerValuesFromAudio(ab);
-
 	GenerateAllChunks();
 }
 
@@ -40,8 +37,8 @@ void World::OnDelete()
 	baseChunkMesh.reset();
 	vkDeviceWaitIdle(vRenderer->getDevice());
 	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
-	for (const auto& pair : chunkRenderData) {
-		vRenderer->DestroyTerrainVertexBuffers(pair.second.vertexBuffer);
+	for (const auto& c : chunkRenderData) {
+		vRenderer->DestroyTerrainVertexBuffers(c.vertexBuffer);
 	}
 }
 
@@ -49,9 +46,9 @@ void World::OnDelete()
 
 void World::GenerateAllChunks()
 {
-	chunks.clear();
-	chunks.shrink_to_fit();
+	chunkMap.clear();
 	chunkRenderData.clear();
+	chunkRenderData.shrink_to_fit();
 
 	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
@@ -66,7 +63,8 @@ void World::GenerateAllChunks()
 			GenerateChunkHeightmap(tempChunk.get());
 			BuildChunkMeshData(tempChunk.get());
 
-			chunks.push_back(std::move(tempChunk));
+			chunkMap.insert({chunkWorldPos, std::move(tempChunk) });
+			//chunkMap.push_back(std::move(tempChunk));
 			i++;
 		}
 	}
@@ -145,7 +143,8 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.isInitialized = true;
 	renderData.aabb.min = Vec3(chunkPos.x, chunk->getMinY(), chunkPos.y);
 	renderData.aabb.max = Vec3(chunkPos.x + CHUNK_WORLD_SIZE, chunk->getMaxY(), chunkPos.y + CHUNK_WORLD_SIZE);
-	chunkRenderData[chunkWorldPos] = renderData;
+	chunkRenderData.push_back(renderData);
+	//chunkRenderData[chunkWorldPos] = renderData;
 
 }
 
@@ -188,7 +187,9 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 
 World::~World()
 {
-	chunks.clear();
+	chunkMap.clear();
+	//baseChunkMesh.release();
+	chunkRenderData.clear();
 }
 
 

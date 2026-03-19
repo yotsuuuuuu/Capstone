@@ -12,7 +12,7 @@ class Chunk
 	// can be used for culling and collision detection.
 	float minY;
 	float maxY;
-	bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
+	//bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
 	
 	// for culling just figure out the centre world position
 public:
@@ -36,8 +36,8 @@ public:
 	float getMinY() const { return minY; }
 	float getMaxY() const { return maxY; }
 
-	void SetCulled(bool culled_) { culled = culled_; }
-	bool IsCulled() const { return culled; }
+	//void SetCulled(bool culled_) { culled = culled_; }
+	//bool IsCulled() const { return culled; }
 
 };
 

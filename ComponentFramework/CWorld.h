@@ -29,8 +29,8 @@ public:
 
 	//PipelineInfo const GetWorldPipeline() { return C_World->GetPipeline(); }
 	//std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
-	std::unordered_map<Vec3, TerrainChunkData>* GetChunkRenderData() { return C_World->GetChunkRenderData(); }
-	std::vector<std::unique_ptr<Chunk>>* GetChunks() { return C_World->GetChunks(); }
+	std::unordered_map<Vec2, std::unique_ptr<Chunk>>* GetChunkMap() { return C_World->GetChunkMap(); }
+	std::vector<TerrainChunkData>* GetChunkRenderData() { return C_World->GetChunkRenderData(); }
 	void InitializeWorld(TerrainPreset* t_);
 	void InitializeWorld(int songIndex);
 
