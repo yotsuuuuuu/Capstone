@@ -22,6 +22,7 @@ void Timer::StartFrameTime()
 	// Capped dt should change the max to a variable later
 	// Calculate dt and cache it for this frame
 	if (dt > 0.3f) {
+
 		Debug::Warning("Delta Time lasted more than 0.3f",__FILE__,__LINE__);
 	}
 	dt = SDL_clamp(dt, 0.0f, 0.03f);

@@ -12,11 +12,7 @@ VkImGUISystem::VkImGUISystem():imguiDescriptorPool(VK_NULL_HANDLE)
 VkImGUISystem::~VkImGUISystem()
 {
 
-    ImGui_ImplVulkan_Shutdown();
-    vkDestroyDescriptorPool(context.device, imguiDescriptorPool, nullptr);
-
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
+    
 }
 
 bool VkImGUISystem::Initialize(const ImGuiContex& cntx)
@@ -56,6 +52,15 @@ bool VkImGUISystem::Initialize(const ImGuiContex& cntx)
     return  ImGui_ImplVulkan_Init(&info);
 }
 
+void VkImGUISystem::ShutDonw() {
+    ImGui_ImplVulkan_Shutdown();
+    vkDestroyDescriptorPool(context.device, imguiDescriptorPool, nullptr);
+    imguiDescriptorPool = VK_NULL_HANDLE;
+
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
+}
+
 void VkImGUISystem::RecordCMDBuffer(const VkCommandBuffer& cmd)
 {
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
@@ -80,7 +85,13 @@ void VkImGUISystem::EndFrame()
 
 void VkImGUISystem::TestUI()
 {
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
+    ImGuiIO& io = ImGui::GetIO();
+    BeginFrame();
+    ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();   
+    EndFrame();
 }
 
 void VkImGUISystem::CreateDescriptorPool()

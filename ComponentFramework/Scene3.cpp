@@ -214,16 +214,6 @@ bool Scene3::OnCreate() {
 void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 	
 		switch (sdlEvent.type) {
-		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
-			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
-			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
-			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-			if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
-			{
-				dynamic_cast<VulkanRenderer*>(engineContext.renderer)->RecreateSwapChain();
-			}
-			break;
-		}
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
 		{

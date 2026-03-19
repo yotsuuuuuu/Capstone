@@ -34,14 +34,7 @@ void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
         // need ot wait on the current recording frame
         // not the whole device
         vkDeviceWaitIdle(device); /// This is bad
-        ImGuiIO& io = ImGui::GetIO();
-        imGuiSystem->BeginFrame();
-        //imGuiSystem->TestUI();
-        ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-		//imGuiSystem->TestUI();
-		imGuiSystem->EndFrame();
+       
 
         for (size_t i = 0; i < primaryCommandBuffer.commandBuffers.size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
@@ -69,7 +62,7 @@ void VulkanRenderer::RecordCommandBuffers(Recording start_stop) {
     }
     else if (start_stop == Recording::STOP) {
         for (size_t i = 0; i < primaryCommandBuffer.commandBuffers.size(); i++) {
-			imGuiSystem->RecordCMDBuffer(primaryCommandBuffer.commandBuffers[i]);
+			
             vkCmdEndRenderPass(primaryCommandBuffer.commandBuffers[i]);
             if (vkEndCommandBuffer(primaryCommandBuffer.commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");

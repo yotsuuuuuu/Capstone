@@ -23,6 +23,8 @@ public:
 	~VkImGUISystem();	
 
 	bool Initialize(const ImGuiContex& cntx);
+	void ShutDonw();
+
 	void RecordCMDBuffer(const VkCommandBuffer& cmd);
 	void ImGUIHandelEvents(const SDL_Event& event);
 	void BeginFrame();

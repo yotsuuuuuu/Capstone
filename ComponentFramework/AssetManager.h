@@ -62,8 +62,11 @@ public:
 	std::vector<Ref<Component>> GetActorsInScene();
 	void clearActorsInScene() { actorMap.clear(); }
 	Ref<Component> GetCamera();
+	void ScreenResizeCameraEvent(float aspectRatio);
 	Ref<CMesh> GetMesh(const std::string& id);
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);
+
+	void RecreatedPipelines();
 	
 };

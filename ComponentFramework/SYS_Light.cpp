@@ -233,6 +233,28 @@ void SYS_Light::ComputeLightClusters(uint32_t frameIndex)
 	}
 }
 
+void SYS_Light::ScreenResizeCameraEvent(int width, int height)
+{
+	
+	// next four  var are dependent on the Camera
+	// if the cameras projection matrix changes (most likly due to screen size change)
+	// these values should get updated.
+	if (!isInit)
+		return;
+	auto comp = camera.lock();
+	if (!comp)
+		return;
+	auto cam = std::dynamic_pointer_cast<CActor>(comp)->GetComponent<CCamera>();
+
+	data.inverseProjection = MMath::inverse(cam->GetProjection());
+	auto planes = cam->GetzPlanes();
+	data.zPlanes[0] = planes.x;
+	data.zPlanes[1] = planes.y;
+	data.screenDimensions[0] = static_cast<uint32_t>(width);
+	data.screenDimensions[1] = static_cast<uint32_t>(height);
+	systemDataUBOOutOfDate = true;
+}
+
 bool SYS_Light::RegisterLight(CLight* Light)
 { 
 	if (!mapppedLightSSBO || !isInit)

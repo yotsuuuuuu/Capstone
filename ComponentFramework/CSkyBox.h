@@ -27,8 +27,11 @@ public:
 	void Update(const float dt)  override {}
 
 	IndexedVertexBuffer GetMesh();
+
+	void RecreatePipeline();
 	PipelineInfo GetPipeline();
 	std::vector<VkDescriptorSet> GetSet() { return DesSet; }
+
 
 };
 

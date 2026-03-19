@@ -4,6 +4,7 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 #include "FmodController.h"
+#include "VkImGUISystem.h"
 #include "SYS_Light.h"
 #include "Timer.h"
 #include "Scene0.h"
@@ -14,7 +15,7 @@
 SceneManager::SceneManager() :
 	currentScene(nullptr), timer(nullptr),
 	fps(60), isRunning(false), rendererType(RendererType::VULKAN),
-	renderer(nullptr){}
+	renderer(nullptr),LightSystem(nullptr),fmodController(nullptr), assetManager(nullptr), VKImGui(nullptr){}
 
 SceneManager::~SceneManager() {
 	if (currentScene) {
@@ -33,6 +34,10 @@ SceneManager::~SceneManager() {
 	if (LightSystem) {
 		LightSystem->ShutDonw();
 		delete LightSystem;
+	}
+	if (VKImGui) {
+		VKImGui->ShutDonw();
+		delete VKImGui;
 	}
 	renderer->OnDestroy();
 	engineContext.renderer = nullptr;
@@ -79,6 +84,8 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	fmodController = new FmodController();
 	LightSystem = new SYS_Light(&engineContext, 1000);
 
+	VKImGui = new VkImGUISystem();
+
 	assetManager = new AssetManager();
 	if (!fmodController->AddSonginFile())
 	{
@@ -89,10 +96,16 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		Debug::Error("Failed to create fmod system", __FILE__, __LINE__);
 	}
 	fmodController->InitilizeSongs();
-	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem);
+	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem,*VKImGui);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./test.json");		
-	
+
+	auto cntx = static_cast<VulkanRenderer*>(renderer)->GetImGuiContext();
+	if (!VKImGui->Initialize(cntx)) {
+		Debug::FatalError("Failed to initialize ImGui System", __FILE__, __LINE__);
+		return false;
+	}
+
 	if (!LightSystem->Initilize()) {
 		Debug::FatalError("Failed to initialize Light System", __FILE__, __LINE__);
 		return false;
@@ -118,10 +131,11 @@ void SceneManager::Run() {
 	while (isRunning) {		
 		timer->StartFrameTime();	
 
-		currentScene->Update(timer->getDeltaTime());		
+		GetEvents();		
+		currentScene->Update(timer->getDeltaTime());
+		engineContext.VKImGUI->TestUI();
 		currentScene->Render();
 
-		GetEvents();		
 		timer->EndFrameTime();
 	}
 }
@@ -183,12 +197,33 @@ void SceneManager::GetEvents() {
 				break;
 			}
 		}
+		if(sdlEvent.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
+			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
+			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
+			if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
+			{
+				VulkanRenderer* Vkrender = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+				Vkrender->RecreateSwapChain();// recreate swapchains
+				engineContext.assetManager->ScreenResizeCameraEvent(aspectRatio); // update main camera
+				engineContext.assetManager->RecreatedPipelines(); //recreate Pipeliens
+				//update Light System
+				engineContext.lightSys->ScreenResizeCameraEvent(sdlEvent.window.data1, sdlEvent.window.data2);
+				engineContext.lightSys->ComputeClusters();
+				//update imgui
+				auto cntx = Vkrender->GetImGuiContext();
+				engineContext.VKImGUI->ShutDonw();
+				engineContext.VKImGUI->Initialize(cntx);
+			}
+			
+		}
+
 		if (currentScene == nullptr) {
 			Debug::FatalError("Failed to initialize Scene", __FILE__, __LINE__);
 			isRunning = false;
 			return;
 		}
-		static_cast<VulkanRenderer*>(renderer)->ImGUIHandelEvents(sdlEvent);
+		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent);
 		currentScene->HandleEvents(sdlEvent);
 	}
 }

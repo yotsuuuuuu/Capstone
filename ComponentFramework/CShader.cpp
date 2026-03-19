@@ -6,7 +6,7 @@ bool CShader::OnCreate()
 		return true;
     if (!render)
         return false;
-
+    
     switch (render->getRendererType()) {
     case RendererType::VULKAN :{
         VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
@@ -20,7 +20,7 @@ bool CShader::OnCreate()
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
       
-
+        
         isCreated = true;
         return true;
         break;
@@ -49,6 +49,11 @@ void CShader::OnDestroy()
     isCreated = false;
 }
 
+void CShader::SetPipeLineConfig(PipeLineConfig config)
+{
+    p_config = config;
+}
+
 
 std::vector<VkDescriptorSet> CShader::AllocateDescriptorSet(std::vector<Sampler2D> arrySampler)
 {
@@ -68,6 +73,27 @@ std::vector<VkDescriptorSet> CShader::AllocateDescriptorSet(std::vector<Sampler2
     return  std::vector<VkDescriptorSet>();
 }
 
+// Asumming this is being called while device is idel
 void CShader::RecreatePipeLine()
 {
+    if (!isCreated)
+        return;
+    if (!render)
+        return;
+
+    switch (render->getRendererType()) {
+    case RendererType::VULKAN: {
+        VulkanRenderer* vkrender = static_cast<VulkanRenderer*>(render);
+      
+        vkrender->DestroyPipeline(pipelineInfo);
+
+        std::vector<VkDescriptorSetLayout> arrDescriptorlayouts = { vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout };
+
+        PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
+        pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
+            fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
+        break;
+    }
+    }
+
 }

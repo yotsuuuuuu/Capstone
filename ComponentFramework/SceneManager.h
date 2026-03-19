@@ -40,6 +40,7 @@ private:
 	AssetManager* assetManager;
 	FmodController* fmodController;
 	SYS_Light* LightSystem;
+	VkImGUISystem* VKImGui;
 	unsigned int fps;
 	bool isRunning;
 	void BuildScene(SCENE_NUMBER scene_);

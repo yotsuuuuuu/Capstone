@@ -45,9 +45,7 @@ bool VulkanRenderer::OnCreate(){
     CreateCommandBuffers();
     createSyncObjects();
 
-	imGuiSystem = new VkImGUISystem();
-    auto cntx = GetImGuiContext();
-	imGuiSystem->Initialize(cntx);
+	
 
     return true;
 }
@@ -56,8 +54,7 @@ void VulkanRenderer::OnDestroy() {
     vkDeviceWaitIdle(device); /// Wait for all commands to clear
     destroySwapChain();
 
-    delete imGuiSystem;
-    imGuiSystem = nullptr;
+   
 
     DestroyCommandBuffers();
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -1194,10 +1191,6 @@ ImGuiContex VulkanRenderer::GetImGuiContext()
     return c;
 }
 
-void VulkanRenderer::ImGUIHandelEvents(const SDL_Event& event)
-{
-	imGuiSystem->ImGUIHandelEvents(event);
-}
 
 void VulkanRenderer::AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo, uint32_t binding, VkDescriptorType desType, VkShaderStageFlags stageFlags, uint32_t count)
 {

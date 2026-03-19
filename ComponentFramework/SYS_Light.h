@@ -6,9 +6,6 @@
 class SYS_Light
 {
 	//TODO (Kev) Light system
-	// IMPLEMENT INTO THE MAIN REDNER LOOP
-	// 
-	// UPDATE MAIN SHADERS TO USE THE LIGHT SYSTEM.
 	// NEED TO ACCOUNT FOR RESIZEING OF THE SCREEN
 	BufferMemory ScreenClustersSSBO;
 	uint32_t ClusterCount;
@@ -61,6 +58,8 @@ public:
 	// Based on the Cameras view Matrix
 	// has to be done everyframe.
 	void ComputeLightClusters(uint32_t frameIndex);
+
+	void ScreenResizeCameraEvent(int width, int height);
 
 	bool RegisterLight(CLight* Light);
 	bool DeregisterLight(CLight* Light);

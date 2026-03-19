@@ -7,6 +7,7 @@
 #include "CCamera.h"
 #include "CPhysics.h"
 #include "CInput.h"
+#include "CSkyBox.h"
 #include "CGlobalLight.h"
 #include "CLight.h"
 #include "Debug.h"
@@ -132,7 +133,7 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		std::cout << "json does not contain shader" << "\n";
 		return false;
 	}
-
+    //note still only does one descriptor
 	for(auto & [shaderId, shaderData] : jsonLoader["Shaders"].items())
 	{
 		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
@@ -366,3 +367,26 @@ AssetManager::~AssetManager()
 	camera->OnDestroy();
     camera = nullptr;
 }
+
+void AssetManager::RecreatedPipelines()
+{
+    for (const auto& Comp : assetMap) {
+        if (auto shader = std::dynamic_pointer_cast<CShader>(Comp.second)) {
+            shader->RecreatePipeLine();
+        }
+    }
+}
+
+
+void AssetManager::ScreenResizeCameraEvent(float aspectRatio)
+{
+    auto camComp = camera->GetComponent<CCamera>();
+    auto camdata = camComp->GetProjMatrixValues();
+
+    camComp->UpdateProjectionMatrix(camdata[0], aspectRatio, camdata[2], camdata[3]);
+    if (auto skybox = camera->GetComponent<CSkyBox>()) {
+        skybox->RecreatePipeline();
+    }
+}
+
+

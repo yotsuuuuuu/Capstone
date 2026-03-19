@@ -83,6 +83,23 @@ IndexedVertexBuffer CSkyBox::GetMesh()
     return   std::dynamic_pointer_cast<CMesh>(Mesh)->GetMesh();
 }
 
+void CSkyBox::RecreatePipeline()
+{
+    if (!isCreated)
+        return;
+    if (!renderer)
+        return;
+    VulkanRenderer* VKR = static_cast<VulkanRenderer*>(renderer);
+    auto config = VKR->GetMainPassPipeLineConfig();
+    config.depthTestEnable = VK_TRUE;
+    config.depthWriteEnable = VK_FALSE;
+    config.depthCompareOp = VK_COMPARE_OP_LESS;
+    config.cullMode = VK_CULL_MODE_FRONT_BIT;
+    Ref<CShader> s = std::dynamic_pointer_cast<CShader>(Shader);
+    s->SetPipeLineConfig(config);
+    s->RecreatePipeLine();
+}
+
 PipelineInfo CSkyBox::GetPipeline()
 {
     return std::dynamic_pointer_cast<CShader>(Shader)->GetPipelineInfo();

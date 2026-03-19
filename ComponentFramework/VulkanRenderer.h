@@ -21,7 +21,7 @@
 #include "CoreStructs.h"
 #include "Renderer.h"
 #include "DescriptorSetBuilder.h"
-#include "VkImGUISystem.h"
+//#include "VkImGUISystem.h"
 
 
 #include <Vector.h>
@@ -341,11 +341,11 @@ private:
 
 
     //ImGUI system
-	VkImGUISystem* imGuiSystem;
+	//VkImGUISystem* imGuiSystem;
 public:
 
     ImGuiContex GetImGuiContext();
-	void ImGUIHandelEvents(const SDL_Event& event);
+
 
 	//Descriptor Set Builder
     void AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,

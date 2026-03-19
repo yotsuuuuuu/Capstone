@@ -236,6 +236,7 @@ vec4 ClusterLightsColour(vec4 ktColour) {
 
 		Result += intensity * attenuation * ((diff * pointLightColor) + ( spec * pointLightColor)) * ktColour;
 		//Result += intensity  * ((diff * pointLightColor) + ( spec * pointLightColor)) * ktColour;
+	    //Result = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		
     }
 

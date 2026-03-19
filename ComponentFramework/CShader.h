@@ -36,8 +36,9 @@ public:
 	virtual void OnDestroy() override;
 	virtual void Update(const float dt) override {}	
 	
+	void SetPipeLineConfig(PipeLineConfig config);
 	PipelineInfo GetPipelineInfo() const { return pipelineInfo; }	
-	void SetPipelineInfo(const PipelineInfo& pipelineInfo_) { pipelineInfo = pipelineInfo_; }
+	//void SetPipelineInfo(const PipelineInfo& pipelineInfo_) { pipelineInfo = pipelineInfo_; }
 
 	std::vector<VkDescriptorSet> AllocateDescriptorSet(std::vector<Sampler2D> arrySampler);
 

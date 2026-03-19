@@ -38,6 +38,7 @@ public:
 	void UpdateUBO(uint32_t uboindex);
 
 	void UpdateProjectionMatrix(float FOVY,float aspectRatio,float nearClip,float farClip);
+	std::vector<float> GetProjMatrixValues();
 	void UpdateViewMatrix();
 
 	Matrix4 GetProjectionMatrix() const { return projectionMatrix; }

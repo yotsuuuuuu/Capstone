@@ -12,6 +12,7 @@
 #include "EngineContext.h"
 #include "SYS_Light.h"
 #include "AssetManager.h"
+#include "VkImGUISystem.h"
 #include "imgui.h"
 #include <unordered_map>
 
@@ -534,13 +535,7 @@ public:
         //  Post process bloom pass
         //  ImGUI 
       
-        ImGuiIO& io = ImGui::GetIO();
-        VKRNDR->imGuiSystem->BeginFrame();
-        ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-        //VKRNDR->imGuiSystem->TestUI();
-        VKRNDR->imGuiSystem->EndFrame();
+      
         // 1 Get current render frame info
         VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
 
@@ -553,6 +548,7 @@ public:
             MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.inFlightIndex);
             MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
+        
         Ecntx.lightSys->ComputeLightClusters(framecntx.inFlightIndex);
 
         VkPipelineLayout line;
@@ -605,7 +601,6 @@ public:
         else {
             throw std::runtime_error("Main Camera is in valid");
         }
-        // TODO: REDO FOR CASTCADING SHAHOW MAPS.
         // 3 Start recording
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
@@ -681,8 +676,8 @@ public:
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
             }
-           
-            VKRNDR->imGuiSystem->RecordCMDBuffer(framecntx.CMDBuffer);
+           // IMGUI PROBLY WILL HAVE TO MOVE IF WE ARE DOING BLOOM
+            Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);           
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
         // 4 Stop recording

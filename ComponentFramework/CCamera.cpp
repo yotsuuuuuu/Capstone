@@ -104,6 +104,16 @@ void CCamera::UpdateProjectionMatrix(float fovy_, float aspectRatio_, float near
 	projectionMatrix = MMath::perspectiveVK(fovy, aspectRatio, nearClip, farClip);
 }
 
+std::vector<float> CCamera::GetProjMatrixValues()
+{
+	std::vector<float> data(4);
+	data[0] = fovy;
+	data[1] = aspectRatio;
+	data[2] = nearClip;
+	data[3] = farClip;
+	return data;
+}
+
 void CCamera::UpdateViewMatrix() {
 	auto T = transform.lock();
 	if (T) {
