@@ -131,10 +131,12 @@ void SceneManager::Run() {
 	while (isRunning) {		
 		timer->StartFrameTime();	
 
-		GetEvents();		
-		currentScene->Update(timer->getDeltaTime());
-		engineContext.VKImGUI->TestUI();
-		currentScene->Render();
+		GetEvents();
+		if (currentScene && !isWindowMinimized) {
+			currentScene->Update(timer->getDeltaTime());
+			engineContext.VKImGUI->TestUI();
+			currentScene->Render();
+		}
 
 		timer->EndFrameTime();
 	}
@@ -144,37 +146,30 @@ void SceneManager::GetEvents() {
 	SDL_Event sdlEvent;
 	std::string songnametest;
 	while (SDL_PollEvent(&sdlEvent)) {
-		if (sdlEvent.type == SDL_EventType::SDL_EVENT_QUIT) {
+		switch (sdlEvent.type) {
+		case SDL_EVENT_QUIT:
 			isRunning = false;
 			return;
-		}
-		else if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
+		case SDL_EVENT_KEY_DOWN:
 			switch (sdlEvent.key.scancode) {
-			//case SDL_SCANCODE_ESCAPE:
 			case SDL_SCANCODE_Q:
 				isRunning = false;
 				return;
-
 			case SDL_SCANCODE_F1:
-					BuildScene(SCENE0);
+				BuildScene(SCENE0);
 				break;
-
 			case SDL_SCANCODE_F2:
 				BuildScene(SCENE2);
 				break;
-
 			case SDL_SCANCODE_F3:
 				BuildScene(SCENE3);
 				break;
-
 			case SDL_SCANCODE_F4:
 				///BuildScene(SCENE4);
 				break;
-
 			case SDL_SCANCODE_F5:
 				///BuildScene(SCENE5);
 				break;
-
 			case SDL_SCANCODE_F6:
 				///BuildScene(SCENE6);
 				break;
@@ -193,38 +188,58 @@ void SceneManager::GetEvents() {
 				engineContext.fmodController->playsong(1);
 				break;
 			default:
-				//BuildScene(SCENE0);
 				break;
 			}
+			break;
+
+		case SDL_EVENT_WINDOW_MINIMIZED:
+			isWindowMinimized = true;
+			break;
+
+		case SDL_EVENT_WINDOW_RESTORED:
+			isWindowMinimized = false;
+			needSwapChainRecreation = true;
+			break;
+
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			needSwapChainRecreation = true;
+			break;
+
+		default:
+			break;
 		}
-		if(sdlEvent.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
-			printf("size changed %d %d\n", sdlEvent.window.data1, sdlEvent.window.data2);
-			float aspectRatio = static_cast<float>(sdlEvent.window.data1) / static_cast<float>(sdlEvent.window.data2);
-			///camera->Perspective(45.0f, aspectRatio, 0.5f, 20.0f);
-			if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
-			{
-				VulkanRenderer* Vkrender = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
-				Vkrender->RecreateSwapChain();// recreate swapchains
-				engineContext.assetManager->ScreenResizeCameraEvent(aspectRatio); // update main camera
-				engineContext.assetManager->RecreatedPipelines(); //recreate Pipeliens
-				//update Light System
-				engineContext.lightSys->ScreenResizeCameraEvent(sdlEvent.window.data1, sdlEvent.window.data2);
-				engineContext.lightSys->ComputeClusters();
-				//update imgui
-				auto cntx = Vkrender->GetImGuiContext();
-				engineContext.VKImGUI->ShutDonw();
-				engineContext.VKImGUI->Initialize(cntx);
-			}
-			
+		
+		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent);
+		if (currentScene) currentScene->HandleEvents(sdlEvent);
+	}
+	if (needSwapChainRecreation) {
+
+		if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
+		{
+			VulkanRenderer* Vkrender = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+			int width = 0, height = 0;
+			SDL_GetWindowSize(Vkrender->getWindow(), &width, &height);
+			printf("size changed %d %d\n", width, height);
+			float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+			Vkrender->RecreateSwapChain();// recreate swapchains
+			engineContext.assetManager->ScreenResizeCameraEvent(aspectRatio); // update main camera
+			engineContext.assetManager->RecreatedPipelines(); //recreate Pipeliens
+			//update Light System
+			engineContext.lightSys->ScreenResizeCameraEvent(width, height);
+			engineContext.lightSys->ComputeClusters();
+			//update imgui
+			auto cntx = Vkrender->GetImGuiContext();
+			engineContext.VKImGUI->ShutDonw();
+			engineContext.VKImGUI->Initialize(cntx);
+			needSwapChainRecreation = false;
 		}
 
-		if (currentScene == nullptr) {
-			Debug::FatalError("Failed to initialize Scene", __FILE__, __LINE__);
-			isRunning = false;
-			return;
-		}
-		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent);
-		currentScene->HandleEvents(sdlEvent);
+	}
+
+	if (currentScene == nullptr) {
+		Debug::FatalError("Failed to initialize Scene", __FILE__, __LINE__);
+		isRunning = false;
+		return;
 	}
 }
 

@@ -43,6 +43,8 @@ private:
 	VkImGUISystem* VKImGui;
 	unsigned int fps;
 	bool isRunning;
+	bool isWindowMinimized = false;
+	bool needSwapChainRecreation = false;
 	void BuildScene(SCENE_NUMBER scene_);
 };
 

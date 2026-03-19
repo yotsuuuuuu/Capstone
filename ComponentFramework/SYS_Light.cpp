@@ -187,7 +187,7 @@ void SYS_Light::ComputeClusters()
 		vk->CMDEndRecord(ComputeCmd.front());
 		// submit
 		vk->CMDSubmitComputeQueue(&ComputeCmd.front(), 1, Fence);
-		vkWaitForFences(device, 1, &Fence, VK_TRUE, UINT64_MAX);
+		//vkWaitForFences(device, 1, &Fence, VK_TRUE, UINT64_MAX);
 		////// Temporary debug readback
 		//	void* mappedData;
 		//vkMapMemory(device, ScreenClustersSSBO.bufferMemoryID, 0, sizeof(Cluster) * 5, 0, &mappedData);
