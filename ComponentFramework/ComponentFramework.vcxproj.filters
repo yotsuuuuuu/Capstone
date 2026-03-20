@@ -142,6 +142,15 @@
     <ClCompile Include="CLight.cpp">
       <Filter>Source\Components</Filter>
     </ClCompile>
+    <ClCompile Include="CCollider.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="CCapsuleCollider.cpp">
+      <Filter>Source\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsManager.cpp">
+      <Filter>Source\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
@@ -302,6 +311,15 @@
     </ClInclude>
     <ClInclude Include="Chunk.h">
       <Filter>Header\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="CCollider.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CCapsuleCollider.h">
+      <Filter>Header\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsManager.h">
+      <Filter>Header\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

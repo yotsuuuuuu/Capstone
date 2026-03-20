@@ -24,9 +24,11 @@ private:
 
 	// chunks
 	std::unique_ptr<BaseGridMesh> baseChunkMesh; // base mesh for chunks
-	std::vector<std::unique_ptr<Chunk>> chunks; 
-	std::unordered_map<Vec3, TerrainChunkData> chunkRenderData; // map chunk positions to their render data
+	std::unordered_map<Vec2, std::unique_ptr<Chunk>> chunkMap; // map chunk positions to their render data
+	std::vector<TerrainChunkData> chunkRenderData;
 	IndexedVertexBuffer chunkIndexBuffer;
+
+
 	// vulkan
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
@@ -55,10 +57,13 @@ public:
 	void Initialize(int songIndex);
 	void OnDelete();
 
+	int GetWorldSize() const { return WORLD_SIZE; }
+	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
+
 	PipelineInfo const GetPipeline() { return worldPipeline; }
 	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
-	std::unordered_map<Vec3, TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
-	std::vector<std::unique_ptr<Chunk>>* GetChunks() { return &chunks; }
+	std::unordered_map<Vec2, std::unique_ptr<Chunk> >* GetChunkMap() { return &chunkMap; }
+	std::vector<TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
 	// get culled chunk data
 
 

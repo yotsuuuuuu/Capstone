@@ -570,15 +570,15 @@ public:
                 if (world && mat) {
                     PipelineInfo info = mat->GetPipelineInfo();
                     VkDescriptorSet set = mat->GetDescriptorSet()[framecntx.inFlightIndex];
-                    auto chunkMap = world->GetChunkRenderData();
-                    for (const auto& pair : *chunkMap) {
-                        if (pair.second.isCulled) {
+                    auto chunkData = world->GetChunkRenderData();
+                    for (const auto& c : *chunkData) {
+                        if (c.isCulled) {
 							//std::cout << "culled chunk at " << pair.first.x << "," << pair.first.y << "," << pair.first.z << std::endl;
                             continue;
 						}
                         DrawItem item;
-                        item.mesh = pair.second.vertexBuffer;
-                        item.push = pair.second.transform;
+                        item.mesh = c.vertexBuffer;
+                        item.push = c.transform;
                         item.setID = mat->GetSetValue();
                         item.pipeInfo = info;
                         item.set = set;

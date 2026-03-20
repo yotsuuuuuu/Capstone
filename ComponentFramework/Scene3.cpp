@@ -9,6 +9,7 @@
 #include "CMesh.h"
 #include "CMaterial.h"
 #include "CTransform.h"
+#include "CCapsuleCollider.h"
 #include "CWorld.h"
 #include "CInput.h"
 #include "CCamera.h"
@@ -339,8 +340,8 @@ void Scene3::FrustumCheck()
 
 	auto worldActor = std::dynamic_pointer_cast<CActor>(world);
 	auto chunksData = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
-	for (auto& pair : *chunksData) {
-		auto& c = pair.second;
+	for (auto& c : *chunksData) {
+		//auto& c = pair.second;
 		c.isCulled = false;
 
 		for (int i = 0; i < 6; i++) {
@@ -380,7 +381,11 @@ void Scene3::FrustumCheck()
 
 }
 
+
+
 void Scene3::Update(const float deltaTime) {
+
+	// TODO: move to physics system.
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
 		auto playerController =player->GetComponent<CInput>();
@@ -392,6 +397,23 @@ void Scene3::Update(const float deltaTime) {
 	}
 	
 	FrustumCheck();
+	
+	// world collision checking
+	// through a system maybe?
+	//
+	// iterate through the chunk render data
+	// keep track 
+	// int mapX, mapY; (start at 0)
+	// iterate through and when 
+	// mapX < WORLD_SIZE
+	// mapX = 0;
+	// mapY++
+	// when mapY < WORLD_SIZE && mapX < WORLD_SIZE -> return;
+	// mapX and mapY can be used to grab the correct chunk from chunkMap
+	// chunkMap.find(Vec2(mapX, mapY));
+	// chunkMap holds indices and vertices on CPU so can be used to check collision with player
+	//  
+	//
 	
 }
 

@@ -56,6 +56,7 @@ public:
 	std::vector<MATHEX::Plane> GenerateFrustumPLane();
 	void FrustumCheck();
 
+
 };
 
 

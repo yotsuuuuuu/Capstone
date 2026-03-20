@@ -8,13 +8,15 @@ class Chunk
 	Vec2 position; // x,z position in world space. y comes from heightmap
 	std::vector<float> heightmap; // heightmap for the chunk
 	Vec3 worldPos;
+
 	// with min and max and the chunk size we can calculate a bounding box for the chunk.
 	// can be used for culling and collision detection.
 	float minY;
 	float maxY;
-	bool culled = false; // flag for if the chunk is currently culled or not. can be used to avoid recalculating culling every frame for chunks that are already culled.
-	
-	// for culling just figure out the centre world position
+
+	std::vector<Vertex> vertices;
+	//std::vector<uint32_t> indices;
+
 public:
 
 	Chunk() { position = Vec2(); }
@@ -28,7 +30,7 @@ public:
 	const std::vector<float>& GetHeightmap() const { return heightmap; }
 	const Vec2& GetPosition() const { return position; }
 	Vec3 GetWorldPos() const { return worldPos; }
-	Vec2 getChunkPos() const { return position; }
+	Vec2 GetChunkPos() const { return position; }
 
 	void setMinY(float min_) { minY = min_; }
 	void setMaxY(float max_) { maxY = max_; }
@@ -36,8 +38,10 @@ public:
 	float getMinY() const { return minY; }
 	float getMaxY() const { return maxY; }
 
-	void SetCulled(bool culled_) { culled = culled_; }
-	bool IsCulled() const { return culled; }
+	std::vector<Vertex>& GetVertices() { return vertices; }
+
+	//void SetCulled(bool culled_) { culled = culled_; }
+	//bool IsCulled() const { return culled; }
 
 };
 
