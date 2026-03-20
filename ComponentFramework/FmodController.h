@@ -8,10 +8,12 @@ class FmodController
 {
 private:
 	FMOD::System* system;
+	FMOD::ChannelGroup* masterGroup = nullptr;
 	std::vector<FMOD::Sound*> sounds;
 	std::vector<std::string> nameOfsounds;
 	FMOD::Channel* channel = nullptr;
 	FMOD_RESULT result = FMOD_OK;
+	FMOD::DSP* dsp;
 	void* extradriverdata = 0;
 	float volume = 25.0f;
 
@@ -26,10 +28,11 @@ public:
 	void playsong(AudioState state_);
 	bool createSystem();
 	void Volume(float volume_);
-
+	float getTimeOfSong(int index_);
+	float getCurrentTime();
 
 	std::vector<AudioBands> AnalyzeAudioOffline(int songunum_);
-	std::vector<AudioBands> AnalyzeAudioOnline();
+	AudioBands AnalyzeAudioOnline();
 	//system that gets the fmod sound data that fram puts it inot bands then sends it to the vulkan rednerer for the shader system. NEEDS TO GET SIZE
 	~FmodController();
 };
