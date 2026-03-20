@@ -67,6 +67,8 @@ public:
 
 	VkSemaphore GetLightCullReadySingal() { return SignalSema; }
 
+	uint32_t GetCurrentLightCount() { return data.lightCount; }
+
 	std::vector< BufferMemory> GetSysUBO() { return { systemDataUBO }; }
 	std::vector< BufferMemory> GetClusterSSBO() { return { ScreenClustersSSBO }; }
 	std::vector< BufferMemory> GetLightSSBO() { return { ActiveSceneLightSSBO }; }

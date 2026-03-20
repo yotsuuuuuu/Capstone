@@ -7,6 +7,7 @@
 #include "CMesh.h"
 #include "CGlobalLight.h"
 #include "CTransform.h"
+#include "CLight.h"
 #include "CWorld.h"
 #include "CSkyBox.h"
 #include "EngineContext.h"
@@ -73,7 +74,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescriptorLayoutCollection(layoutGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3);
     AddToDescriptorLayoutCollection(layoutGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
-    AddToDescriptorLayoutCollection(layoutGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 
     std::vector<DescriptorWriteInfo> writeGlobal;
     AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Camera->GetCameraUBO());
@@ -81,7 +82,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, shadowMappingInfo.ShadowTextures2D);
     AddToDescrisptorLayoutWrite(writeGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetSysUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
 
     //
@@ -402,10 +403,11 @@ void VulkanRenderer::CMDRecordBindIndexedMesh(const VkCommandBuffer& cmd, const 
     vkCmdBindIndexBuffer(cmd, mesh.indexBufferID, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void VulkanRenderer::CMDRecordDrawIndexedMesh(const VkCommandBuffer& cmd, const IndexedVertexBuffer& mesh)
+void VulkanRenderer::CMDRecordDrawIndexedMesh(const VkCommandBuffer& cmd, const IndexedVertexBuffer& mesh, uint32_t count)
 {
-    vkCmdDrawIndexed(cmd, static_cast<uint32_t>(mesh.indexBufferLength), 1, 0, 0, 0);
+    vkCmdDrawIndexed(cmd, static_cast<uint32_t>(mesh.indexBufferLength), count, 0, 0, 0);
 }
+
 
 
 void VulkanRenderer::CMDEndRenderPass(const VkCommandBuffer& cmd)
@@ -551,7 +553,7 @@ public:
         
         Ecntx.lightSys->ComputeLightClusters(framecntx.inFlightIndex);
 
-        VkPipelineLayout line;
+       // VkPipelineLayout line;
         // 1.1 get draw items
         std::unordered_map<VkPipeline, std::vector<DrawItem>> DrawingBuckets;      
         for (const auto& comp : drawlist) {
@@ -559,12 +561,16 @@ public:
             if (a) {
                 auto mat = a->GetComponent<CMaterial>();
                 auto mesh = a->GetComponent<CMesh>();
+                auto cLight = a->GetComponent<CLight>();
                 // sohuld check for transform
                 if (mat && mesh) {
                     DrawItem item = GetDrawItem(a, framecntx);
                     // 1.2 sort them into buckets
+                   /* if (cLight) {
+                        item.push.normalMatrix[0] = static_cast<float>(cLight->GetIndex());
+                    }*/
                     DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
-                    line = item.pipeInfo.pipelineLayout;
+                   
                 }       
                 auto world = a->GetComponent<CWorld>();
                 if (world && mat) {
@@ -601,6 +607,19 @@ public:
         else {
             throw std::runtime_error("Main Camera is in valid");
         }
+        //1.4 draw item for Lights
+        auto LightMat = Ecntx.assetManager->GetMat("SimpleLightMat");
+        auto LightMesh = Ecntx.assetManager->GetMesh("IcoMesh");
+        bool componentsareValid = false;
+        DrawItem lightItem{};
+        if (LightMat && LightMesh) {           
+            componentsareValid = true;
+            lightItem.pipeInfo = LightMat->GetPipelineInfo();
+            lightItem.mesh = LightMesh->GetMesh();
+            lightItem.set = LightMat->GetDescriptorSet()[framecntx.inFlightIndex];
+            lightItem.setID = LightMat->GetSetValue();
+        }
+            
         // 3 Start recording
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
@@ -676,6 +695,15 @@ public:
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
             }
+            //draw the lights
+            if (componentsareValid) {
+                //lightItem
+                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, lightItem.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, lightItem.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &lightItem.set, lightItem.setID);
+                VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, lightItem.mesh);
+                VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, lightItem.mesh,Ecntx.lightSys->GetCurrentLightCount());
+            }
+
            // IMGUI PROBLY WILL HAVE TO MOVE IF WE ARE DOING BLOOM
             Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);           
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
@@ -711,7 +739,7 @@ public:
       
 
         DrawItem item{};
-        item.push.modelMatrix = actor->GetModelMatrix();;
+        item.push.modelMatrix = actor->GetModelMatrix();
         item.push.normalMatrix = MMath::transpose(MMath::inverse(item.push.modelMatrix));
         item.pipeInfo = mat->GetPipelineInfo();
         item.mesh = mesh->GetMesh();
