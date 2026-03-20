@@ -7,15 +7,16 @@ void PhysicsManager::TerrainCollision()
 
 	for (auto& cd : *chunksData) {
 		if (cd.isCulled) continue; // if culled skip collision check
-
-		if (playerCollider->IntersectingAABB(cd.aabb)) {
+		CollisionInfo info = playerCollider->IntersectingAABB(cd.aabb);
+		if (info.isColliding) {
 			//std::cout << "Colliding with chunk at pos: " << std::endl;
 			// check if colliding with mesh
 			auto chunkIt = chunkMap->find(Vec2(mapX, mapY));
 			if (chunkIt != chunkMap->end()) {
 
 				auto& chunk = chunkIt->second;
-				if (playerCollider->IntersectingMesh(chunk->GetVertices(), indices)) {
+				MeshCollisionInfo mInfo = playerCollider->IntersectingMesh(chunk->GetVertices(), indices);
+				if (mInfo.isColliding) {
 					//std::cout << "Colliding with chunk mesh at pos: " << aabb.chunkPos.x << ", " << aabb.chunkPos.y << std::endl;
 					// 
 					// maybe break here if we only want to know if colliding with the chunk or not, 

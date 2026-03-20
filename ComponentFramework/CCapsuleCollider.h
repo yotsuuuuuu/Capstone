@@ -43,7 +43,6 @@ public:
 	virtual CollisionInfo IntersectingAABB(const AABB& aabb) override;
 
 	virtual bool SimpleIntersectingAABB(const AABB& aabb) override; // just check if the capsule's AABB is intersecting with the given AABB, used for broad phase
-	//virtual bool IntersectingChunk(const TerrainChunkData& chunk) override;
 	virtual MeshCollisionInfo IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) override;
 
 	float GetRadius() { return radius; }
@@ -53,8 +52,6 @@ public:
 	const Vec3& GetAxis() { return axis; }
 
 	
-	Vec3 GetClosestPointOnCapsule(const Vec3& point) const;
-	float GetDistanceToPoint(const Vec3& point) const;
 	CollisionInfo IntersectingSphereTriangle(const Vec3& sphereCenter, float sphereRadius, const Vec3& v0, const Vec3& v1, const Vec3& v2) const;
 	CollisionInfo IntersectingCapsuleTriangle(const Vec3& v0, const Vec3& v1, const Vec3& v2) const;
 	AABB GetAABB() const; 

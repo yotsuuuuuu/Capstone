@@ -13,20 +13,33 @@ bool CCapsuleCollider::OnCreate() {
 	//UpdateCapsulePoints();
 	//UpdateWorldAABB();
 	auto actor = parent.lock();
-	if (!actor)
-		return;
+	if (!actor)	return false;
 	auto t = std::dynamic_pointer_cast<CActor>(actor)->GetComponent<CTransform>();
-	if (!t)
-		return;
+	if (!t)	return false;
 	transform = t;
 
 	return true;
+}
+
+void CCapsuleCollider::OnDestroy()
+{
+	// nothing to clean up for now
 }
 
 void CCapsuleCollider::Update(const float dt)
 {
 }
 
+
+CollisionInfo CCapsuleCollider::IntersectingWith(const CCollider& other) const
+{
+	return CollisionInfo();
+}
+
+CollisionInfo CCapsuleCollider::IntersectingCapsule(const CCapsuleCollider& capsule) const
+{
+	return CollisionInfo();
+}
 
 CollisionInfo CCapsuleCollider::IntersectingAABB(const AABB& aabb) // capsul aabb
 {
