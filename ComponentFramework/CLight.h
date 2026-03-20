@@ -31,6 +31,8 @@ public:
     void OnDestroy();
     void Update(const float dt) {}
 
+    uint32_t GetIndex() { return ssboIndex; }
+
     void UpdateColour(const Vec3& c) { Colour = c; }
     void UpdateRadius(const float& r) { radius = r; }
     void UpdateIntensity(float inten) { intensity = inten; }

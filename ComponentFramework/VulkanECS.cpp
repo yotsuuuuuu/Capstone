@@ -7,6 +7,7 @@
 #include "CMesh.h"
 #include "CGlobalLight.h"
 #include "CTransform.h"
+#include "CLight.h"
 #include "CWorld.h"
 #include "CSkyBox.h"
 #include "EngineContext.h"
@@ -559,10 +560,14 @@ public:
             if (a) {
                 auto mat = a->GetComponent<CMaterial>();
                 auto mesh = a->GetComponent<CMesh>();
+                auto cLight = a->GetComponent<CLight>();
                 // sohuld check for transform
                 if (mat && mesh) {
                     DrawItem item = GetDrawItem(a, framecntx);
                     // 1.2 sort them into buckets
+                    if (cLight) {
+                        item.push.normalMatrix[0] = static_cast<float>(cLight->GetIndex());
+                    }
                     DrawingBuckets[item.pipeInfo.pipeline].push_back(item);
                     line = item.pipeInfo.pipelineLayout;
                 }       

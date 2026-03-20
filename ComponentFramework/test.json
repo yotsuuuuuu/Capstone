@@ -1,5 +1,6 @@
 {
   "Meshes": {
+    "IcoMesh": "./meshes/SimpleIco.obj",
     "marioMesh": "./meshes/Mario.obj",
     "sphereMesh": "./meshes/Sphere.obj"
   },
@@ -13,9 +14,19 @@
       "pass": 1,
       "opaque": 0
 
+    },
+    "SimpleLightShader": {
+      "frag": "shaders/MassPass_2.frag.spv",
+      "vert": "shaders/MassPass_2.vert.spv",
+      "binding": 0,
+      "type": 1,
+      "stage": 16,
+      "pass": 1,
+      "opaque": 0
     }
   },
   "Textures": {
+    "DefaultTexture": "./textures/DefaultTexture.png",
     "marioMime": "./textures/mario_mime.png",
     "marioFire": "./textures/mario_fire.png"
   },
@@ -23,6 +34,12 @@
   "Material": {
     "marioMat": {
       "texture": "marioMime",
+      "shader": "main",
+      "cast shadow": "true",
+      "recieve shadow": "false"
+    },
+    "SimpleLightMat": {
+      "texture": "DefaultTexture",
       "shader": "main",
       "cast shadow": "true",
       "recieve shadow": "false"
@@ -72,7 +89,8 @@
       "color": [ 1.0, 0.0, 1.0 ]
     },
     "light": {
-      "Mesh": "bruh", 
+      "Mat": "SimpleLightMat",
+      "Mesh": "IcoMesh",
       "radius": 1.0,
       "intensity": 1.0,
       "color": [ 1.0, 1.0, 1.0 ]
