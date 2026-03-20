@@ -31,6 +31,10 @@ public:
 	//std::vector<VkDescriptorSet> const GetWorldDescriptorSet() { return C_World->GetDescriptorSetInfo().descriptorSet; }
 	std::unordered_map<Vec2, std::unique_ptr<Chunk>>* GetChunkMap() { return C_World->GetChunkMap(); }
 	std::vector<TerrainChunkData>* GetChunkRenderData() { return C_World->GetChunkRenderData(); }
+	
+	int GetWorldSize() const { return C_World->GetWorldSize(); }
+	std::vector<uint32_t> GetChunkIndices() const { return C_World->GetChunkIndices(); }
+
 	void InitializeWorld(TerrainPreset* t_);
 	void InitializeWorld(int songIndex);
 

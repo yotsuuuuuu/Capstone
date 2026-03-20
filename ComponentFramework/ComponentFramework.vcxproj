@@ -172,6 +172,7 @@
     <ClCompile Include="imgui_impl_vulkan.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="PhysicsManager.cpp" />
     <ClCompile Include="Scene2.cpp" />
     <ClCompile Include="Scene3.cpp" />
     <ClCompile Include="SYS_Light.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="json_fwd.hpp" />
     <ClInclude Include="OpenGLRenderer.h" />
+    <ClInclude Include="PhysicsManager.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene0.h" />
     <ClInclude Include="Scene2.h" />

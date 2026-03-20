@@ -391,31 +391,11 @@ void Scene3::FrustumCheck()
 
 }
 
-void Scene3::TerrainCollision()
-{
-	auto worldActor = std::dynamic_pointer_cast<CActor>(world);
-	auto chunksData = worldActor->GetComponent<CWorld>()->GetChunkRenderData();
-	auto chunkMap = worldActor->GetComponent<CWorld>()->GetChunkMap();
 
-	auto player = std::dynamic_pointer_cast<CActor>(camera);
-	auto collider = player->GetComponent<CCapsuleCollider>();
-
-	for (auto& cd : *chunksData) {
-		if (collider->IntersectingAABB(cd.aabb)) {
-			//std::cout << "Colliding with chunk at pos: " << std::endl;
-			// check if colliding with mesh
-			auto chunkIt = chunkMap->find(cd.chunkPos);
-			if (chunkIt != chunkMap->end()) {
-				auto& chunk = chunkIt->second;
-				if (collider->IntersectingMesh(chunk->GetVertices(), chunk->GetIndices())) {
-					std::cout << "Colliding with chunk mesh at pos: " << aabb.chunkPos.x << ", " << aabb.chunkPos.y << std::endl;
-				}
-			}
-		}
-	}
-}
 
 void Scene3::Update(const float deltaTime) {
+
+	// TODO: move to physics system.
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
 		auto playerController =player->GetComponent<CInput>();

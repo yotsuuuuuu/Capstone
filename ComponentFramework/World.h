@@ -27,6 +27,8 @@ private:
 	std::unordered_map<Vec2, std::unique_ptr<Chunk>> chunkMap; // map chunk positions to their render data
 	std::vector<TerrainChunkData> chunkRenderData;
 	IndexedVertexBuffer chunkIndexBuffer;
+
+
 	// vulkan
 	PipelineInfo worldPipeline;
 	DescriptorSetInfo worldDescriptorSet;
@@ -54,6 +56,9 @@ public:
 	void Initialize(TerrainPreset* t_);
 	void Initialize(int songIndex);
 	void OnDelete();
+
+	int GetWorldSize() const { return WORLD_SIZE; }
+	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
 
 	PipelineInfo const GetPipeline() { return worldPipeline; }
 	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }

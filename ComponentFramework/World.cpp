@@ -73,7 +73,7 @@ void World::GenerateAllChunks()
 void World::GenerateChunkHeightmap(Chunk* chunk)
 {
 	std::vector<float> heightmap(CHUNK_SIZE*CHUNK_SIZE);
-	Vec2 chunkPos = chunk->getChunkPos();
+	Vec2 chunkPos = chunk->GetChunkPos();
 	float minHeight = std::numeric_limits<float>::max();
 	float maxHeight = std::numeric_limits<float>::lowest();
 
@@ -104,7 +104,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	vertices.reserve(baseChunkMesh->basePositions.size());
 
 	const auto& heightmap = chunk->GetHeightmap();
-	const Vec2& chunkPos = chunk->getChunkPos();
+	const Vec2& chunkPos = chunk->GetChunkPos();
 	const Vec3& chunkWorldPos = chunk->GetWorldPos();
 
 	for (size_t i = 0; i < baseChunkMesh->basePositions.size(); i++) {
