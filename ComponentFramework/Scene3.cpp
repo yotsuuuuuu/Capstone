@@ -36,7 +36,18 @@ bool Scene3::OnCreate() {
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
 		
-		engineContext.assetManager->CreateActor("light", 500);
+		auto lights = engineContext.assetManager->CreateActor("lightMagenta", 450);
+		auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
+		auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
+
+		if (!LightMat->OnCreate()) {
+			Debug::Warning("LightMat Failed ", __FILE__, __LINE__);
+			return false;
+		}
+		if (!LightMesh->OnCreate()) {
+			Debug::Warning("LightMesh Failed ", __FILE__, __LINE__);
+			return false;
+		}
 
 		engineContext.assetManager->CreateActor("mario",1);
 
@@ -44,7 +55,7 @@ bool Scene3::OnCreate() {
 
 		// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
 		const float spacing = 20.0f;
-		int gridSize = static_cast<int>(std::ceil(std::sqrt(actorsInScene.size())));
+		int gridSize = static_cast<int>(std::ceil(std::sqrt(lights.size())));
 		
 		static const Vec3 testColors[] = {
 			{1.0f, 0.0f, 0.0f},   // red
@@ -61,7 +72,7 @@ bool Scene3::OnCreate() {
 		const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
 
 		int index = 0;
-		for (auto& actor : actorsInScene)
+		for (auto& actor : lights)
 		{
 			auto act = std::dynamic_pointer_cast<CActor>(actor);
 			auto light = act->GetComponent<CLight>();
@@ -85,7 +96,7 @@ bool Scene3::OnCreate() {
 			// Cycle through distinct colors
 			Vec3 color = testColors[index % colorCount];
 			light->UpdateRadius(10.0f);
-			light->UpdateIntensity(3.0f);
+			light->UpdateIntensity(1.0f);
 			light->UpdateColour(color);
 			light->UpdateLight();
 

@@ -16,8 +16,8 @@
 
     },
     "SimpleLightShader": {
-      "frag": "shaders/MassPass_2.frag.spv",
-      "vert": "shaders/MassPass_2.vert.spv",
+      "frag": "shaders/SimpleLight.frag.spv",
+      "vert": "shaders/SimpleLight.vert.spv",
       "binding": 0,
       "type": 1,
       "stage": 16,
@@ -40,8 +40,8 @@
     },
     "SimpleLightMat": {
       "texture": "DefaultTexture",
-      "shader": "main",
-      "cast shadow": "true",
+      "shader": "SimpleLightShader",
+      "cast shadow": "false",
       "recieve shadow": "false"
     }
   },
@@ -89,8 +89,6 @@
       "color": [ 1.0, 0.0, 1.0 ]
     },
     "light": {
-      "Mat": "SimpleLightMat",
-      "Mesh": "IcoMesh",
       "radius": 1.0,
       "intensity": 1.0,
       "color": [ 1.0, 1.0, 1.0 ]
@@ -125,11 +123,11 @@
     "farClip": 500
   },
   "globalLight": {
-     "diffused": [ 0.5, 0.6, 0.8,0.0 ],
-     "specular": [ 0.9,0.9, 1.0, 0.0 ],
-     "ambient": [ 0.08, 0.08, 0.16, 0.0 ],
-     "orthosidelength": 10.0,
-     "orientation": [ -40, 1, 0, 0 ],
-     "distance" :  2.0
+    "diffused": [ 0.5, 0.6, 0.8, 0.0 ],
+    "specular": [ 0.9, 0.9, 1.0, 0.0 ],
+    "ambient": [ 0.028, 0.028, 0.056, 0 ],
+    "orthosidelength": 10.0,
+    "orientation": [ -40, 1, 0, 0 ],
+    "distance": 2.0
   }
 }

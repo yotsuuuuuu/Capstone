@@ -305,30 +305,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\multiPhong.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\multiPhong.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\phong.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\phong.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simplePhong.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simplePhong.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simpleTexture.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simpleTexture.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\terrain.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -338,41 +314,71 @@
     <None Include="test.json">
       <Filter>Json</Filter>
     </None>
-    <None Include="shaders\GlobalLight.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\GlobalLight.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\MainPass.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\MainPass.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\SkyBox.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\SkyBox.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\ShadowCheck.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\MassPass_2.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\MassPass_2.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\ShadowCheck_2.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\ClusterCompute.comp">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Compute</Filter>
     </None>
     <None Include="shaders\LightCullCompute.comp">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Compute</Filter>
+    </None>
+    <None Include="shaders\GlobalLight.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\GlobalLight.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\MassPass_2.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\MassPass_2.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\MainPass.vert">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\MainPass.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\multiPhong.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\multiPhong.vert">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\phong.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\phong.vert">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\ShadowCheck.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\simplePhong.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\simplePhong.vert">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\simpleTexture.frag">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\simpleTexture.vert">
+      <Filter>Shaders\OldShaders</Filter>
+    </None>
+    <None Include="shaders\ShadowCheck_2.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\SkyBox.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\SimpleLight.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\SimpleLight.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -435,6 +441,15 @@
     </Filter>
     <Filter Include="Source\Terrain">
       <UniqueIdentifier>{488c0726-f1be-4b30-a61f-52528ffca205}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Compute">
+      <UniqueIdentifier>{f394d87a-6d3d-4ca1-b465-6c3aa10876cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\CurrentShaders">
+      <UniqueIdentifier>{107f8450-a302-4d93-a81d-50113d92e2d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\OldShaders">
+      <UniqueIdentifier>{928c8354-3bc4-4911-9aa1-cdf6b91e1a78}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

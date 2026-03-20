@@ -383,7 +383,7 @@ private:
     void CMDRecordBindPipeline(const VkCommandBuffer&, const VkPipeline&, const VkPipelineBindPoint&);
     void CMDRecordDescriptorSet(const VkCommandBuffer&, const VkPipelineLayout&, VkPipelineBindPoint flag, const VkDescriptorSet*, uint32_t fristSet = 0, uint32_t count = 1, uint32_t desOffset = 0, const uint32_t* DynamicOffset = nullptr);
     void CMDRecordBindIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
-    void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&);
+    void CMDRecordDrawIndexedMesh(const VkCommandBuffer&, const IndexedVertexBuffer&, uint32_t count = 1);
     void CMDRecordDrawTerrainIndex(const VkCommandBuffer&, const IndexedVertexBuffer&);
     void CMDRecordDistpatch(const VkCommandBuffer&, uint32_t groupX, uint32_t groupY, uint32_t groupz);
     void CMDEndRenderPass(const VkCommandBuffer&);
