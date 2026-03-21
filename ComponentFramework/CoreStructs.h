@@ -346,3 +346,78 @@ enum class AudioState
 	PREV,
 	STOP
 };
+
+
+struct RenderTarget {
+    VkImage image;
+    VkDeviceMemory memory;
+    VkImageView view;
+    VkFormat format;
+    VkExtent2D extent;
+};
+
+struct HDRContext {
+
+    VkSampler sampler;
+
+    // hdr per frames in flight
+    VkRenderPass hdrRenderPass;
+    std::vector<RenderTarget> hdrColor; // color images
+    std::vector<RenderTarget> hdrDepth; // depth iamges
+    std::vector<VkFramebuffer> hdrFramebuffers; // frame buffer
+
+    //Bloom 
+    VkRenderPass bloomPass;
+    std::vector<RenderTarget> bloomMips;
+    std::vector<VkFramebuffer> bloomFramebuffers;
+    DescriptorSetInfo bloomDescriptors;
+
+    //VkRenderPass tonemapRenderPass; Use the Main Render Pass
+    
+    PipelineInfo tonePassPipeline;
+    DescriptorSetInfo tonemapDescriptors;
+
+    uint32_t bloomMipLevels = 5;
+    float bloomThreshold = 1.0f;
+    float bloomStrength = 1.0f;
+};
+
+struct GlobalShadowMappingInfo
+{
+    //Rendering handles
+    VkRenderPass RenderPass;
+    VkSampler ShadowSampler;
+    std::vector<Sampler2D> ShadowTextures2D;
+    std::vector<VkFramebuffer> FrameBuffers;
+    //for rendering 
+    VkCommandPool CMDpool;
+    std::vector<VkCommandBuffer> CMDBuffers;
+    DescriptorSetInfo DesSetInfo;
+    std::vector<PipelineInfo> PipelineInfo;
+    //sync objects
+    std::vector<VkSemaphore> ReadySignals;
+    //config info
+    uint16_t NumOFCascadeMaps;
+    std::vector<VkExtent2D> Exents;
+    VkFormat format;
+    VkImageTiling tile;
+    VkImageUsageFlags useFlag;
+    VkImageAspectFlags aspectFlag;
+    VkMemoryPropertyFlags propFlag;
+    VkImageLayout initial;
+    VkImageLayout final;
+
+};
+
+struct FrameContext
+{
+    VkCommandBuffer CMDBuffer;
+    VkRenderPass Renderpass;
+    VkFramebuffer currentFrameBuffer;
+    VkFence currentFrameFence;
+    VkSemaphore waitSemaphores;
+    VkSemaphore signalSemaphores;
+    uint32_t targetFrameIndex;
+    uint32_t inFlightIndex;
+    VkExtent2D extent;
+};

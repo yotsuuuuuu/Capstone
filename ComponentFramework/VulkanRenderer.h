@@ -362,19 +362,8 @@ public:
 
     // ECS Rendering
 private:
-    struct FrameContext
-    {
-        VkCommandBuffer CMDBuffer;
-        VkRenderPass Renderpass;
-        VkFramebuffer currentFrameBuffer;
-        VkFence currentFrameFence;
-        VkSemaphore waitSemaphores;
-        VkSemaphore signalSemaphores;
-        uint32_t targetFrameIndex;
-        uint32_t inFlightIndex;
-        VkExtent2D extent;
-    };
-    VulkanRenderer::FrameContext GetCurrentFrameContext();
+   
+    FrameContext GetCurrentFrameContext();
  public:
     void CMDBeginRecord(const VkCommandBuffer&);
     void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPass&, const VkFramebuffer&,const VkExtent2D&, const std::vector<VkClearValue>&  = {});
@@ -407,7 +396,7 @@ private:
 
  public:
     //Creation Helper functions
-    void CreateSampler(VkSampler&, VkFilter, VkSamplerAddressMode, VkBorderColor,VkBool32 = VK_FALSE,VkBool32 = VK_TRUE);
+    void CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor,VkBool32 compare = VK_FALSE,VkBool32 anisotropy = VK_TRUE);
     void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
@@ -432,35 +421,9 @@ private:
     void CopyBufferToImage(VkBuffer, VkImage, uint32_t, uint32_t, VkImageAspectFlags, uint32_t, uint32_t, uint32_t);
     void CubeImageLayoutTransition(VkImage, VkImageLayout srcLay, VkImageLayout dtsLay, VkPipelineStageFlags srdFlag, VkPipelineStageFlags dtsFlag,VkAccessFlags srcAcss, VkAccessFlags dtsAcss);
 	//Shadow Mapping
-    private:
-    struct GlobalShadowMappingInfo
-    {
-        //Rendering handles
-        VkRenderPass RenderPass;
-        VkSampler ShadowSampler;
-		std::vector<Sampler2D> ShadowTextures2D;
-        std::vector<VkFramebuffer> FrameBuffers;
-        //for rendering 
-        VkCommandPool CMDpool;
-        std::vector<VkCommandBuffer> CMDBuffers;
-		DescriptorSetInfo DesSetInfo;
-        std::vector<PipelineInfo> PipelineInfo;
-        //sync objects
-        std::vector<VkSemaphore> ReadySignals;
-        //config info
-        uint16_t NumOFCascadeMaps;
-        std::vector<VkExtent2D> Exents;
-        VkFormat format;
-        VkImageTiling tile;
-        VkImageUsageFlags useFlag;
-        VkImageAspectFlags aspectFlag;
-        VkMemoryPropertyFlags propFlag;
-        VkImageLayout initial;
-        VkImageLayout final; 
-  
-    };
+private:  
 
-	GlobalShadowMappingInfo shadowMappingInfo;
+	GlobalShadowMappingInfo shadowMappingCntx;
 
     void CreateGlobalShadowMappingResources(uint32_t width, uint32_t height, VkFormat format,
         VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectFlags,
@@ -473,7 +436,8 @@ public:
     void RenderECS(const EngineContext& Ecntx,const std::vector<std::shared_ptr<Component>>& drawlist);
 
     PipeLineConfig GetMainPassPipeLineConfig();
-    VulkanRenderer::GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingInfo; }
+    PipeLineConfig GetSwapChainPipeLineConfig();
+    GlobalShadowMappingInfo GetShadowInfo() { return shadowMappingCntx; }
     
     std::shared_ptr<Component> GetCurrentCamera() { return camera.lock(); }
     void SetCurrentCamera(std::shared_ptr<Component> cam) { camera = cam; }
@@ -507,6 +471,14 @@ public:
     void DrawTerrain(IndexedVertexBuffer chunk);
 	void DestroyTerrainVertexBuffers(IndexedVertexBuffer terrainBuffers);
   
+private:
+    HDRContext hdrInfo;
+
+    void CreateHDRResources();
+
+    void RecreateHDRResources();
+
+    void DestroyHDResources();
 };
 #endif 
 

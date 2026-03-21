@@ -79,7 +79,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     std::vector<DescriptorWriteInfo> writeGlobal;
     AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Camera->GetCameraUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Glight->GetMainUBO());
-    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, shadowMappingInfo.ShadowTextures2D);
+    AddToDescrisptorLayoutWrite(writeGlobal, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_ARR_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, shadowMappingCntx.ShadowTextures2D);
     AddToDescrisptorLayoutWrite(writeGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetSysUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
@@ -107,7 +107,7 @@ void VulkanRenderer::DestroyGlobalResources()
     DestroyShadowMappingResources();
 }
 
-VulkanRenderer::FrameContext VulkanRenderer::GetCurrentFrameContext()
+FrameContext VulkanRenderer::GetCurrentFrameContext()
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     uint32_t imageIndex;
@@ -559,10 +559,10 @@ public:
       
       
         // 1 Get current render frame info
-        VulkanRenderer::FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
+        FrameContext framecntx =  VKRNDR->GetCurrentFrameContext();
 
 
-        VulkanRenderer::GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
+        GlobalShadowMappingInfo shadowcntx = VKRNDR->GetShadowInfo();
         // 1.1.1 UPDATE PER FRAME UBO
         if (auto cam = VKRNDR->camera.lock()) {
             auto MainCamera = std::dynamic_pointer_cast<CActor>(cam);
@@ -731,7 +731,7 @@ public:
 
     }
 
-    static DrawItem GetDrawItem(const Ref<CActor>& actor,const VulkanRenderer::FrameContext& cntx) {
+    static DrawItem GetDrawItem(const Ref<CActor>& actor,const FrameContext& cntx) {
 
         auto mat = actor->GetComponent<CMaterial>();
         auto mesh = actor->GetComponent<CMesh>();

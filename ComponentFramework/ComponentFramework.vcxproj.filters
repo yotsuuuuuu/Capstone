@@ -151,6 +151,9 @@
     <ClCompile Include="PhysicsManager.cpp">
       <Filter>Source\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanHDR.cpp">
+      <Filter>Source\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h">
