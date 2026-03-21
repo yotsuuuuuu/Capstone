@@ -7,6 +7,7 @@ layout(location = 0) in vec2 uvcoord;
 
 
 layout( set = 0, binding = 0 ) uniform sampler2D hdrSampler;
+// layout(set = 0, binding = 1) uniform sampler2D bloomSampler; // add later
 //Just for testing if HDR frame are working.
 void main() { 
 	fragColor = texture(hdrSampler,uvcoord);

@@ -412,8 +412,10 @@ struct GlobalShadowMappingInfo
 struct FrameContext
 {
     VkCommandBuffer CMDBuffer;
-    VkRenderPass Renderpass;
-    VkFramebuffer currentFrameBuffer;
+    VkRenderPass SwapChainRenderpass;
+    VkRenderPass HDRRenderPass;
+    VkFramebuffer currentSwapChainFrameBuffer;
+    VkFramebuffer currentHDRFrameBuffer;
     VkFence currentFrameFence;
     VkSemaphore waitSemaphores;
     VkSemaphore signalSemaphores;

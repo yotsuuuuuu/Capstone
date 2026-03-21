@@ -45,17 +45,18 @@ bool VulkanRenderer::OnCreate(){
     CreateCommandBuffers();
     createSyncObjects();
 
-	
+    
+    CreateHDRResources();
 
     return true;
 }
 
 void VulkanRenderer::OnDestroy() {
     vkDeviceWaitIdle(device); /// Wait for all commands to clear
-    destroySwapChain();
-
    
-
+    DestroyHDResources();
+   
+    destroySwapChain();
     DestroyCommandBuffers();
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
@@ -90,6 +91,7 @@ void VulkanRenderer::RecreateSwapChain() {
     createDepthResources();
     createFramebuffers();
     //CreateCommandBuffers();
+    //RecreateHDRResources(); TODO
 }
 
 

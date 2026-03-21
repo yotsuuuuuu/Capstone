@@ -217,21 +217,21 @@ void SceneManager::GetEvents() {
 
 		if (engineContext.renderer->getRendererType() == RendererType::VULKAN)
 		{
-			VulkanRenderer* Vkrender = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
-			int width = 0, height = 0;
-			SDL_GetWindowSize(Vkrender->getWindow(), &width, &height);
-			printf("size changed %d %d\n", width, height);
-			float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-			Vkrender->RecreateSwapChain();// recreate swapchains
-			engineContext.assetManager->ScreenResizeCameraEvent(aspectRatio); // update main camera
-			engineContext.assetManager->RecreatedPipelines(); //recreate Pipeliens
-			//update Light System
-			engineContext.lightSys->ScreenResizeCameraEvent(width, height);
-			engineContext.lightSys->ComputeClusters();
-			//update imgui
-			auto cntx = Vkrender->GetImGuiContext();
-			engineContext.VKImGUI->ShutDonw();
-			engineContext.VKImGUI->Initialize(cntx);
+			//VulkanRenderer* Vkrender = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
+			//int width = 0, height = 0;
+			//SDL_GetWindowSize(Vkrender->getWindow(), &width, &height);
+			//printf("size changed %d %d\n", width, height);
+			//float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+			//Vkrender->RecreateSwapChain();// recreate swapchains
+			//engineContext.assetManager->ScreenResizeCameraEvent(aspectRatio); // update main camera
+			//engineContext.assetManager->RecreatedPipelines(); //recreate Pipeliens
+			////update Light System
+			//engineContext.lightSys->ScreenResizeCameraEvent(width, height);
+			//engineContext.lightSys->ComputeClusters();
+			////update imgui
+			//auto cntx = Vkrender->GetImGuiContext();
+			//engineContext.VKImGUI->ShutDonw();
+			//engineContext.VKImGUI->Initialize(cntx);
 			needSwapChainRecreation = false;
 		}
 

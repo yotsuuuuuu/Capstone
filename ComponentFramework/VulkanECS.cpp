@@ -67,7 +67,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
 
     // then create global resources
-    //TODO: ADD THE LIGTH SYSTEM SSBOs TO THE GLOBAL SET
+  
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -84,7 +84,8 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
-
+    
+     
     //
     //add the skybox to the main camera actor
     std::vector<std::string> skyboxFiles = { "./textures/skybox/px.png","./textures/skybox/nx.png",
@@ -130,33 +131,24 @@ FrameContext VulkanRenderer::GetCurrentFrameContext()
     context.currentFrameFence = inFlightFences[currentFrame];
     context.waitSemaphores = imageAvailableSemaphores[currentFrame];
     context.signalSemaphores = renderFinishedSemaphores[currentFrame];
-    context.currentFrameBuffer = swapChainFramebuffers[imageIndex];
-    context.Renderpass = renderPass;
+    context.currentSwapChainFrameBuffer = swapChainFramebuffers[imageIndex];
+    context.currentHDRFrameBuffer = hdrInfo.hdrFramebuffers[currentFrame];
+    context.SwapChainRenderpass = renderPass;
+    context.HDRRenderPass = hdrInfo.hdrRenderPass;
     context.extent = swapChainExtent;
 
     return context;
    
 }
 
-void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD)
-{
-    //VkAttachmentDescription colorAttachment{};
-    //colorAttachment.format = swapChainImageFormat;
-    //colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    //colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    //colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    //colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    //colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    //colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    //colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
+void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD,
+    std::vector<VkSubpassDependency> dependencies)
+{   
     
 	uint32_t ColorAttachmentCount = static_cast<uint32_t>(colorAD.size());
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = ColorAttachmentCount;
-	
-
 
     std::vector<VkAttachmentReference> ColorAttachmentsRefeneces;
     VkAttachmentReference depthAttachmentRef{};
@@ -180,13 +172,17 @@ void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkA
    
     subpass.pColorAttachments = ColorAttachmentsRefeneces.data();
 
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    if (dependencies.empty()) {
+        // this is a entry dependacy
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependencies.push_back(dependency);
+    }
 
     
     VkRenderPassCreateInfo renderPassInfo{};
@@ -195,8 +191,8 @@ void VulkanRenderer::CreateRenderPass(VkRenderPass& renderpass_, std::vector<VkA
     renderPassInfo.pAttachments = colorAD.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+    renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+    renderPassInfo.pDependencies = dependencies.data();
 
     if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderpass_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
@@ -442,6 +438,11 @@ void VulkanRenderer::CMDEndRecord(const VkCommandBuffer& cmd)
     }
 }
 
+void VulkanRenderer::CMDRecordDrawTRI(const VkCommandBuffer& cmd)
+{
+    vkCmdDraw(cmd, 3, 1, 0, 0);
+}
+
 void VulkanRenderer::CMDRecordDistpatch(const VkCommandBuffer& cmd, uint32_t groupX, uint32_t groupY, uint32_t groupz)
 {
     vkCmdDispatch(cmd, groupX, groupY, groupz);
@@ -685,9 +686,9 @@ public:
         }
    
         VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
-        { // the main pass
+        { // the HDR main pass
             
-            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, framecntx.Renderpass, framecntx.currentFrameBuffer, framecntx.extent);
+            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, framecntx.HDRRenderPass, framecntx.currentHDRFrameBuffer, framecntx.extent);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.inFlightIndex]);
@@ -716,8 +717,20 @@ public:
             }
 
           
-            Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);           
+                     
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+        }
+        {// Tone Mapping
+            
+            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, framecntx.SwapChainRenderpass, framecntx.currentSwapChainFrameBuffer, framecntx.extent);
+            VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer,VKRNDR->hdrInfo.tonePassPipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, VKRNDR->hdrInfo.tonePassPipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            &VKRNDR->hdrInfo.tonemapDescriptors.descriptorSet[framecntx.inFlightIndex]);
+            VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
+
+            Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);
+            VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+
         }
         // 4 Stop recording
         VKRNDR->CMDEndRecord(framecntx.CMDBuffer);             

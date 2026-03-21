@@ -401,6 +401,12 @@
     <None Include="shaders\SimpleLight.vert">
       <Filter>Shaders\CurrentShaders</Filter>
     </None>
+    <None Include="shaders\TonePass.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\TonePass.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

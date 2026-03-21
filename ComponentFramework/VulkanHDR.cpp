@@ -5,7 +5,7 @@
 void VulkanRenderer::CreateHDRResources()
 {
 	//1 Create HDR RenderPass
-	auto depthformat = VK_FORMAT_D32_SFLOAT;
+	auto depthformat = findDepthFormat();//VK_FORMAT_D32_SFLOAT;
 	auto colorformat = VK_FORMAT_R16G16B16A16_SFLOAT;
 	auto numOfFramesInFLight = getNumberOfFramesInFlight();
 
@@ -28,8 +28,17 @@ void VulkanRenderer::CreateHDRResources()
 	ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	
+	// this is a exit dependacy
+	VkSubpassDependency hdrDependencies{};
+	hdrDependencies.srcSubpass = 0;
+	hdrDependencies.dstSubpass = VK_SUBPASS_EXTERNAL;
+	hdrDependencies.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	hdrDependencies.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	hdrDependencies.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	hdrDependencies.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-	CreateRenderPass(hdrInfo.hdrRenderPass, { ColorAttachment }, { depthAttachment });
+	CreateRenderPass(hdrInfo.hdrRenderPass, { ColorAttachment }, { depthAttachment },{ hdrDependencies });
 	
 
 	//2 Create images and depth images for HDR
@@ -40,7 +49,7 @@ void VulkanRenderer::CreateHDRResources()
 		image.format = colorformat;
 		image.extent = swapChainExtent;
 		createImage(image.extent.width, image.extent.height, image.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT, image.image, image.memory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image.image, image.memory);
 		image.view = createImageView(image.image, image.format, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 
@@ -50,7 +59,7 @@ void VulkanRenderer::CreateHDRResources()
 		image.format = depthformat;
 		image.extent = swapChainExtent;
 		createImage(image.extent.width, image.extent.height, image.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_IMAGE_ASPECT_DEPTH_BIT, image.image, image.memory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image.image, image.memory);
 		image.view = createImageView(image.image, image.format, VK_IMAGE_ASPECT_DEPTH_BIT);
 	}
 
@@ -93,7 +102,7 @@ void VulkanRenderer::CreateHDRResources()
 	config.cullMode = VK_CULL_MODE_NONE;
 	config.depthTestEnable = VK_FALSE;
 	config.depthWriteEnable = VK_FALSE;
-	hdrInfo.tonePassPipeline = CreateGraphicsPipeline({ hdrInfo.tonemapDescriptors.descriptorSetLayout }, config, "./shader/TonePass.vert.spv", "./shader/TonePass.frag.spv");
+	hdrInfo.tonePassPipeline = CreateGraphicsPipeline({ hdrInfo.tonemapDescriptors.descriptorSetLayout }, config, "./shaders/TonePass.vert.spv", "./shaders/TonePass.frag.spv");
 	
 }
 

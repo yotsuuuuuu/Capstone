@@ -282,6 +282,8 @@
     <None Include="shaders\SkyBox.vert" />
     <None Include="shaders\terrain.frag" />
     <None Include="shaders\terrain.vert" />
+    <None Include="shaders\TonePass.frag" />
+    <None Include="shaders\TonePass.vert" />
     <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

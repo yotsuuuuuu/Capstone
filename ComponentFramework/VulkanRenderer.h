@@ -377,6 +377,7 @@ private:
     void CMDRecordDistpatch(const VkCommandBuffer&, uint32_t groupX, uint32_t groupY, uint32_t groupz);
     void CMDEndRenderPass(const VkCommandBuffer&);
     void CMDEndRecord(const VkCommandBuffer&);
+    void CMDRecordDrawTRI(const VkCommandBuffer&);
     void CMDImageBarrier(const VkCommandBuffer& cmd, const VkImage& image, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, VkAccessFlags srcAccess,
         VkAccessFlags dstAccess, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask,
         uint32_t baseMip = 0, uint32_t levelCount = 1, uint32_t baseLayer = 0, uint32_t layerCount = 1);
@@ -397,7 +398,7 @@ private:
  public:
     //Creation Helper functions
     void CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode samplerMode, VkBorderColor borderColor,VkBool32 compare = VK_FALSE,VkBool32 anisotropy = VK_TRUE);
-    void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt);
+    void CreateRenderPass(VkRenderPass& renderpass, std::vector<VkAttachmentDescription> colorAD, std::optional<VkAttachmentDescription> depthAD = std::nullopt, std::vector<VkSubpassDependency> dependencies = {});
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
     void CreateFence(VkFence& fence);
