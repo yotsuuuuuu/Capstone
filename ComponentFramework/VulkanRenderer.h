@@ -377,7 +377,7 @@ private:
     VulkanRenderer::FrameContext GetCurrentFrameContext();
  public:
     void CMDBeginRecord(const VkCommandBuffer&);
-    void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPassBeginInfo&);
+    void CMDBeginRenderPass(const VkCommandBuffer&, const VkRenderPass&, const VkFramebuffer&,const VkExtent2D&, const std::vector<VkClearValue>&  = {});
     // proble this one needs bit of rework
     void CMDRecordPushConstant(const VkCommandBuffer&, const VkPipelineLayout&,const VkShaderStageFlagBits&  ,const ModelMatrixPushConst&);
     void CMDRecordBindPipeline(const VkCommandBuffer&, const VkPipeline&, const VkPipelineBindPoint&);
@@ -439,10 +439,14 @@ private:
         VkRenderPass RenderPass;
         VkSampler ShadowSampler;
 		std::vector<Sampler2D> ShadowTextures2D;
-        std::vector<VkFramebuffer> FrameBuffers;	
-        //CommandBufferData CMDBuffers;
+        std::vector<VkFramebuffer> FrameBuffers;
+        //for rendering 
+        VkCommandPool CMDpool;
+        std::vector<VkCommandBuffer> CMDBuffers;
 		DescriptorSetInfo DesSetInfo;
         std::vector<PipelineInfo> PipelineInfo;
+        //sync objects
+        std::vector<VkSemaphore> ReadySignals;
         //config info
         uint16_t NumOFCascadeMaps;
         std::vector<VkExtent2D> Exents;

@@ -134,7 +134,7 @@ void SceneManager::Run() {
 		GetEvents();
 		if (currentScene && !isWindowMinimized) {
 			currentScene->Update(timer->getDeltaTime());
-			//engineContext.fmodController->AnalyzeAudioOnline();
+			engineContext.fmodController->AnalyzeAudioOnline();
 			engineContext.VKImGUI->TestUI();
 			currentScene->Render();
 		}

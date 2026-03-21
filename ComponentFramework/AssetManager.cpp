@@ -300,6 +300,7 @@ Ref<CMaterial> AssetManager::GetMat(const std::string& id)
 	auto checker = assetMapGet<CMaterial>(id); 
     if (checker)
     {
+        //checker->OnCreate();
         return checker;
     }
 

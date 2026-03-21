@@ -372,10 +372,30 @@ void VulkanRenderer::CMDBeginRecord(const VkCommandBuffer& cmd)
     }
 }
 
-void VulkanRenderer::CMDBeginRenderPass(const VkCommandBuffer& cmd, const VkRenderPassBeginInfo& renderInfo)
+void VulkanRenderer::CMDBeginRenderPass(const VkCommandBuffer& cmd, const VkRenderPass& pass, const VkFramebuffer& frameBuffer, const VkExtent2D& extents, const std::vector<VkClearValue>& Values)
 {
-    vkCmdBeginRenderPass(cmd, &renderInfo, VK_SUBPASS_CONTENTS_INLINE);
+    std::vector<VkClearValue> clearValues;
+    if (Values.empty()) {
+        clearValues.resize(2);
+        clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+    }
+    else {
+        clearValues = Values;
+    }
+
+    VkRenderPassBeginInfo renderinfo{};
+    renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderinfo.renderPass = pass;
+    renderinfo.framebuffer = frameBuffer;
+    renderinfo.renderArea.offset = { 0,0 };
+    renderinfo.renderArea.extent = extents;
+    renderinfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderinfo.pClearValues = clearValues.data();
+    vkCmdBeginRenderPass(cmd, &renderinfo, VK_SUBPASS_CONTENTS_INLINE);
 }
+
+
 
 void VulkanRenderer::CMDRecordPushConstant(const VkCommandBuffer& cmd, const VkPipelineLayout& layout, 
     const VkShaderStageFlagBits& flag, const ModelMatrixPushConst& push)
@@ -620,63 +640,54 @@ public:
             lightItem.setID = LightMat->GetSetValue();
         }
             
+
+        auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
+        std::vector<VkSemaphore> waitSemapohres;
+        std::vector< VkPipelineStageFlags> waitStages;
+        waitSemapohres.push_back(framecntx.waitSemaphores);
+        waitStages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+        waitSemapohres.push_back(lightCullingDoneSemaphore);
+        waitStages.push_back(VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
         // 3 Start recording
-        VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         {// Shadow Pass
 
             auto cachedLayout = shadowcntx.PipelineInfo[0].pipelineLayout;
-            std::array<VkClearValue, 1> clearValue{};
+            std::vector<VkClearValue> clearValue(1);
             clearValue[0].depthStencil = { 1.0f,0 };
 
             for (uint32_t i = 0; i < shadowcntx.NumOFCascadeMaps; i++) { // For each shadow map need it for the 
                 // flat array so my row is the current in flight index my colums are i with a witdh of number of cascademaps
                 // this is used to acess the 3 resoultion cascade maps high med and low.
-                size_t index = framecntx.inFlightIndex * shadowcntx.NumOFCascadeMaps + i;
-                VkRenderPassBeginInfo renderinfo{};
-                renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                renderinfo.renderPass = shadowcntx.RenderPass;
-                renderinfo.framebuffer = shadowcntx.FrameBuffers[index];
-                renderinfo.renderArea.offset = { 0,0 };
-                // there are number of exents that match the number of CascadeMaps
-                renderinfo.renderArea.extent = shadowcntx.Exents[i];
-                renderinfo.clearValueCount = static_cast<uint32_t>(clearValue.size());
-                renderinfo.pClearValues = clearValue.data();
-                VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
+                size_t index = framecntx.inFlightIndex * shadowcntx.NumOFCascadeMaps + i;     
+                VKRNDR->CMDBeginRecord(shadowcntx.CMDBuffers[index]);
+                VKRNDR->CMDBeginRenderPass(shadowcntx.CMDBuffers[index], shadowcntx.RenderPass, shadowcntx.FrameBuffers[index], shadowcntx.Exents[i], clearValue);
                 // there are number of pipeline that match the number of CascadeMaps
-                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, shadowcntx.PipelineInfo[i].pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, cachedLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                VKRNDR->CMDRecordBindPipeline(shadowcntx.CMDBuffers[index], shadowcntx.PipelineInfo[i].pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                VKRNDR->CMDRecordDescriptorSet(shadowcntx.CMDBuffers[index], cachedLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
                     &shadowcntx.DesSetInfo.descriptorSet[index]);
 
                 for (const auto& pair : DrawingBuckets) {
                     for (const auto& item : pair.second) {
-                        VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, item.mesh);
-                        VKRNDR->CMDRecordPushConstant(framecntx.CMDBuffer, cachedLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
-                        VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
+                        VKRNDR->CMDRecordBindIndexedMesh(shadowcntx.CMDBuffers[index], item.mesh);
+                        VKRNDR->CMDRecordPushConstant(shadowcntx.CMDBuffers[index], cachedLayout, VK_SHADER_STAGE_VERTEX_BIT, item.push);
+                        VKRNDR->CMDRecordDrawIndexedMesh(shadowcntx.CMDBuffers[index], item.mesh);
                     }
                 }
 
-                VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+                VKRNDR->CMDEndRenderPass(shadowcntx.CMDBuffers[index]);
+                VKRNDR->CMDEndRecord(shadowcntx.CMDBuffers[index]);
+                VKRNDR->CMDSubmitGraphicsQueue(&shadowcntx.CMDBuffers[index], 1, VK_NULL_HANDLE, nullptr, nullptr, 0, &shadowcntx.ReadySignals[index], 1);
+                waitSemapohres.push_back(shadowcntx.ReadySignals[index]);
+                waitStages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             }
 
         }
    
-        // An image must leave a render pass in the layout it will be used in next.
-        // If the next use requires a different layout, a memory image barrier must be used to transition it.
-       
-
+        VKRNDR->CMDBeginRecord(framecntx.CMDBuffer);
         { // the main pass
-            VkRenderPassBeginInfo renderinfo{};
-            renderinfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderinfo.renderPass = framecntx.Renderpass;
-            renderinfo.framebuffer = framecntx.currentFrameBuffer;
-            renderinfo.renderArea.offset = { 0, 0 };
-            renderinfo.renderArea.extent = framecntx.extent;
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-            clearValues[1].depthStencil = { 1.0f, 0 };
-            renderinfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderinfo.pClearValues = clearValues.data();
-            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, renderinfo);
+            
+            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, framecntx.Renderpass, framecntx.currentFrameBuffer, framecntx.extent);
             //global discriptor bind
             auto globalset = VKRNDR->GetGlobalDescriptionSet();
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &globalset.descriptorSet[framecntx.inFlightIndex]);
@@ -704,29 +715,17 @@ public:
                 VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, lightItem.mesh,Ecntx.lightSys->GetCurrentLightCount());
             }
 
-           // IMGUI PROBLY WILL HAVE TO MOVE IF WE ARE DOING BLOOM
+          
             Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);           
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
         // 4 Stop recording
-        VKRNDR->CMDEndRecord(framecntx.CMDBuffer);
+        VKRNDR->CMDEndRecord(framecntx.CMDBuffer);             
+        // 5 submit Main submit
+        VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages.data(), waitSemapohres.data(), waitSemapohres.size(), &framecntx.signalSemaphores, 1);
 
 
-        //Temp for Testing idealy later on the main pass waits on the fragemnt stage for
-        // depth shadows too
-        auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
-        
-        VkSemaphore waitSems[] = {
-             framecntx.waitSemaphores,       
-             lightCullingDoneSemaphore       
-        };
 
-        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  
-                                               VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT          
-        };
-         
-        // 5 submit
-        VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages, waitSems, 2, &framecntx.signalSemaphores, 1);
         // 6 present
         VKRNDR->CMDPresent(framecntx.targetFrameIndex, &framecntx.signalSemaphores,1);
 

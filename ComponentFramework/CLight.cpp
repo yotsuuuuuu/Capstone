@@ -1,16 +1,17 @@
 #include "CLight.h"
 #include "CActor.h"
 #include "SYS_Light.h"
+#include <cstdint>
 
 CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_)
-	:Component(parent_), LightSystem(sys),radius(radius_),intensity(intensity_),Colour(colour_),Type(0){
+	:Component(parent_), LightSystem(sys),radius(radius_),intensity(intensity_),Colour(colour_),Type(0), ssboIndex(std::numeric_limits<uint32_t>::max()){
 	
 }
 
 CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, 
 	Vec3 direction_, Vec2 inner_Outer_)
 	:Component(parent_), LightSystem(sys), radius(radius_), intensity(intensity_), Colour(colour_), Type(1),
-	Direction(direction_),inner_Outer(inner_Outer_){
+	Direction(direction_),inner_Outer(inner_Outer_), ssboIndex(std::numeric_limits<uint32_t>::max()) {
 		
 }
 

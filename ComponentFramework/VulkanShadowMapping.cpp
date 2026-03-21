@@ -92,7 +92,21 @@ void VulkanRenderer::CreateGlobalShadowMappingResources(uint32_t width, uint32_t
 		CreateFrameBuffer({ shadowMappingInfo.ShadowTextures2D[base + 2].imageView }, LOW, shadowMappingInfo.RenderPass, shadowMappingInfo.FrameBuffers[base + 2]);
 
 	}
+	// Command buffers
 	
+	shadowMappingInfo.CMDpool = CreateCMDPool(getQueueFamilys().graphicsFamily.value(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	int numerofelements = shadowMappingInfo.NumOFCascadeMaps * getNumberOfFramesInFlight();
+	for (int i = 0; i < numerofelements; i++) {
+		auto cmd = AllocatedCMDbuffer(shadowMappingInfo.CMDpool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+		shadowMappingInfo.CMDBuffers.push_back(cmd);
+	}
+	
+	// Ready singals
+	shadowMappingInfo.ReadySignals.resize(numerofelements);
+
+	for (int i = 0; i < shadowMappingInfo.ReadySignals.size(); i++) {
+		CreateSemaphore(shadowMappingInfo.ReadySignals[i]);
+	}
 
 }
 
@@ -148,6 +162,12 @@ void VulkanRenderer::DestroyShadowMappingResources()
 	DestroyDescriptorSet(shadowMappingInfo.DesSetInfo);
 	// need to destroy in reverse order
 	
+	for (VkSemaphore& sema : shadowMappingInfo.ReadySignals) {
+		DestroySemaphore(sema);
+	}
+
+	DestroyCommandBuffer(shadowMappingInfo.CMDBuffers,shadowMappingInfo.CMDpool);
+	DestroyCommandPool(shadowMappingInfo.CMDpool);
 
 	// step 4
 	for (size_t i = 0; i < shadowMappingInfo.FrameBuffers.size(); i++) {

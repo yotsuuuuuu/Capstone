@@ -37,7 +37,7 @@ bool Scene3::OnCreate() {
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
 		
-		auto lights = engineContext.assetManager->CreateActor("lightMagenta", 450);
+		auto lights = engineContext.assetManager->CreateActor("lightMagenta", 200);
 		auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
 		auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
 
