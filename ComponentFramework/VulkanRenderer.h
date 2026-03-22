@@ -402,6 +402,8 @@ private:
     void CreateFrameBuffer(std::vector<VkImageView> images,VkExtent2D size, VkRenderPass& pass, VkFramebuffer& frameBuffer);
     void CreateSemaphore(VkSemaphore& semaphore);
     void CreateFence(VkFence& fence);
+    void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, uint32_t mipLevels, VkImage& image, VkDeviceMemory& imageMemory);
+    void CreateImageView(VkImage image, VkFormat format, uint32_t mipLevel, VkImageAspectFlags aspectFlags, VkImageView& view);
     VkCommandPool CreateCMDPool(uint32_t queueFamilyIndex,VkCommandPoolCreateFlags flags);
     //allocate one CMD
     VkCommandBuffer AllocatedCMDbuffer(const VkCommandPool& cmd,VkCommandBufferLevel level);
@@ -480,6 +482,22 @@ private:
     void RecreateHDRResources();
 
     void DestroyHDResources();
+    // helpers functions
+    void CreateHDRFramBuffers(VkFormat,VkFormat,uint32_t);
+    void CreateHDRRenderPass(VkFormat, VkFormat);
+    void CreateTonePassPipeLine(uint32_t);
+    //void CreateBloomPassPipeLines(uint32_t);
+
+    void DestroyHDRFramBuffers();
+    void DestroyHDRRenderPass();
+    void DestroyTonePassPipeLine();
+    //void DestroyBloomPassPipeLines();
+
+    void CreateBloomRenderPasses(VkFormat);
+    void CreateBloomMipFrameBuffers(VkFormat, uint32_t);
+    
+    void DestroyBloomMipFrameBuffers();
+    void DestroyBloomRenderPasses();
 };
 #endif 
 

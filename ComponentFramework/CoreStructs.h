@@ -367,9 +367,11 @@ struct HDRContext {
     std::vector<VkFramebuffer> hdrFramebuffers; // frame buffer
 
     //Bloom 
-    VkRenderPass bloomPass;
-    std::vector<RenderTarget> bloomMips;
-    std::vector<VkFramebuffer> bloomFramebuffers;
+    VkRenderPass bloomDonwPass;
+    VkRenderPass bloomUpPass;
+    std::vector<RenderTarget> bloomMips; // numberinflight * number of mips
+    std::vector<VkFramebuffer> bloomDownFramebuffers;
+    std::vector<VkFramebuffer> bloomUpFramebuffers;
     DescriptorSetInfo bloomDescriptors;
 
     //VkRenderPass tonemapRenderPass; Use the Main Render Pass

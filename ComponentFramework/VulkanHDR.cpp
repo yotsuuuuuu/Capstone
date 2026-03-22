@@ -5,44 +5,52 @@
 void VulkanRenderer::CreateHDRResources()
 {
 	//1 Create HDR RenderPass
-	auto depthformat = findDepthFormat();//VK_FORMAT_D32_SFLOAT;
+	auto depthformat = VK_FORMAT_D32_SFLOAT;
 	auto colorformat = VK_FORMAT_R16G16B16A16_SFLOAT;
 	auto numOfFramesInFLight = getNumberOfFramesInFlight();
-
-	VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = depthformat;
-	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentDescription ColorAttachment{};
-	ColorAttachment.format = colorformat;
-	ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	CreateSampler(hdrInfo.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK, VK_FALSE, VK_FALSE);
 	
-	// this is a exit dependacy
-	VkSubpassDependency hdrDependencies{};
-	hdrDependencies.srcSubpass = 0;
-	hdrDependencies.dstSubpass = VK_SUBPASS_EXTERNAL;
-	hdrDependencies.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	hdrDependencies.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	hdrDependencies.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	hdrDependencies.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-	CreateRenderPass(hdrInfo.hdrRenderPass, { ColorAttachment }, { depthAttachment },{ hdrDependencies });
 	
+	// Bloom frame buffers and render passes
+	CreateBloomRenderPasses(colorformat);
+	CreateBloomMipFrameBuffers(colorformat, numOfFramesInFLight);
+	// TODO: Donw and up Sampling pipelines and descriptor sets
 
+	CreateHDRRenderPass(colorformat, depthformat);
 	//2 Create images and depth images for HDR
+	CreateHDRFramBuffers(colorformat, depthformat, numOfFramesInFLight);
 
+	// Tone Pass Descriptor set and Pipeline
+	//TODO: CHANGE WHEN BLOOM TARGETS ARE DONE
+	CreateTonePassPipeLine(numOfFramesInFLight);
+
+	
+}
+
+void VulkanRenderer::RecreateHDRResources()
+{
+	//TODO: RESIZING EVENT
+}
+
+
+void VulkanRenderer::DestroyHDResources()
+{
+
+
+	DestroyBloomMipFrameBuffers();
+	DestroyBloomRenderPasses();
+
+	DestroyTonePassPipeLine();
+	DestroyHDRFramBuffers();
+	
+	DestroySampler(hdrInfo.sampler);
+	DestroyHDRRenderPass();
+}
+
+
+void VulkanRenderer::CreateHDRFramBuffers(VkFormat colorformat, VkFormat depthformat, uint32_t numOfFramesInFLight)
+{
+	hdrInfo.hdrColor.clear();
 	hdrInfo.hdrColor.resize(numOfFramesInFLight);
 
 	for (auto& image : hdrInfo.hdrColor) {
@@ -52,7 +60,7 @@ void VulkanRenderer::CreateHDRResources()
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image.image, image.memory);
 		image.view = createImageView(image.image, image.format, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
-
+	hdrInfo.hdrDepth.clear();
 	hdrInfo.hdrDepth.resize(numOfFramesInFLight);
 
 	for (auto& image : hdrInfo.hdrDepth) {
@@ -62,18 +70,50 @@ void VulkanRenderer::CreateHDRResources()
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image.image, image.memory);
 		image.view = createImageView(image.image, image.format, VK_IMAGE_ASPECT_DEPTH_BIT);
 	}
-
+	hdrInfo.hdrFramebuffers.clear();
 	hdrInfo.hdrFramebuffers.resize(numOfFramesInFLight);
 
 	for (size_t i = 0; i < hdrInfo.hdrFramebuffers.size(); i++) {
 
 		CreateFrameBuffer({ hdrInfo.hdrColor[i].view,hdrInfo.hdrDepth[i].view }, hdrInfo.hdrColor[i].extent, hdrInfo.hdrRenderPass, hdrInfo.hdrFramebuffers[i]);
 	}
+}
 
-	CreateSampler(hdrInfo.sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK,VK_FALSE,VK_FALSE);
+void VulkanRenderer::CreateHDRRenderPass(VkFormat colorformat, VkFormat depthformat)
+{
+	
+	VkAttachmentDescription depthAttachment{};
+	depthAttachment.format = depthformat;
+	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	VkAttachmentDescription ColorAttachment{};
+	ColorAttachment.format = colorformat;
+	ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	// this is a exit dependacy
+	VkSubpassDependency hdrDependencies{};
+	hdrDependencies.srcSubpass = 0;
+	hdrDependencies.dstSubpass = VK_SUBPASS_EXTERNAL;
+	hdrDependencies.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	hdrDependencies.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	hdrDependencies.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	hdrDependencies.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	CreateRenderPass(hdrInfo.hdrRenderPass, { ColorAttachment }, { depthAttachment }, { hdrDependencies });
+}
 
-	// Tone Pass Descriptor set and Pipeline
-	//TODO: CHANGE WHEN BLOOM TARGETS ARE DONE
+void VulkanRenderer::CreateTonePassPipeLine(uint32_t numOfFramesInFLight)
+{
+
 	std::vector<SingleDescriptorSetLayoutInfo> layout;
 	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 	hdrInfo.tonemapDescriptors.descriptorSetLayout = CreateDescriptorSetLayout(layout);
@@ -88,12 +128,12 @@ void VulkanRenderer::CreateHDRResources()
 		desHDRSamplers[i].imageView = hdrInfo.hdrColor[i].view;
 		desHDRSamplers[i].imageDeviceMemory = hdrInfo.hdrColor[i].memory;
 		desHDRSamplers[i].sampler = hdrInfo.sampler;
-	}	
+	}
 	std::vector<DescriptorWriteInfo> write;
 	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, desHDRSamplers);
 	WriteDescriptorSets(hdrInfo.tonemapDescriptors.descriptorSet, write);
 
-	PipeLineConfig config = GetSwapChainPipeLineConfig();	
+	PipeLineConfig config = GetSwapChainPipeLineConfig();
 	VkPipelineVertexInputStateCreateInfo vertexinfo{};
 	vertexinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexinfo.vertexBindingDescriptionCount = 0;
@@ -103,24 +143,103 @@ void VulkanRenderer::CreateHDRResources()
 	config.depthTestEnable = VK_FALSE;
 	config.depthWriteEnable = VK_FALSE;
 	hdrInfo.tonePassPipeline = CreateGraphicsPipeline({ hdrInfo.tonemapDescriptors.descriptorSetLayout }, config, "./shaders/TonePass.vert.spv", "./shaders/TonePass.frag.spv");
+
 	
 }
 
-void VulkanRenderer::RecreateHDRResources()
+void VulkanRenderer::CreateBloomRenderPasses(VkFormat colorformat)
 {
-	//TODO: RESIZING EVENT
+
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	{// donw bloom render pass
+		VkAttachmentDescription ColorAttachment{};
+		ColorAttachment.format = colorformat;
+		ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+
+		CreateRenderPass(hdrInfo.bloomDonwPass, { ColorAttachment }, std::nullopt, { dependency });
+
+	}
+	{// up bloom render pass
+		VkAttachmentDescription ColorAttachment{};
+		ColorAttachment.format = colorformat;
+		ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		CreateRenderPass(hdrInfo.bloomUpPass, { ColorAttachment }, std::nullopt, { dependency });
+
+	}
+}
+
+void VulkanRenderer::CreateBloomMipFrameBuffers(VkFormat colorformat, uint32_t numOfFramesInFLight)
+{
+	// create the bloom image and image views
+	hdrInfo.bloomMips.resize(numOfFramesInFLight * hdrInfo.bloomMipLevels);
+	//needs to done in steps as the render targets shared some handels
+
+	// frist extends
+	std::vector<VkExtent2D> mipExtents(hdrInfo.bloomMipLevels);
+	VkExtent2D mipExtent = swapChainExtent;
+	for (size_t j = 0; j < hdrInfo.bloomMipLevels; j++) {
+		mipExtents[j] = mipExtent;
+		mipExtent.width = std::max(1u, mipExtent.width / 2);
+		mipExtent.height = std::max(1u, mipExtent.height / 2);
+	}
+	std::vector< VkImage> images(numOfFramesInFLight);
+	std::vector< VkDeviceMemory> imagesMems(numOfFramesInFLight);
+	for (size_t i = 0; i < numOfFramesInFLight; i++) {
+		CreateImage(swapChainExtent.width, swapChainExtent.height, colorformat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, hdrInfo.bloomMipLevels, images[i], imagesMems[i]);
+	}
+
+	// filling each render targets information
+	for (size_t i = 0; i < numOfFramesInFLight; i++) {
+		for (size_t j = 0; j < hdrInfo.bloomMipLevels; j++) {
+			auto index = i * static_cast<uint32_t>(hdrInfo.bloomMipLevels) + j;
+			hdrInfo.bloomMips[index].image = images[i];
+			hdrInfo.bloomMips[index].memory = imagesMems[i];
+			hdrInfo.bloomMips[index].extent = mipExtents[j];
+			hdrInfo.bloomMips[index].format = colorformat;
+			CreateImageView(images[i], colorformat, static_cast<uint32_t>(j), VK_IMAGE_ASPECT_COLOR_BIT, hdrInfo.bloomMips[index].view);
+
+		}
+	}
+
+	// need 20 buffer frames = number of bloom mips 5 X number of renderpasses 2 X number of frames in flight 2
+	hdrInfo.bloomDownFramebuffers.resize(numOfFramesInFLight * hdrInfo.bloomMipLevels);
+	hdrInfo.bloomUpFramebuffers.resize(numOfFramesInFLight * hdrInfo.bloomMipLevels);
+	
+	for (size_t i = 0; i < numOfFramesInFLight; i++) {
+		for (size_t j = 0; j < hdrInfo.bloomMipLevels; j++) {
+			uint32_t  index = i * static_cast<uint32_t>(hdrInfo.bloomMipLevels) + j;
+			auto& renderTarget = hdrInfo.bloomMips[index];
+			CreateFrameBuffer({ renderTarget.view }, renderTarget.extent, hdrInfo.bloomDonwPass, hdrInfo.bloomDownFramebuffers[index]);
+			CreateFrameBuffer({ renderTarget.view }, renderTarget.extent, hdrInfo.bloomUpPass, hdrInfo.bloomUpFramebuffers[index]);
+		}
+	}
 }
 
 
-void VulkanRenderer::DestroyHDResources()
+void VulkanRenderer::DestroyHDRFramBuffers()
 {
-
-	DestroyPipeline(hdrInfo.tonePassPipeline);
-	DestroyDescriptorSet(hdrInfo.tonemapDescriptors);
-
-
-	DestroySampler(hdrInfo.sampler);
-
 	for (auto& frame : hdrInfo.hdrFramebuffers) {
 		DestroyFrameBuffer(frame);
 	}
@@ -134,5 +253,47 @@ void VulkanRenderer::DestroyHDResources()
 		DestroyImage(image.image, image.memory);
 	}
 
+}
+
+void VulkanRenderer::DestroyHDRRenderPass()
+{
 	DestroyRenderPass(hdrInfo.hdrRenderPass);
+}
+
+void VulkanRenderer::DestroyTonePassPipeLine()
+{
+
+	DestroyPipeline(hdrInfo.tonePassPipeline);
+	DestroyDescriptorSet(hdrInfo.tonemapDescriptors);
+}
+
+
+void VulkanRenderer::DestroyBloomMipFrameBuffers()
+{
+
+	for (auto& frame : hdrInfo.bloomDownFramebuffers) {
+		DestroyFrameBuffer(frame);
+	}
+	for (auto& frame : hdrInfo.bloomUpFramebuffers) {
+		DestroyFrameBuffer(frame);
+	}
+
+	for (auto& imageview : hdrInfo.bloomMips) {
+		DestroyImageView(imageview.view);
+	}
+
+	
+	for (size_t i = 0; i < getNumberOfFramesInFlight(); i++) {
+		auto index = i * static_cast<uint32_t>(hdrInfo.bloomMipLevels) + 0;
+		VkImage im = hdrInfo.bloomMips[index].image;
+		VkDeviceMemory mem = hdrInfo.bloomMips[index].memory;
+		DestroyImage(im, mem);
+	}	
+}
+
+void VulkanRenderer::DestroyBloomRenderPasses()
+{
+
+	DestroyRenderPass(hdrInfo.bloomDonwPass);
+	DestroyRenderPass(hdrInfo.bloomUpPass);
 }

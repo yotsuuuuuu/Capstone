@@ -735,7 +735,7 @@ public:
         // 4 Stop recording
         VKRNDR->CMDEndRecord(framecntx.CMDBuffer);             
         // 5 submit Main submit
-        VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages.data(), waitSemapohres.data(), waitSemapohres.size(), &framecntx.signalSemaphores, 1);
+        VKRNDR->CMDSubmitGraphicsQueue(&framecntx.CMDBuffer, 1, framecntx.currentFrameFence, waitStages.data(), waitSemapohres.data(), static_cast<uint32_t>(waitSemapohres.size()), &framecntx.signalSemaphores, 1);
 
 
 
