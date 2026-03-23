@@ -394,7 +394,7 @@ struct HDRContext {
     PipelineInfo upSamplePipeline;
     DescriptorSetInfo bloomDescriptors;
 
-    uint32_t bloomMipLevels = 5;
+    uint32_t bloomMipLevels = 4;
     float bloomThreshold = 1.0f;
     float bloomStrength = 1.0f;
 };

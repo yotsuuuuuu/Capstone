@@ -29,14 +29,15 @@ layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 void main() { 
 	 PointLight light = pointLight[lightIndex];
-    float emissiveScale = light.outer_type_emissiveScale.z;
+
     vec3 color = light.color_intensity.xyz;
-    float intensity = light.color_intensity.w * emissiveScale;
+    float intensity = light.outer_type_emissiveScale.z;
     
     float colorLuminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
     float luminanceScale = 1.0 / max(colorLuminance, 0.0001);
     
+    float whiteBias = 0.4;
     vec3 emissive = color * intensity * luminanceScale;
-    fragColor = vec4(emissive, 1.0);	   
+    fragColor = vec4(mix(emissive, vec3(1.0), whiteBias), 1.0);  
 } 
 
