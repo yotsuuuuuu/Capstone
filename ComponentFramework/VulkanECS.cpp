@@ -443,6 +443,23 @@ void VulkanRenderer::CMDRecordDrawTRI(const VkCommandBuffer& cmd)
     vkCmdDraw(cmd, 3, 1, 0, 0);
 }
 
+void VulkanRenderer::CMDRecordDynamicViewport(const VkCommandBuffer& cmd, const VkExtent2D& extent)
+{
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(extent.width);
+    viewport.height = static_cast<float>(extent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = extent;
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
+}
+
 void VulkanRenderer::CMDRecordDistpatch(const VkCommandBuffer& cmd, uint32_t groupX, uint32_t groupY, uint32_t groupz)
 {
     vkCmdDispatch(cmd, groupX, groupY, groupz);
@@ -721,7 +738,19 @@ public:
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
         {// Bloom 
-
+            const auto& hdr = VKRNDR->hdrInfo;
+            size_t framebufferBase = framecntx.inFlightIndex * hdr.bloomMipLevels;
+            size_t descBase = ((hdr.bloomMipLevels * 2) - 1) * framecntx.inFlightIndex;
+            VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, hdr.bloomDonwPass, hdr.bloomDownFramebuffers[framebufferBase + 0], hdr.bloomMips[framebufferBase + 0].extent);
+            VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, hdr.thresholdPipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+            VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, hdr.thresholdPipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &hdr.bloomDescriptors.descriptorSet[descBase + 0]);
+            BloomPush push{};
+            push.bloomStrength = hdr.bloomStrength;
+            push.bloomThreshold = hdr.bloomThreshold;
+            VKRNDR->CMDRecordPushConstant<BloomPush>(framecntx.CMDBuffer, hdr.thresholdPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, push);
+            VKRNDR->CMDRecordDynamicViewport(framecntx.CMDBuffer, hdr.bloomMips[framebufferBase + 0].extent);
+            VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
+            VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
         {// Tone Mapping
             

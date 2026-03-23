@@ -29,8 +29,9 @@ layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 void main() { 
 	PointLight light = pointLight[lightIndex];
-    vec3 color = light.color_intensity.xyz;
-    float intensity = light.color_intensity.w;
+    float bloomfactor = 5.0;
+    vec3 color = light.color_intensity.xyz ;
+    float intensity = light.color_intensity.w * bloomfactor;
     fragColor = vec4(color * intensity, 1.0);	
 } 
 
