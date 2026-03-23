@@ -14,7 +14,7 @@ struct PointLight
     vec4 position_radius;
     vec4 color_intensity;
     vec4 direction_inner;
-    vec4 outer_type_pad;
+    vec4 outer_type_emissiveScale;
 };
 
 layout(std430, set = 0 , binding = 5) readonly restrict buffer lightSSBO
@@ -29,7 +29,7 @@ layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 void main() { 
 	 PointLight light = pointLight[lightIndex];
-    float emissiveScale = 1.0;
+    float emissiveScale = light.outer_type_emissiveScale.z;
     vec3 color = light.color_intensity.xyz;
     float intensity = light.color_intensity.w * emissiveScale;
     

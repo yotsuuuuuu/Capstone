@@ -119,7 +119,7 @@ struct alignas(16) CLightData {
     Vec4 position_radius;
     Vec4 colour_intensity;
     Vec4 direction_inner;
-    Vec4 outer_type_pad;
+    Vec4 outer_type_emissiveScale;
 };
 
 struct  Cluster

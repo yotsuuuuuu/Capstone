@@ -4,14 +4,15 @@
 #include <cstdint>
 
 CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_)
-	:Component(parent_), LightSystem(sys),radius(radius_),intensity(intensity_),Colour(colour_),Type(0), ssboIndex(std::numeric_limits<uint32_t>::max()){
+	:Component(parent_), LightSystem(sys),radius(radius_),intensity(intensity_),Colour(colour_),Type(0), ssboIndex(std::numeric_limits<uint32_t>::max())
+, bloomScale(1.0f){
 	
 }
 
 CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, 
 	Vec3 direction_, Vec2 inner_Outer_)
 	:Component(parent_), LightSystem(sys), radius(radius_), intensity(intensity_), Colour(colour_), Type(1),
-	Direction(direction_),inner_Outer(inner_Outer_), ssboIndex(std::numeric_limits<uint32_t>::max()) {
+	Direction(direction_),inner_Outer(inner_Outer_), ssboIndex(std::numeric_limits<uint32_t>::max()), bloomScale(1.0f) {
 		
 }
 
@@ -75,7 +76,7 @@ void CLight::UpdateData()
 	data.colour_intensity = Vec4(Colour, intensity);
 	data.position_radius = Vec4(Position, radius);
 	data.direction_inner = Vec4(Direction, inner_Outer.x);
-	data.outer_type_pad = Vec4(inner_Outer.y, static_cast<float>(Type), 0, 0);
+	data.outer_type_emissiveScale = Vec4(inner_Outer.y, static_cast<float>(Type), bloomScale, 0);
 }
 
 CLightData CLight::GetUpdatedData()

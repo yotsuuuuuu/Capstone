@@ -14,6 +14,7 @@ class CLight :
     Vec3 Colour;
     float radius;
     float intensity;
+    float bloomScale; // needs to be adde to constructor and filled in my assetmanager
     Vec3 Position;
     Vec3 Direction;
     Vec2 inner_Outer;
@@ -34,6 +35,7 @@ public:
     uint32_t GetIndex() { return ssboIndex; }
 
     void UpdateColour(const Vec3& c) { Colour = c; }
+    void UpdateBloomScale(const float& scale) { bloomScale = scale; }
     void UpdateRadius(const float& r) { radius = r; }
     void UpdateIntensity(float inten) { intensity = inten; }
     void UpdateDirection(const Vec3& dir) { Direction = dir; }
