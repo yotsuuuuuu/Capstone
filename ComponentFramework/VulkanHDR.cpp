@@ -22,6 +22,7 @@ void VulkanRenderer::CreateHDRResources()
 
 	// Tone Pass Descriptor set and Pipeline
 	//TODO: CHANGE WHEN BLOOM TARGETS ARE DONE
+	CreateBloomPassPipeLines(numOfFramesInFLight);
 	CreateTonePassPipeLine(numOfFramesInFLight);
 
 	
@@ -36,14 +37,15 @@ void VulkanRenderer::RecreateHDRResources()
 void VulkanRenderer::DestroyHDResources()
 {
 
+	DestroyBloomPassPipeLines();
+	DestroyTonePassPipeLine();
+
 
 	DestroyBloomMipFrameBuffers();
-	DestroyBloomRenderPasses();
-
-	DestroyTonePassPipeLine();
 	DestroyHDRFramBuffers();
 	
 	DestroySampler(hdrInfo.sampler);
+	DestroyBloomRenderPasses();
 	DestroyHDRRenderPass();
 }
 
@@ -147,6 +149,77 @@ void VulkanRenderer::CreateTonePassPipeLine(uint32_t numOfFramesInFLight)
 	
 }
 
+void VulkanRenderer::CreateBloomPassPipeLines(uint32_t numOfFramesInFLight)
+{
+
+	std::vector<SingleDescriptorSetLayoutInfo> layout;
+	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+	hdrInfo.bloomDescriptors.descriptorSetLayout = CreateDescriptorSetLayout(layout);
+	hdrInfo.bloomDescriptors.descriptorPool = CreateDescriptorPool(layout, 9);
+	
+	VkPipelineVertexInputStateCreateInfo vertexinfo{};
+	vertexinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexinfo.vertexBindingDescriptionCount = 0;
+	vertexinfo.vertexAttributeDescriptionCount = 0;
+	
+	PipeLineConfig config{};	
+	config.cullMode = VK_CULL_MODE_NONE;
+	config.vertexinfo = vertexinfo;
+	config.depthBias = VK_FALSE;
+	config.depthBiasClamp = 0.0f;
+	config.depthBiasConstantFactor = 0.0f;
+	config.depthBiasSlopeFactor = 0.0f;
+	config.depthTestEnable = VK_FALSE;
+	config.depthWriteEnable = VK_FALSE;
+	config.depthCompareOp = VK_COMPARE_OP_LESS;
+	config.polygonMode = VK_POLYGON_MODE_FILL;
+	config.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	config.dynamicViewport = true;
+	config.blendMode = PipeLineConfig::BlendMode::OPAQUE;
+	config.Color = true;
+	config.renderPass = hdrInfo.bloomDonwPass; 
+	config.viewPortsize = swapChainExtent; 
+	hdrInfo.thresholdPipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/ThresholdSample.vert.spv", "./shaders/ThresholdSample.frag.spv");
+	hdrInfo.donwSamplePipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/Sampling.vert.spv", "./shaders/DownSampling.frag.spv");
+
+	config.renderPass = hdrInfo.bloomUpPass;
+	config.blendMode = PipeLineConfig::BlendMode::ADDITIVE;
+	hdrInfo.upSamplePipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/Sampling.vert.spv", "./shaders/UpSampling.frag.spv");
+
+	int miplvls = static_cast<int>(hdrInfo.bloomMipLevels);
+	int numberofframes = static_cast<int>(numOfFramesInFLight);
+	int numberofRenderpases = 2;
+	int numofdescriptorssets = ((miplvls * numberofRenderpases) - 1);
+	int numofdescriptorssetsperframe = numofdescriptorssets  * numberofframes; // should be 18
+	
+	hdrInfo.bloomDescriptors.descriptorSet = AllocateDescriptorSets(hdrInfo.bloomDescriptors.descriptorPool, 
+											hdrInfo.bloomDescriptors.descriptorSetLayout, numofdescriptorssetsperframe);
+
+	
+	std::vector<Sampler2D> samplers;
+	samplers.resize(numofdescriptorssetsperframe);
+	for (size_t i = 0; i < numberofframes; i++) {
+		// threshold sample
+		size_t frameBase = numofdescriptorssets * i;
+		samplers[frameBase] = hdrInfo.hdrColor[i].MakeSampler(hdrInfo.sampler);
+		// donw sample
+		for (size_t j = 0; j < hdrInfo.bloomMipLevels - 1; j++) {
+			size_t sourceMip = i * hdrInfo.bloomMipLevels + j;			
+			samplers[frameBase + 1 + j] = hdrInfo.bloomMips[sourceMip].MakeSampler(hdrInfo.sampler);
+		}
+		// up samples
+		for (size_t k = 0; k < hdrInfo.bloomMipLevels - 1; k++) {
+			size_t sourceMip = i * hdrInfo.bloomMipLevels + (hdrInfo.bloomMipLevels - 1 - k);				
+			samplers[frameBase + hdrInfo.bloomMipLevels + k] = hdrInfo.bloomMips[sourceMip].MakeSampler(hdrInfo.sampler);
+		}
+	}
+
+	std::vector< DescriptorWriteInfo> write;
+	AddToDescrisptorLayoutWrite(write,0,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER,VK_SHADER_STAGE_FRAGMENT_BIT,1,samplers);
+	WriteDescriptorSets(hdrInfo.bloomDescriptors.descriptorSet, write);
+
+}
+
 void VulkanRenderer::CreateBloomRenderPasses(VkFormat colorformat)
 {
 
@@ -229,7 +302,7 @@ void VulkanRenderer::CreateBloomMipFrameBuffers(VkFormat colorformat, uint32_t n
 	
 	for (size_t i = 0; i < numOfFramesInFLight; i++) {
 		for (size_t j = 0; j < hdrInfo.bloomMipLevels; j++) {
-			uint32_t  index = i * static_cast<uint32_t>(hdrInfo.bloomMipLevels) + j;
+			uint32_t  index = static_cast<uint32_t>(i * hdrInfo.bloomMipLevels + j);
 			auto& renderTarget = hdrInfo.bloomMips[index];
 			CreateFrameBuffer({ renderTarget.view }, renderTarget.extent, hdrInfo.bloomDonwPass, hdrInfo.bloomDownFramebuffers[index]);
 			CreateFrameBuffer({ renderTarget.view }, renderTarget.extent, hdrInfo.bloomUpPass, hdrInfo.bloomUpFramebuffers[index]);
@@ -265,6 +338,14 @@ void VulkanRenderer::DestroyTonePassPipeLine()
 
 	DestroyPipeline(hdrInfo.tonePassPipeline);
 	DestroyDescriptorSet(hdrInfo.tonemapDescriptors);
+}
+
+void VulkanRenderer::DestroyBloomPassPipeLines()
+{
+	DestroyPipeline(hdrInfo.thresholdPipeline);
+	DestroyPipeline(hdrInfo.donwSamplePipeline);
+	DestroyPipeline(hdrInfo.upSamplePipeline);
+	DestroyDescriptorSet(hdrInfo.bloomDescriptors);
 }
 
 

@@ -259,6 +259,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\ClusterCompute.comp" />
+    <None Include="shaders\DownSampling.frag" />
     <None Include="shaders\GlobalLight.frag" />
     <None Include="shaders\GlobalLight.vert" />
     <None Include="shaders\LightCullCompute.comp" />
@@ -270,6 +271,7 @@
     <None Include="shaders\multiPhong.vert" />
     <None Include="shaders\phong.frag" />
     <None Include="shaders\phong.vert" />
+    <None Include="shaders\Sampling.vert" />
     <None Include="shaders\ShadowCheck_2.frag" />
     <None Include="shaders\ShadowCheck.frag" />
     <None Include="shaders\SimpleLight.frag" />
@@ -282,8 +284,11 @@
     <None Include="shaders\SkyBox.vert" />
     <None Include="shaders\terrain.frag" />
     <None Include="shaders\terrain.vert" />
+    <None Include="shaders\ThresholdSample.frag" />
+    <None Include="shaders\ThresholdSample.vert" />
     <None Include="shaders\TonePass.frag" />
     <None Include="shaders\TonePass.vert" />
+    <None Include="shaders\UpSampling.frag" />
     <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

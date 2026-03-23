@@ -720,6 +720,9 @@ public:
                      
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
+        {// Bloom 
+
+        }
         {// Tone Mapping
             
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, framecntx.SwapChainRenderpass, framecntx.currentSwapChainFrameBuffer, framecntx.extent);

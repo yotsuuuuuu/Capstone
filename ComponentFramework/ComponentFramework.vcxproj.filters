@@ -407,6 +407,21 @@
     <None Include="shaders\TonePass.vert">
       <Filter>Shaders\CurrentShaders</Filter>
     </None>
+    <None Include="shaders\DownSampling.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\ThresholdSample.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\UpSampling.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\Sampling.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\ThresholdSample.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

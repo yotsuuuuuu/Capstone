@@ -386,6 +386,13 @@ private:
     void CMDSubmitGraphicsQueue(VkCommandBuffer* cmds, uint32_t cmd_count, VkFence fence = VK_NULL_HANDLE, VkPipelineStageFlags* stageFlags = nullptr, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0, VkSemaphore* readySema = nullptr, uint32_t ready_count = 0);
     void CMDPresent(uint32_t SwapImageindex, VkSemaphore* waitSema = nullptr, uint32_t wait_count = 0);
 
+    template<typename T>
+    void CMDRecordPushConstant(const VkCommandBuffer& cmd, const VkPipelineLayout& layout, const VkShaderStageFlagBits& flags, const T& push) {
+        static_assert(sizeof(T) <= 128, "Push constant struct exceeds 128 byte - Reduce size");
+        vkCmdPushConstants(cmd, layout, flags, 0, sizeof(T), &push);
+    }
+
+
  private:
     struct ECSRenderer;
 
@@ -486,18 +493,20 @@ private:
     void CreateHDRFramBuffers(VkFormat,VkFormat,uint32_t);
     void CreateHDRRenderPass(VkFormat, VkFormat);
     void CreateTonePassPipeLine(uint32_t);
-    //void CreateBloomPassPipeLines(uint32_t);
+    void CreateBloomPassPipeLines(uint32_t);
 
     void DestroyHDRFramBuffers();
     void DestroyHDRRenderPass();
     void DestroyTonePassPipeLine();
-    //void DestroyBloomPassPipeLines();
+    void DestroyBloomPassPipeLines();
 
     void CreateBloomRenderPasses(VkFormat);
     void CreateBloomMipFrameBuffers(VkFormat, uint32_t);
     
     void DestroyBloomMipFrameBuffers();
     void DestroyBloomRenderPasses();
+
+    
 };
 #endif 
 

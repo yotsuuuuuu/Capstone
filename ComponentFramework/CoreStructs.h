@@ -273,7 +273,9 @@ enum BlendMode {OPAQUE,ALPHA,ADDITIVE};
     //color
     bool Color = true;
     BlendMode blendMode = BlendMode::OPAQUE;
-    //Renderpass and viewport must be set
+
+    bool dynamicViewport = false;
+    //Renderpass and viewport must be set if not dynamic
 };
 
 
@@ -354,6 +356,14 @@ struct RenderTarget {
     VkImageView view;
     VkFormat format;
     VkExtent2D extent;
+    Sampler2D MakeSampler(VkSampler sampler) {
+        Sampler2D s{};
+        s.image = image;
+        s.imageView = view;
+        s.imageDeviceMemory = memory;
+        s.sampler = sampler;
+        return s;
+    }
 };
 
 struct HDRContext {
@@ -372,16 +382,26 @@ struct HDRContext {
     std::vector<RenderTarget> bloomMips; // numberinflight * number of mips
     std::vector<VkFramebuffer> bloomDownFramebuffers;
     std::vector<VkFramebuffer> bloomUpFramebuffers;
-    DescriptorSetInfo bloomDescriptors;
+    
 
     //VkRenderPass tonemapRenderPass; Use the Main Render Pass
     
-    PipelineInfo tonePassPipeline;
+    PipelineInfo tonePassPipeline;    
     DescriptorSetInfo tonemapDescriptors;
+
+    PipelineInfo thresholdPipeline;
+    PipelineInfo donwSamplePipeline;
+    PipelineInfo upSamplePipeline;
+    DescriptorSetInfo bloomDescriptors;
 
     uint32_t bloomMipLevels = 5;
     float bloomThreshold = 1.0f;
     float bloomStrength = 1.0f;
+};
+
+struct BloomPush {
+    float bloomThreshold;
+    float bloomStrength;
 };
 
 struct GlobalShadowMappingInfo
