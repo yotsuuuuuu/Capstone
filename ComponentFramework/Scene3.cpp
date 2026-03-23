@@ -97,7 +97,7 @@ bool Scene3::OnCreate() {
 			// Cycle through distinct colors
 			Vec3 color = testColors[index % colorCount];
 			light->UpdateRadius(10.0f);
-			light->UpdateIntensity(3.0f);
+			light->UpdateIntensity(1.00f);
 			light->UpdateColour(color);
 			light->UpdateLight();
 

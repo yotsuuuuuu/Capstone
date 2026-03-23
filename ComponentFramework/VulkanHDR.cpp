@@ -31,6 +31,17 @@ void VulkanRenderer::CreateHDRResources()
 void VulkanRenderer::RecreateHDRResources()
 {
 	//TODO: RESIZING EVENT
+	DestroyBloomPassPipeLines();
+	DestroyTonePassPipeLine();
+	DestroyBloomMipFrameBuffers();
+	DestroyHDRFramBuffers();
+	auto depthformat = VK_FORMAT_D32_SFLOAT;
+	auto colorformat = VK_FORMAT_R16G16B16A16_SFLOAT;
+	auto numOfFramesInFLight = getNumberOfFramesInFlight();
+	CreateBloomMipFrameBuffers(colorformat, numOfFramesInFLight);
+	CreateHDRFramBuffers(colorformat, depthformat, numOfFramesInFLight);
+	CreateBloomPassPipeLines(numOfFramesInFLight);
+	CreateTonePassPipeLine(numOfFramesInFLight);
 }
 
 
@@ -118,22 +129,9 @@ void VulkanRenderer::CreateTonePassPipeLine(uint32_t numOfFramesInFLight)
 
 	std::vector<SingleDescriptorSetLayoutInfo> layout;
 	AddToDescriptorLayoutCollection(layout, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+	AddToDescriptorLayoutCollection(layout, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 	hdrInfo.tonemapDescriptors.descriptorSetLayout = CreateDescriptorSetLayout(layout);
 	hdrInfo.tonemapDescriptors.descriptorPool = CreateDescriptorPool(layout, 2);
-
-	hdrInfo.tonemapDescriptors.descriptorSet = AllocateDescriptorSets(hdrInfo.tonemapDescriptors.descriptorPool, hdrInfo.tonemapDescriptors.descriptorSetLayout, numOfFramesInFLight);
-
-	std::vector<Sampler2D> desHDRSamplers;
-	desHDRSamplers.resize(numOfFramesInFLight);
-	for (size_t i = 0; i < desHDRSamplers.size(); i++) {
-		desHDRSamplers[i].image = hdrInfo.hdrColor[i].image;
-		desHDRSamplers[i].imageView = hdrInfo.hdrColor[i].view;
-		desHDRSamplers[i].imageDeviceMemory = hdrInfo.hdrColor[i].memory;
-		desHDRSamplers[i].sampler = hdrInfo.sampler;
-	}
-	std::vector<DescriptorWriteInfo> write;
-	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, desHDRSamplers);
-	WriteDescriptorSets(hdrInfo.tonemapDescriptors.descriptorSet, write);
 
 	PipeLineConfig config = GetSwapChainPipeLineConfig();
 	VkPipelineVertexInputStateCreateInfo vertexinfo{};
@@ -145,6 +143,32 @@ void VulkanRenderer::CreateTonePassPipeLine(uint32_t numOfFramesInFLight)
 	config.depthTestEnable = VK_FALSE;
 	config.depthWriteEnable = VK_FALSE;
 	hdrInfo.tonePassPipeline = CreateGraphicsPipeline({ hdrInfo.tonemapDescriptors.descriptorSetLayout }, config, "./shaders/TonePass.vert.spv", "./shaders/TonePass.frag.spv");
+
+
+
+
+	hdrInfo.tonemapDescriptors.descriptorSet = AllocateDescriptorSets(hdrInfo.tonemapDescriptors.descriptorPool, hdrInfo.tonemapDescriptors.descriptorSetLayout, numOfFramesInFLight);
+
+	std::vector<Sampler2D> desHDRSamplers;
+	desHDRSamplers.resize(numOfFramesInFLight);
+	for (size_t i = 0; i < desHDRSamplers.size(); i++) {
+		desHDRSamplers[i]= hdrInfo.hdrColor[i].MakeSampler(hdrInfo.sampler);
+	
+	}
+
+	std::vector<Sampler2D> bloomSamples;
+	bloomSamples.resize(numOfFramesInFLight);
+	for (size_t i = 0; i < bloomSamples.size(); i++) {
+		size_t base = hdrInfo.bloomMipLevels ;
+		bloomSamples[i] = hdrInfo.bloomMips[base * i].MakeSampler(hdrInfo.sampler);
+
+	}
+	std::vector<DescriptorWriteInfo> write;
+	AddToDescrisptorLayoutWrite(write, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, desHDRSamplers);
+	AddToDescrisptorLayoutWrite(write, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, DescriptorWriteInfo::Destype::PER_FRAME_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, bloomSamples);
+	WriteDescriptorSets(hdrInfo.tonemapDescriptors.descriptorSet, write);
+
+
 
 	
 }

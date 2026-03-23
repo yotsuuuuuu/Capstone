@@ -16,7 +16,11 @@ void main() {
 	// optionanl luminace  options (0.299,0.587,0.114)
 	// or  bit slower sqrt( 0.299*R^2 + 0.587*G^2 + 0.114*B^2 )
 	float luminance = dot(colour, vec3(0.2126, 0.7152, 0.0722));
-	vec3 result = (luminance > threshold) ? colour : vec3(0.0);
+	float knee = 0.1; 
+	float rq = clamp(luminance - threshold + knee, 0.0, 2.0 * knee);
+	rq = (rq * rq) / (4.0 * knee + 0.00001);
+	float weight = max(rq, luminance - threshold) / max(luminance, 0.00001);
+	vec3 result = colour * weight;
     fragColor = vec4(result, 1.0);
 } 
 

@@ -91,7 +91,8 @@ void VulkanRenderer::RecreateSwapChain() {
     createDepthResources();
     createFramebuffers();
     //CreateCommandBuffers();
-    //RecreateHDRResources(); TODO
+    
+    RecreateHDRResources();
 }
 
 

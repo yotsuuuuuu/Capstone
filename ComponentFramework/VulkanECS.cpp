@@ -737,20 +737,54 @@ public:
                      
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
         }
+
+        const auto& hdr = VKRNDR->hdrInfo;
+        BloomPush push{};
+        push.bloomStrength = hdr.bloomStrength;
+        push.bloomThreshold = hdr.bloomThreshold;
         {// Bloom 
-            const auto& hdr = VKRNDR->hdrInfo;
+           
             size_t framebufferBase = framecntx.inFlightIndex * hdr.bloomMipLevels;
             size_t descBase = ((hdr.bloomMipLevels * 2) - 1) * framecntx.inFlightIndex;
             VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, hdr.bloomDonwPass, hdr.bloomDownFramebuffers[framebufferBase + 0], hdr.bloomMips[framebufferBase + 0].extent);
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, hdr.thresholdPipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, hdr.thresholdPipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &hdr.bloomDescriptors.descriptorSet[descBase + 0]);
-            BloomPush push{};
-            push.bloomStrength = hdr.bloomStrength;
-            push.bloomThreshold = hdr.bloomThreshold;
+            
             VKRNDR->CMDRecordPushConstant<BloomPush>(framecntx.CMDBuffer, hdr.thresholdPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, push);
             VKRNDR->CMDRecordDynamicViewport(framecntx.CMDBuffer, hdr.bloomMips[framebufferBase + 0].extent);
             VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
             VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+
+            VKRNDR->CMDImageBarrier(framecntx.CMDBuffer, hdr.bloomMips[framebufferBase + 0].image, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, 0);
+
+            // donw samples
+            for (int i = 1; i < hdr.bloomMipLevels; i++) {
+                VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, hdr.bloomDonwPass, hdr.bloomDownFramebuffers[framebufferBase + i], hdr.bloomMips[framebufferBase + i].extent);
+                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, hdr.donwSamplePipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, hdr.donwSamplePipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &hdr.bloomDescriptors.descriptorSet[descBase + i]);
+                VKRNDR->CMDRecordDynamicViewport(framecntx.CMDBuffer, hdr.bloomMips[framebufferBase + i].extent);
+                VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
+                VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+                VKRNDR->CMDImageBarrier(framecntx.CMDBuffer, hdr.bloomMips[framebufferBase + i].image, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, i);
+            }
+            // up sample
+
+            for (int i = hdr.bloomMipLevels - 2 ; i  >= 0 ; i--) {
+                size_t upBase = framebufferBase  + i;
+                size_t UpdescBase = descBase + hdr.bloomMipLevels + ((hdr.bloomMipLevels - 2) - i);
+                VKRNDR->CMDBeginRenderPass(framecntx.CMDBuffer, hdr.bloomUpPass, hdr.bloomUpFramebuffers[upBase], hdr.bloomMips[upBase].extent);
+                VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, hdr.upSamplePipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+                VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, hdr.upSamplePipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &hdr.bloomDescriptors.descriptorSet[UpdescBase]);
+                VKRNDR->CMDRecordDynamicViewport(framecntx.CMDBuffer, hdr.bloomMips[upBase].extent);
+                VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
+                VKRNDR->CMDEndRenderPass(framecntx.CMDBuffer);
+                VKRNDR->CMDImageBarrier(framecntx.CMDBuffer, hdr.bloomMips[upBase].image, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, i);
+
+            }
+
         }
         {// Tone Mapping
             
@@ -758,6 +792,8 @@ public:
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer,VKRNDR->hdrInfo.tonePassPipeline.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, VKRNDR->hdrInfo.tonePassPipeline.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             &VKRNDR->hdrInfo.tonemapDescriptors.descriptorSet[framecntx.inFlightIndex]);
+          
+            VKRNDR->CMDRecordPushConstant<BloomPush>(framecntx.CMDBuffer, hdr.tonePassPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, push);
             VKRNDR->CMDRecordDrawTRI(framecntx.CMDBuffer);
 
             Ecntx.VKImGUI->RecordCMDBuffer(framecntx.CMDBuffer);
