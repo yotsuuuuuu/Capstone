@@ -724,7 +724,7 @@ public:
                     VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, item.mesh);
                 }
             }
-            //draw the lights
+            //draw the lights temporary
             if (componentsareValid) {
                 //lightItem
                 VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, lightItem.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);

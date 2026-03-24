@@ -123,9 +123,9 @@
     "farClip": 500
   },
   "globalLight": {
-    "diffused": [ 0.5, 0.6, 0.8, 0.0 ],
-    "specular": [ 0.9, 0.9, 1.0, 0.0 ],
-    "ambient": [ 0.028, 0.028, 0.056, 0 ],
+    "diffused": [ 0.95, 0.95, 0.95, 0.0 ],
+    "specular": [ 1.0, 1.0, 0.95, 0.0 ],
+    "ambient": [ 0.005, 0.005, 0.008, 0.0 ],
     "orthosidelength": 10.0,
     "orientation": [ -40, 1, 0, 0 ],
     "distance": 2.0

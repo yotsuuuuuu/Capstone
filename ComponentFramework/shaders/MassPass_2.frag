@@ -125,9 +125,22 @@ void main() {
 	spec = max(dot(eyeDir, reflection), 0.0);
 	spec = pow(spec, 14.0);
 	spec *= diff > 0.0 ? 1.0 : 0.0; // small fix but dosen't to much in the grand scheme of things
+	vec4 specularC = spec * ks;
+
+	// clamping both diff and specular
+	float specLuminance = dot(specularC.rgb, vec3(0.2126, 0.7152, 0.0722));
+	float specScale = min(0.5, 1.0 / max(specLuminance, 0.0001));
+	specularC *= specScale;
 	
-	// Add diffuse and specular
-	phongResult += (shadow * ((diff * kd) + (spec * ks)) ) * kt;
+	vec4 diffC = diff * kd;
+	vec4 phongContrib = (diffC + specularC) * kt;
+	
+	
+	float phongLuminance = dot(phongContrib.rgb, vec3(0.2126, 0.7152, 0.0722));
+	float phongScale = min(0.8, 1.0 / max(phongLuminance, 0.0001));
+	phongContrib *= phongScale;
+	
+	phongResult += shadow * phongContrib;
 	phongResult += ClusterLightsColour(kt);
 	//vec4 phongResult = vec4(max(dot(vertNormal, lightDir), 0));
 	fragColor = phongResult;
