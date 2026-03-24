@@ -14,6 +14,7 @@ class CLight :
     Vec3 Colour;
     float radius;
     float intensity;
+    int AudioBand;
     float bloomScale; // needs to be adde to constructor and filled in my assetmanager
     Vec3 Position;
     Vec3 Direction;

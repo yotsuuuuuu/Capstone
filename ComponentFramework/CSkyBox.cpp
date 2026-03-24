@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "CShader.h"
 #include "CMesh.h"
+#include "imgui.h"
 
 bool CSkyBox::OnCreate()
 {
@@ -103,4 +104,16 @@ void CSkyBox::RecreatePipeline()
 PipelineInfo CSkyBox::GetPipeline()
 {
     return std::dynamic_pointer_cast<CShader>(Shader)->GetPipelineInfo();
+}
+
+void CSkyBox::ImGui()
+{
+
+    ImGui::Begin("CSkyBox");
+ 
+    ImGui::SliderFloat("Bloom Factor (0 -> 2)", &push.Bloomfactor, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    ImGui::ColorPicker4("RGB Bloom Tint", (float*) &push.ColorTint, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float);
+
+    ImGui::End();
 }

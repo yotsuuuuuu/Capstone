@@ -17,9 +17,16 @@ class CSkyBox : public Component
 	std::vector<VkDescriptorSet> DesSet;
 	Renderer* renderer;
 
+	
+	SkyboxPush push;
+
 public:
 	CSkyBox(Ref<Component> parent_, Renderer* renderer_, std::vector<std::string> files ): Component(parent_),
-		renderer(renderer_),paths(files), CubeSampler({})  { }
+		renderer(renderer_),paths(files), CubeSampler({})  
+	{
+		push.Bloomfactor = 1.0f;
+		push.ColorTint = Vec4(0.45, 0.475, 0.5, 1.0);
+	}
 
 
 	bool OnCreate() override;
@@ -32,6 +39,10 @@ public:
 	PipelineInfo GetPipeline();
 	std::vector<VkDescriptorSet> GetSet() { return DesSet; }
 
+	void ImGui();
+
+	SkyboxPush GetSkyBoxPush() { return push; }
+	void SetSkyBoxPush(SkyboxPush p) { push = p; }
 
 };
 

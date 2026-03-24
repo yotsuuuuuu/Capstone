@@ -86,12 +86,11 @@ void VkImGUISystem::EndFrame()
 void VkImGUISystem::TestUI()
 {
     //ImGui::ShowDemoWindow();
-    ImGuiIO& io = ImGui::GetIO();
-    BeginFrame();
+    ImGuiIO& io = ImGui::GetIO();   
     ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();   
-    EndFrame();
+
 }
 
 void VkImGUISystem::CreateDescriptorPool()

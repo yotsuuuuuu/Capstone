@@ -17,6 +17,7 @@ private:
 	void* extradriverdata = 0;
 	float volume = 25.0f;
 
+	
 public:
 	FmodController(){};
 	void addSong(const char* wave_);

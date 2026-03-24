@@ -634,6 +634,7 @@ public:
         }
         //1.3 skybox draw item for main pass
         DrawItem skybox;
+        SkyboxPush sPush;
         if (auto cam = VKRNDR->camera.lock()) {
            auto MainCamera =  std::dynamic_pointer_cast<CActor>(cam);
            auto CskyBox = MainCamera->GetComponent<CSkyBox>();
@@ -641,6 +642,7 @@ public:
            skybox.pipeInfo = CskyBox->GetPipeline();
            skybox.set = CskyBox->GetSet()[framecntx.inFlightIndex];
            skybox.setID = 1;
+           sPush = CskyBox->GetSkyBoxPush();
         }
         else {
             throw std::runtime_error("Main Camera is in valid");
@@ -712,14 +714,9 @@ public:
             // draw sky box
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, skybox.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
-            struct SkyboxPush {
-                Vec4  ColorTint;
-                float Bloomfactor;               
-            };
-            SkyboxPush push;
-            push.Bloomfactor = 1.5f;
-            push.ColorTint = Vec4(0.45, 0.475, 0.5, 1.0);
-            VKRNDR->CMDRecordPushConstant<SkyboxPush>(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, push);
+           
+            //TODO: get push 
+            VKRNDR->CMDRecordPushConstant<SkyboxPush>(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, sPush);
             VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             // draw the rest of the items

@@ -8,6 +8,7 @@
 #include "CShader.h"
 #include "CMesh.h"
 #include "CMaterial.h"
+#include "CSkyBox.h"
 #include "CTransform.h"
 #include "CCapsuleCollider.h"
 #include "CWorld.h"
@@ -405,6 +406,11 @@ void Scene3::Update(const float deltaTime) {
 		if (playerController) {
 			playerController->UpdateInput(deltaTime);
 			phys->Update(deltaTime);
+		}
+		auto Skybox = player->GetComponent<CSkyBox>();
+		if (Skybox) {
+			// Run imgui sky box
+			Skybox->ImGui();
 		}
 	}
 	

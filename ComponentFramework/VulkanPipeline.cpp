@@ -519,7 +519,7 @@ PipelineInfo VulkanRenderer::CreateGraphicsPipeline(const std::vector <VkDescrip
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = config.polygonMode;
+    rasterizer.polygonMode = config.polygonMode;//  VK_POLYGON_MODE_LINE
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = config.cullMode;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;

@@ -445,3 +445,8 @@ struct FrameContext
     uint32_t inFlightIndex;
     VkExtent2D extent;
 };
+
+struct SkyboxPush {
+    Vec4  ColorTint;
+    float Bloomfactor;
+};
