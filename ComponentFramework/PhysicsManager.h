@@ -35,9 +35,14 @@ private:
 
 	Ref<CActor> player;// = std::dynamic_pointer_cast<CActor>(camera);
 	Ref<CCapsuleCollider> playerCollider;// = player->GetComponent<CCapsuleCollider>();
+
+	std::vector<Ref<Component>> actorsInScene;
+	std::vector<Ref<Component>> collidersInScene;
+
 public:
 
-	bool OnCreate(Ref<Component> world_, Ref<Component> camera_);
+	void Set(std::vector<Ref<Component>> sceneActors, Ref<Component> cam, Ref<Component> world_) { actorsInScene = sceneActors; camera = cam; world = world_; }
+	bool OnCreate();
 
 	void TerrainCollision();
 

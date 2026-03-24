@@ -14,6 +14,7 @@ enum class ColliderType {
 	NONE = 0,
 	CAPSULE,
 	MESH,
+	AABB
 };
 
 struct CollisionInfo {

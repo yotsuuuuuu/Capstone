@@ -20,6 +20,7 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 #include "FmodController.h"
+#include "PhysicsManager.h"
 
 Scene3::Scene3(EngineContext& context_): 
 	Scene(context_) {
@@ -205,13 +206,17 @@ bool Scene3::OnCreate() {
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
 		
-		actorsInScene.push_back(WorldActor);
 
 		//actorsInScene.push_back(engineContext.assetManager->GetCamera());
 
 		//step 3 Actors being added to the scene.
 		camera = engineContext.assetManager->GetCamera();	
 		world = WorldActor;
+		engineContext.physicsManager->Set(actorsInScene, camera, world);
+		engineContext.physicsManager->OnCreate();
+
+		actorsInScene.push_back(WorldActor);
+
 		
 	}
 		break;
@@ -408,6 +413,7 @@ void Scene3::Update(const float deltaTime) {
 	}
 	
 	FrustumCheck();
+	engineContext.physicsManager->TerrainCollision();
 	
 	// world collision checking
 	// through a system maybe?

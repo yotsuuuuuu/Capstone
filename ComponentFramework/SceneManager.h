@@ -41,6 +41,8 @@ private:
 	FmodController* fmodController;
 	SYS_Light* LightSystem;
 	VkImGUISystem* VKImGui;
+	PhysicsManager* physicsManager;
+
 	unsigned int fps;
 	bool isRunning;
 	bool isWindowMinimized = false;
