@@ -16,7 +16,7 @@ public:
 
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
-	virtual void Update(const float dt) override {}
+	virtual void Update(const float dt);
 
 private:
 	// keyboard
@@ -49,7 +49,7 @@ public:
 	void HandleMouseMotion(const SDL_Event& motion);
 	void HandleMouseButton(const SDL_Event& button);
 
-	void UpdateInput(const float dt);
+	//void Update(const float dt);
 
 	void SetMoveSpeed(float speed) { moveSpeed = speed; }
 	void SetSprintMultiplier(float multiplier) { sprintMultiplier = multiplier; }

@@ -17,7 +17,7 @@ public:
 
 	virtual bool OnCreate() override { return true; }
 	virtual void OnDestroy() override {}
-	virtual void Update(const float dt) override {}
+	virtual void Update(const float dt);
 
 	inline MATH::Vec3 GetPosition() const { return position; }
 	inline void SetPosition(const MATH::Vec3& pos) { position = pos; }	

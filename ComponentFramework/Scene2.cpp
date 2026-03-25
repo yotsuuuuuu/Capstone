@@ -193,7 +193,7 @@ void Scene2::Update(const float deltaTime) {
 	auto playerController = p1->GetComponent<CInput>();
 	auto phys = p1->GetComponent<CPhysics>();
 
-	playerController->UpdateInput(deltaTime);
+	playerController->Update(deltaTime);
 	phys->Update(deltaTime);
 
 	//p1->Update(deltaTime);

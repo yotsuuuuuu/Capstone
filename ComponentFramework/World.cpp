@@ -63,8 +63,7 @@ void World::GenerateAllChunks()
 			GenerateChunkHeightmap(tempChunk.get());
 			BuildChunkMeshData(tempChunk.get());
 
-			chunkMap.insert({chunkWorldPos, std::move(tempChunk) });
-			//chunkMap.push_back(std::move(tempChunk));
+			//chunkMap.insert({chunkWorldPos, std::move(tempChunk) });
 			i++;
 		}
 	}
@@ -143,6 +142,8 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	renderData.isInitialized = true;
 	renderData.aabb.min = Vec3(chunkPos.x, chunk->getMinY(), chunkPos.y);
 	renderData.aabb.max = Vec3(chunkPos.x + CHUNK_WORLD_SIZE, chunk->getMaxY(), chunkPos.y + CHUNK_WORLD_SIZE);
+	renderData.vertices = std::move(vertices);
+	renderData.chunkPos = chunkPos;
 	chunkRenderData.push_back(renderData);
 	//chunkRenderData[chunkWorldPos] = renderData;
 

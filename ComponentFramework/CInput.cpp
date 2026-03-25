@@ -102,7 +102,7 @@ void CInput::HandleMouseButton(const SDL_Event& button)
 	// TODO: (andres) figure out a use for mouse clicking and implement
 }
 
-void CInput::UpdateInput(const float dt)
+void CInput::Update(const float dt)
 {
 	auto phys = physics.lock();
 

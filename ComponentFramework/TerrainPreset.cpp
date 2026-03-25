@@ -5,12 +5,16 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	pAudio = GetLayerValuesFromAudio(ab);
 
 	CreateBase();
-	//CreatePeaksValleys();
+	CreatePeaksValleys();
 	//CreateErosion();
-	//CreateContinentalness();
-	exponent = 1.0f + (int(pAudio.bassMaxSum * pAudio.midMaxSum - pAudio.bassAvgSum * pAudio.highMaxSum) % 2) * pAudio.bassAvgSum;
+	CreateContinentalness();
+	
+	exponent = 1.0f + (pAudio.highAvgSum*2 );
 	std::cout << exponent << std::endl;
 	int why = 0;
+	// if mids are dominant, concatenate layers for more complex terrain. 
+	concatenate = (pAudio.midAvgSum*1.3 > pAudio.bassAvgSum/1.6f) && (pAudio.midAvgSum > pAudio.highAvgSum); 
+
 	// TODO: (andres) exponents, 
 	// TODO: (andres) global height scale, 
 	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
@@ -279,7 +283,7 @@ void TerrainPreset::CreateBase()
 	base.type = ChooseNoise(0, avgBands.bass); // for base decide it with bass
 	base.seed = pAudio.seed * (pAudio.bassAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
 	base.frequency = 0.005f + (avgBands.sub * 0.03f); // for base keep it very very low. 0.001-0.01
-	base.amplitude = 2.0f + (avgBands.highBass * 3.0f); // 5 is a good starting point. nothing more than 10
+	base.amplitude = 3.0f + (avgBands.highBass * 3.0f); // 5 is a good starting point. nothing more than 10
 	base.fractal = ChooseFractal(0, pAudio.bassAvgSum * 2); // for base DO NOT USE PINGPONG OR RIDGED. its too crazy.
 	
 	if (base.fractal != FractalType::None) {
@@ -302,9 +306,10 @@ void TerrainPreset::CreatePeaksValleys()
 	AudioBands avgBands = pAudio.avgBands;
 	peaksValleys.type = ChooseNoise(1, pAudio.highAvgSum); // avg sum cause alone they tiny 
 	peaksValleys.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	peaksValleys.frequency = 0.05f + (pAudio.highAvgSum * 0.1f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
+	peaksValleys.frequency = 0.005f + (pAudio.highAvgSum); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
 	peaksValleys.amplitude = 0.3f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
 	peaksValleys.fractal = ChooseFractal(1, pAudio.highAvgSum); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
+	
 	if (peaksValleys.fractal != FractalType::None) {
 		peaksValleys.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 3); // influenced by mids since they are in the middle
 		peaksValleys.gain = 0.3f + ((pAudio.midAvgSum) * 0.4f); // if using fractal, 0.3-0.7 is good for peaks and valleys

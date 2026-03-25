@@ -203,7 +203,6 @@
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CCameraActor.h" />
     <ClInclude Include="CCapsuleCollider.h" />
-    <ClInclude Include="CChunk.h" />
     <ClInclude Include="CCollider.h" />
     <ClInclude Include="CGlobalLight.h" />
     <ClInclude Include="Chunk.h" />

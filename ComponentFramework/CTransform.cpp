@@ -1,6 +1,10 @@
 #include "CTransform.h"
 #include <MMath.h>
 
+void CTransform::Update(const float dt)
+{
+}
+
 void CTransform::SetRotation(const MATH::Quaternion& rot)
 {
     rotation = rot;

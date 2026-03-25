@@ -6,6 +6,8 @@
 #include "CTransform.h"
 #include "CCamera.h"
 #include "CPhysics.h"
+#include "CCapsuleCollider.h"
+
 #include "CInput.h"
 #include "CSkyBox.h"
 #include "CGlobalLight.h"
@@ -50,6 +52,7 @@ bool AssetManager::LoadCamera(const std::string& filepath_)
     camera->AddComponent<CCamera>(std::make_shared<CCamera>(camera, renderer, fov, aspectRatio, nearClip, farClip));
     camera->AddComponent<CPhysics>(std::make_shared<CPhysics>(camera));
     camera->AddComponent<CInput>(std::make_shared<CInput>(camera));
+    camera->AddComponent<CCapsuleCollider>(std::make_shared<CCapsuleCollider>(camera));
 
 
     if (!jsonLoader.contains("globalLight"))

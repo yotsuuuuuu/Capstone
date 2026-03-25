@@ -18,6 +18,10 @@ bool CCapsuleCollider::OnCreate() {
 	if (!t)	return false;
 	transform = t;
 
+	cylinderHeight = height - radius * 2.0f;  // The straight cylinder part
+
+	UpdateCapsulePoints();
+
 	return true;
 }
 
@@ -28,6 +32,7 @@ void CCapsuleCollider::OnDestroy()
 
 void CCapsuleCollider::Update(const float dt)
 {
+	UpdateCapsulePoints();
 }
 
 
@@ -41,12 +46,15 @@ CollisionInfo CCapsuleCollider::IntersectingCapsule(const CCapsuleCollider& caps
 	return CollisionInfo();
 }
 
-CollisionInfo CCapsuleCollider::IntersectingAABB(const AABB& aabb) // capsul aabb
+
+
+CollisionInfo CCapsuleCollider::IntersectingAABB(const AABB& aabb) const// capsul aabb
 {
 	CollisionInfo info;
 
 	Vec3 axis = capA - capB;
 	float axislength = VMath::mag(axis);
+	float radius = this->radius;
 
 	if (axislength < VERY_SMALL) {
 		// degenerate capsule (sphere)
@@ -94,7 +102,7 @@ CollisionInfo CCapsuleCollider::IntersectingAABB(const AABB& aabb) // capsul aab
 	return info;
 }
 
-MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) const
 {
 	MeshCollisionInfo info;
 
@@ -125,7 +133,7 @@ MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& 
 	return info;
 }
 
-bool CCapsuleCollider::SimpleIntersectingAABB(const AABB& aabb)
+bool CCapsuleCollider::SimpleIntersectingAABB(const AABB& aabb) const
 {
 	AABB capsuleAABB = GetAABB();
 
@@ -137,6 +145,13 @@ bool CCapsuleCollider::SimpleIntersectingAABB(const AABB& aabb)
 }
 
 
+
+void CCapsuleCollider::UpdateCapsulePoints()
+{
+	capA = transform.lock()->GetPosition() + offset + Vec3(0.0f, cylinderHeight - cameraHeight, 0.0f);
+	capB = transform.lock()->GetPosition() + offset - Vec3(0.0f, cameraHeight, 0.0f);
+	axis = capA - capB;
+}
 
 CollisionInfo CCapsuleCollider::IntersectingSphereTriangle(const Vec3& sphereCenter, float sphereRadius, const Vec3& v0, const Vec3& v1, const Vec3& v2) const
 {
@@ -156,7 +171,7 @@ CollisionInfo CCapsuleCollider::IntersectingSphereTriangle(const Vec3& sphereCen
 
 	Vec3 closestPoint = ClosestPointOnTriangle(v0, v1, v2, projectedCenter);
 
-	Vec3 delta = projectedCenter - closestPoint;
+	Vec3 delta = sphereCenter - closestPoint;
 
 	float distance = VMath::mag(delta);
 
@@ -173,7 +188,7 @@ CollisionInfo CCapsuleCollider::IntersectingCapsuleTriangle(const Vec3& v0, cons
 {
 	CollisionInfo info;
 
-	float minPenetration = std::numeric_limits<float>::max(); // or 0
+	float maxPenetration = 0.0f;
 
 	Vec3 axis = capA - capB;
 
@@ -188,11 +203,11 @@ CollisionInfo CCapsuleCollider::IntersectingCapsuleTriangle(const Vec3& v0, cons
 	int numSamples = std::max(3, static_cast<int>(axisLength / radius) + 2); // more samples for longer capsules
 
 	for (int i = 0; i <= numSamples; ++i) {
-		float t = axisLength * (i / static_cast<float>(numSamples));
-		Vec3 sphereCenter = capB + axisDir * t * axisLength; // point on the capsule axis
+		float t = static_cast<float>(i) / numSamples;
+		Vec3 sphereCenter = capB + axisDir * (t * axisLength); // point on the capsule axis
 		CollisionInfo sphereInfo = IntersectingSphereTriangle(sphereCenter, radius, v0, v1, v2);
-		if (sphereInfo.isColliding && sphereInfo.penetrationDepth < minPenetration) {
-			minPenetration = sphereInfo.penetrationDepth;
+		if (sphereInfo.isColliding && sphereInfo.penetrationDepth > maxPenetration) {
+			maxPenetration = sphereInfo.penetrationDepth;
 			info = sphereInfo;
 		}
 	}

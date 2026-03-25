@@ -47,7 +47,7 @@ public:
 	void ApplyImpulse(MATH::Vec3 impulse);
 	void ApplyDragForce();
 
-	void Update(const float deltaTime);
+	virtual void Update(const float deltaTime);
 
 };
 

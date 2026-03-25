@@ -380,18 +380,6 @@ void Scene3::FrustumCheck()
 				break;
 			}
 
-			// just to check if it intersects probs not needed
-			//Vec3 nVertex = Vec3((p.n.x > 0) ? c.aabb.min.x : c.aabb.max.x,
-			//					(p.n.y > 0) ? c.aabb.min.y : c.aabb.max.y,
-			//					(p.n.z > 0) ? c.aabb.min.z : c.aabb.max.z);
-
-			//float dot2 = p.n.x * nVertex.x + 
-			//			 p.n.y * nVertex.y + 
-			//			 p.n.z * nVertex.z;
-
-			//if (dot2 <= -p.d) {
-			//	c.isCulled = false;
-			//}
 		}
 	}
 
@@ -401,19 +389,30 @@ void Scene3::FrustumCheck()
 
 void Scene3::Update(const float deltaTime) {
 
+
+	//for (auto& actor : actorsInScene) {
+	//	actor->Update(deltaTime);
+	//}
+
+	//camera->Update(deltaTime);
+
+	engineContext.physicsManager->Update(deltaTime);
+
 	// TODO: move to physics system.
-	auto player = std::dynamic_pointer_cast<CActor>(camera);
-	if (player) {
-		auto playerController =player->GetComponent<CInput>();
-		auto phys  =player->GetComponent<CPhysics>();
-		if (playerController) {
-			playerController->UpdateInput(deltaTime);
-			phys->Update(deltaTime);
-		}
-	}
-	
-	FrustumCheck();
-	engineContext.physicsManager->TerrainCollision();
+	//auto player = std::dynamic_pointer_cast<CActor>(camera);
+	//if (player) {
+	//	auto playerController =player->GetComponent<CInput>();
+	//	auto phys = player->GetComponent<CPhysics>();
+	//	auto collider = player->GetComponent<CCapsuleCollider>();
+	//	if (playerController) {
+	//		playerController->UpdateInput(deltaTime);
+	//		phys->Update(deltaTime);
+	//		collider->Update(deltaTime);
+	//	}
+	//}
+	//
+	//FrustumCheck();
+	//engineContext.physicsManager->TerrainCollision();
 	
 	// world collision checking
 	// through a system maybe?

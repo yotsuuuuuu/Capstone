@@ -129,13 +129,15 @@ float TerrainNoise::sample(float wX, float wZ) const
         }
     }
 
-    float cv = EvaluateContinental(continentalness);
     //cv = continentalness;
 
     // here is where i can check for modifiers
     //h += cv * continentalPreset.amplitude;
 
     h += pv * PVpreset.amplitude;
+
+    float cv = EvaluateContinental(continentalness);
+	h += cv * continentalPreset.amplitude;
 
 	h *= terrainConfig.globalHeightScale;
 

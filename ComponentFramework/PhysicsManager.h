@@ -28,7 +28,7 @@ private:
 	Ref<CWorld> worldComp;// = std::dynamic_pointer_cast<CWorld>(worldActor);
 
 	std::vector<TerrainChunkData>* chunksData;// = worldComp->GetChunkRenderData();
-	std::vector<uint32_t> indices;// = worldComp->GetChunkIndices();
+	std::vector<uint32_t> chunkIndices;// = worldComp->GetChunkIndices();
 	int world_size;// = worldComp->GetWorldSize();
 
 	std::unordered_map<Vec2, std::unique_ptr<Chunk>>* chunkMap;// = worldComp->GetChunkMap();
@@ -37,7 +37,7 @@ private:
 	Ref<CCapsuleCollider> playerCollider;// = player->GetComponent<CCapsuleCollider>();
 
 	std::vector<Ref<Component>> actorsInScene;
-	std::vector<Ref<Component>> collidersInScene;
+	std::vector<Ref<CCollider>> collidersInScene;
 
 public:
 

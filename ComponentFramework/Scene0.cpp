@@ -126,7 +126,7 @@ void Scene0::Update(const float deltaTime) {
 		auto playerController =player->GetComponent<CInput>();
 		auto phys  =player->GetComponent<CPhysics>();
 		if (playerController) {
-			playerController->UpdateInput(deltaTime);
+			playerController->Update(deltaTime);
 			phys->Update(deltaTime);
 		}
 	}
