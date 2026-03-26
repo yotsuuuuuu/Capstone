@@ -35,14 +35,39 @@ layout(std430, set = 0 , binding = 5) readonly restrict buffer lightSSBO
 
 layout (location = 0) flat out int lightIndex;
 
+mat4 buildModelMatrix(vec3 position, vec3 direction);
+
 void main() {
 	lightIndex = gl_InstanceIndex;
+//    PointLight light = pointLight[gl_InstanceIndex];
+//    vec3 worldPos = light.position_radius.xyz;
+//    float radius = 1.0;
+//
+//    vec4 scaledVertex = vec4(vVertex.xyz * radius, 1.0);
+//    vec4 worldVertex = scaledVertex + vec4(worldPos, 0.0);
+//
+//	gl_Position = camera.projectionMatrix * camera.viewMatrix * worldVertex;
+
     PointLight light = pointLight[gl_InstanceIndex];
     vec3 worldPos = light.position_radius.xyz;
-    float radius = 1.0;
+    vec3 direction = light.direction_inner.xyz;
 
-    vec4 scaledVertex = vec4(vVertex.xyz * radius, 1.0);
-    vec4 worldVertex = scaledVertex + vec4(worldPos, 0.0);
+    mat4 model = buildModelMatrix(worldPos, direction);
+    gl_Position = camera.projectionMatrix * camera.viewMatrix * model * vVertex;
+}
 
-	gl_Position = camera.projectionMatrix * camera.viewMatrix * worldVertex;
+
+mat4 buildModelMatrix(vec3 position, vec3 direction)
+{
+    vec3 forward = normalize(direction);
+    vec3 up = abs(forward.y) < 0.999 ? vec3(0,1,0) : vec3(1,0,0); // avoid gimbal
+    vec3 right = normalize(cross(up, forward));
+    up = cross(forward, right);
+
+    mat4 model = mat4(1.0);
+    model[0] = vec4(right,   0.0);
+    model[1] = vec4(up,      0.0);
+    model[2] = vec4(-forward, 0.0);
+    model[3] = vec4(position, 1.0);
+    return model;
 }

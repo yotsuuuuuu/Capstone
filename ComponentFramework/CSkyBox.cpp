@@ -3,6 +3,7 @@
 #include "CShader.h"
 #include "CMesh.h"
 #include "imgui.h"
+#include "FmodController.h"
 
 bool CSkyBox::OnCreate()
 {
@@ -104,6 +105,27 @@ void CSkyBox::RecreatePipeline()
 PipelineInfo CSkyBox::GetPipeline()
 {
     return std::dynamic_pointer_cast<CShader>(Shader)->GetPipelineInfo();
+}
+static float m_smoothed1 = 0.0f;
+static float m_smoothed2 = 0.0f;
+void CSkyBox::AudioReact(EngineContext& cntx)
+{
+    auto bands = cntx.fmodController->AnalyzeAudioOnline();
+    float smoothing = 0.25f;
+    m_smoothed1 += (bands.bass - m_smoothed1) * smoothing;
+    m_smoothed2 += (bands.highBass - m_smoothed2) * smoothing;
+
+
+    push.Bloomfactor = (m_smoothed1 + m_smoothed2) * 0.5f * 3.0f ;
+    ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
+    ImGui::SetNextWindowBgAlpha(0.0f);
+    ImGui::Begin("Audio",nullptr, ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoInputs |
+        ImGuiWindowFlags_NoBackground );
+    ImGui::PlotLines("##Audio", (float*) & bands, 10, 0, NULL, 0.0f, 1.0f, ImVec2(0, 80));
+    ImGui::End();
 }
 
 void CSkyBox::ImGui()

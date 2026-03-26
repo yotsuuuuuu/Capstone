@@ -714,8 +714,6 @@ public:
             // draw sky box
             VKRNDR->CMDRecordBindPipeline(framecntx.CMDBuffer, skybox.pipeInfo.pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
             VKRNDR->CMDRecordDescriptorSet(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, &skybox.set, skybox.setID);
-           
-            //TODO: get push 
             VKRNDR->CMDRecordPushConstant<SkyboxPush>(framecntx.CMDBuffer, skybox.pipeInfo.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, sPush);
             VKRNDR->CMDRecordBindIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
             VKRNDR->CMDRecordDrawIndexedMesh(framecntx.CMDBuffer, skybox.mesh);
