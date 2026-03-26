@@ -168,7 +168,7 @@ bool Scene3::OnCreate() {
 		preset2.continentalness.returnType = ReturnType::Distance2;
 
 		/// PRESET 3 ///
-		preset3.concatenate = true;
+		preset3.truncate = true;
 		preset3.globalHeightScale = 2.0f;
 		preset3.base.type = NoiseType::OpenSimplex2;
 		preset3.base.seed = 123;
@@ -213,7 +213,10 @@ bool Scene3::OnCreate() {
 		camera = engineContext.assetManager->GetCamera();	
 		world = WorldActor;
 		engineContext.physicsManager->Set(actorsInScene, camera, world);
-		engineContext.physicsManager->OnCreate();
+		engineContext.physicsManager->OnCreate();	
+		
+		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+		cameraActor->GetComponent<CPhysics>()->SetPosition(Vec3(0, 20.0f, 0));
 
 		actorsInScene.push_back(WorldActor);
 

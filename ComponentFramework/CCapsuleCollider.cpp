@@ -1,5 +1,5 @@
 #include "CCapsuleCollider.h"
-#include "CTransform.h"
+#include "CPhysics.h"
 #include "CActor.h"
 #include <algorithm>
 #include <limits>
@@ -14,9 +14,9 @@ bool CCapsuleCollider::OnCreate() {
 	//UpdateWorldAABB();
 	auto actor = parent.lock();
 	if (!actor)	return false;
-	auto t = std::dynamic_pointer_cast<CActor>(actor)->GetComponent<CTransform>();
-	if (!t)	return false;
-	transform = t;
+	auto p = std::dynamic_pointer_cast<CActor>(actor)->GetComponent<CPhysics>();
+	if (!p)	return false;
+	physics = p;
 
 	cylinderHeight = height - radius * 2.0f;  // The straight cylinder part
 
@@ -102,7 +102,7 @@ CollisionInfo CCapsuleCollider::IntersectingAABB(const AABB& aabb) const// capsu
 	return info;
 }
 
-MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) const
+MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, Vec2& chunkPosition) const
 {
 	MeshCollisionInfo info;
 
@@ -114,11 +114,18 @@ MeshCollisionInfo CCapsuleCollider::IntersectingMesh(const std::vector<Vertex>& 
 
 	for (size_t i = 0; i < indices.size(); i += 3) {
 
-		const Vec3& v0 = vertices[indices[i]].pos;
-		const Vec3& v1 = vertices[indices[i + 1]].pos;
-		const Vec3& v2 = vertices[indices[i + 2]].pos;
+		// local vertices of the triangle
+		const Vertex& v0 = vertices[indices[i]];
+		const Vertex& v1 = vertices[indices[i + 1]];
+		const Vertex& v2 = vertices[indices[i + 2]];
 
-		CollisionInfo triInfo = IntersectingCapsuleTriangle(v0, v1, v2);
+		Vec3 worldV0 = v0.pos + Vec3(chunkPosition.x, 0.0f, chunkPosition.y);
+		Vec3 worldV1 = v1.pos + Vec3(chunkPosition.x, 0.0f, chunkPosition.y);
+		Vec3 worldV2 = v2.pos + Vec3(chunkPosition.x, 0.0f, chunkPosition.y);
+
+
+
+		CollisionInfo triInfo = IntersectingCapsuleTriangle(worldV0, worldV1, worldV2);
 
 		if (triInfo.isColliding && triInfo.penetrationDepth > maxPenetration) {
 			maxPenetration = triInfo.penetrationDepth;
@@ -148,8 +155,8 @@ bool CCapsuleCollider::SimpleIntersectingAABB(const AABB& aabb) const
 
 void CCapsuleCollider::UpdateCapsulePoints()
 {
-	capA = transform.lock()->GetPosition() + offset + Vec3(0.0f, cylinderHeight - cameraHeight, 0.0f);
-	capB = transform.lock()->GetPosition() + offset - Vec3(0.0f, cameraHeight, 0.0f);
+	capA = physics.lock()->GetPosition() + offset + Vec3(0.0f, cylinderHeight - cameraHeight, 0.0f);
+	capB = physics.lock()->GetPosition() + offset - Vec3(0.0f, cameraHeight, 0.0f);
 	axis = capA - capB;
 }
 
@@ -189,8 +196,6 @@ CollisionInfo CCapsuleCollider::IntersectingCapsuleTriangle(const Vec3& v0, cons
 	CollisionInfo info;
 
 	float maxPenetration = 0.0f;
-
-	Vec3 axis = capA - capB;
 
 	float axisLength = VMath::mag(axis);
 	if (axisLength < VERY_SMALL) {

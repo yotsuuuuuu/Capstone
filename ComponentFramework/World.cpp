@@ -95,11 +95,14 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 	chunk->setMaxY(maxHeight);
 	chunk->SetWorldPos((minHeight + maxHeight) / 2.0f); // set world pos y to the middle of the chunk height range for culling
 
+	if (minHeight < lowestPoint) lowestPoint = minHeight;
+	if (maxHeight > highestPoint) highestPoint = maxHeight;
 }
 
 void World::BuildChunkMeshData(Chunk* chunk)
 {
 	std::vector<Vertex> vertices;
+	//std::vector<Vertex> collisionVertices;
 	vertices.reserve(baseChunkMesh->basePositions.size());
 
 	const auto& heightmap = chunk->GetHeightmap();
@@ -121,6 +124,14 @@ void World::BuildChunkMeshData(Chunk* chunk)
 		//vertex.uv.print("vertext UV");
 		//vertex.normal.print("vertext Normal");
 		vertices.push_back(vertex);
+
+		//Vertex collisionVertex;
+		//collisionVertex.pos = Vec3( // WORLD space position of vertex, used for collision checking
+		//	chunkPos.x + basePos.x,
+		//	heightmap[i],
+		//	chunkPos.y + basePos.z);
+		//collisionVertices.push_back(collisionVertex);
+
 	}
 
 	CalculateNormals(vertices);

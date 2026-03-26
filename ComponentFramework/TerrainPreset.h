@@ -95,7 +95,7 @@ struct TerrainPreset {
     int numLayers;
     std::vector<NoiseLayerPreset> layers; // probs not needed. will stick with 3 layers
 
-    bool concatenate = false;
+    bool truncate = false;
 
     float globalHeightScale = 5.0f;
 	float exponent = 1.0f; // creates more dramatic terrain by exaggerating height differences. >1 will make mountains taller and valleys deeper, 0-1 will create a more flattened terrain.

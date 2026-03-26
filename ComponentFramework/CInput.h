@@ -39,9 +39,9 @@ private:
 	float jumpStrength = 5.0f; // units per second
 	float airControl = 0.03f;
 
-	// ground
-	bool isGrounded = false;
-	float groundCheckDistance = 0.1f; // distance to check for ground
+	//// ground
+	//bool isGrounded = false;
+	//float groundCheckDistance = 0.1f; // distance to check for ground
 
 public:
 	// movement functions
@@ -62,7 +62,7 @@ public:
 
 private:
 	void UpdateCameraRotation();
-	void CheckGrounded();
+	//void CheckGrounded();
 	MATH::Vec3 CalculateMovementDirection() const;
 
 };

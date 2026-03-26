@@ -11,7 +11,7 @@ public:
 
 	TerrainPreset terrainConfig;
 	float EvaluateContinental(float c) const;
-	int Concatenate(float h) const;
+	int Truncate(float h) const;
 	int clamps(float h) const;
 	float spike(float h) const;
 

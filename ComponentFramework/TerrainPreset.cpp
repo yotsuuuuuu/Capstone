@@ -4,16 +4,31 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 {
 	pAudio = GetLayerValuesFromAudio(ab);
 
+	// scale high frequencies to a more usable range (since they tend to be very low) and clamp to 1.0f
+	float highScaled = std::min(pAudio.highAvgSum * 100.0f, 1.0f); 
+	float midScaled = std::min(pAudio.midAvgSum * 2.0f, 1.0f);
+	float bassScaled = pAudio.bassAvgSum; // bass is usually already in a good range so no need to scale much, maybe just a little
+
 	CreateBase();
 	CreatePeaksValleys();
 	//CreateErosion();
-	CreateContinentalness();
+	//CreateContinentalness();
 	
-	exponent = 1.0f + (pAudio.highAvgSum*2 );
+	exponent = (highScaled * 1.3f);
 	std::cout << exponent << std::endl;
+
+	float midDominance = pAudio.midAvgSum * 1.3f; 
+	float bassInfluence = pAudio.bassAvgSum / 1.6f; // if mids are significantly higher than bass, consider them dominant
+	bool midsDominate = midDominance > bassInfluence;
+	bool highsDominate = highScaled > 0.5f;
+
+	// if mids are dominant, truncate layers for more complex terrain. 
+	//concatenate = (pAudio.midAvgSum*1.3 > pAudio.bassAvgSum/1.6f) && (pAudio.midAvgSum > pAudio.highAvgSum); 
+	truncate = midsDominate || (pAudio.midAvgSum > 0.3f && highScaled > 0.4f);
+
+	globalHeightScale = 3.0f + (pAudio.bassAvgSum * 10.0f); // bass can influence overall height since its usually the highest and can create more dramatic terrain with higher values
+
 	int why = 0;
-	// if mids are dominant, concatenate layers for more complex terrain. 
-	concatenate = (pAudio.midAvgSum*1.3 > pAudio.bassAvgSum/1.6f) && (pAudio.midAvgSum > pAudio.highAvgSum); 
 
 	// TODO: (andres) exponents, 
 	// TODO: (andres) global height scale, 
@@ -22,27 +37,13 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	// TODO: (andres) randomize actor placement (lights, etc) ( x % worldsize, then x % chunksize)
 
 
-	//// CONTINENTALNESS
-	//continentalness.type = NoiseType::Cellular; // cellular or value cubic seem to be good options
-	//continentalness.seed = 3847598; // idk hash the song
-	//continentalness.frequency = 0.005f; // for continentalness keep it low. 0.001-0.01
-	//continentalness.amplitude = 0.2f; // maybe even 0 since were really jsut using it to determine height ranges. maybe 0.2
-	//continentalness.fractal = FractalType::None; // anything but ridged
-	//continentalness.fractalOctaves = 1; // if using fractal, 3-5 octaves is good for continentalness (influenced by ??)
-	//continentalness.fractalWeightedStrength = 0.0f; // not needed for continentalness
-	//continentalness.gain = 0.005f; // keep very very very small 
-	//continentalness.cellType = CellularType::Euclidian; // try not to use hybrid or manhattan
-	//continentalness.returnType = ReturnType::Distance2Sub; // anything works here jsut keep in mind cell value will be sharp changes
-	//continentalness.cellularJitter = 1.0f; // keep around 1, 
-	//continentalness.domainWarp = WarpType::None; // not needed for continentalness
-	
-
 	// EROSION
 	// maybe use this layer to add some erosion-like details to the terrain, such as small ridges or valleys.
 
 	// PEAKS AND VALLEYS
 	//peaksValleys.type = NoiseType::Cubic; // any works
 }
+
 ProcessedAudio TerrainPreset::GetLayerValuesFromAudio(std::vector<AudioBands> ab)
 {
 
@@ -102,194 +103,281 @@ ProcessedAudio TerrainPreset::GetLayerValuesFromAudio(std::vector<AudioBands> ab
 
 NoiseType TerrainPreset::ChooseNoise(int layer, float value)
 {
-	int numNoise = 5;
-	int modifier = 0;
-	switch (layer) {
-		case 0: // base layer
-			numNoise = 2; // all noise types available for base layer since it has the biggest impact on overall terrain shape
-			break;
-		case 1: // peaks and valleys
-		case 2: // erosion
-			numNoise = 4; // only 4 noise types for these layers since we want to avoid cellular
-			break;
-		case 3: // continentalness
-			numNoise = 3;
-			modifier = 2; // value, cubic, and cellular.
-			// [x] [x] [x] [ ] [ ]	// 3 noises available
-			// [ ] [ ] [x] [x] [x]	// +2 to get the last 3 noise types
-			break;
-	}
-	
-	// result is 0 - numNoise-1;
-	int percent = std::round(value * float(numNoise)); 
+    // Define available noise types per layer
+    std::vector<NoiseType> availableNoise;
 
-	// if the final result is greater than the amount of available then just set it to the overflow
-	int result = (percent % numNoise) + modifier;
-	result = result > numNoise ? (result - numNoise) + modifier : (percent % numNoise) + modifier;
+    switch (layer) {
+    case 0: // base layer - biggest impact on overall terrain shape
+        availableNoise = {
+            NoiseType::Perlin,      // classic smooth hills
+            NoiseType::OpenSimplex2 // more natural shapes
+        };
+        break;
 
-	// ex. [x] [x] [x] [ ] [ ]	// 3 noises available
-	//     [ ] [ ] [x] [x] [x]	// +2 to get the last 3 noise types
-	// numNoise = 3, modifier = 2 value = 0.5
-	// percent = 1.5 -> round to 2
-	// result = (2 % 3) + 2 = 4 -> since 4 > numNoise(3) result = 4 - 3 = 1 + modifier(2) = 3 which is the last noise type available
-	
-	return static_cast<NoiseType>(result); 
+    case 1: // peaks and valleys - need dramatic shapes
+    case 2: // erosion - avoid cellular for natural erosion patterns
+        availableNoise = {
+            NoiseType::Perlin,       // rolling hills
+            NoiseType::OpenSimplex2, // natural peaks
+            NoiseType::Value,        // blocky peaks
+            NoiseType::Cubic         // smooth valleys
+            // cellular excluded - creates unnatural erosion
+        };
+        break;
 
+    case 3: // continentalness - broad landmass shapes
+        availableNoise = {
+            NoiseType::Value,        // blocky continents
+            NoiseType::Cubic,        // smooth continents
+            NoiseType::Cellular      // island clusters
+        };
+        break;
+
+    default:
+        availableNoise = {
+            NoiseType::Perlin,
+            NoiseType::OpenSimplex2,
+            NoiseType::Cellular,
+            NoiseType::Value,
+            NoiseType::Cubic
+        };
+        break;
+    }
+
+    // clamp value to 0-0.999 to avoid out-of-bounds
+    value = std::clamp(value, 0.0f, 0.999f);
+
+    // map value to index in available range
+    int index = static_cast<int>(value * static_cast<float>(availableNoise.size()));
+
+    return availableNoise[index];
 }
 
 FractalType TerrainPreset::ChooseFractal(int layer, float value)
 {
-	int numFractal = 4;
-	int modifier = 0;
-	// setting value to 0 means the first option will get chosen
+    // define available fractal types per layer
+    std::vector<FractalType> availableFractals;
 
-	switch (layer) {
-		case 0: // base layer
-			numFractal = 3; // just any but ridged? looks good in preset 2
-			break;
-		case 1: // peaks and valleys
-			numFractal = 3; // any
-			modifier = 1; // FBm, PingPong, Ridged
-				// [x] [x] [x] [ ]	// 3 fractal types available
-				// [ ] [x] [x] [x]	// +1 to get the last 3 fractal types
-			break;
+    switch (layer) {
+    case 0: // base layer - avoid Ridged (too sharp for continents)
+        availableFractals = {
+            FractalType::None,    // smooth, no fractal
+            FractalType::FBm,     // standard fractal (good for hills)
+            FractalType::PingPong // creates interesting plateaus
+            // [x] [x] [x] [ ]    // 3 fractals available (No Ridged)
+        };
+        break;
 
-		case 2: // erosion
-			// not sure yet rn just using continentalness values
-		case 3: // continentalness
-			numFractal = 4; //anything
-			modifier = 0; 
-			break;
-	}
+    case 1: // peaks and valleys - dramatic terrain needs Ridged
+        availableFractals = {
+            FractalType::None,    // some areas can be smooth
+            FractalType::FBm,     // rolling hills
+            //FractalType::Ridged,  // sharp mountain peaks
+            FractalType::PingPong // chaotic, rocky terrain
+            // [x] [x] [x] [x]    // all 4 fractals available
+        };
+        break;
 
-	// result is 0 - numFractal-1;
-	int percent = std::round(value * float(numFractal));
+    case 2: // erosion - need organic patterns
+        availableFractals = {
+            FractalType::FBm,     // gentle erosion
+            FractalType::Ridged,  // sharp erosion gullies
+            FractalType::PingPong // complex erosion patterns
+        };
+        break;
 
-	// if the final result is greater than the amount of available then just set it to the overflow
-	int result = (percent % numFractal) + modifier;
-	result = result > numFractal ? (result - numFractal) + modifier : (percent % numFractal) + modifier;
-	return static_cast<FractalType>(result);
+    case 3: // continentalness - broad shapes
+        availableFractals = {
+            FractalType::None,    // smooth continents
+            FractalType::FBm      // slightly varied continents
+        };
+        break;
+
+    default:
+        availableFractals = {
+            FractalType::None,
+            FractalType::FBm,
+            FractalType::Ridged,
+            FractalType::PingPong
+        };
+        break;
+    }
+
+    // clamp value to 0-0.999 to avoid out-of-bounds
+    value = std::clamp(value, 0.0f, 0.999f);
+
+    // map value to index in available range
+    int index = static_cast<int>(value * static_cast<float>(availableFractals.size()));
+
+    return availableFractals[index];
 }
 
 WarpType TerrainPreset::ChooseWarp(int layer, float value)
 {
-	int numWarp = 3;
-	int modifier = 0;
-	// setting value to 0 means the first option will get chosen
+    // define available warp types per layer
+    std::vector<WarpType> availableWarps;
 
-	switch (layer) {
-	case 0: // base layer
-		numWarp = 3; // any
-		break;
-	case 1: // peaks and valleys
-		numWarp = 2; // no grid
-		break;
+    switch (layer) {
+    case 0: // base layer - can use any warp
+        availableWarps = {
+            WarpType::None,          // no warping
+            WarpType::OpenSimplex2,  // organic warping
+            WarpType::BasicGrid      // grid-based warping
+        };
+        break;
 
-	case 2: // erosion
-		// not sure yet rn just using continentalness values
-	case 3: // continentalness
-		numWarp = 2; // has to warp
-		modifier = 1; // OpenSimplex2 or BasicGrid
-				// [x] [x] [ ]	// 2 warp types available
-				// [ ] [x] [x]	// +1 to get the last 2 warp types
-		break;
-	}
+    case 1: // peaks and valleys - avoid BasicGrid (looks unnatural)
+        availableWarps = {
+            WarpType::None,          // keep shape clean
+            WarpType::OpenSimplex2   // organic warping only
+            // [x] [x] [ ]           // 2 warp types available
+        };
+        break;
 
-	// result is 0 - numWarp-1;
-	int percent = std::round(value * float(numWarp));
+    case 2: // erosion - needs organic warping
+    case 3: // continentalness - needs subtle warping
+        availableWarps = {
+            WarpType::OpenSimplex2,  // organic warping
+            WarpType::BasicGrid      // grid warping for canyons
+            // [ ] [x] [x]           // last 2 warp types available
+        };
+        break;
 
-	int result = (percent % numWarp) + modifier;
-	result = result > numWarp ? (result - numWarp) + modifier : (percent % numWarp) + modifier;
-	return static_cast<WarpType>(result);
+    default:
+        availableWarps = {
+            WarpType::None,
+            WarpType::OpenSimplex2,
+            WarpType::BasicGrid
+        };
+        break;
+    }
+
+    // clamp value to 0-0.999 to avoid out-of-bounds
+    value = std::clamp(value, 0.0f, 0.999f);
+
+    // map value to index in available range
+    int index = static_cast<int>(value * static_cast<float>(availableWarps.size()));
+
+    return availableWarps[index];
 }
 
 CellularType TerrainPreset::ChooseCellular(int layer, float value)
 {
+    // define available cellular types per layer
+    std::vector<CellularType> availableCellular;
 
-	int numCellular = 5;
-	int modifier = 0;
+    switch (layer) {
+    case 0: // base layer - not typically used
+    case 1: // peaks and valleys - avoid Hybrid (too chaotic)
+        availableCellular = {
+            CellularType::Euclidian,   // smooth cell boundaries
+            CellularType::EuclidianSq, // slightly sharper
+            CellularType::Manhattan    // grid-like cells
+        };
+        break;
 
-	switch (layer) {
-	case 0: // base layer
-		value = 0; // not needed
-		break;
-	case 1: // peaks and valleys
-		numCellular = 3; // no hybrid
-		modifier = 1; // euclidian, euclidian sq, manhattan
-			// [x] [x] [x] [ ] [ ]	// 3 cellular types available
-			// [ ] [x] [x] [x] [ ]	// +1 to get the middle 3 cellular types
-		break;
+    case 2: // erosion - can use more variety
+    case 3: // continentalness - needs cell clustering
+        availableCellular = {
+            CellularType::Euclidian,   // natural clusters
+            CellularType::EuclidianSq, // defined boundaries
+            CellularType::Manhattan,   // city-block clusters
+            CellularType::Hybrid       // complex shapes
+        };
+        break;
 
-	case 2: // erosion
-		// not sure yet rn just using continentalness values
-	case 3: // continentalness
-		numCellular = 4; // 
-		modifier = 1; // 
-		break;
-	}
+    default:
+        availableCellular = {
+            CellularType::Euclidian,
+            CellularType::EuclidianSq,
+            CellularType::Manhattan,
+            CellularType::Hybrid
+        };
+        break;
+    }
 
-	int percent = std::round(value * float(numCellular));
+    // clamp value to 0-0.999 to avoid out-of-bounds
+    value = std::clamp(value, 0.0f, 0.999f);
 
-	int result = (percent % numCellular) + modifier;
-	result = result > numCellular ? (result - numCellular) + modifier : (percent % numCellular) + modifier;
-	return static_cast<CellularType>(result);
+    // map value to index in available range
+    int index = static_cast<int>(value * static_cast<float>(availableCellular.size()));
 
+    return availableCellular[index];
 }
 
 ReturnType TerrainPreset::ChooseReturn(int layer, float value)
 {
-	int numReturn = 7;
-	int modifier = 0;
+    // define available return types per layer
+    std::vector<ReturnType> availableReturns;
 
-	switch (layer) {
-	case 0: // base layer
-		value = 0; // not needed
-		break;
-	case 1: // peaks and valleys
-		numReturn = 3; // 
-		modifier = 2; // distance2, distance2add, distance2
-			// [x] [x] [x] [ ] [ ] [ ] [ ]	// 3 return types available
-			// [ ] [x] [x] [x] [ ] [ ] [ ]	// +2 to get the middle 3 return types
-		break;
+    switch (layer) {
+    case 0: // base layer - not typically used
+        value = 0; // not needed
+        availableReturns = {
+            ReturnType::Distance,      // basic distance field
+            ReturnType::Distance2,     // squared distance
+            ReturnType::CellValue      // cell indices
+        };
+        break;
 
-	case 2: // erosion
-		// not sure yet rn just using continentalness values
-	case 3: // continentalness
-		numReturn = 4; // 
-		modifier = 1; // all basically
-			// [x] [x] [x] [x] [x] [x] [x] [ ]	// 4 return types available
-			// [ ] [x] [x] [x] [x] [x] [x] [x]	// +1 to get the last 4 return types
-		break;
-	}
+    case 1: // peaks and valleys - need distance-based returns
+        availableReturns = {
+            ReturnType::Distance2,       // sharp boundaries
+            ReturnType::Distance2Add,    // distance + cell value
+            ReturnType::Distance2Sub     // distance - cell value
+        };
+        break;
 
-	int percent = std::round(value * float(numReturn));
+    case 2: // erosion - can use more variety
+    case 3: // continentalness - needs cell value for continents
+        availableReturns = {
+            ReturnType::CellValue,       // clear continent boundaries
+            ReturnType::Distance,        // smooth transitions
+            ReturnType::Distance2,       // sharper edges
+            ReturnType::Distance2Add     // combined effects
+        };
+        break;
 
-	int result = (percent % numReturn) + modifier;
-	result = result > numReturn ? (result - numReturn) + modifier : (percent % numReturn) + modifier;
-	return static_cast<ReturnType>(result);
+    default:
+        availableReturns = {
+            ReturnType::CellValue,
+            ReturnType::Distance,
+            ReturnType::Distance2,
+            ReturnType::Distance2Add
+        };
+        break;
+    }
+
+    // clamp value to 0-0.999 to avoid out-of-bounds
+    value = std::clamp(value, 0.0f, 0.999f);
+
+    // map value to index in available range
+    int index = static_cast<int>(value * static_cast<float>(availableReturns.size()));
+
+    return availableReturns[index];
 }
 
 
 
 // maybe change to no arguments and make it one big call
 // value can be used to further modify things
-void TerrainPreset::CreateBase() 
+void TerrainPreset::CreateBase()
 {
 	// int for layer is 0 = base
-	
+
 	AudioBands avgBands = pAudio.avgBands;
 
 	// base could use some sprinkling from highs for fractals or something
 	base.type = ChooseNoise(0, avgBands.bass); // for base decide it with bass
 	base.seed = pAudio.seed * (pAudio.bassAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	base.frequency = 0.005f + (avgBands.sub * 0.03f); // for base keep it very very low. 0.001-0.01
-	base.amplitude = 3.0f + (avgBands.highBass * 3.0f); // 5 is a good starting point. nothing more than 10
+	base.frequency = 0.001f + (avgBands.sub * 0.03f); // for base keep it very very low. 0.001-0.01
+	base.amplitude = 2.0f + (avgBands.highBass * 3.0f); // 5 is a good starting point. nothing more than 10
 	base.fractal = ChooseFractal(0, pAudio.bassAvgSum * 2); // for base DO NOT USE PINGPONG OR RIDGED. its too crazy.
-	
+
 	if (base.fractal != FractalType::None) {
 		base.fractalOctaves = 1 + std::round((pAudio.highAvgSum) * 20); // influenced by highs (super low so *20)
 		base.gain = 0.1f + ((pAudio.bassAvgSum) * 0.2f); // if using fractal, 0.3-0.5 is good for base
-		base.lacunarity = 2.0f + (pAudio.bassAvgSum * 0.5f); 
+		base.lacunarity = 2.0f + (pAudio.bassAvgSum * 0.5f);
 		//base.fractalWeightedStrength = (pAudio.highAvgSum) * 2.0f; // highs since they are so low
 	}
 
@@ -306,7 +394,7 @@ void TerrainPreset::CreatePeaksValleys()
 	AudioBands avgBands = pAudio.avgBands;
 	peaksValleys.type = ChooseNoise(1, pAudio.highAvgSum); // avg sum cause alone they tiny 
 	peaksValleys.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	peaksValleys.frequency = 0.005f + (pAudio.highAvgSum); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
+	peaksValleys.frequency = 0.001f + (pAudio.highAvgSum * 0.3f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
 	peaksValleys.amplitude = 0.3f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
 	peaksValleys.fractal = ChooseFractal(1, pAudio.highAvgSum); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
 	
@@ -333,8 +421,8 @@ void TerrainPreset::CreateContinentalness()
 	AudioBands avgBands = pAudio.avgBands;
 	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum * pAudio.highAvgSum )/3.0f); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
 	continentalness.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	continentalness.frequency = 0.08f * ((avgBands.midMid + avgBands.lowMid)); // almost lower than base
-	continentalness.amplitude = 0.2f + (pAudio.midAvgSum * 0.33f); 
+	continentalness.frequency = 0.002f * (avgBands.sub * 0.008f); // almost lower than base
+	continentalness.amplitude = 0.1f + (pAudio.bassAvgSum * 0.33f); 
 	
 	//continentalness.fractal = ChooseFractal(3,pAudio.bassMaxSum * avgBands.midHigh * 0.01f);
 	if (continentalness.fractal != FractalType::None) {
@@ -349,8 +437,8 @@ void TerrainPreset::CreateContinentalness()
 		continentalness.returnType = ChooseReturn(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
 		continentalness.cellularJitter = 0.7f + (pAudio.midAvgSum * 2.0f); // keep around 1, 
 
-		// complicated way to calculate a 10/2477 chance but its calculated strangely so hopefully still unpredictable
-		if (int((pAudio.highMaxSum * pAudio.midMaxSum * pAudio.bassMaxSum) * (pAudio.highAvgSum * 1000) - (avgBands.highHigh * 1000)) % 2477 <= 10) {
+		// complicated way to calculate a 30/2477 chance but its calculated strangely so hopefully still unpredictable
+		if (int((pAudio.highMaxSum * pAudio.midMaxSum * pAudio.bassMaxSum) * (pAudio.highAvgSum * 1000) - (avgBands.highHigh * 1000)) % 2477 <= 30) {
 			continentalness.cellularJitter = 0.0f + 10 * avgBands.highHigh; // VERY RARE hopefully
 		}
 	}

@@ -1,28 +1,28 @@
 #include "CCollider.h"
-#include "CTransform.h"
+#include "CPhysics.h"
 #include "CActor.h"
 
 
 
-bool CCollider::OnCreate()
-{
-    if (isCreated) return true;
-
-    auto actor = parent.lock();
-    if (!actor) return false;
-
-    // Ensure we have a transform component
-    auto t = std::dynamic_pointer_cast<CActor>(actor)->GetComponent<CTransform>();
-    if (!t) {
-        // Can't have collider without transform
-        return false;
-    }
-
-	transform = t;
-
-    isCreated = true;
-    return true;
-}
+//bool CCollider::OnCreate()
+//{
+//    if (isCreated) return true;
+//
+//    auto actor = parent.lock();
+//    if (!actor) return false;
+//
+//    // Ensure we have a transform component
+//    auto t = std::dynamic_pointer_cast<CActor>(actor)->GetComponent<CTransform>();
+//    if (!t) {
+//        // Can't have collider without transform
+//        return false;
+//    }
+//
+//	transform = t;
+//
+//    isCreated = true;
+//    return true;
+//}
 
 void CCollider::OnDestroy()
 {
@@ -123,6 +123,15 @@ float CCollider::SquaredDistanceToSegment(const Vec3& a, const Vec3& b, const Ve
     Vec3 diff = point - closestPoint;
 
     return VMath::dot(diff, diff);
+}
+
+void CCollider::ApplyCollisionResponse(const MeshCollisionInfo& info)
+{
+     if (auto p = physics.lock()) {
+        Vec3 correction = info.normal * info.penetrationDepth;
+        p->SetPosition(p->GetPosition() + correction);
+		//p->SetVelocity(VMath::reflect(p->GetVelocity(), info.normal) * 2.0f);
+	 }
 }
 
 

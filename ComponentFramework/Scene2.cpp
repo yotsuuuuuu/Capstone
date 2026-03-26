@@ -121,7 +121,7 @@ bool Scene2::OnCreate() {
 
 		// Terrain Stuff
 		TerrainPreset preset;
-		preset.concatenate = true;
+		preset.truncate = true;
 		//preset.globalHeightScale = 5.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 42;

@@ -104,96 +104,129 @@ TerrainNoise::TerrainNoise(const TerrainPreset& preset)
     terrainConfig = preset;
 }
 
-
 float TerrainNoise::sample(float wX, float wZ) const
 {
+    // get raw noise values
     float base = baseNoise.GetNoise(wX, wZ);
     float pv = PVnoise.GetNoise(wX, wZ);
-    float continentalness = continentalNoise.GetNoise(wX, wZ);
-    // post-processing for terrain shaping
+    float continentalnessRaw = continentalNoise.GetNoise(wX, wZ);
 
-    float h = base * basePreset.amplitude;
+    // map to 0-1 range
+    float baseNorm = (base + 1.0f) * 0.5f;
+    float pvNorm = (pv + 1.0f) * 0.5f;
+    float continentalness = (continentalnessRaw + 1.0f) * 0.5f;
 
-
-    //h += base * mask * basePreset.amplitude;
-    //h += continentalness * continentalPreset.amplitude;
-
-    // apply additional shaping based on layer properties
-    if (terrainConfig.exponent != 1.0f) {
-        if (h <= 0) { // h is negative just return 0
-            //h = -std::pow(abs(h), terrainConfig.exponent);
-            h = 0;
-        }
-        else {
-            h = std::pow(abs(h), terrainConfig.exponent);
-        }
-    }
-
-    //cv = continentalness;
-
-    // here is where i can check for modifiers
-    //h += cv * continentalPreset.amplitude;
-
-    h += pv * PVpreset.amplitude;
-
+    // evaluate continental height
     float cv = EvaluateContinental(continentalness);
-	h += cv * continentalPreset.amplitude;
 
-	h *= terrainConfig.globalHeightScale;
+    // combine layers
+    float h = cv * continentalPreset.amplitude;
+    h += baseNorm * basePreset.amplitude;
+    h += pvNorm * PVpreset.amplitude;
 
-
-    if (terrainConfig.concatenate) { h = Concatenate(h); };
-
-    if (h != h) {
-        printf("null");
+    // apply exponent (only to positive values)
+    if (terrainConfig.exponent != 1.0f && h > VERY_SMALL) {
+        float maxH = continentalPreset.amplitude + basePreset.amplitude + PVpreset.amplitude;
+        float t = h / maxH;
+        h = std::pow(t, terrainConfig.exponent) * maxH/1.3f; // can be changed
     }
-    //h += (detail-0.5f * PVpreset.amplitude);
-    //std::cout << h << std::endl;
 
-    //h = base * basePreset.amplitude; // for just testing base
+    // apply global scale
+    h *= terrainConfig.globalHeightScale;
+
+    // truncate if needed
+    if (terrainConfig.truncate) {
+        return static_cast<float>(Truncate(h)); // round, really
+    }
 
     return h;
 }
 
 
+
+
+//float TerrainNoise::EvaluateContinental(float c) const
+//{
+//	c = std::clamp(c, 0.0f, 1.0f); // ensure c is between 0 and 1
+//
+//    float percent;
+//
+//    // continental value
+//    float cv1 = 0.2f;
+//	float cv2 = 0.5f;
+//	float cv3 = 0.8f;
+//	float cv4 = 1.0f;
+//
+//	// height value (spline value)
+//	float sv1 = 2.0f;
+//	float sv2 = 3.0f;
+//	float sv3 = 8.0f;
+//	float sv4 = 11.0f;
+//
+//    if (c <= 0.3f) {
+//        percent = c / 0.3f; // 0 to 1 as c goes from 0 to 0.3
+//        return percent * sv1; // scale to spline 1 to spline 2 
+//    }
+//    else if (c <= 0.5f) {
+//        percent = (c - 0.3f) / (0.5f - 0.3f); // 0 to 1 as c goes from 0.3 to 0.5
+//        return sv1 + percent * (sv2 - sv1); // scale to 2 to 5
+//    }
+//    else if (c <= 0.9f) {
+//        percent = (c - 0.5f) / (0.9f - 0.5f); // 0 to 1 as c goes from 0.5 to 0.9
+//        return sv2 + percent * (sv3 - sv2); // scale to 5 to 7
+//    }
+//    else {
+//        percent = (c - 0.9f) / (1.0f - 0.9f); // 0 to 1 as c goes from 0.9 to 1
+//        return sv3 + percent * (sv4 - sv3); // scale to 7 to 8
+//	}
+//}
+
 float TerrainNoise::EvaluateContinental(float c) const
 {
-	c = std::clamp(c, 0.0f, 1.0f); // ensure c is between 0 and 1
+    // c is already clamped to 0-1
+    c = std::clamp(c, 0.0f, 1.0f);
 
-    float percent;
+    // Continental breakpoints (control points)
+    struct ControlPoint {
+        float continental;
+        float height;
+    };
 
-    // continental value
-    float cv1 = 0.2f;
-	float cv2 = 0.5f;
-	float cv3 = 0.8f;
-	float cv4 = 1.0f;
+    // Define control points for smooth interpolation
+    std::vector<ControlPoint> points = {
+        {0.0f, 0.0f},   // Deep ocean
+        {0.2f, 0.0f},   // Ocean floor
+        {0.3f, 1.0f},   // Beach/shallow water
+        {0.5f, 2.0f},   // Coastal plains
+        {0.8f, 5.0f},   // Hills
+        {0.9f, 8.0f},   // Mountains
+        {1.0f, 11.0f}   // High peaks
+    };
 
-	// height value (spline value)
-	float sv1 = 2.0f;
-	float sv2 = 3.0f;
-	float sv3 = 8.0f;
-	float sv4 = 11.0f;
+    // Find which segment c falls into
+    for (size_t i = 0; i < points.size() - 1; i++) {
+        if (c >= points[i].continental && c <= points[i + 1].continental) {
+            float t = (c - points[i].continental) / (points[i + 1].continental - points[i].continental);
+            // Cubic interpolation for smoother transitions
+            float t2 = t * t;
+            float t3 = t2 * t;
 
-    if (c <= 0.3f) {
-        percent = c / 0.3f; // 0 to 1 as c goes from 0 to 0.3
-        return percent * sv1; // scale to spline 1 to spline 2 
+            // Hermite interpolation for smooth curves
+            float height = points[i].height * (2.0f * t3 - 3.0f * t2 + 1.0f) +
+                points[i + 1].height * (-2.0f * t3 + 3.0f * t2) +
+                0.0f * (t3 - 2.0f * t2 + t) +  // tangent at start
+                0.0f * (t3 - t2);               // tangent at end
+
+            return height;
+        }
     }
-    else if (c <= 0.5f) {
-        percent = (c - 0.3f) / (0.5f - 0.3f); // 0 to 1 as c goes from 0.3 to 0.5
-        return sv1 + percent * (sv2 - sv1); // scale to 2 to 5
-    }
-    else if (c <= 0.9f) {
-        percent = (c - 0.5f) / (0.9f - 0.5f); // 0 to 1 as c goes from 0.5 to 0.9
-        return sv2 + percent * (sv3 - sv2); // scale to 5 to 7
-    }
-    else {
-        percent = (c - 0.9f) / (1.0f - 0.9f); // 0 to 1 as c goes from 0.9 to 1
-        return sv3 + percent * (sv4 - sv3); // scale to 7 to 8
-	}
+
+    return points.back().height;
 }
 
-int TerrainNoise::Concatenate(float h) const
+int TerrainNoise::Truncate(float h) const
 {
-    int temp = (int)h;
+    int temp;// = (int)h;
+    temp = static_cast<int>(std::round(h));
     return temp;
 }

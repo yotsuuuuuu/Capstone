@@ -25,7 +25,7 @@ void CPhysics::ApplyDragForce()
 
 void CPhysics::Update(const float deltaTime)
 {
-	if (hasGravity) {
+	if (hasGravity && !isGrounded) {
 		const MATH::Vec3 gravity(0.0f, -9.81f, 0.0f);
 		acceleration += gravity;
 	}

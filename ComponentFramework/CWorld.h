@@ -34,6 +34,8 @@ public:
 	
 	int GetWorldSize() const { return C_World->GetWorldSize(); }
 	std::vector<uint32_t> GetChunkIndices() const { return C_World->GetChunkIndices(); }
+	float GetLowestPoint() const { return C_World->GetLowestPoint(); }
+	float GetHighestPoint() const { return C_World->GetHighestPoint(); }
 
 	void InitializeWorld(TerrainPreset* t_);
 	void InitializeWorld(int songIndex);

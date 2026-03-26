@@ -35,6 +35,7 @@ private:
 
 	Ref<CActor> player;// = std::dynamic_pointer_cast<CActor>(camera);
 	Ref<CCapsuleCollider> playerCollider;// = player->GetComponent<CCapsuleCollider>();
+	Ref<CPhysics> playerPhysics;// = player->GetComponent<CPhysics>();
 
 	std::vector<Ref<Component>> actorsInScene;
 	std::vector<Ref<CCollider>> collidersInScene;
@@ -47,5 +48,8 @@ public:
 	void TerrainCollision();
 
 	void Update(const float dt);
+
+private:
+	void CheckGroundCollision();
 };
 
