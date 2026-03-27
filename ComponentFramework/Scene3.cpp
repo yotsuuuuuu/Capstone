@@ -393,18 +393,10 @@ void Scene3::FrustumCheck()
 
 
 void Scene3::Update(const float deltaTime) {
+
 	engineContext.physicsManager->Update(deltaTime);
-	// TODO: move to physics system.
-	auto player = std::dynamic_pointer_cast<CActor>(camera);
-	if (player) {
-		auto playerController =player->GetComponent<CInput>();
-		auto phys  =player->GetComponent<CPhysics>();
-		if (playerController) {
-			playerController->UpdateInput(deltaTime);
-			phys->Update(deltaTime);
-		}
-	}
 	
+	// TODO: move to camera
 	FrustumCheck();
 	
 	// world collision checking
