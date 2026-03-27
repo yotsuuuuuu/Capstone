@@ -133,7 +133,7 @@ void SceneManager::Run() {
 
 		GetEvents();
 		if (currentScene && !isWindowMinimized) {
-			//engineContext.fmodController->AnalyzeAudioOnline(); commenting out for now
+			engineContext.fmodController->AnalyzeAudioOnline(); 
 			engineContext.VKImGUI->BeginFrame();
 			currentScene->Update(timer->getDeltaTime());
 			engineContext.VKImGUI->TestUI();
@@ -162,7 +162,7 @@ void SceneManager::GetEvents() {
 				BuildScene(SCENE0);
 				break;
 			case SDL_SCANCODE_F2:
-				BuildScene(SCENE2);
+				//BuildScene(SCENE2);
 				break;
 			case SDL_SCANCODE_F3:
 				BuildScene(SCENE3);

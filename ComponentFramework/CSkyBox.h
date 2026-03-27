@@ -18,6 +18,8 @@ class CSkyBox : public Component
 	std::vector<VkDescriptorSet> DesSet;
 	Renderer* renderer;
 
+	float m_smoothed1 = 0.0f;
+	float m_smoothed2 = 0.0f;
 	
 	SkyboxPush push;
 

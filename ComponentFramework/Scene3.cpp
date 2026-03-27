@@ -104,7 +104,8 @@ bool Scene3::OnCreate() {
 			// Cycle through distinct colors
 			Vec3 color = testColors[index % colorCount];
 			light->UpdateRadius(25.0f);
-			light->UpdateBloomScale(1.0f);
+			light->UpdateAudioId(index % 10);
+			light->UpdateBloomScale(0.9f);
 			light->UpdateIntensity(2.0f);
 			light->UpdateColour(color);
 			light->UpdateLight();
@@ -416,7 +417,7 @@ void Scene3::Update(const float deltaTime) {
 		auto Skybox = player->GetComponent<CSkyBox>();
 		if (Skybox) {
 			// Run imgui sky box
-			//Skybox->ImGui();
+			Skybox->ImGui();
 			Skybox->AudioReact(engineContext);
 		}
 	}

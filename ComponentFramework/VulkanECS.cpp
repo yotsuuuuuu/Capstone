@@ -14,6 +14,7 @@
 #include "SYS_Light.h"
 #include "AssetManager.h"
 #include "VkImGUISystem.h"
+#include "FmodController.h"
 #include "imgui.h"
 #include <unordered_map>
 
@@ -67,6 +68,8 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     CreateGlobalShadowPipelineResources("./shaders/GlobalLight.vert.spv", "./shaders/GlobalLight.frag.spv", Glight);
 
     // then create global resources
+ 
+    CreateSysUbos();
   
     std::vector<SingleDescriptorSetLayoutInfo> layoutGlobal;
     AddToDescriptorLayoutCollection(layoutGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
@@ -75,6 +78,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescriptorLayoutCollection(layoutGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 
     std::vector<DescriptorWriteInfo> writeGlobal;
     AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Camera->GetCameraUBO());
@@ -83,6 +87,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescrisptorLayoutWrite(writeGlobal, 3, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetSysUBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
+    AddToDescrisptorLayoutWrite(writeGlobal, 6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, { sys_UBOs.AudioGPUData });
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
     
      
@@ -104,8 +109,48 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
 void VulkanRenderer::DestroyGlobalResources()
 {
     vkDeviceWaitIdle(device);
+    DestroySysUbos();
     DestroyGlobalDescriptionSet();
     DestroyShadowMappingResources();
+}
+
+void VulkanRenderer::CreateSysUbos()
+{
+    sys_UBOs.AudioGPUData = CreateUniformBuffer<AudioBandsUBO>();
+}
+void VulkanRenderer::UpdateAudioUBO(const EngineContext& cntx)
+{
+    const AudioBands& Bands = cntx.fmodController->GetFrameAudioBand();
+
+    AudioBandsUBO uboData{};
+
+    uboData.bands[0] = Bands.sub;
+    uboData.bands[1] = Bands.bass;
+    uboData.bands[2] = Bands.highBass;
+    uboData.bands[3] = Bands.lowMid;
+    uboData.bands[4] = Bands.midMid;
+    uboData.bands[5] = Bands.highMid;
+    uboData.bands[6] = Bands.lowHigh;
+    uboData.bands[7] = Bands.midHigh;
+    uboData.bands[8] = Bands.highHigh;
+    uboData.bands[9] = Bands.air;
+
+    // padding
+    uboData.bands[10] = 0.0f;
+    uboData.bands[11] = 0.0f;
+    uboData.bands[12] = 0.0f;
+    uboData.bands[13] = 0.0f;
+    uboData.bands[14] = 0.0f;
+    uboData.bands[15] = 0.0f;
+  
+
+
+    UpdateUniformBuffer<AudioBandsUBO>(uboData, sys_UBOs.AudioGPUData);
+
+}
+void VulkanRenderer::DestroySysUbos()
+{
+    DestroyUBO({ sys_UBOs.AudioGPUData });
 }
 
 FrameContext VulkanRenderer::GetCurrentFrameContext()
@@ -588,6 +633,7 @@ public:
             MainCamera->GetComponent<CCamera>()->UpdateUBO(framecntx.inFlightIndex);
             MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
+        VKRNDR->UpdateAudioUBO(Ecntx);
         
         Ecntx.lightSys->ComputeLightClusters(framecntx.inFlightIndex);
 

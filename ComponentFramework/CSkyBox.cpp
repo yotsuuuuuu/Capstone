@@ -106,18 +106,17 @@ PipelineInfo CSkyBox::GetPipeline()
 {
     return std::dynamic_pointer_cast<CShader>(Shader)->GetPipelineInfo();
 }
-static float m_smoothed1 = 0.0f;
-static float m_smoothed2 = 0.0f;
+
 void CSkyBox::AudioReact(EngineContext& cntx)
 {
-    auto bands = cntx.fmodController->AnalyzeAudioOnline();
+    auto bands = cntx.fmodController->GetFrameAudioBand();
     float smoothing = 0.25f;
     m_smoothed1 += (bands.bass - m_smoothed1) * smoothing;
     m_smoothed2 += (bands.highBass - m_smoothed2) * smoothing;
 
 
     push.Bloomfactor = (m_smoothed1 + m_smoothed2) * 0.5f * 3.0f ;
-    ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_Always); // visualy probly should be moved out of here.
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
     ImGui::SetNextWindowBgAlpha(0.0f);
     ImGui::Begin("Audio",nullptr, ImGuiWindowFlags_NoTitleBar |
@@ -135,7 +134,7 @@ void CSkyBox::ImGui()
  
     ImGui::SliderFloat("Bloom Factor (0 -> 2)", &push.Bloomfactor, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-    ImGui::ColorPicker4("RGB Bloom Tint", (float*) &push.ColorTint, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float);
+    ImGui::ColorPicker4("RGB Bloom Tint", (float*) &push.ColorTint, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float);
 
     ImGui::End();
 }

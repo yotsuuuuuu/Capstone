@@ -3,16 +3,16 @@
 #include "SYS_Light.h"
 #include <cstdint>
 
-CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_)
+CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_ , int AudioId_)
 	:Component(parent_), LightSystem(sys),radius(radius_),intensity(intensity_),Colour(colour_),Type(0), ssboIndex(std::numeric_limits<uint32_t>::max())
-, bloomScale(1.0f),AudioBandID(-1){
+, bloomScale(1.0f),AudioBandID(AudioId_){
 	
 }
 
 CLight::CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, 
-	 Vec2 inner_Outer_)
+	 Vec2 inner_Outer_, int AudioId_)
 	:Component(parent_), LightSystem(sys), radius(radius_), intensity(intensity_), Colour(colour_), Type(1),
-	inner_Outer(inner_Outer_), ssboIndex(std::numeric_limits<uint32_t>::max()), bloomScale(1.0f), AudioBandID(-1) {
+	inner_Outer(inner_Outer_), ssboIndex(std::numeric_limits<uint32_t>::max()), bloomScale(1.0f), AudioBandID(AudioId_) {
 		
 }
 
@@ -78,7 +78,7 @@ void CLight::UpdateData()
 	data.colour_intensity = Vec4(Colour, intensity);
 	data.position_radius = Vec4(Position, radius);
 	data.direction_inner = Vec4(Direction, inner_Outer.x);
-	data.outer_type_emissiveScale = Vec4(inner_Outer.y, static_cast<float>(Type), bloomScale, 0);
+	data.outer_type_emissiveScale_audioID = Vec4(inner_Outer.y, static_cast<float>(Type), bloomScale, static_cast<float>(AudioBandID));
 }
 
 CLightData CLight::GetUpdatedData()

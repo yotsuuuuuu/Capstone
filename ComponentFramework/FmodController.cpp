@@ -315,7 +315,7 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	return bandHolder;
 }
 
-AudioBands FmodController::AnalyzeAudioOnline()
+void FmodController::AnalyzeAudioOnline()
 {
 	float sampleRate = 48000.0f; // Default sample rate, can be updated based on the actual sound being played
 	AudioBands bands;
@@ -411,7 +411,13 @@ AudioBands FmodController::AnalyzeAudioOnline()
 	//	<< "Air: " << bands.air << std::endl;
 
 
-	return bands;
+	PerframeAudioBand =  bands;
+
+}
+
+const AudioBands& FmodController::GetFrameAudioBand()
+{
+	return PerframeAudioBand;
 }
 
 

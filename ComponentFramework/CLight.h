@@ -24,8 +24,8 @@ class CLight :
     SYS_Light* LightSystem = nullptr;
    
 public:
-    CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour);
-    CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, Vec2 inner_Outer_);
+    CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour, int AudioId_ = -1);
+    CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, Vec2 inner_Outer_, int AudioId_ = -1);
     ~CLight() {}
 
     bool OnCreate();

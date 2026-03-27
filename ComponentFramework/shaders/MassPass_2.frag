@@ -215,11 +215,11 @@ vec4 ClusterLightsColour(vec4 ktColour) {
         tile.x + (tile.y *  DataSys.gridSize.x) + (tile.z *  DataSys.gridSize.x *  DataSys.gridSize.y);
 
     uint lightCount = clusters[tileIndex].count;
-	if (lightCount > 95) {
-     //getting close to limit. Output red color and dip
-     Result = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-     return Result;
-	}
+//	if (lightCount > 95) {
+//     //getting close to limit. Output red color and dip
+//     Result = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+//     return Result;
+//	}
 
 	for (int i = 0; i < lightCount; ++i)
     {
