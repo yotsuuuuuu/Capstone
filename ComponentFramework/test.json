@@ -1,11 +1,12 @@
 {
-  "Meshes": {
+ "Meshes": {
     "IcoMesh": "./meshes/SimpleIco.obj",
     "marioMesh": "./meshes/Mario.obj",
     "sphereMesh": "./meshes/Sphere.obj"
   },
   "Shaders": {
     "main": {
+      "config":  true,
       "frag": "shaders/MassPass_2.frag.spv",
       "vert": "shaders/MassPass_2.vert.spv",
       "binding": 0,
@@ -34,13 +35,13 @@
 
   "Material": {
     "marioMat": {
-      "texture": "marioMime",
+      "texture": ["marioMime"],
       "shader": "main",
       "cast shadow": "true",
       "recieve shadow": "false"
     },
     "SimpleLightMat": {
-      "texture": "DefaultTexture",
+      "texture": ["DefaultTexture"],
       "shader": "SimpleLightShader",
       "cast shadow": "false",
       "recieve shadow": "false"

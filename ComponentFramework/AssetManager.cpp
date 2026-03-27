@@ -164,12 +164,16 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
     for (auto& [matId, matData] : jsonLoader["Material"].items())
     {
 
-        std::vector<std::string> texName;
-		std::string filepath = matData["texture"].get<std::string>();
-		texName.push_back(jsonLoader["Textures"][filepath].get<std::string>());
-		Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer,texName, assetMapGet<CShader>(matData["shader"]));
+        std::vector<std::string> texName = matData["texture"].get<std::vector<std::string>>();
+        std::vector<std::string> propertexs;
+        for (int i = 0; i < texName.size(); i++)
+        {
+
+            propertexs.push_back(jsonLoader["Textures"][texName[i]].get<std::string>());
+        }
+        Ref<CMaterial> mat1 = std::make_shared<CMaterial>(nullptr, renderer, propertexs, assetMapGet<CShader>(matData["shader"]));
         assetMap[matId] = mat1;
-        
+
     }
 
 	file.close();
