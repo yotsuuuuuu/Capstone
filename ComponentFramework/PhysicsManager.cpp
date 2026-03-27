@@ -53,9 +53,9 @@ void PhysicsManager::TerrainCollision()
         if (chunk.isCulled) continue;
 
         // broad phase AABB test
+		playerPhysics->SetHasGravity(true); // just so the player is falling if they are in the air, above an AABB (or whatever)
 		if (!playerCollider->SimpleIntersectingAABB(chunk.aabb)) { continue; }
 
-		playerPhysics->SetHasGravity(true); // just so the player is falling if they are in the air, above an AABB (or whatever)
 
         Vec2 chunkPos = chunk.chunkPos; 
 
