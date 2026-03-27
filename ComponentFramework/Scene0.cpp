@@ -48,7 +48,7 @@ bool Scene0::OnCreate() {
 
 		std::vector<std::string> filepaths = { "./textures/rock.png" };
 
-		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("main"));
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("Terrain"));
 		mat3->OnCreate();
 
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);

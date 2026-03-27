@@ -103,9 +103,9 @@ bool Scene3::OnCreate() {
 			transform->SetRotation(rotation);
 			// Cycle through distinct colors
 			Vec3 color = testColors[index % colorCount];
-			light->UpdateRadius(10.0f);
-			light->UpdateBloomScale(0.8f);
-			light->UpdateIntensity(1.00f);
+			light->UpdateRadius(25.0f);
+			light->UpdateBloomScale(1.0f);
+			light->UpdateIntensity(2.0f);
 			light->UpdateColour(color);
 			light->UpdateLight();
 
@@ -115,7 +115,7 @@ bool Scene3::OnCreate() {
 
 		 std::vector<std::string> filepaths = { "./textures/rock.png" };
 
-		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("main"));
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("Terrain"));
 		mat3->OnCreate();
 
 		// step 2 create actors

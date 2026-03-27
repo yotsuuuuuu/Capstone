@@ -326,12 +326,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\terrain.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\terrain.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="test.json">
       <Filter>Json</Filter>
     </None>
@@ -420,6 +414,12 @@
       <Filter>Shaders\CurrentShaders</Filter>
     </None>
     <None Include="shaders\ThresholdSample.vert">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\terrain.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\terrain.vert">
       <Filter>Shaders\CurrentShaders</Filter>
     </None>
   </ItemGroup>
