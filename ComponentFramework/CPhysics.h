@@ -41,6 +41,7 @@ public:
 	//void SetRotation(MATH::Quaternion rot_) { rotation = rot_; }
 	void SetIsGrounded(bool grounded_) { isGrounded = grounded_; }
 	bool IsGrounded() const { return isGrounded; }
+	bool HasGravity() const { return hasGravity; }
 	float GetMass() { return mass; }
 	MATH::Vec3 GetVelocity() { return velocity; }
 	MATH::Vec3 GetAcceleration() { return acceleration; }

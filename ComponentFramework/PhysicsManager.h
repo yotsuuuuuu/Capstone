@@ -50,6 +50,7 @@ public:
 	void Update(const float dt);
 
 private:
-	void CheckGroundCollision();
+	void CheckGroundCollision(MeshCollisionInfo mInfo);
+	void CheckGroundCollision(CollisionInfo info); // AABB
 };
 

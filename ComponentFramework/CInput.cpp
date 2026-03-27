@@ -174,14 +174,16 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	if (moveLeftPressed) { direction -= right; }
 	if (moveRightPressed) { direction += right; }
 
-	//auto phys = physics.lock();
-	//if (jumpPressed && phys && phys->IsGrounded()) { direction.y += 1.0f; } // add vertical movement for jumping, will be handled by physics
+	auto phys = physics.lock();
+	if (jumpPressed && phys && phys->IsGrounded()) { 
+		phys->ApplyImpulse(MATH::Vec3(0.0f, jumpStrength, 0.0f)); 
+	} // add vertical movement for jumping, will be handled by physics
 
 	// normalize if moving diagonally to prevent faster movement
 	if (MATH::VMath::mag(direction) > 0.0f) {
 		direction = MATH::VMath::normalize(direction);
 	}
-
+	//direction = MATH::Vec3(direction.x, 0.0f, direction.z); // ensure no vertical movement from input
 	return direction;
 
 }

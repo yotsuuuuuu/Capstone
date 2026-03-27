@@ -155,9 +155,23 @@ bool CCapsuleCollider::SimpleIntersectingAABB(const AABB& aabb) const
 
 void CCapsuleCollider::UpdateCapsulePoints()
 {
-	capA = physics.lock()->GetPosition() + offset + Vec3(0.0f, cylinderHeight - cameraHeight, 0.0f);
-	capB = physics.lock()->GetPosition() + offset - Vec3(0.0f, cameraHeight, 0.0f);
-	axis = capA - capB;
+	auto phys = physics.lock();
+	if (!phys) return;
+
+	Vec3 center = phys->GetPosition() + offset;
+
+	cylinderHeight = height - radius * 2.0f;
+	if (cylinderHeight < 0.0f) cylinderHeight = 0.0f;
+
+	float halfCylinder = cylinderHeight * 0.5f;
+
+	// bottom of capsule (feet)
+	capB = center - Vec3(0.0f, halfCylinder, 0.0f);
+
+	// top of capsule (head)
+	capA = center + Vec3(0.0f, halfCylinder, 0.0f);
+
+	axis = VMath::normalize(capA - capB);
 }
 
 CollisionInfo CCapsuleCollider::IntersectingSphereTriangle(const Vec3& sphereCenter, float sphereRadius, const Vec3& v0, const Vec3& v1, const Vec3& v2) const

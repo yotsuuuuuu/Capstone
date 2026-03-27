@@ -11,7 +11,7 @@ class CCapsuleCollider : public CCollider
 	float radius = 0.5f;
 	float height = 2.0f;
 	float cylinderHeight = height - radius * 2.0f;  // The straight cylinder part
-	float cameraHeight = cylinderHeight * 0.7f; // for camera collision
+	//float cameraHeight = cylinderHeight * 0.7f; // for camera collision
 
 	//WeakRef<CTransform> transform;
 	
