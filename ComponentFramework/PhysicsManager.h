@@ -28,19 +28,29 @@ private:
 	Ref<CWorld> worldComp;// = std::dynamic_pointer_cast<CWorld>(worldActor);
 
 	std::vector<TerrainChunkData>* chunksData;// = worldComp->GetChunkRenderData();
-	std::vector<uint32_t> indices;// = worldComp->GetChunkIndices();
+	std::vector<uint32_t> chunkIndices;// = worldComp->GetChunkIndices();
 	int world_size;// = worldComp->GetWorldSize();
 
 	std::unordered_map<Vec2, std::unique_ptr<Chunk>>* chunkMap;// = worldComp->GetChunkMap();
 
 	Ref<CActor> player;// = std::dynamic_pointer_cast<CActor>(camera);
 	Ref<CCapsuleCollider> playerCollider;// = player->GetComponent<CCapsuleCollider>();
+	Ref<CPhysics> playerPhysics;// = player->GetComponent<CPhysics>();
+
+	std::vector<Ref<Component>> actorsInScene;
+	std::vector<Ref<CCollider>> collidersInScene;
+
 public:
 
-	bool OnCreate(Ref<Component> world_, Ref<Component> camera_);
+	void Set(std::vector<Ref<Component>> sceneActors, Ref<Component> cam, Ref<Component> world_) { actorsInScene = sceneActors; camera = cam; world = world_; }
+	bool OnCreate();
 
 	void TerrainCollision();
 
 	void Update(const float dt);
+
+private:
+	void CheckGroundCollision(MeshCollisionInfo mInfo);
+	void CheckGroundCollision(CollisionInfo info); // AABB
 };
 

@@ -36,8 +36,8 @@ private:
 	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
-	float lowestPoint = 0.0f; // for lowring the entinre mesh if its way above y=0.
-
+	float lowestPoint = std::numeric_limits<float>::max(); 
+	float highestPoint = std::numeric_limits<float>::min();
 
 	//player
 	//CActor* player;
@@ -58,6 +58,9 @@ public:
 	void OnDelete();
 
 	int GetWorldSize() const { return WORLD_SIZE; }
+	float GetHighestPoint() const { return highestPoint; }
+	float GetLowestPoint() const { return lowestPoint; }
+
 	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
 
 	PipelineInfo const GetPipeline() { return worldPipeline; }

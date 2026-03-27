@@ -319,8 +319,10 @@ struct AABB
 struct TerrainChunkData { // shared terrain mesh topology data
 	IndexedVertexBuffer vertexBuffer; // shared among all terrain chunks
 	ModelMatrixPushConst transform; // unique per chunk
+	std::vector<Vertex> vertices; // unique per chunk, used for collision and culling
     bool isInitialized = false;
 	bool isCulled = false;
+	Vec2 chunkPos; // x,z position in world space
 	AABB aabb;
 };
 

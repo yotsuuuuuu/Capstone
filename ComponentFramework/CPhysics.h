@@ -8,7 +8,8 @@ private:
 	MATH::Vec3 velocity;
 	MATH::Vec3 acceleration;
 
-	bool hasGravity;
+	bool hasGravity = true;
+	bool isGrounded = false;
 
 public:
 	CPhysics(Ref<Component> parent_) :
@@ -17,7 +18,7 @@ public:
 		dragCoefficient(0.01f),
 		velocity(MATH::Vec3()),
 		acceleration(MATH::Vec3()),
-		hasGravity(false) {}
+		hasGravity(true) {}
 
 	CPhysics(Ref<Component> parent_, float mass_, MATH::Vec3 velocity_, MATH::Vec3 acceleration_, bool hasGravity_) :
 		CTransform(parent_),
@@ -38,7 +39,9 @@ public:
 	void SetHasGravity(bool hasGravity_) { hasGravity = hasGravity_; }
 	void SetDragCoefficient(float dragCoefficient_) { dragCoefficient = dragCoefficient_; }
 	//void SetRotation(MATH::Quaternion rot_) { rotation = rot_; }
-
+	void SetIsGrounded(bool grounded_) { isGrounded = grounded_; }
+	bool IsGrounded() const { return isGrounded; }
+	bool HasGravity() const { return hasGravity; }
 	float GetMass() { return mass; }
 	MATH::Vec3 GetVelocity() { return velocity; }
 	MATH::Vec3 GetAcceleration() { return acceleration; }
@@ -47,7 +50,7 @@ public:
 	void ApplyImpulse(MATH::Vec3 impulse);
 	void ApplyDragForce();
 
-	void Update(const float deltaTime);
+	virtual void Update(const float deltaTime);
 
 };
 

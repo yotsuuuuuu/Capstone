@@ -55,7 +55,7 @@ bool Scene0::OnCreate() {
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
 		TerrainPreset preset;
 
-		preset.concatenate = true;
+		preset.truncate = true;
 		//preset.globalHeightScale = 5.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 42;
@@ -126,7 +126,7 @@ void Scene0::Update(const float deltaTime) {
 		auto playerController =player->GetComponent<CInput>();
 		auto phys  =player->GetComponent<CPhysics>();
 		if (playerController) {
-			playerController->UpdateInput(deltaTime);
+			playerController->Update(deltaTime);
 			phys->Update(deltaTime);
 		}
 	}

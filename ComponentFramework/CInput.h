@@ -16,7 +16,7 @@ public:
 
 	virtual bool OnCreate() override;
 	virtual void OnDestroy() override;
-	virtual void Update(const float dt) override {}
+	virtual void Update(const float dt);
 
 private:
 	// keyboard
@@ -36,12 +36,12 @@ private:
 	// parameters
 	float moveSpeed = 20.0f; // units per second
 	float sprintMultiplier = 2.0f;
-	float jumpStrength = 5.0f; // units per second
+	float jumpStrength = 10.0f; // units per second
 	float airControl = 0.03f;
 
-	// ground
-	bool isGrounded = false;
-	float groundCheckDistance = 0.1f; // distance to check for ground
+	//// ground
+	//bool isGrounded = false;
+	//float groundCheckDistance = 0.1f; // distance to check for ground
 
 public:
 	// movement functions
@@ -49,7 +49,7 @@ public:
 	void HandleMouseMotion(const SDL_Event& motion);
 	void HandleMouseButton(const SDL_Event& button);
 
-	void UpdateInput(const float dt);
+	//void Update(const float dt);
 
 	void SetMoveSpeed(float speed) { moveSpeed = speed; }
 	void SetSprintMultiplier(float multiplier) { sprintMultiplier = multiplier; }
@@ -62,7 +62,7 @@ public:
 
 private:
 	void UpdateCameraRotation();
-	void CheckGrounded();
+	//void CheckGrounded();
 	MATH::Vec3 CalculateMovementDirection() const;
 
 };

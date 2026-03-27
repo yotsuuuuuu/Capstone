@@ -7,13 +7,15 @@
 using namespace MATH;
 
 //forward declaration
-class CTransform;
+//class CTransform;
+class CPhysics;
 class CCapsuleCollider; // just for now
 
 enum class ColliderType {
 	NONE = 0,
 	CAPSULE,
 	MESH,
+	AABB
 };
 
 struct CollisionInfo {
@@ -33,7 +35,7 @@ protected:
 	ColliderType type = ColliderType::NONE;
 
 	// use parents transform;
-	WeakRef<CTransform> transform;
+	WeakRef<CPhysics> physics;
 
 	Vec3 offset; // so we can offset (move up/down)
 
@@ -47,18 +49,19 @@ public:
 	}
 
 	virtual ~CCollider() = default;
-	virtual bool OnCreate() override;
+	virtual bool OnCreate() = 0;
 	virtual void OnDestroy() override;
-	virtual void Update(const float dt) override;
+	virtual void Update(const float dt) = 0;
 
 	virtual ColliderType GetColliderType() const { return type; }
 
-	virtual CollisionInfo IntersectingWith(const CCollider& other) const;
-	virtual CollisionInfo IntersectingCapsule(const CCapsuleCollider& capsule) const;
+	virtual bool SimpleIntersectingAABB(const AABB& aabb) const = 0; // just check if the collider's AABB is intersecting with the given AABB, used for broad phase
+	virtual CollisionInfo IntersectingAABB(const AABB& aabb) const = 0;
 
-	virtual bool SimpleIntersectingAABB(const AABB& aabb); // just check if the collider's AABB is intersecting with the given AABB, used for broad phase
-	virtual CollisionInfo IntersectingAABB(const AABB& aabb);
-	virtual MeshCollisionInfo IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+	virtual CollisionInfo IntersectingWith(const CCollider& other) const = 0;
+	virtual CollisionInfo IntersectingCapsule(const CCapsuleCollider& capsule) const = 0;
+	// "mesh" is really just for chunk
+	virtual MeshCollisionInfo IntersectingMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, Vec2& chunkPosition) const = 0;
 
 	//virtual bool IntersectingMesh(const CCollider& mesh) const { return false; }
 
@@ -70,7 +73,8 @@ public:
 	Vec3 ClosestPointOnAABB(const AABB& aabb, const Vec3& point) const;
 	float SquaredDistanceToSegment(const Vec3& a, const Vec3& b, const Vec3& point) const;
 
-
+	void ApplyCollisionResponse(const CollisionInfo& info);
+	void ApplyCollisionResponse(const MeshCollisionInfo& info);
 
 
 };

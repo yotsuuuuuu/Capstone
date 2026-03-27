@@ -21,6 +21,7 @@
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
 #include "FmodController.h"
+#include "PhysicsManager.h"
 
 Scene3::Scene3(EngineContext& context_): 
 	Scene(context_) {
@@ -169,7 +170,7 @@ bool Scene3::OnCreate() {
 		preset2.continentalness.returnType = ReturnType::Distance2;
 
 		/// PRESET 3 ///
-		preset3.concatenate = true;
+		preset3.truncate = true;
 		preset3.globalHeightScale = 2.0f;
 		preset3.base.type = NoiseType::OpenSimplex2;
 		preset3.base.seed = 123;
@@ -207,13 +208,20 @@ bool Scene3::OnCreate() {
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
 		
-		actorsInScene.push_back(WorldActor);
 
 		//actorsInScene.push_back(engineContext.assetManager->GetCamera());
 
 		//step 3 Actors being added to the scene.
 		camera = engineContext.assetManager->GetCamera();	
 		world = WorldActor;
+		engineContext.physicsManager->Set(actorsInScene, camera, world);
+		engineContext.physicsManager->OnCreate();	
+		
+		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+		cameraActor->GetComponent<CPhysics>()->SetPosition(Vec3(0, 20.0f, 0));
+
+		actorsInScene.push_back(WorldActor);
+
 		
 	}
 		break;
@@ -377,18 +385,6 @@ void Scene3::FrustumCheck()
 				break;
 			}
 
-			// just to check if it intersects probs not needed
-			//Vec3 nVertex = Vec3((p.n.x > 0) ? c.aabb.min.x : c.aabb.max.x,
-			//					(p.n.y > 0) ? c.aabb.min.y : c.aabb.max.y,
-			//					(p.n.z > 0) ? c.aabb.min.z : c.aabb.max.z);
-
-			//float dot2 = p.n.x * nVertex.x + 
-			//			 p.n.y * nVertex.y + 
-			//			 p.n.z * nVertex.z;
-
-			//if (dot2 <= -p.d) {
-			//	c.isCulled = false;
-			//}
 		}
 	}
 
@@ -397,7 +393,7 @@ void Scene3::FrustumCheck()
 
 
 void Scene3::Update(const float deltaTime) {
-
+	engineContext.physicsManager->Update(deltaTime);
 	// TODO: move to physics system.
 	auto player = std::dynamic_pointer_cast<CActor>(camera);
 	if (player) {
@@ -406,11 +402,6 @@ void Scene3::Update(const float deltaTime) {
 		if (playerController) {
 			playerController->UpdateInput(deltaTime);
 			phys->Update(deltaTime);
-		}
-		auto Skybox = player->GetComponent<CSkyBox>();
-		if (Skybox) {
-			// Run imgui sky box
-			Skybox->ImGui();
 		}
 	}
 	

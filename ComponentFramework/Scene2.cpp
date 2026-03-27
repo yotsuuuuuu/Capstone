@@ -121,7 +121,7 @@ bool Scene2::OnCreate() {
 
 		// Terrain Stuff
 		TerrainPreset preset;
-		preset.concatenate = true;
+		preset.truncate = true;
 		//preset.globalHeightScale = 5.0f;
 		preset.base.type = NoiseType::OpenSimplex2;
 		preset.base.seed = 42;
@@ -193,7 +193,7 @@ void Scene2::Update(const float deltaTime) {
 	auto playerController = p1->GetComponent<CInput>();
 	auto phys = p1->GetComponent<CPhysics>();
 
-	playerController->UpdateInput(deltaTime);
+	playerController->Update(deltaTime);
 	phys->Update(deltaTime);
 
 	//p1->Update(deltaTime);

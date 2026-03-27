@@ -6,6 +6,8 @@
 #include "FmodController.h"
 #include "VkImGUISystem.h"
 #include "SYS_Light.h"
+#include "PhysicsManager.h"
+
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
@@ -43,6 +45,9 @@ SceneManager::~SceneManager() {
 	engineContext.renderer = nullptr;
 	engineContext.assetManager = nullptr;	
 	engineContext.fmodController = nullptr;
+	engineContext.physicsManager = nullptr;
+
+	delete physicsManager;
 	delete fmodController;
 	delete renderer;
 
@@ -96,7 +101,10 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		Debug::Error("Failed to create fmod system", __FILE__, __LINE__);
 	}
 	fmodController->InitilizeSongs();
-	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem,*VKImGui);
+
+	physicsManager = new PhysicsManager();
+
+	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem, *VKImGui, *physicsManager);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./test.json");		
 

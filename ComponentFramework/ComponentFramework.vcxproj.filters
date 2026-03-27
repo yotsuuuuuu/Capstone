@@ -297,9 +297,6 @@
     <ClInclude Include="CWorld.h">
       <Filter>Header\Components</Filter>
     </ClInclude>
-    <ClInclude Include="CChunk.h">
-      <Filter>Header\Components</Filter>
-    </ClInclude>
     <ClInclude Include="CSkyBox.h">
       <Filter>Header\Components</Filter>
     </ClInclude>

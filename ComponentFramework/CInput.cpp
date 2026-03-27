@@ -23,7 +23,7 @@ bool CInput::OnCreate()
 	auto phys = physics.lock();
 	if (!phys) return false;
 
-	phys->SetHasGravity(false); // disable gravity for player controller for NOW until COLLISIONS
+	//phys->SetHasGravity(false); // disable gravity for player controller for NOW until COLLISIONS
 	phys->SetMass(5.0f);
 	phys->SetDragCoefficient(0.3f);
 	phys->SetVelocity(MATH::Vec3(0.0f, 0.0f, 0.0f)); // reset just in case
@@ -102,7 +102,7 @@ void CInput::HandleMouseButton(const SDL_Event& button)
 	// TODO: (andres) figure out a use for mouse clicking and implement
 }
 
-void CInput::UpdateInput(const float dt)
+void CInput::Update(const float dt)
 {
 	auto phys = physics.lock();
 
@@ -136,21 +136,21 @@ void CInput::UpdateInput(const float dt)
 void CInput::UpdateCameraRotation()
 {
 	auto phys = physics.lock();
-	auto transform = std::dynamic_pointer_cast<CTransform>(phys);
+	//auto transform = std::dynamic_pointer_cast<CTransform>(phys);
 	if (!phys) return;
 
 	Quaternion yawRotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, 1.0f, 0.0f));
 	Quaternion pitchRotation = QMath::angleAxisRotation(pitch, Vec3(1.0f, 0.0f, 0.0f));
 
-	transform->SetRotation(yawRotation * pitchRotation);
+	phys->SetRotation(yawRotation * pitchRotation);
 
 }
 
-void CInput::CheckGrounded()
-{
-	// no floor so ignore this for now
-	// TODO: (andres) implement raycast or collision check to set isGrounded properly. requires collisions to be implemented first
-}
+//void CInput::CheckGrounded()
+//{
+//	// no floor so ignore this for now
+//	// TODO: (andres) implement raycast or collision check to set isGrounded properly. requires collisions to be implemented first
+//}
 
 MATH::Vec3 CInput::CalculateMovementDirection() const
 {
@@ -163,7 +163,7 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	MATH::Vec3 right = cam->GetRightVector();
 
 	// commented out for now since we flying
-	//front.y = 0.0f; // ignore vertical component for movement (so we dont fly when looking up )
+	front.y = 0.0f; // ignore vertical component for movement (so we dont fly when looking up )
 
 	if (MATH::VMath::mag(front) > 0.0f) {
 		front = MATH::VMath::normalize(front);
@@ -174,11 +174,16 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	if (moveLeftPressed) { direction -= right; }
 	if (moveRightPressed) { direction += right; }
 
+	auto phys = physics.lock();
+	if (jumpPressed && phys && phys->IsGrounded()) { 
+		phys->ApplyImpulse(MATH::Vec3(0.0f, jumpStrength, 0.0f)); 
+	} // add vertical movement for jumping, will be handled by physics
+
 	// normalize if moving diagonally to prevent faster movement
 	if (MATH::VMath::mag(direction) > 0.0f) {
 		direction = MATH::VMath::normalize(direction);
 	}
-
+	//direction = MATH::Vec3(direction.x, 0.0f, direction.z); // ensure no vertical movement from input
 	return direction;
 
 }

@@ -30,6 +30,10 @@ void CActor::OnDestroy()
 
 void CActor::Update(const float dt)
 {
+    for (const auto& comp : components)
+    {
+        comp->Update(dt);
+	}
 }
 
 void CActor::DeleteComponents()
