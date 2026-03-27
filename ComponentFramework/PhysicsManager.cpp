@@ -46,7 +46,6 @@ void PhysicsManager::TerrainCollision()
 	bool collisionDetected = false;
 	//std::cout << "Player Gravity: " << playerPhysics->HasGravity() << "\n" << " IsGrounded: " << playerPhysics->IsGrounded() << std::endl;
 		
-	playerPhysics->SetHasGravity(true); // just so the player is falling if they are in the air, above an AABB (or whatever)
     
 	for (auto& chunk : *chunksData) {
 
@@ -56,6 +55,7 @@ void PhysicsManager::TerrainCollision()
         // broad phase AABB test
 		if (!playerCollider->SimpleIntersectingAABB(chunk.aabb)) { continue; }
 
+		playerPhysics->SetHasGravity(true); // just so the player is falling if they are in the air, above an AABB (or whatever)
 
         Vec2 chunkPos = chunk.chunkPos; 
 
@@ -64,22 +64,19 @@ void PhysicsManager::TerrainCollision()
 		if (VMath::mag(playerDirection) < VERY_SMALL) {
 			playerDirection = Vec3(0.0f, -1.0f, 0.0f); // if player is not moving, just check downwards
 		}
+
 		Vec3 playerDirNormalized = VMath::normalize(playerDirection);
 		Vec3 originalCapA = playerCollider->GetCapA();
 		Vec3 originalCapB = playerCollider->GetCapB();
 
 		Vec3 step = playerDirNormalized * 0.25f; // quarter steps
 		for (int i = 0; i < 4; i++) {
-			//playerCollider->UpdateCapsulePoints(); // update capsule points before each step
 			playerCollider->SetCapA(originalCapA + step * (i+1));
 			playerCollider->SetCapB(originalCapB + step * (i+1));
-
-
 
 			// narrow phase triangle collision
 			MeshCollisionInfo mInfo = playerCollider->IntersectingMesh(chunk.vertices, chunkIndices, chunkPos);
 
-			//std::cout << mInfo.isColliding << std::endl;
 			CheckGroundCollision(mInfo); // check if it's ground collision and set grounded state accordingly
 			if (mInfo.isColliding) {
 				//std::cout << "triangle collision detected: " << mInfo.triangleIndex
