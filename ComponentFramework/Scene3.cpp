@@ -96,11 +96,18 @@ bool Scene3::OnCreate() {
 
 			transform->SetPosition(Vec3(x, 0.5f, z));
 
+			
+			
+			float yaw = (index * 37.0f) * RADIANS_TO_DEGREES;
+			
+			Quaternion rotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, -1.0f, 0.0f));
+			transform->SetRotation(rotation);
 			// Cycle through distinct colors
 			Vec3 color = testColors[index % colorCount];
-			light->UpdateRadius(10.0f);
-			light->UpdateBloomScale(1.1f);
-			light->UpdateIntensity(1.00f);
+			light->UpdateRadius(25.0f);
+			light->UpdateAudioId(index % 10);
+			light->UpdateBloomScale(0.9f);
+			light->UpdateIntensity(2.0f);
 			light->UpdateColour(color);
 			light->UpdateLight();
 
@@ -110,7 +117,7 @@ bool Scene3::OnCreate() {
 
 		 std::vector<std::string> filepaths = { "./textures/rock.png" };
 
-		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("main"));
+		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("Terrain"));
 		mat3->OnCreate();
 
 		// step 2 create actors

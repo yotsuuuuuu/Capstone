@@ -119,7 +119,7 @@ struct alignas(16) CLightData {
     Vec4 position_radius;
     Vec4 colour_intensity;
     Vec4 direction_inner;
-    Vec4 outer_type_emissiveScale;
+    Vec4 outer_type_emissiveScale_audioID;
 };
 
 struct  Cluster
@@ -338,9 +338,11 @@ struct AudioBands
     float midHigh = 0.0f;   // 4187 Hz  - 8000 Hz
     float highHigh = 0.0f;  // 8000 Hz  - 12000 Hz
     float air = 0.0f;       // 12001 Hz - 20000 Hz
-
 };
 
+struct alignas(16) AudioBandsUBO {
+    Matrix4 bands;
+};
 
 enum class AudioState
 {
@@ -450,5 +452,12 @@ struct FrameContext
 
 struct SkyboxPush {
     Vec4  ColorTint;
-    float Bloomfactor;
+    float Bloomfactor = 1.0f;
+};
+
+
+struct SystemsUBOs {
+    BufferMemory AudioGPUData;
+    BufferMemory EngineData; // unsure what to put here
+    BufferMemory TerrainData;
 };

@@ -17,6 +17,7 @@ private:
 	void* extradriverdata = 0;
 	float volume = 25.0f;
 
+	AudioBands PerframeAudioBand;
 	
 public:
 	FmodController(){};
@@ -33,7 +34,8 @@ public:
 	float getCurrentTime();
 
 	std::vector<AudioBands> AnalyzeAudioOffline(int songunum_);
-	AudioBands AnalyzeAudioOnline();
+	void AnalyzeAudioOnline();
+	const AudioBands& GetFrameAudioBand();
 	//system that gets the fmod sound data that fram puts it inot bands then sends it to the vulkan rednerer for the shader system. NEEDS TO GET SIZE
 	~FmodController();
 };

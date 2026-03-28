@@ -1,27 +1,58 @@
 #version 450
+#extension GL_ARB_separate_shader_objects : enable // need for openGL
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 2) in vec2 inTexCoord;
+#define MAX_SHADOW_MAPS 3
 
-layout(location = 0) out vec3 fragNormal;
-layout(location = 1) out vec2 fragTexCoord;
+layout (location = 0) in  vec4 vVertex;
+layout (location = 1) in  vec4 vNormal;
+layout (location = 2) in  vec2 texCoords;
 
-// ALL bindings are in Set 0 now
-layout(binding = 0) uniform CameraBuffer {  // Set 0, Binding 0
-    mat4 projection;
-    mat4 view;
+layout(set = 0 , binding = 0) uniform CameraUBO {
+    mat4 projectionMatrix;
+	mat4 viewMatrix;
 } camera;
 
-layout(push_constant) uniform ModelMatrix {
-    mat4 model;
-    mat4 normalMatrix;
-} transform;
+layout(set = 0, binding = 1) uniform GLightData{
+	mat4 projectionMatrix[MAX_SHADOW_MAPS];
+	mat4 viewMatrix[MAX_SHADOW_MAPS];
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	vec4 dir;
+} GLData;
+
+layout(push_constant) uniform Push {
+	mat4 modelMatrix;
+	mat4 normalMatrix; 
+} push;
+
+layout (location = 0) out vec3 vertNormal;
+layout (location = 1) out vec2 fragTexCoords;
+layout (location = 2) out vec3 lightDir;
+layout (location = 3) out vec4 fragViewPos;
+layout (location = 4) out vec4 fragWorldPos;
+layout (location = 5) out vec4 fragLightSpace[MAX_SHADOW_MAPS];
+
 
 void main() {
-    vec4 worldPos = transform.model * vec4(inPosition, 1.0);
-    gl_Position = camera.projection * camera.view * worldPos;
-    
-    fragNormal = mat3(transform.normalMatrix) * inNormal;
-    fragTexCoord = inTexCoord;
+	fragTexCoords = texCoords;
+	// Transform normals to view space
+	mat3 normalMatrix = mat3(transpose(inverse(camera.viewMatrix * push.modelMatrix)));
+	vertNormal = normalize(normalMatrix * vNormal.xyz);
+	// Position in view space
+	fragWorldPos =  push.modelMatrix * vVertex;
+	fragViewPos = camera.viewMatrix * push.modelMatrix * vVertex;
+	// Eye direction 
+
+
+	// If we are Trasnforming the normal to view space the light dir must match 
+	// it is form pespective form the vertex so it must be negated
+	lightDir = -normalize(mat3(camera.viewMatrix) * GLData.dir.xyz);
+	// Fragment postion in light space
+	for( int i = 0 ; i < MAX_SHADOW_MAPS; i++){
+		fragLightSpace[i] = GLData.projectionMatrix[i] * GLData.viewMatrix[i] * push.modelMatrix * vVertex;
+	}
+	// Final Pos
+	// viewpos  =  camera.viewMatrix * push.modelMatrix * vVertex;
+	gl_Position = camera.projectionMatrix * fragViewPos;
 }

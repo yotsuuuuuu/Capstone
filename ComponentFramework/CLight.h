@@ -14,7 +14,7 @@ class CLight :
     Vec3 Colour;
     float radius;
     float intensity;
-    int AudioBand;
+    int AudioBandID;
     float bloomScale; // needs to be adde to constructor and filled in my assetmanager
     Vec3 Position;
     Vec3 Direction;
@@ -24,9 +24,8 @@ class CLight :
     SYS_Light* LightSystem = nullptr;
    
 public:
-    CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour);
-    CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour,
-        Vec3 direction, Vec2 inner_Outer);
+    CLight(Ref<Component> parent_, SYS_Light* sys, float radius, float intensity, Vec3 colour, int AudioId_ = -1);
+    CLight(Ref<Component> parent_, SYS_Light* sys, float radius_, float intensity_, Vec3 colour_, Vec2 inner_Outer_, int AudioId_ = -1);
     ~CLight() {}
 
     bool OnCreate();
@@ -35,6 +34,7 @@ public:
 
     uint32_t GetIndex() { return ssboIndex; }
 
+    void UpdateAudioId(int id) { AudioBandID = id; }
     void UpdateColour(const Vec3& c) { Colour = c; }
     void UpdateBloomScale(const float& scale) { bloomScale = scale; }
     void UpdateRadius(const float& r) { radius = r; }

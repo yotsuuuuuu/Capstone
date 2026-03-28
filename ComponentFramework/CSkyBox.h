@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "CoreStructs.h"
+#include "EngineContext.h"
 
 class Renderer;
 class CSkyBox : public Component
@@ -17,6 +18,8 @@ class CSkyBox : public Component
 	std::vector<VkDescriptorSet> DesSet;
 	Renderer* renderer;
 
+	float m_smoothed1 = 0.0f;
+	float m_smoothed2 = 0.0f;
 	
 	SkyboxPush push;
 
@@ -25,7 +28,7 @@ public:
 		renderer(renderer_),paths(files), CubeSampler({})  
 	{
 		push.Bloomfactor = 1.0f;
-		push.ColorTint = Vec4(0.45, 0.475, 0.5, 1.0);
+		push.ColorTint = Vec4(0.610f, 0.707f, 0.803f, 1.0f);
 	}
 
 
@@ -38,6 +41,9 @@ public:
 	void RecreatePipeline();
 	PipelineInfo GetPipeline();
 	std::vector<VkDescriptorSet> GetSet() { return DesSet; }
+
+
+	void AudioReact(EngineContext& cntx);
 
 	void ImGui();
 

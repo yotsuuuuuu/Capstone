@@ -16,6 +16,16 @@
       "opaque": 0
 
     },
+    "Terrain": {
+      "frag": "shaders/terrain.frag.spv",
+      "vert": "shaders/terrain.vert.spv",
+      "binding": 0,
+      "type": 1,
+      "stage": 16,
+      "pass": 1,
+      "opaque": 0
+
+    },
     "SimpleLightShader": {
       "frag": "shaders/SimpleLight.frag.spv",
       "vert": "shaders/SimpleLight.vert.spv",

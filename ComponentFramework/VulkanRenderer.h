@@ -442,8 +442,18 @@ private:
 	void DestroyShadowMappingResources();
 
     void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , std::shared_ptr<Component> globaLight);
+   
+    SystemsUBOs sys_UBOs;
+    void UpdateAudioUBO(const EngineContext& cntx);
 
+    void CreateSysUbos();
+    void DestroySysUbos();
 public:
+    BufferMemory GetAudioUBO() { return sys_UBOs.AudioGPUData; }
+    BufferMemory GetEngineUBO() { return sys_UBOs.EngineData; }
+
+
+
     void RenderECS(const EngineContext& Ecntx,const std::vector<std::shared_ptr<Component>>& drawlist);
 
     PipeLineConfig GetMainPassPipeLineConfig();
@@ -507,6 +517,8 @@ private:
     void DestroyBloomMipFrameBuffers();
     void DestroyBloomRenderPasses();
 
+
+        
     
 };
 #endif 
