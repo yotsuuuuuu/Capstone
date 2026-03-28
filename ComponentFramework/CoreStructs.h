@@ -461,3 +461,9 @@ struct SystemsUBOs {
     BufferMemory EngineData; // unsure what to put here
     BufferMemory TerrainData;
 };
+
+struct SongTime
+{
+    unsigned int min;
+    unsigned int sec;
+};

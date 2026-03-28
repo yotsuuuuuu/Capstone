@@ -165,14 +165,32 @@ void FmodController::Volume(float volume_)
 	}
 }
 
-float FmodController::getTimeOfSong(int index_)
+SongTime FmodController::getTimeOfSong(int index_)
 {
-	return 0.0f;
+	unsigned int length;
+
+	sounds[index_]->getLength(&length, FMOD_TIMEUNIT_MS);
+
+	SongTime total;
+
+	total.min = length / 60000;
+	total.sec = (length % 60000) / 1000;
+
+	return total;
 }
 
-float FmodController::getCurrentTime()
+SongTime FmodController::getCurrentTime()
 {
-	return 0.0f;
+	unsigned int positionInSong;
+
+	channel->getPosition(&positionInSong, FMOD_TIMEUNIT_MS);
+	
+	SongTime currentPos;
+
+	currentPos.min = positionInSong / 60000;
+	currentPos.sec = (positionInSong % 60000) / 1000;
+
+	return currentPos;
 }
 
 

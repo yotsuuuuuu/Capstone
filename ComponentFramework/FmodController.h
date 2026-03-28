@@ -30,8 +30,8 @@ public:
 	void playsong(AudioState state_);
 	bool createSystem();
 	void Volume(float volume_);
-	float getTimeOfSong(int index_);
-	float getCurrentTime();
+	SongTime getTimeOfSong(int index_);
+	SongTime getCurrentTime();
 
 	std::vector<AudioBands> AnalyzeAudioOffline(int songunum_);
 	void AnalyzeAudioOnline();
