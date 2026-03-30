@@ -135,17 +135,24 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		std::cout << "json does not contain shader" << "\n";
 		return false;
 	}
-    //note still only does one descriptor
+    //note still only does one binding
     for (auto& [shaderId, shaderData] : jsonLoader["Shaders"].items())
     {
         std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
         std::pair<std::string, std::string> shaderPaths;
         shaderPaths.first = shaderData["frag"].get<std::string>();
         shaderPaths.second = shaderData["vert"].get<std::string>();
+        //std::nullopt; 
         int shaderBinding = shaderData["binding"].get<int>();
-        int shaderType = shaderData["type"].get<int>();
-        int shaderStage = shaderData["stage"].get<int>();
+        //lop from here change stuff to vector
+        for (int i = 0; i <= shaderBinding; i++)
+        {
+        
+        int shaderType = shaderData["type"][i].get<int>();
+        int shaderStage = shaderData["stage"][i].get<int>();
+        //loop for binding point
         renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
+        }
         /*	Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first,config);*/
 
         PipeLineConfig config = dynamic_cast<VulkanRenderer*>(engineContext.renderer)->GetMainPassPipeLineConfig();
@@ -312,12 +319,16 @@ std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, i
         {
            
 		   colour = Vec3(actorData["color"][0].get<float>(), actorData["color"][1].get<float>(), actorData["color"][2].get<float>());
-           Ref<CLight>light = std::make_shared<CLight>(act,engineContext.lightSys,radius,intensity,colour);
+           Ref<CLight>light;
            if (actorData.contains("audioId"))
            {
                int audioId = -1;
                actorData.at("audioId").get_to(audioId);
-               light->UpdateAudioId(audioId);
+               light = std::make_shared<CLight>(act, engineContext.lightSys, radius, intensity, colour,audioId);
+           }
+           else
+           {
+               light = std::make_shared<CLight>(act, engineContext.lightSys, radius, intensity, colour);
            }
 		   act->AddComponent<CLight>(light);
         }
