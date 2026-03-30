@@ -4,7 +4,7 @@
 #include "CoreStructs.h"
 #include "Debug.h"
 #include "EngineContext.h"
-
+#include "CustomSDLEvents.h"
 class VkImGUISystem
 {
 	//Copying and moving disabled
@@ -32,13 +32,13 @@ public:
 	void ShutDonw();
 
 	void RecordCMDBuffer(const VkCommandBuffer& cmd);
-	void ImGUIHandelEvents(const SDL_Event& event);
+	void ImGUIHandelEvents(const SDL_Event& event,const EngineContext& cntx);
 	void BeginFrame();
 	void EndFrame();
 	
-	void GatherSystemData(EngineContext& cntx);
+	void GatherSystemData(const EngineContext& cntx);
 
-	void SystemUI(EngineContext& cntx);
+	void SystemUI(const EngineContext& cntx);
 
 	void TestUI();
 

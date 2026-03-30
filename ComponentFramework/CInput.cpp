@@ -2,6 +2,7 @@
 #include "CPhysics.h"
 #include "CActor.h"
 #include "CCamera.h"
+#include "CustomSDLEvents.h"
 
 bool CInput::OnCreate()
 {
@@ -44,12 +45,17 @@ void CInput::OnDestroy()
 void CInput::HandleKeyboardInput(const SDL_Event& event)
 {
 	//std::cout << event.key.key << std::endl;
-
+	if (event.type == CustomEvent::AUDIO_MENU_EVENT) {
+		if (event.user.code == 1)       // menu opened
+			mouseLookActive = false;
+		else                            // menu closed
+			mouseLookActive = true;
+	}
 	bool pressed = event.type == SDL_EVENT_KEY_DOWN; // true if key is pressed, false if released
 	switch (event.key.key) {
 	case SDLK_ESCAPE: // dont think this does anything yet
 		if (pressed) { // only happens when its pressed, nothing when released
-			mouseLookActive = !mouseLookActive;
+			//mouseLookActive = !mouseLookActive;
 		}
 		break;
 	case SDLK_W:
@@ -78,6 +84,7 @@ void CInput::HandleKeyboardInput(const SDL_Event& event)
 
 void CInput::HandleMouseMotion(const SDL_Event& motion)
 {
+	if (motion.type != SDL_EVENT_MOUSE_MOTION) return;
 	if (!mouseLookActive) return; // do nothing when mouse look is not active
 
 	float xOffset = static_cast<float>(-motion.motion.xrel); // negate x to invert mouse look (so moving mouse right looks right)

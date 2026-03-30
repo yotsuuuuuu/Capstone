@@ -5,10 +5,13 @@
 #include "imgui_internal.h"
 #include "SYS_Light.h"
 #include "FmodController.h"
+#include "VulkanRenderer.h"
+
 
 
 VkImGUISystem::VkImGUISystem():imguiDescriptorPool(VK_NULL_HANDLE)
 {
+    CustomEvent::Initilize();
 }
 
 VkImGUISystem::~VkImGUISystem()
@@ -19,6 +22,7 @@ VkImGUISystem::~VkImGUISystem()
 
 bool VkImGUISystem::Initialize(const ImGuiContex& cntx)
 {
+   
     context = cntx;
     if (imguiDescriptorPool == VK_NULL_HANDLE) {
         CreateDescriptorPool();
@@ -68,13 +72,19 @@ void VkImGUISystem::RecordCMDBuffer(const VkCommandBuffer& cmd)
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 }
 
-void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event)
+void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContext& cntx)
 {
     switch (event.type) {
         case SDL_EVENT_KEY_UP:
             switch (event.key.scancode) {
-            case SDL_SCANCODE_P:
+            case SDL_SCANCODE_P: {
                 ShowSongMenu = !ShowSongMenu;
+                SDL_Event customEvent;
+                SDL_zero(customEvent);
+                customEvent.type = CustomEvent::AUDIO_MENU_EVENT;
+                customEvent.user.code = ShowSongMenu ? 1 : 0; // 1 = menu open, 0 = menu closed
+                SDL_PushEvent(&customEvent);
+            }
                 break;
             }
 
@@ -95,7 +105,7 @@ void VkImGUISystem::EndFrame()
     ImGui::Render();
 }
 
-void VkImGUISystem::GatherSystemData(EngineContext& cntx)
+void VkImGUISystem::GatherSystemData(const EngineContext& cntx)
 {
     int numberOfSongs = 0;
     while (true) {
@@ -108,7 +118,7 @@ void VkImGUISystem::GatherSystemData(EngineContext& cntx)
     }
 }
 
-void VkImGUISystem::SystemUI(EngineContext& cntx)
+void VkImGUISystem::SystemUI(const EngineContext& cntx)
 {
     // Display Audio Visualler/ Current Name Of the Song // Current time // Controllo audio // Stop and Start
 
@@ -155,27 +165,29 @@ void VkImGUISystem::SystemUI(EngineContext& cntx)
         ImGui::Text("Press P for Pause Menu");
         ImGui::End();
     }
-
+    SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(cntx.renderer)->getWindow(), !ShowSongMenu);
     if (ShowSongMenu) {
+        ImVec2 window_size = ImVec2(400, 250);
+        ImVec2 display_size = ImGui::GetIO().DisplaySize;
+        ImGui::SetNextWindowSize(window_size);
+        ImGui::SetNextWindowPos(ImVec2((display_size.x - window_size.x) * 0.45f,
+            (display_size.y - window_size.y) * 0.45f));
         ImGui::Begin("Pause Menu", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize );
-        
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
         ImGuiStyle& style = ImGui::GetStyle();
-        float child_w = (ImGui::GetContentRegionAvail().x - 1 * style.ItemSpacing.x) / 2;        
-
+        float child_w = (ImGui::GetContentRegionAvail().x - 1 * style.ItemSpacing.x) / 1.75f;        
         ImGui::BeginChild("##SonglistNames", ImVec2(child_w, 200.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_MenuBar);
         ImGui::BeginMenuBar();
         ImGui::TextUnformatted("SongList");
         ImGui::EndMenuBar();
-
+       
         for (auto it = SongNameList.begin(); it != SongNameList.end(); ++it) {
             ImGui::PushID(it->first);
             if (ImGui::Selectable("##selecteable")) {
-                printf("CLicked number %d", it->first);
                 currentSongIndex = it->first;                
                 cntx.fmodController->playsong(currentSongIndex);
                 SongLenght = cntx.fmodController->getTimeOfSong(currentSongIndex);
-                // need to change the world here 
-                ShowSongMenu = false;
+                // need to change the world here                               
             }
             ImGui::SameLine();
             ImGui::AlignTextToFramePadding();
@@ -187,17 +199,27 @@ void VkImGUISystem::SystemUI(EngineContext& cntx)
         ImGui::SameLine();
         ImGui::SetNextItemWidth(child_w);
         static float volume = 25.0f; // 0 - 100
+        ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 12.0f);
         if (ImGui::VSliderFloat("##Volume",ImVec2(20,200), &volume, 0.0f, 100.0f, "")) {
             cntx.fmodController->Volume(volume);
         }
+        ImGui::PopStyleVar();
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Volume: %.0f", volume);
         }
-        ImVec2 window_size = ImVec2(300, 230);
-        ImVec2 display_size = ImGui::GetIO().DisplaySize;
-        ImGui::SetNextWindowSize(window_size);
-        ImGui::SetWindowPos(ImVec2((display_size.x - window_size.x) * 0.45f,
-            (display_size.y - window_size.y) * 0.45f));
+
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        if (ImGui::Button("Play", ImVec2(child_w * 0.5f, 0))) {             
+            cntx.fmodController->playsong(AudioState::PLAY);
+        }
+        if (ImGui::Button("Pause", ImVec2(child_w * 0.5f, 0))) {
+            
+            cntx.fmodController->playsong(AudioState::PAUSE);
+        }
+        ImGui::EndGroup();
+        ImGui::PopStyleVar();
+       
         ImGui::End();
     }
   

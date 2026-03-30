@@ -242,56 +242,46 @@ bool Scene3::OnCreate() {
 
 void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 	
-		switch (sdlEvent.type) {
-		case SDL_EVENT_KEY_DOWN:
-		case SDL_EVENT_KEY_UP:
-		{
-			if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-				// escape stuff
-				if (sdlEvent.key.key == SDLK_ESCAPE) {
-					mouseLocked = !mouseLocked;
-					SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
-				}
-				else if (sdlEvent.key.key == SDLK_1) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(0);
-				}
-				else if (sdlEvent.key.key == SDLK_2) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(1);
-
-				}
-				else if (sdlEvent.key.key == SDLK_3) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(2);
-				}
+	auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+	auto playerController = p1->GetComponent<CInput>();
+	if (playerController) {
+		playerController->HandleKeyboardInput(sdlEvent);
+		playerController->HandleMouseMotion(sdlEvent);
+	}
+	switch (sdlEvent.type) {
+	case SDL_EVENT_KEY_UP:
+	{
+		if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
+			// escape stuff
+			if (sdlEvent.key.key == SDLK_ESCAPE) {
+				
+			}
+			else if (sdlEvent.key.key == SDLK_1) {
+				auto wA = std::dynamic_pointer_cast<CActor>(world);
+				auto w = wA->GetComponent<CWorld>();
+				w->OnDestroy();
+				w->InitializeWorld(0);
+			}
+			else if (sdlEvent.key.key == SDLK_2) {
+				auto wA = std::dynamic_pointer_cast<CActor>(world);
+				auto w = wA->GetComponent<CWorld>();
+				w->OnDestroy();
+				w->InitializeWorld(1);
 
 			}
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
-			auto playerController = p1->GetComponent<CInput>();
-			if (playerController) {
-				playerController->HandleKeyboardInput(sdlEvent);
+			else if (sdlEvent.key.key == SDLK_3) {
+				auto wA = std::dynamic_pointer_cast<CActor>(world);
+				auto w = wA->GetComponent<CWorld>();
+				w->OnDestroy();
+				w->InitializeWorld(2);
 			}
-			break;
-		}
-
-		case SDL_EVENT_MOUSE_MOTION:
-		{
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
-			auto playerController = p1->GetComponent<CInput>();
-			if (playerController) {
-				playerController->HandleMouseMotion(sdlEvent);
-			}
-			break;
-		}
 
 		}
+		
+		break;
+	}
+
+	}
 	
 }
 

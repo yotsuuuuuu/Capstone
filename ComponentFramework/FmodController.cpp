@@ -20,7 +20,7 @@ std::string FmodController::getSongName(int songnum_)
 	{
 		char name[256];
 		sounds[songnum_]->getName(name ,256);
-		std::cout << name << std::endl;
+		//std::cout << name << std::endl;
 		return std::string(name);
 	}
 	else
