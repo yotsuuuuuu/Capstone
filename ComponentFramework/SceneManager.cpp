@@ -156,8 +156,7 @@ void SceneManager::Run() {
 
 void SceneManager::GetEvents() {
 	SDL_Event sdlEvent;
-	while (SDL_PollEvent(&sdlEvent)) {
-		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent, engineContext);
+	while (SDL_PollEvent(&sdlEvent)) {		
 		switch (sdlEvent.type) {
 		case SDL_EVENT_QUIT:
 			isRunning = false;
@@ -217,6 +216,7 @@ void SceneManager::GetEvents() {
 		
 		
 		if (currentScene) currentScene->HandleEvents(sdlEvent);
+		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent, engineContext);
 	}
 	if (needSwapChainRecreation) {
 

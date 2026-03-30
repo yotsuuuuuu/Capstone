@@ -17,6 +17,7 @@
 #include "CPhysics.h"
 #include "CGlobalLight.h"
 #include "VulkanRenderer.h"
+#include "CustomSDLEvents.h"
 #include "SYS_Light.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
@@ -248,38 +249,18 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		playerController->HandleKeyboardInput(sdlEvent);
 		playerController->HandleMouseMotion(sdlEvent);
 	}
+	if (sdlEvent.type == CustomEvent::SONG_SELECTED_EVENT) {
+		int sondId = (int)sdlEvent.user.code;
+		auto wA = std::dynamic_pointer_cast<CActor>(world);
+		auto w = wA->GetComponent<CWorld>();
+		w->OnDestroy();
+		w->InitializeWorld(sondId);
+	}
 	switch (sdlEvent.type) {
-	case SDL_EVENT_KEY_UP:
-	{
-		if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-			// escape stuff
-			if (sdlEvent.key.key == SDLK_ESCAPE) {
-				
-			}
-			else if (sdlEvent.key.key == SDLK_1) {
-				auto wA = std::dynamic_pointer_cast<CActor>(world);
-				auto w = wA->GetComponent<CWorld>();
-				w->OnDestroy();
-				w->InitializeWorld(0);
-			}
-			else if (sdlEvent.key.key == SDLK_2) {
-				auto wA = std::dynamic_pointer_cast<CActor>(world);
-				auto w = wA->GetComponent<CWorld>();
-				w->OnDestroy();
-				w->InitializeWorld(1);
-
-			}
-			else if (sdlEvent.key.key == SDLK_3) {
-				auto wA = std::dynamic_pointer_cast<CActor>(world);
-				auto w = wA->GetComponent<CWorld>();
-				w->OnDestroy();
-				w->InitializeWorld(2);
-			}
-
-		}
+	case SDL_EVENT_KEY_UP:{
 		
 		break;
-	}
+	}	
 
 	}
 	

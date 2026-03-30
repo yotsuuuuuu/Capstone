@@ -74,6 +74,10 @@ void VkImGUISystem::RecordCMDBuffer(const VkCommandBuffer& cmd)
 
 void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContext& cntx)
 {
+    if (event.type == CustomEvent::SONG_SELECTED_EVENT) {
+        cntx.fmodController->playsong(currentSongIndex);
+        SongLenght = cntx.fmodController->getTimeOfSong(currentSongIndex);
+    }
     switch (event.type) {
         case SDL_EVENT_KEY_UP:
             switch (event.key.scancode) {
@@ -186,9 +190,13 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             ImGui::PushID(it->first);
             if (ImGui::Selectable("##selecteable")) {
                 currentSongIndex = it->first;                
-                cntx.fmodController->playsong(currentSongIndex);
-                SongLenght = cntx.fmodController->getTimeOfSong(currentSongIndex);
-                // need to change the world here                               
+             
+                // need to change the world here      
+                SDL_Event customEvent;
+                SDL_zero(customEvent);
+                customEvent.type = CustomEvent::SONG_SELECTED_EVENT;
+                customEvent.user.code = (Sint32)currentSongIndex; 
+                SDL_PushEvent(&customEvent);
             }
             ImGui::SameLine();
             ImGui::AlignTextToFramePadding();
@@ -222,6 +230,9 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             
             cntx.fmodController->playsong(AudioState::PAUSE);
         }
+
+
+
         if (ImGui::Button("Close Menu", ImVec2(child_w * 0.5f, 0))) {
             ShowSongMenu = false;
             SDL_Event customEvent;
