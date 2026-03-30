@@ -18,6 +18,8 @@ private:
 	float volume = 25.0f;
 
 	AudioBands PerframeAudioBand;
+
+
 	
 public:
 	FmodController(){};

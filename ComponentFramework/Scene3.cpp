@@ -272,14 +272,6 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 					w->InitializeWorld(2);
 				}
 
-				else if (sdlEvent.key.key == SDLK_B)
-				{
-					engineContext.fmodController->playsong(AudioState::PAUSE);
-				}
-				else if (sdlEvent.key.key == SDLK_N)
-				{
-					engineContext.fmodController->playsong(AudioState::PLAY);
-				}
 			}
 			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
 			auto playerController = p1->GetComponent<CInput>();
@@ -402,7 +394,10 @@ void Scene3::FrustumCheck()
 void Scene3::Update(const float deltaTime) {
 
 	engineContext.physicsManager->Update(deltaTime);
-	
+	auto Skybox = std::dynamic_pointer_cast<CActor>(camera)->GetComponent<CSkyBox>();
+	if (Skybox) {
+		Skybox->AudioReact(engineContext);
+	}
 	// TODO: move to camera
 	FrustumCheck();
 	
@@ -433,14 +428,8 @@ void Scene3::Render() const {
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 		
-		{
-		/*	std::vector<Ref<Component>> drawlist;
-			actorsInScene.push_back(plane);*/
-			/*drawlist.push_back(actor);
-			drawlist.push_back(actor1);
-			drawlist.push_back(plane);
-			drawlist.push_back(World);*/
-			vRenderer->RenderECS(engineContext,actorsInScene);// Context obejct
+		{		
+			vRenderer->RenderECS(engineContext,actorsInScene);
 		}
 		break;
 

@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 #include "CoreStructs.h"
 #include "Debug.h"
-
+#include "EngineContext.h"
 
 class VkImGUISystem
 {
@@ -15,7 +15,13 @@ class VkImGUISystem
 
 	ImGuiContex context;
 	VkDescriptorPool imguiDescriptorPool;
+
+
+	int currentSongIndex = -1;
+	std::unordered_map<int,std::string> SongNameList;
+	SongTime SongLenght;
 	
+	bool ShowSongMenu = true;
 	
 public:
 
@@ -30,6 +36,10 @@ public:
 	void BeginFrame();
 	void EndFrame();
 	
+	void GatherSystemData(EngineContext& cntx);
+
+	void SystemUI(EngineContext& cntx);
+
 	void TestUI();
 
 	static void CheckVkResult(VkResult err) {

@@ -464,6 +464,6 @@ struct SystemsUBOs {
 
 struct SongTime
 {
-    unsigned int min;
-    unsigned int sec;
+    unsigned int min = 0;
+    unsigned int sec = 0;
 };
