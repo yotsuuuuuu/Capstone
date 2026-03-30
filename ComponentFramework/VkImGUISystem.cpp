@@ -124,6 +124,8 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
 
     const AudioBands& bands = cntx.fmodController->GetFrameAudioBand();
     SongTime time = cntx.fmodController->getCurrentTime();
+    ImColor BottomColor = IM_COL32(23, 134, 134, 255);
+    ImColor TopColor = IM_COL32(255, 0, 0, 255);
     std::string currentname;
     if (currentSongIndex != -1) {  
         currentname = SongNameList[currentSongIndex];
@@ -141,8 +143,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         ImVec2 canvasPos = ImGui::GetCursorScreenPos();
         float width = 200, height = 80.0f;
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImColor BottomColor = IM_COL32(23, 134, 134, 255);
-        ImColor TopColor = IM_COL32(255, 0, 0, 255);
+        
         float* bandsData = (float*)&bands;
         int numberofBands = 9;
         for (int i = 0; i < numberofBands - 1 ; i++) {
@@ -200,9 +201,13 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         ImGui::SetNextItemWidth(child_w);
         static float volume = 25.0f; // 0 - 100
         ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 12.0f);
+        ImVec4 color =  ImLerp((ImVec4)BottomColor, (ImVec4)TopColor, volume / 100.0f);
+        ImGui::PushStyleColor(ImGuiCol_SliderGrab, color);
+        ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, color);
         if (ImGui::VSliderFloat("##Volume",ImVec2(20,200), &volume, 0.0f, 100.0f, "")) {
             cntx.fmodController->Volume(volume);
         }
+        ImGui::PopStyleColor(2);
         ImGui::PopStyleVar();
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Volume: %.0f", volume);
@@ -216,6 +221,14 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         if (ImGui::Button("Pause", ImVec2(child_w * 0.5f, 0))) {
             
             cntx.fmodController->playsong(AudioState::PAUSE);
+        }
+        if (ImGui::Button("Close Menu", ImVec2(child_w * 0.5f, 0))) {
+            ShowSongMenu = false;
+            SDL_Event customEvent;
+            SDL_zero(customEvent);
+            customEvent.type = CustomEvent::AUDIO_MENU_EVENT;
+            customEvent.user.code = ShowSongMenu ? 1 : 0; 
+            SDL_PushEvent(&customEvent);
         }
         ImGui::EndGroup();
         ImGui::PopStyleVar();
