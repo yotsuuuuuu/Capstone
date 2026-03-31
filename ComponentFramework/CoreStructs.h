@@ -467,3 +467,10 @@ struct SongTime
     unsigned int min = 0;
     unsigned int sec = 0;
 };
+
+struct TerraindataUBO {
+    Vec4 max_min_lineWidth_pad;
+    Vec4 fadeStart_fadeEnd_gridScaleX_gridScaleY;
+    Vec4 maxColor;
+	Vec4 minColor;
+};
