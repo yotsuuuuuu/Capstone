@@ -7,7 +7,6 @@
 #include "CCamera.h"
 #include "CPhysics.h"
 #include "CCapsuleCollider.h"
-
 #include "CInput.h"
 #include "CSkyBox.h"
 #include "CGlobalLight.h"
@@ -136,24 +135,94 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
 		std::cout << "json does not contain shader" << "\n";
 		return false;
 	}
-    //note still only does one descriptor
-	for(auto & [shaderId, shaderData] : jsonLoader["Shaders"].items())
-	{
-		std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
-		std::pair<std::string, std::string> shaderPaths;
-		shaderPaths.first = shaderData["frag"].get<std::string>();
-		shaderPaths.second = shaderData["vert"].get<std::string>();
-		int shaderBinding = shaderData["binding"].get<int>();
-		int shaderType = shaderData["type"].get<int>();
-		int shaderStage = shaderData["stage"].get<int>();
-		renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
-		Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
-        if (!cshade->OnCreate()) 
+    //note still only does one binding
+    for (auto& [shaderId, shaderData] : jsonLoader["Shaders"].items())
+    {
+        std::vector<SingleDescriptorSetLayoutInfo> layoutInfo;
+        std::pair<std::string, std::string> shaderPaths;
+        shaderPaths.first = shaderData["frag"].get<std::string>();
+        shaderPaths.second = shaderData["vert"].get<std::string>();
+        //std::nullopt; 
+        std::vector<int> shaderBinding = shaderData["binding"].get<std::vector<int>>();
+        //lop from here change stuff to vector
+        
+        if (shaderBinding.size() != shaderData["type"].size())
+            std::cout << "not enough types for amount of bindings";
+        if(shaderBinding.size() != shaderData["stage"].size())
+			std::cout << "not enough stages for amount of bindings";
+
+        for (int i = 0; i < shaderBinding.size(); i++)
         {
-			std::cout << "Failed to create shader :" << shaderId << "\n";
+        
+        int shaderType = shaderData["type"][i].get<int>();
+        int shaderStage = shaderData["stage"][i].get<int>();
+        //loop for binding point
+        renderer->AddToDescriptorLayoutCollection(layoutInfo, i, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
         }
-		assetMap[shaderId] = cshade;
-	}
+        /*	Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first,config);*/
+
+        PipeLineConfig config = dynamic_cast<VulkanRenderer*>(engineContext.renderer)->GetMainPassPipeLineConfig();
+   
+        if (shaderData.contains("config"))
+        {
+            auto& configPath = shaderData["config"];
+            //working on translator so its not just a bunch of enums
+            if(configPath.contains("topology"))
+			configPath.at("topology").get_to(config.topology);
+            if(configPath.contains("polygonMode"))
+			configPath.at("polygonMode").get_to(config.polygonMode);
+            if(configPath.contains("cullMode"))
+			configPath.at("cullMode").get_to(config.cullMode);
+            if(configPath.contains("blendMode"))
+            configPath.at("blendMode").get_to(config.blendMode);
+            if(configPath.contains("depthCompareOp"))
+            configPath.at("depthCompareOp").get_to(config.depthCompareOp);
+            
+            //vk_true false 
+            if (configPath.contains("depthBias"))
+            configPath.at("depthBias").get_to(config.depthBias);
+            if (configPath.contains("depthTestEnable"))
+            configPath.at("depthTestEnable").get_to(config.depthTestEnable);
+            if (configPath.contains("depthWriteEnable"))
+            configPath.at("depthWriteEnable").get_to(config.depthWriteEnable);
+
+            //floats
+            if (configPath.contains("depthBiasClamp"))
+            configPath.at("depthBiasClamp").get_to(config.depthBiasClamp);
+            if (configPath.contains("depthBiasSlopeFactor"))
+            configPath.at("depthBiasSlopeFactor").get_to(config.depthBiasSlopeFactor);
+            if (configPath.contains("depthBiasConstantFactor"))
+            configPath.at("depthBiasConstantFactor").get_to(config.depthBiasConstantFactor);
+
+            //normal bool
+            if (configPath.contains("dynamicViewport"))
+            configPath.at("dynamicViewport").get_to(config.dynamicViewport);
+
+
+            Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first, config);
+            if (!cshade->OnCreate())
+            {
+                std::cout << "Failed to create shader :" << shaderId << "\n";
+            }
+            assetMap[shaderId] = cshade;
+        }
+        else
+        {
+            Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first);
+            if (!cshade->OnCreate())
+            {
+                std::cout << "Failed to create shader :" << shaderId << "\n";
+            }
+            assetMap[shaderId] = cshade;
+        }
+        /*  if (!cshade->OnCreate())
+          {
+              std::cout << "Failed to create shader :" << shaderId << "\n";
+          }
+          assetMap[shaderId] = cshade;
+      }*/
+
+    }
 
     if (!jsonLoader.contains("Material")) 
     {
@@ -242,7 +311,6 @@ std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, i
         float radius = 0.0f;
 		float intensity = 0.0f; 
 		Vec3 colour = Vec3(0.0,0.0,0.0);
-
 		if (actorData.contains("radius"))
 		{
 			radius = actorData["radius"].get<float>();
@@ -253,12 +321,24 @@ std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, i
 			intensity = actorData["intensity"].get<float>();
         }
 
-        if (jsonLoader["Actor"][actorId].contains("intensity"))
+        if (actorData.contains("intensity"))
         {
+           
 		   colour = Vec3(actorData["color"][0].get<float>(), actorData["color"][1].get<float>(), actorData["color"][2].get<float>());
-           Ref<CLight>light = std::make_shared<CLight>(act,engineContext.lightSys,radius,intensity,colour);
+           Ref<CLight>light;
+           if (actorData.contains("audioId"))
+           {
+               int audioId = -1;
+               actorData.at("audioId").get_to(audioId);
+               light = std::make_shared<CLight>(act, engineContext.lightSys, radius, intensity, colour,audioId);
+           }
+           else
+           {
+               light = std::make_shared<CLight>(act, engineContext.lightSys, radius, intensity, colour);
+           }
 		   act->AddComponent<CLight>(light);
         }
+        
             
         if (!act->OnCreate())
         {

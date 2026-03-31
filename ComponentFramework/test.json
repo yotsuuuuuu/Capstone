@@ -6,35 +6,31 @@
   },
   "Shaders": {
     "main": {
-      "config":  true,
+      "config": {
+        "topology": 3
+      },
       "frag": "shaders/MassPass_2.frag.spv",
       "vert": "shaders/MassPass_2.vert.spv",
-      "binding": 0,
-      "type": 1,
-      "stage": 16,
-      "pass": 1,
-      "opaque": 0
-
+        "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16 ],
+      "pass":  1 
     },
     "Terrain": {
       "frag": "shaders/terrain.frag.spv",
       "vert": "shaders/terrain.vert.spv",
-      "binding": 0,
-      "type": 1,
-      "stage": 16,
-      "pass": 1,
-      "opaque": 0
-
+        "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16],
+      "pass": 1 
     },
     "SimpleLightShader": {
       "frag": "shaders/SimpleLight.frag.spv",
       "vert": "shaders/SimpleLight.vert.spv",
-      "binding": 0,
-      "type": 1,
-      "stage": 16,
-      "pass": 1,
-      "opaque": 0
-
+       "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16 ],
+      "pass": 1
     }
   },
   "Textures": {
@@ -83,7 +79,8 @@
     "lightBlue": {
       "radius": 1.0,
       "intensity": 1.0,
-      "color": [ 0.0, 0.0, 1.0 ]
+      "color": [ 0.0, 0.0, 1.0 ],
+      "audioId": 0
     },
     "lightYellow": {
       "radius": 1.0,
