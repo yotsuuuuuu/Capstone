@@ -28,6 +28,8 @@ private:
 	std::vector<TerrainChunkData> chunkRenderData;
 	IndexedVertexBuffer chunkIndexBuffer;
 
+	std::unordered_map<int, std::vector<Vec3>> actorChunkLocations;
+
 	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
