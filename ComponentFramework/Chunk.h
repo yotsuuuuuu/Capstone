@@ -38,6 +38,8 @@ public:
 	float getMinY() const { return minY; }
 	float getMaxY() const { return maxY; }
 
+	const float GetHeightAtPosition(int x, int z, int chunkSize) const { return heightmap[z * chunkSize + x]; }
+	//const Vec3 GetWorldPositionAtVertex(int x, int z, int chunkWorldSize) const {return}
 	std::vector<Vertex>& GetVertices() { return vertices; }
 
 	//void SetCulled(bool culled_) { culled = culled_; }

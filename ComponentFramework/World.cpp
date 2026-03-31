@@ -54,8 +54,9 @@ void World::GenerateAllChunks()
 	// create grid of chunks
 	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
-		for (int y = 0; y < WORLD_SIZE; y++) {
+		for (int y = 0; y < WORLD_SIZE; y++) { // create each chunk
 
+			if (i == WORLD_SIZE/2) { }
 			// it might be better to keep internal pos and world position as separate var.
 			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
@@ -113,7 +114,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 		Vertex vertex;
 		Vec3 basePos = baseChunkMesh->basePositions[i]; // original position of the OG mesh
 
-		vertex.pos = Vec3( // local space position of vertex in world space, y will be adjusted by heightmap
+		vertex.pos = Vec3( // local space position of vertex , y will be adjusted by heightmap
 			basePos.x,
 			heightmap[i],
 			basePos.z); 
@@ -125,12 +126,6 @@ void World::BuildChunkMeshData(Chunk* chunk)
 		//vertex.normal.print("vertext Normal");
 		vertices.push_back(vertex);
 
-		//Vertex collisionVertex;
-		//collisionVertex.pos = Vec3( // WORLD space position of vertex, used for collision checking
-		//	chunkPos.x + basePos.x,
-		//	heightmap[i],
-		//	chunkPos.y + basePos.z);
-		//collisionVertices.push_back(collisionVertex);
 
 	}
 

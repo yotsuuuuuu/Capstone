@@ -28,11 +28,6 @@ private:
 	std::vector<TerrainChunkData> chunkRenderData;
 	IndexedVertexBuffer chunkIndexBuffer;
 
-
-	// vulkan
-	PipelineInfo worldPipeline;
-	DescriptorSetInfo worldDescriptorSet;
-
 	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
@@ -46,7 +41,6 @@ private:
 	//texture
 	Sampler2D terrainTexture;
 
-	// TODO: (andres) collision meshes
 	// TODO: (andres) LOD/ render distance
 	
 public:
@@ -64,11 +58,10 @@ public:
 
 	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
 
-	PipelineInfo const GetPipeline() { return worldPipeline; }
-	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
 	std::unordered_map<Vec2, std::unique_ptr<Chunk> >* GetChunkMap() { return &chunkMap; }
 	std::vector<TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
-	// get culled chunk data
+	
+	void CreateActorSpawns();
 
 
 private:
