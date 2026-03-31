@@ -130,7 +130,7 @@ void CCollider::ApplyCollisionResponse(const MeshCollisionInfo& info)
     if (auto phys = physics.lock()) {
 
         phys->SetPosition(phys->GetPosition() + info.normal * info.penetrationDepth);
-        std::cout << info.penetrationDepth << std::endl;
+        //std::cout << info.penetrationDepth << std::endl;
         bool isGround = VMath::dot(info.normal, Vec3(0, 1, 0)) > 0.3f;
 
         if (isGround) 
@@ -139,6 +139,7 @@ void CCollider::ApplyCollisionResponse(const MeshCollisionInfo& info)
             Vec3 vel = phys->GetVelocity();
             vel.y = 0.0f;
             phys->SetVelocity(vel);
+            std::cout << "vel resest" << std::endl;
         }
         else {
             phys->SetIsGrounded(false);

@@ -6,7 +6,7 @@ void CPhysics::ApplyForce(MATH::Vec3 force)
 	// a = F / m
 	acceleration += force / mass;
 	//acceleration += acceleration;
-	velocity += acceleration;
+	//velocity += acceleration;
 }
 
 void CPhysics::ApplyImpulse(MATH::Vec3 impulse)
@@ -27,19 +27,20 @@ void CPhysics::Update(const float deltaTime)
 {
 	//std::cout << "VELOCITY: " << velocity.x << ", " << velocity.y << ", " << velocity.z << std::endl;
 
-	if (velocity.y <= VERY_SMALL) { velocity.y = 0.0f; }
+	//if (velocity.y <= VERY_SMALL) { velocity.y = 0.0f; }
+	acceleration = MATH::Vec3(0.0f, 0.0f, 0.0f); // Reset acceleration after each update
 
 	if (hasGravity && !isGrounded){ // only apply gravity when not on the ground
-		const MATH::Vec3 gravity(0.0f, -9.81f, 0.0f);
-		acceleration += gravity;
+		ApplyForce(gravity*mass);
 	}
-
 	ApplyDragForce();
-	velocity += acceleration * deltaTime;
 
-	if (MATH::VMath::mag(velocity) >= VERY_SMALL) { needsUBOupdate = true; } // if moving then update UBO
+	velocity += acceleration * deltaTime;
 	position += velocity * deltaTime;
 
-	acceleration = MATH::Vec3(0.0f, 0.0f, 0.0f); // Reset acceleration after each update
+	if (MATH::VMath::mag(velocity) >= VERY_SMALL) { needsUBOupdate = true; } // if moving then update UBO
+
+	std::cout << "VEL: " << velocity.x << " " << velocity.y << " " << velocity.z << std::endl;
+	std::cout << "ACC: " << acceleration.x << " " << acceleration.y << " " << acceleration.z << std::endl;
 
 }

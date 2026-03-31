@@ -26,6 +26,7 @@ private:
 	bool moveRightPressed = false;
 	bool sprintPressed = false;
 	bool jumpPressed = false;
+	bool noclip = false;
 
 	// mouse
 	float yaw = -90.0f;
@@ -34,9 +35,9 @@ private:
 	bool mouseLookActive = false;
 
 	// parameters
-	float moveSpeed = 20.0f; // units per second
+	float moveSpeed = 10.0f; // units per second
 	float sprintMultiplier = 2.0f;
-	float jumpStrength = 50.0f; // units per second
+	float jumpStrength = 20.0f; // units per second
 	float airControl = 0.03f;
 
 	//// ground

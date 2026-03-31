@@ -74,6 +74,7 @@ void PhysicsManager::TerrainCollision()
 			// collision response
 			playerCollider->ApplyCollisionResponse(mInfo);
 			//return;
+			//std::cout << "COLLIDING" << std::endl;
 					
 
 

@@ -67,6 +67,8 @@ void CInput::HandleKeyboardInput(const SDL_Event& event)
 	case SDLK_LSHIFT:
 		sprintPressed = pressed;
 		break;
+	case SDLK_V:
+		noclip = pressed;
 	case SDLK_SPACE:
 		jumpPressed = pressed;
 		break;
@@ -121,22 +123,23 @@ void CInput::Update(const float dt)
 
 	if (MATH::VMath::mag(movementDirection) > VERY_SMALL) {
 
-		currentVelocity = movementDirection * currentSpeed;
-		//currentVelocity.x = movementDirection.x * currentSpeed;
-		//currentVelocity.y = movementDirection.y * jumpStrength;
-		//currentVelocity.z = movementDirection.z * currentSpeed;
+		//currentVelocity += movementDirection * currentSpeed;
+		currentVelocity.x = movementDirection.x * currentSpeed;
+		//currentVelocity.y += movementDirection.y * jumpStrength;
+		currentVelocity.z = movementDirection.z * currentSpeed;
 		//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 	}
 	else 
 	{
-		currentVelocity = MATH::Vec3(0.0f, 0.0f, 0.0f);
+		//currentVelocity = MATH::Vec3(0.0f, 0.0f, 0.0f);
 	}
 
 	phys->SetVelocity(currentVelocity);
 
 	// apply jump AFTER movement
- 	if (jumpPressed && !phys->IsGrounded()) {
+ 	if (jumpPressed && phys->IsGrounded()) {
 		phys->ApplyImpulse(Vec3(0.0f, jumpStrength, 0.0f));
+		phys->SetIsGrounded(false);
 	} 
 }
 
@@ -171,7 +174,7 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 
 	MATH::Vec3 up = cam->GetUpVector();
 	// commented out for now since we flying
-	front.y = 0.0f; // ignore vertical component for movement (so we dont fly when looking up )
+	if (!noclip) { front.y = 0.0f; } // ignore vertical component for movement (so we dont fly when looking up )
 
 	if (MATH::VMath::mag(front) > 0.0f) {
 		front = MATH::VMath::normalize(front);
@@ -184,7 +187,7 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 
 	auto phys = physics.lock();
 
-	if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
+	//if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
 
 	// normalize if moving diagonally to prevent faster movement
 	if (MATH::VMath::mag(direction) > 0.0f) {
