@@ -143,15 +143,21 @@ bool AssetManager::LoadAsset(const std::string& filepath_)
         shaderPaths.first = shaderData["frag"].get<std::string>();
         shaderPaths.second = shaderData["vert"].get<std::string>();
         //std::nullopt; 
-        int shaderBinding = shaderData["binding"].get<int>();
+        std::vector<int> shaderBinding = shaderData["binding"].get<std::vector<int>>();
         //lop from here change stuff to vector
-        for (int i = 0; i <= shaderBinding; i++)
+        
+        if (shaderBinding.size() != shaderData["type"].size())
+            std::cout << "not enough types for amount of bindings";
+        if(shaderBinding.size() != shaderData["stage"].size())
+			std::cout << "not enough stages for amount of bindings";
+
+        for (int i = 0; i < shaderBinding.size(); i++)
         {
         
         int shaderType = shaderData["type"][i].get<int>();
         int shaderStage = shaderData["stage"][i].get<int>();
         //loop for binding point
-        renderer->AddToDescriptorLayoutCollection(layoutInfo, shaderBinding, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
+        renderer->AddToDescriptorLayoutCollection(layoutInfo, i, static_cast<VkDescriptorType>(shaderType), static_cast<VkShaderStageFlagBits>(shaderStage), 1);
         }
         /*	Ref<CShader> cshade = std::make_shared<CShader>(nullptr, renderer, layoutInfo, shaderPaths.second, shaderPaths.first,config);*/
 
