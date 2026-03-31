@@ -40,7 +40,7 @@ void CPhysics::Update(const float deltaTime)
 
 	if (MATH::VMath::mag(velocity) >= VERY_SMALL) { needsUBOupdate = true; } // if moving then update UBO
 
-	std::cout << "VEL: " << velocity.x << " " << velocity.y << " " << velocity.z << std::endl;
-	std::cout << "ACC: " << acceleration.x << " " << acceleration.y << " " << acceleration.z << std::endl;
+	//td::cout << "VEL: " << velocity.x << " " << velocity.y << " " << velocity.z << std::endl;
+	//std::cout << "ACC: " << acceleration.x << " " << acceleration.y << " " << acceleration.z << std::endl;
 
 }

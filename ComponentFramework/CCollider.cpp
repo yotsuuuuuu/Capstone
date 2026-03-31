@@ -139,7 +139,7 @@ void CCollider::ApplyCollisionResponse(const MeshCollisionInfo& info)
             Vec3 vel = phys->GetVelocity();
             vel.y = 0.0f;
             phys->SetVelocity(vel);
-            std::cout << "vel resest" << std::endl;
+           // std::cout << "vel resest" << std::endl;
         }
         else {
             phys->SetIsGrounded(false);
