@@ -41,6 +41,7 @@ private:
 
 	//player
 	//CActor* player;
+	Vec3 spawnPoint;
 
 	//texture
 	Sampler2D terrainTexture;
