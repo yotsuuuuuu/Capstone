@@ -24,7 +24,7 @@ bool CInput::OnCreate()
 	if (!phys) return false;
 
 	//phys->SetHasGravity(false); // disable gravity for player controller for NOW until COLLISIONS
-	phys->SetMass(5.0f);
+	phys->SetMass(1.0f);
 	phys->SetDragCoefficient(0.3f);
 	phys->SetVelocity(MATH::Vec3(0.0f, 0.0f, 0.0f)); // reset just in case
 
@@ -122,6 +122,9 @@ void CInput::Update(const float dt)
 	if (MATH::VMath::mag(movementDirection) > VERY_SMALL) {
 
 		currentVelocity = movementDirection * currentSpeed;
+		//currentVelocity.x = movementDirection.x * currentSpeed;
+		//currentVelocity.y = movementDirection.y * jumpStrength;
+		//currentVelocity.z = movementDirection.z * currentSpeed;
 		//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 	}
 	else 
@@ -131,6 +134,10 @@ void CInput::Update(const float dt)
 
 	phys->SetVelocity(currentVelocity);
 
+	// apply jump AFTER movement
+ 	if (jumpPressed && !phys->IsGrounded()) {
+		phys->ApplyImpulse(Vec3(0.0f, jumpStrength, 0.0f));
+	} 
 }
 
 void CInput::UpdateCameraRotation()
@@ -162,6 +169,7 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	MATH::Vec3 front = cam->GetFrontVector();
 	MATH::Vec3 right = cam->GetRightVector();
 
+	MATH::Vec3 up = cam->GetUpVector();
 	// commented out for now since we flying
 	front.y = 0.0f; // ignore vertical component for movement (so we dont fly when looking up )
 
@@ -175,9 +183,8 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	if (moveRightPressed) { direction += right; }
 
 	auto phys = physics.lock();
-	if (jumpPressed && phys && phys->IsGrounded()) { 
-		phys->ApplyImpulse(MATH::Vec3(0.0f, jumpStrength, 0.0f)); 
-	} // add vertical movement for jumping, will be handled by physics
+
+	if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
 
 	// normalize if moving diagonally to prevent faster movement
 	if (MATH::VMath::mag(direction) > 0.0f) {

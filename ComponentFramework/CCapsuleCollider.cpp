@@ -191,7 +191,7 @@ CollisionInfo CCapsuleCollider::IntersectingSphereTriangle(const Vec3& sphereCen
 	Vec3 projectedCenter = sphereCenter - distToPlane * normal;
 
 	Vec3 closestPoint = ClosestPointOnTriangle(v0, v1, v2, projectedCenter);
-
+	//std::cout << "Closest Point: " << closestPoint.x << " " << closestPoint.y << " " << closestPoint.z << std::endl;
 	Vec3 delta = sphereCenter - closestPoint;
 
 	float distance = VMath::mag(delta);

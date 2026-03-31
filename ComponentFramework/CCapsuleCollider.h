@@ -23,7 +23,7 @@ class CCapsuleCollider : public CCollider
 	//float penetrationDepth = 0.0f; // for collision response
 
 public:
-	CCapsuleCollider(Ref<Component> parent_, float radius_ = 0.5f, float height_ = 5.0f, Vec3 offset_ = Vec3()) :
+	CCapsuleCollider(Ref<Component> parent_, float radius_ = 1.5f, float height_ = 6.0f, Vec3 offset_ = Vec3()) :
 		CCollider(parent_, ColliderType::CAPSULE, offset_),
 		radius(radius_), height(height_)
 	{

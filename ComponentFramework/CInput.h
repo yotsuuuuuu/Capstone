@@ -36,7 +36,7 @@ private:
 	// parameters
 	float moveSpeed = 20.0f; // units per second
 	float sprintMultiplier = 2.0f;
-	float jumpStrength = 10.0f; // units per second
+	float jumpStrength = 50.0f; // units per second
 	float airControl = 0.03f;
 
 	//// ground

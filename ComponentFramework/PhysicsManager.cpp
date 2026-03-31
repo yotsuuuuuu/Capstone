@@ -44,8 +44,7 @@ void PhysicsManager::TerrainCollision()
 {
 	playerCollider->UpdateCapsulePoints();
 	bool collisionDetected = false;
-	//std::cout << "Player Gravity: " << playerPhysics->HasGravity() << "\n" << " IsGrounded: " << playerPhysics->IsGrounded() << std::endl;
-		
+	playerPhysics->SetIsGrounded(false);
     
 	for (auto& chunk : *chunksData) {
 
@@ -65,40 +64,22 @@ void PhysicsManager::TerrainCollision()
 			playerDirection = Vec3(0.0f, -1.0f, 0.0f); // if player is not moving, just check downwards
 		}
 
-		Vec3 playerDirNormalized = VMath::normalize(playerDirection);
-		Vec3 originalCapA = playerCollider->GetCapA();
-		Vec3 originalCapB = playerCollider->GetCapB();
-
-		Vec3 step = playerDirNormalized * 0.25f; // quarter steps
-		for (int i = 0; i < 4; i++) {
-			playerCollider->SetCapA(originalCapA + step * (i+1));
-			playerCollider->SetCapB(originalCapB + step * (i+1));
-
 			// narrow phase triangle collision
-			MeshCollisionInfo mInfo = playerCollider->IntersectingMesh(chunk.vertices, chunkIndices, chunkPos);
+		MeshCollisionInfo mInfo = playerCollider->IntersectingMesh(chunk.vertices, chunkIndices, chunkPos);
 
-			CheckGroundCollision(mInfo); // check if it's ground collision and set grounded state accordingly
-			if (mInfo.isColliding) {
-				//std::cout << "triangle collision detected: " << mInfo.triangleIndex
-				//	<< " at point: " << mInfo.point.x << ", "
-				//	<< mInfo.point.y << ", " << mInfo.point.z << std::endl;
+		if (mInfo.isColliding) {
 
 
-				// collision response
-				playerCollider->ApplyCollisionResponse(mInfo);
-				playerCollider->UpdateCapsulePoints();
-				return;
+
+			// collision response
+			playerCollider->ApplyCollisionResponse(mInfo);
+			//return;
 					
 
 
-			}
-			
 		}
+		playerCollider->UpdateCapsulePoints();
 
-		playerCollider->SetCapA(originalCapA); // reset capsule points after checking all steps
-		playerCollider->SetCapB(originalCapB);
-
-        
     }
 }
 
@@ -129,12 +110,12 @@ void PhysicsManager::CheckGroundCollision(MeshCollisionInfo mInfo)
 		Vec3 vel = playerPhysics->GetVelocity();
 		vel.y = 0.0f;
 		playerPhysics->SetVelocity(vel);
-		playerPhysics->SetHasGravity(false);
+		//playerPhysics->SetHasGravity(false);
 	}
 	else {
 		// it's a wall - handle separately
 		playerPhysics->SetIsGrounded(false);
-		playerPhysics->SetHasGravity(true);
+		//playerPhysics->SetHasGravity(true);
 	}
 }
 

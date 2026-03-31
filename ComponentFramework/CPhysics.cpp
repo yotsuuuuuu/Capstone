@@ -25,11 +25,11 @@ void CPhysics::ApplyDragForce()
 
 void CPhysics::Update(const float deltaTime)
 {
-	std::cout << "VELOCITY: " << velocity.x << ", " << velocity.y << ", " << velocity.z << std::endl;
+	//std::cout << "VELOCITY: " << velocity.x << ", " << velocity.y << ", " << velocity.z << std::endl;
 
-	if (velocity.y <= VERY_SMALL) { velocity.y = 0.0f; } // terminal velocity
+	if (velocity.y <= VERY_SMALL) { velocity.y = 0.0f; }
 
-	if (hasGravity && !isGrounded) {
+	if (hasGravity && !isGrounded){ // only apply gravity when not on the ground
 		const MATH::Vec3 gravity(0.0f, -9.81f, 0.0f);
 		acceleration += gravity;
 	}
