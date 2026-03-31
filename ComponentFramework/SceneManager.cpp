@@ -106,7 +106,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 
 	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem, *VKImGui, *physicsManager);
 	assetManager->set(engineContext);
-	engineContext.assetManager->LoadCamera("./test.json");		
+	engineContext.assetManager->LoadCamera("./assetList.json");		
 
 	auto cntx = static_cast<VulkanRenderer*>(renderer)->GetImGuiContext();
 	if (!VKImGui->Initialize(cntx)) {
@@ -124,7 +124,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	if (!static_cast<VulkanRenderer*>(renderer)->CreateGlobalRources(engineContext)) {
 		return false;
 	}
-	engineContext.assetManager->LoadAsset("./test.json");
+	engineContext.assetManager->LoadAsset("./assetList.json");
 	engineContext.fmodController->AnalyzeAudioOffline(0);
 	BuildScene(SCENE3);
 	
