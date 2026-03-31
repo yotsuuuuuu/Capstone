@@ -353,7 +353,7 @@ std::vector<Ref<CActor>> AssetManager::CreateActor(const std::string& actorId, i
     return actorsMade;
 }
 
-std::vector<std::shared_ptr<Component>> AssetManager::GetActorsInScene()
+std::vector<std::shared_ptr<Component>>& AssetManager::GetActorsInScene()
 {
     return actorMap;
 }

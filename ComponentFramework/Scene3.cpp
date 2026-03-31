@@ -55,7 +55,8 @@ bool Scene3::OnCreate() {
 
 		engineContext.assetManager->CreateActor("mario",1);
 
-		actorsInScene = engineContext.assetManager->GetActorsInScene();
+
+		auto& actorsInScene = engineContext.assetManager->GetActorsInScene();
 
 		// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
 		const float spacing = 20.0f;
@@ -400,7 +401,7 @@ void Scene3::Render() const {
 
 		
 		{		
-			vRenderer->RenderECS(engineContext,actorsInScene);
+			vRenderer->RenderECS(engineContext, engineContext.assetManager->GetActorsInScene());
 		}
 		break;
 
@@ -425,14 +426,6 @@ void Scene3::OnDestroy() {
 	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 	if(vRenderer){
 		vkDeviceWaitIdle(vRenderer->getDevice());				
-		
-	
-		vRenderer->DestroyUBO(lightsUBO);
-		
-		engineContext.fmodController->playsong(0);
-
-		world->OnDestroy();
-	
 		
 		
 	}

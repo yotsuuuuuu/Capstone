@@ -59,7 +59,7 @@ public:
 	bool LoadCamera(const std::string& filepath_);
 	bool LoadAsset(const std::string& filepath_);
 	std::vector<Ref<CActor>> CreateActor(const std::string& actorId, int amount_);
-	std::vector<Ref<Component>> GetActorsInScene();
+	std::vector<Ref<Component>>& GetActorsInScene();
 	void clearActorsInScene() { actorMap.clear(); }
 	Ref<Component> GetCamera();
 	void ScreenResizeCameraEvent(float aspectRatio);

@@ -21,7 +21,7 @@ private:
 	//Camera *camera;
 
 	
-	std::vector<BufferMemory> lightsUBO;
+	/*std::vector<BufferMemory> lightsUBO;*/
 	LightsData lights;
 
 	bool mouseLocked = false;
@@ -34,7 +34,6 @@ private:
 	
 	
 	//Components
-	std::vector<Ref<Component>> actorsInScene;
 	Ref<Component> camera;
 	Ref<Component> shader;
 	Ref<Component> world;
