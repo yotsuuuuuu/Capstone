@@ -133,7 +133,7 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 
 
 void SceneManager::Run() {
-	
+	engineContext.VKImGUI->GatherSystemData(engineContext);
 	timer->Initialize(fps);
 	isRunning = true;
 	while (isRunning) {		
@@ -145,6 +145,7 @@ void SceneManager::Run() {
 			engineContext.VKImGUI->BeginFrame();
 			currentScene->Update(timer->getDeltaTime());
 			engineContext.VKImGUI->TestUI();
+			engineContext.VKImGUI->SystemUI(engineContext);
 			engineContext.VKImGUI->EndFrame();
 			currentScene->Render();
 		}
@@ -155,15 +156,14 @@ void SceneManager::Run() {
 
 void SceneManager::GetEvents() {
 	SDL_Event sdlEvent;
-	std::string songnametest;
-	while (SDL_PollEvent(&sdlEvent)) {
+	while (SDL_PollEvent(&sdlEvent)) {		
 		switch (sdlEvent.type) {
 		case SDL_EVENT_QUIT:
 			isRunning = false;
 			return;
 		case SDL_EVENT_KEY_DOWN:
 			switch (sdlEvent.key.scancode) {
-			case SDL_SCANCODE_Q:
+			case SDL_SCANCODE_ESCAPE:
 				isRunning = false;
 				return;
 			case SDL_SCANCODE_F1:
@@ -184,19 +184,13 @@ void SceneManager::GetEvents() {
 			case SDL_SCANCODE_F6:
 				///BuildScene(SCENE6);
 				break;
-			case SDL_SCANCODE_EQUALS:
-				engineContext.fmodController->Volume(10);
+			case SDL_SCANCODE_EQUALS:	
 				break;
-			case SDL_SCANCODE_MINUS:
-				engineContext.fmodController->Volume(-10);
+			case SDL_SCANCODE_MINUS:				
 				break;
-			case SDL_SCANCODE_KP_0:
-				engineContext.fmodController->playsong(0);
-				songnametest = engineContext.fmodController->getSongName(0);
+			case SDL_SCANCODE_KP_0:				
 				break;
-			case SDL_SCANCODE_KP_1:
-				songnametest = engineContext.fmodController->getSongName(1);
-				engineContext.fmodController->playsong(1);
+			case SDL_SCANCODE_KP_1:				
 				break;
 			default:
 				break;
@@ -220,8 +214,9 @@ void SceneManager::GetEvents() {
 			break;
 		}
 		
-		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent);
+		
 		if (currentScene) currentScene->HandleEvents(sdlEvent);
+		engineContext.VKImGUI->ImGUIHandelEvents(sdlEvent, engineContext);
 	}
 	if (needSwapChainRecreation) {
 

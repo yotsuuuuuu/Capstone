@@ -116,15 +116,6 @@ void CSkyBox::AudioReact(EngineContext& cntx)
 
 
     push.Bloomfactor = (m_smoothed1 + m_smoothed2) * 0.5f * 3.0f ;
-    ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_Always); // visualy probly should be moved out of here.
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
-    ImGui::SetNextWindowBgAlpha(0.0f);
-    ImGui::Begin("Audio",nullptr, ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoInputs |
-        ImGuiWindowFlags_NoBackground );
-    ImGui::PlotLines("##Audio", (float*) & bands, 10, 0, NULL, 0.0f, 1.0f, ImVec2(0, 80));
-    ImGui::End();
 }
 
 void CSkyBox::ImGui()

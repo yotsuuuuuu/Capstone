@@ -709,7 +709,7 @@ public:
 
         auto lightCullingDoneSemaphore = Ecntx.lightSys->GetLightCullReadySingal();
         std::vector<VkSemaphore> waitSemapohres;
-        std::vector< VkPipelineStageFlags> waitStages;
+        std::vector<VkPipelineStageFlags> waitStages;
         waitSemapohres.push_back(framecntx.waitSemaphores);
         waitStages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 

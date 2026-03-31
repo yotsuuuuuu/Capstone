@@ -17,6 +17,7 @@
 #include "CPhysics.h"
 #include "CGlobalLight.h"
 #include "VulkanRenderer.h"
+#include "CustomSDLEvents.h"
 #include "SYS_Light.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
@@ -242,64 +243,26 @@ bool Scene3::OnCreate() {
 
 void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 	
-		switch (sdlEvent.type) {
-		case SDL_EVENT_KEY_DOWN:
-		case SDL_EVENT_KEY_UP:
-		{
-			if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-				// escape stuff
-				if (sdlEvent.key.key == SDLK_ESCAPE) {
-					mouseLocked = !mouseLocked;
-					SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getWindow(), mouseLocked);
-				}
-				else if (sdlEvent.key.key == SDLK_1) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(0);
-				}
-				else if (sdlEvent.key.key == SDLK_2) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(1);
+	auto p1 = std::dynamic_pointer_cast<CActor>(camera);
+	auto playerController = p1->GetComponent<CInput>();
+	if (playerController) {
+		playerController->HandleKeyboardInput(sdlEvent);
+		playerController->HandleMouseMotion(sdlEvent);
+	}
+	if (sdlEvent.type == CustomEvent::SONG_SELECTED_EVENT) {
+		int sondId = (int)sdlEvent.user.code;
+		auto wA = std::dynamic_pointer_cast<CActor>(world);
+		auto w = wA->GetComponent<CWorld>();
+		w->OnDestroy();
+		w->InitializeWorld(sondId);
+	}
+	switch (sdlEvent.type) {
+	case SDL_EVENT_KEY_UP:{
+		
+		break;
+	}	
 
-				}
-				else if (sdlEvent.key.key == SDLK_3) {
-					auto wA = std::dynamic_pointer_cast<CActor>(world);
-					auto w = wA->GetComponent<CWorld>();
-					w->OnDestroy();
-					w->InitializeWorld(2);
-				}
-
-				else if (sdlEvent.key.key == SDLK_B)
-				{
-					engineContext.fmodController->playsong(AudioState::PAUSE);
-				}
-				else if (sdlEvent.key.key == SDLK_N)
-				{
-					engineContext.fmodController->playsong(AudioState::PLAY);
-				}
-			}
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
-			auto playerController = p1->GetComponent<CInput>();
-			if (playerController) {
-				playerController->HandleKeyboardInput(sdlEvent);
-			}
-			break;
-		}
-
-		case SDL_EVENT_MOUSE_MOTION:
-		{
-			auto p1 = std::dynamic_pointer_cast<CActor>(camera);
-			auto playerController = p1->GetComponent<CInput>();
-			if (playerController) {
-				playerController->HandleMouseMotion(sdlEvent);
-			}
-			break;
-		}
-
-		}
+	}
 	
 }
 
@@ -402,7 +365,10 @@ void Scene3::FrustumCheck()
 void Scene3::Update(const float deltaTime) {
 
 	engineContext.physicsManager->Update(deltaTime);
-	
+	auto Skybox = std::dynamic_pointer_cast<CActor>(camera)->GetComponent<CSkyBox>();
+	if (Skybox) {
+		Skybox->AudioReact(engineContext);
+	}
 	// TODO: move to camera
 	FrustumCheck();
 	
@@ -433,14 +399,8 @@ void Scene3::Render() const {
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 
 		
-		{
-		/*	std::vector<Ref<Component>> drawlist;
-			actorsInScene.push_back(plane);*/
-			/*drawlist.push_back(actor);
-			drawlist.push_back(actor1);
-			drawlist.push_back(plane);
-			drawlist.push_back(World);*/
-			vRenderer->RenderECS(engineContext,actorsInScene);// Context obejct
+		{		
+			vRenderer->RenderECS(engineContext,actorsInScene);
 		}
 		break;
 

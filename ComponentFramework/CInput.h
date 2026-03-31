@@ -1,6 +1,7 @@
 #pragma once
 #include "Component.h"
 #include "Vector.h"
+
 union SDL_Event;
 class CPhysics;
 class CCamera;

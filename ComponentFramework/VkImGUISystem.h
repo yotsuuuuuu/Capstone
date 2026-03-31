@@ -3,8 +3,8 @@
 #include <SDL3/SDL.h>
 #include "CoreStructs.h"
 #include "Debug.h"
-
-
+#include "EngineContext.h"
+#include "CustomSDLEvents.h"
 class VkImGUISystem
 {
 	//Copying and moving disabled
@@ -15,7 +15,13 @@ class VkImGUISystem
 
 	ImGuiContex context;
 	VkDescriptorPool imguiDescriptorPool;
+
+
+	int currentSongIndex = -1;
+	std::unordered_map<int,std::string> SongNameList;
+	SongTime SongLenght;
 	
+	bool ShowSongMenu = true;
 	
 public:
 
@@ -26,10 +32,14 @@ public:
 	void ShutDonw();
 
 	void RecordCMDBuffer(const VkCommandBuffer& cmd);
-	void ImGUIHandelEvents(const SDL_Event& event);
+	void ImGUIHandelEvents(const SDL_Event& event,const EngineContext& cntx);
 	void BeginFrame();
 	void EndFrame();
 	
+	void GatherSystemData(const EngineContext& cntx);
+
+	void SystemUI(const EngineContext& cntx);
+
 	void TestUI();
 
 	static void CheckVkResult(VkResult err) {

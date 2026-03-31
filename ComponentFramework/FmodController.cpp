@@ -20,12 +20,12 @@ std::string FmodController::getSongName(int songnum_)
 	{
 		char name[256];
 		sounds[songnum_]->getName(name ,256);
-		std::cout << name << std::endl;
-		return static_cast<std::string>(name);
+		//std::cout << name << std::endl;
+		return std::string(name);
 	}
 	else
 	{
-		return "Invalid song number";
+		return "";
 	}
 }
 bool FmodController::AddSonginFile()
@@ -148,7 +148,7 @@ bool FmodController::createSystem()
 
 void FmodController::Volume(float volume_)
 {
-	volume += volume_;
+	volume = volume_;
 
 	if (volume > 100)
 	{
