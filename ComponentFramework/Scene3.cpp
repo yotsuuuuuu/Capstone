@@ -226,11 +226,14 @@ bool Scene3::OnCreate() {
 		engineContext.physicsManager->OnCreate();	
 		
 		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
-		cameraActor->GetComponent<CPhysics>()->SetPosition(Vec3(0, 20.0f, 0));
-
+		Vec3 spawn = wC->GetPlayerSpawn();
+		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
+		spawn.y += halfCylinder;
+		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+		//spawn.print();
 		actorsInScene.push_back(WorldActor);
 
-		
+
 	}
 		break;
 
@@ -255,6 +258,13 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		auto w = wA->GetComponent<CWorld>();
 		w->OnDestroy();
 		w->InitializeWorld(sondId);
+		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+		Vec3 spawn = w->GetPlayerSpawn();
+		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
+		spawn.y += halfCylinder;
+		spawn.print();
+		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+
 	}
 	switch (sdlEvent.type) {
 	case SDL_EVENT_KEY_UP:{

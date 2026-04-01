@@ -304,10 +304,12 @@ struct DescriptorWriteInfo {
 // maybe add chunks here
 
 // TODO: Replace this with scotts vertex
-struct TerrainVertex {
-    Vec3 position;
-    Vec3 normal;
-    Vec2 uv;
+struct ActorAmount {
+    int lights;
+    int tree1;
+    int tree2;
+    int rock1;
+    int rock2;
 };
 
 struct AABB

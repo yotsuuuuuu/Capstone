@@ -163,7 +163,7 @@ void CCapsuleCollider::UpdateCapsulePoints()
 	cylinderHeight = height - radius * 2.0f;
 	if (cylinderHeight < 0.0f) cylinderHeight = 0.0f;
 
-	float halfCylinder = cylinderHeight * 0.5f;
+	halfCylinder = cylinderHeight * 0.5f;
 
 	// bottom of capsule (feet)
 	capB = center - Vec3(0.0f, halfCylinder, 0.0f);
@@ -198,9 +198,10 @@ CollisionInfo CCapsuleCollider::IntersectingSphereTriangle(const Vec3& sphereCen
 
 	if (distance < sphereRadius) {
 		info.isColliding = true;
-		info.penetrationDepth = sphereRadius - distance;
 		info.point = closestPoint;
-		info.normal = VMath::normalize(delta);
+
+		info.penetrationDepth = distance < VERY_SMALL ? sphereRadius + 1.0f : sphereRadius - distance;
+		info.normal = distance < VERY_SMALL ? delta : VMath::normalize(delta);
 	}
 	return info;
 }

@@ -186,32 +186,32 @@ float TerrainNoise::EvaluateContinental(float c) const
     // c is already clamped to 0-1
     c = std::clamp(c, 0.0f, 1.0f);
 
-    // Continental breakpoints (control points)
+    // continental breakpoints (control points)
     struct ControlPoint {
         float continental;
         float height;
     };
 
-    // Define control points for smooth interpolation
+    // define control points for smooth interpolation
     std::vector<ControlPoint> points = {
-        {0.0f, 0.0f},   // Deep ocean
-        {0.2f, 0.0f},   // Ocean floor
-        {0.3f, 1.0f},   // Beach/shallow water
-        {0.5f, 2.0f},   // Coastal plains
-        {0.8f, 5.0f},   // Hills
-        {0.9f, 8.0f},   // Mountains
-        {1.0f, 11.0f}   // High peaks
+        {0.0f, 0.0f},  
+        {0.2f, 0.0f}, 
+        {0.3f, 1.0f},
+        {0.5f, 2.0f},
+        {0.8f, 5.0f},   
+        {0.9f, 8.0f},   
+        {1.0f, 11.0f}   
     };
 
-    // Find which segment c falls into
+    // find which segment c falls into
     for (size_t i = 0; i < points.size() - 1; i++) {
         if (c >= points[i].continental && c <= points[i + 1].continental) {
             float t = (c - points[i].continental) / (points[i + 1].continental - points[i].continental);
-            // Cubic interpolation for smoother transitions
+            // cubic interpolation for smoother transitions
             float t2 = t * t;
             float t3 = t2 * t;
 
-            // Hermite interpolation for smooth curves
+            // hermite interpolation for smooth curves
             float height = points[i].height * (2.0f * t3 - 3.0f * t2 + 1.0f) +
                 points[i + 1].height * (-2.0f * t3 + 3.0f * t2) +
                 0.0f * (t3 - 2.0f * t2 + t) +  // tangent at start

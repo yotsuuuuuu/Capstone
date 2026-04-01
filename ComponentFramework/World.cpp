@@ -1,4 +1,4 @@
-#include "World.h"
+﻿#include "World.h"
 #include "FmodController.h"
 
 
@@ -24,9 +24,10 @@ void World::Initialize(int songIndex)
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();
 	
-	WORLD_SIZE = preset.pAudio.songLength / 250; // this is a really rough way to determine world size based on song length.
+	WORLD_SIZE = preset.pAudio.songLength / 140; // this is a really rough way to determine world size based on song length.
 
 	GenerateAllChunks();
+	CreateActorSpawns(preset.actorAmount);
 
 }
 
@@ -44,6 +45,25 @@ void World::OnDelete()
 
 
 
+void World::CreateActorSpawns(ActorAmount actorAmount_)
+{
+	// center chunk index (0‑based)
+	int centerId = (WORLD_SIZE - 1) / 2; // center chunk
+	int center = CHUNK_SIZE / 2; // center OF chunk
+
+	auto chunk = chunkMap.find(Vec2(centerId, centerId)); // middle chunk (chunk space)
+	float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
+
+	std::cout << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
+	if (chunk->second->getMaxY() - height > 20) { height = chunk->second->getMaxY(); }
+
+	Vec2 chunkWorld = chunk->second->GetChunkPos();
+	spawnPoint = Vec3(chunkWorld.x, height + 2.0f, chunkWorld.y); // height w buffer
+
+
+
+}
+
 void World::GenerateAllChunks()
 {
 	chunkMap.clear();
@@ -52,11 +72,9 @@ void World::GenerateAllChunks()
 
 	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
-	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
 		for (int y = 0; y < WORLD_SIZE; y++) { // create each chunk
 
-			if (i == WORLD_SIZE/2) { }
 			// it might be better to keep internal pos and world position as separate var.
 			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
 			auto tempChunk = std::make_unique<Chunk>(chunkWorldPos);
@@ -65,7 +83,7 @@ void World::GenerateAllChunks()
 			BuildChunkMeshData(tempChunk.get());
 
 			//chunkMap.insert({chunkWorldPos, std::move(tempChunk) });
-			i++;
+			chunkMap.insert({Vec2(x,y), std::move(tempChunk)});
 		}
 	}
 }
@@ -94,7 +112,6 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 	chunk->SetHeightmap(std::move(heightmap));
 	chunk->setMinY(minHeight);
 	chunk->setMaxY(maxHeight);
-	chunk->SetWorldPos((minHeight + maxHeight) / 2.0f); // set world pos y to the middle of the chunk height range for culling
 
 	if (minHeight < lowestPoint) lowestPoint = minHeight;
 	if (maxHeight > highestPoint) highestPoint = maxHeight;
@@ -107,8 +124,7 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	vertices.reserve(baseChunkMesh->basePositions.size());
 
 	const auto& heightmap = chunk->GetHeightmap();
-	const Vec2& chunkPos = chunk->GetChunkPos();
-	const Vec3& chunkWorldPos = chunk->GetWorldPos();
+	const Vec2& chunkPos = chunk->GetChunkPos(); // WORLD SPACE
 
 	for (size_t i = 0; i < baseChunkMesh->basePositions.size(); i++) {
 		Vertex vertex;
@@ -195,7 +211,7 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 World::~World()
 {
 	chunkMap.clear();
-	//baseChunkMesh.release();
+	baseChunkMesh.release();
 	chunkRenderData.clear();
 }
 

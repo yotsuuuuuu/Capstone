@@ -63,12 +63,14 @@ public:
 	std::unordered_map<Vec2, std::unique_ptr<Chunk> >* GetChunkMap() { return &chunkMap; }
 	std::vector<TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
 	
-	void CreateActorSpawns();
+	void CreateActorSpawns(ActorAmount actorAmount_);
 
+	Vec3 GetPlayerSpawn() { return spawnPoint; }
 
 private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
 	void CalculateNormals(std::vector<Vertex>& vertices);
+
 };

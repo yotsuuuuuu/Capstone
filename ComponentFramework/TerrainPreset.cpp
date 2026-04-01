@@ -5,8 +5,10 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	pAudio = GetLayerValuesFromAudio(ab);
 
 	// scale high frequencies to a more usable range (since they tend to be very low) and clamp to 1.0f
-	float highScaled = std::min(pAudio.highAvgSum * 100.0f, 1.0f); 
-	float midScaled = std::min(pAudio.midAvgSum * 2.0f, 1.0f);
+	//float highScaled = std::min(pAudio.highAvgSum * 100.0f, 1.0f); 
+	float highScaled = std::min(pAudio.highAvgSum * 100.0f, 2.0f); 
+    //float highScaled = pAudio.highAvgSum * 100.0f;
+    float midScaled = std::min(pAudio.midAvgSum * 2.0f, 1.0f);
 	float bassScaled = pAudio.bassAvgSum; // bass is usually already in a good range so no need to scale much, maybe just a little
 
 	CreateBase();
@@ -14,7 +16,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	//CreateErosion();
 	//CreateContinentalness();
 	
-	exponent = (highScaled * 1.3f);
+	exponent = (highScaled * 0.8f);
 	std::cout << exponent << std::endl;
 
 	float midDominance = pAudio.midAvgSum * 1.3f; 
@@ -28,10 +30,31 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 
 	globalHeightScale = 3.0f + (pAudio.bassAvgSum * 10.0f); // bass can influence overall height since its usually the highest and can create more dramatic terrain with higher values
 
-	int why = 0;
+    std::cout << globalHeightScale << std::endl;
 
-	// TODO: (andres) exponents, 
-	// TODO: (andres) global height scale, 
+	int maxActors = 200;
+    //int totalActors = 0;
+    actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.midHigh), 40, 140); // keep between 40-140
+    actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * 11)), 1, 12);
+    actorAmount.tree2 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * 11, 1, 12);
+    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * 11)), 1, 12);
+    actorAmount.rock2 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum + pAudio.highAvgSum * 2) * 11), 1, 12);
+
+
+    int totalActors = actorAmount.lights + actorAmount.rock1 + actorAmount.rock2 + actorAmount.tree1 + actorAmount.tree2;
+
+    if (totalActors > maxActors) { // if too many take away from lights
+        int temp = totalActors - maxActors;
+        actorAmount.lights -= temp;
+    }
+    else if(totalActors < maxActors){ // if too little add to lights
+        int temp = totalActors - maxActors;
+        actorAmount.lights += temp;
+    }
+
+    magicNumber1 = (int)pAudio.bassMaxSum % 64;
+    magicNumber2 = (int)pAudio.midMaxSum % 64;
+
 	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
 	// TODO: (andres) continentallness heights
 	// TODO: (andres) randomize actor placement (lights, etc) ( x % worldsize, then x % chunksize)

@@ -9,7 +9,7 @@ private:
 	MATH::Vec3 acceleration;
 	MATH::Vec3 gravity = MATH::Vec3(0.0f, -9.81f, 0.0f);
 
-	bool hasGravity = true;
+	bool hasGravity;
 	bool isGrounded = false;
 
 public:
@@ -19,7 +19,7 @@ public:
 		dragCoefficient(0.2f),
 		velocity(MATH::Vec3()),
 		acceleration(MATH::Vec3()),
-		hasGravity(true) {}
+		hasGravity(false) {}
 
 	CPhysics(Ref<Component> parent_, float mass_, MATH::Vec3 velocity_, MATH::Vec3 acceleration_, bool hasGravity_) :
 		CTransform(parent_),
