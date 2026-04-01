@@ -30,6 +30,13 @@ std::string FmodController::getSongName(int songnum_)
 }
 bool FmodController::AddSonginFile()
 {
+
+	if (nameOfsounds.size() > 0)
+	{
+		nameOfsounds.clear();
+
+	}
+
 	std::string path = "./audio/";
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -55,6 +62,15 @@ bool FmodController::AddSonginFile()
 
 void FmodController::InitilizeSongs()
 {
+
+	if (sounds.size() > 0)
+	{
+		for (int i = 0; i < sounds.size(); i++)
+		{
+			sounds[i]->release();
+		}
+	}
+
 	sounds.resize(nameOfsounds.size());
 
 	for (size_t i = 0; i < sounds.size(); i++)
@@ -335,6 +351,11 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 void FmodController::AnalyzeAudioOnline()
 {
+	bool playing = false;
+	if (channel->isPlaying(&playing))
+	{
+		return;
+	}
 	float sampleRate = 48000.0f; // Default sample rate, can be updated based on the actual sound being played
 	AudioBands bands;
 
