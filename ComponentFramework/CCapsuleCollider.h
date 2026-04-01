@@ -11,6 +11,8 @@ class CCapsuleCollider : public CCollider
 	float radius = 0.5f;
 	float height = 2.0f;
 	float cylinderHeight = height - radius * 2.0f;  // The straight cylinder part
+	float halfCylinder;
+	
 	//float cameraHeight = cylinderHeight * 0.7f; // for camera collision
 
 	//WeakRef<CTransform> transform;
@@ -49,6 +51,7 @@ public:
 
 	float GetRadius() { return radius; }
 	float GetHeight() { return height; }
+	float GetHalfCylinder() { return halfCylinder; }
 	const Vec3& GetCapA() { return capA; }
 	const Vec3& GetCapB() { return capB; }
 	const Vec3& GetAxis() { return axis; }

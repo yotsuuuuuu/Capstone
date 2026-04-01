@@ -10,10 +10,12 @@
 #include "BaseGridMesh.h"
 //#include "FmodController.h" // onyl needed for struct. should be move to core stuct methinks
 #include "EngineContext.h"
+#include <random>
 
 using namespace MATH;
 
 class FmodController; // forward declaration
+class AssetManager;
 
 class World {
 private:
@@ -28,24 +30,18 @@ private:
 	std::vector<TerrainChunkData> chunkRenderData;
 	IndexedVertexBuffer chunkIndexBuffer;
 
-
-	// vulkan
-	PipelineInfo worldPipeline;
-	DescriptorSetInfo worldDescriptorSet;
-
 	int WORLD_SIZE = 16; // number of chunks along one axis (world is WORLD_SIZE x WORLD_SIZE chunks) just two for now
 	float WORLD_OFFSET = (CHUNK_SIZE * WORLD_SIZE) / 2.0f;
 
 	float lowestPoint = std::numeric_limits<float>::max(); 
 	float highestPoint = std::numeric_limits<float>::min();
 
-	//player
-	//CActor* player;
+	uint32_t worldSeed;
 
-	//texture
-	Sampler2D terrainTexture;
+	Vec3 spawnPoint;
+	std::vector<Vec3> actorlocations;
 
-	// TODO: (andres) collision meshes
+
 	// TODO: (andres) LOD/ render distance
 	
 public:
@@ -63,16 +59,20 @@ public:
 
 	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
 
-	PipelineInfo const GetPipeline() { return worldPipeline; }
-	DescriptorSetInfo const GetDescriptorSetInfo() { return worldDescriptorSet; }
 	std::unordered_map<Vec2, std::unique_ptr<Chunk> >* GetChunkMap() { return &chunkMap; }
 	std::vector<TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
-	// get culled chunk data
+	
+	void CreateActorSpawns(ActorAmount actorAmount_);
 
+	Vec3 GetPlayerSpawn() { return spawnPoint; }
 
 private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
 	void CalculateNormals(std::vector<Vertex>& vertices);
+
+	uint32_t HashChunkCoord(int x, int y, uint32_t globalSeed);
+	std::mt19937 GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed);
+	std::vector<size_t> GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937& rng);
 };

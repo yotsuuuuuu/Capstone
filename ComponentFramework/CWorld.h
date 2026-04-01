@@ -36,6 +36,8 @@ public:
 	std::vector<uint32_t> GetChunkIndices() const { return C_World->GetChunkIndices(); }
 	float GetLowestPoint() const { return C_World->GetLowestPoint(); }
 	float GetHighestPoint() const { return C_World->GetHighestPoint(); }
+	Vec3 GetPlayerSpawn() { return C_World->GetPlayerSpawn(); }
+
 
 	void InitializeWorld(TerrainPreset* t_);
 	void InitializeWorld(int songIndex);

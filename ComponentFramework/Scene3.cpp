@@ -125,92 +125,10 @@ bool Scene3::OnCreate() {
 		// step 2 create actors
 		
 
-
 		Ref<CActor> WorldActor = std::make_shared<CActor>(nullptr);
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
-		/// PRESET 1 ///
-		preset.globalHeightScale = 2.0f;
-		preset.base.type = NoiseType::OpenSimplex2;
-		preset.base.seed = 3847598;
-		preset.base.frequency = 0.009f;
-		preset.base.amplitude = 5.0f;
-		preset.exponent = 1.7f;
+	
 
-		preset.continentalness.type = NoiseType::Cellular;
-		preset.continentalness.amplitude = 0.4f;
-		preset.continentalness.frequency = 0.005f;
-		preset.continentalness.fractal = FractalType::PingPong;
-		preset.continentalness.fractalOctaves = 2;
-		preset.continentalness.gain = 0.50f;
-		preset.continentalness.lacunarity = 2;
-		preset.continentalness.cellType = CellularType::Euclidian;
-		preset.continentalness.returnType = ReturnType::Distance2Sub;
-
-		preset.peaksValleys.type = NoiseType::Cubic;
-		preset.peaksValleys.cellType = CellularType::Hybrid;
-		preset.peaksValleys.returnType = ReturnType::Distance2;
-		preset.peaksValleys.fractal = FractalType::Ridged;
-		preset.peaksValleys.fractalOctaves = 4;
-		preset.peaksValleys.gain = 1.5f;
-		preset.peaksValleys.fractalWeightedStrength = 1.8f;
-		preset.peaksValleys.amplitude = 0.9f;
-		preset.peaksValleys.frequency = 0.9f;
-
-		/// PRESET 2 /// WINNING COMBO SO FAR
-		preset2.base.type = NoiseType::Perlin;
-		preset2.base.seed = 421322;
-		preset2.base.frequency = 0.008f;
-		preset2.base.amplitude = 1.0f;
-		preset2.base.fractal = FractalType::PingPong;
-		preset2.base.fractalOctaves = 5;
-		preset2.base.lacunarity = 0.2f;
-		preset2.base.gain = 0.5f;
-		preset2.exponent = 2.0f;
-
-		preset2.continentalness.type = NoiseType::Cellular;
-		preset2.continentalness.seed = 234908;
-		preset2.continentalness.frequency = 0.006f;
-		preset2.continentalness.fractal = FractalType::Ridged;
-		preset2.continentalness.amplitude = 1.0f;
-		preset2.continentalness.fractalOctaves = 3;
-		preset2.continentalness.gain = 0.90f;
-		preset2.continentalness.lacunarity = 2;
-		preset2.continentalness.cellType = CellularType::Euclidian;
-		preset2.continentalness.returnType = ReturnType::Distance2;
-
-		/// PRESET 3 ///
-		preset3.truncate = true;
-		preset3.globalHeightScale = 2.0f;
-		preset3.base.type = NoiseType::OpenSimplex2;
-		preset3.base.seed = 123;
-		preset3.base.frequency = 0.009f;
-		preset3.base.amplitude = 5.0f;
-		//preset3.base.fractal = FractalType::Ridged;
-
-		preset3.continentalness.type = NoiseType::Cellular;
-		preset3.continentalness.frequency = 0.0008f;
-		preset3.continentalness.amplitude = 1.0;
-		preset3.continentalness.fractal = FractalType::FBm;
-		preset3.continentalness.fractalOctaves = 2;
-		preset3.continentalness.gain = 0.7f;
-		preset3.continentalness.cellType = CellularType::Manhattan;
-		preset3.continentalness.returnType = ReturnType::Distance;
-		preset3.continentalness.cellularJitter = 1.2f;
-		preset3.continentalness.domainWarp = WarpType::OpenSimplex2;
-		preset3.continentalness.warpAmplitude = 0.5f;
-
-		preset3.peaksValleys.type = NoiseType::Value;
-		preset3.peaksValleys.cellType = CellularType::Hybrid;
-		preset3.peaksValleys.returnType = ReturnType::Distance2;
-		preset3.peaksValleys.fractal = FractalType::Ridged;
-		preset3.peaksValleys.fractalOctaves = 3;
-		preset3.peaksValleys.gain = 0.8f;
-		preset3.peaksValleys.fractalWeightedStrength = 1.8f;
-		preset3.peaksValleys.amplitude = 0.9f;
-		preset3.peaksValleys.frequency = 0.09f;
-		preset3.exponent = 2.0f;
-
-		//wC->InitializeWorld(&preset3);
 		wC->InitializeWorld(0);
 		//wC->InitializeWorld(1);
 		WorldActor->AddComponent<CWorld>(wC);
@@ -226,12 +144,18 @@ bool Scene3::OnCreate() {
 		engineContext.physicsManager->Set(actorsInScene, camera, world);
 		engineContext.physicsManager->OnCreate();	
 		
+
+		// intial player spawn
 		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
-		cameraActor->GetComponent<CPhysics>()->SetPosition(Vec3(0, 20.0f, 0));
+		Vec3 spawn = wC->GetPlayerSpawn();
+		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
+		spawn.y += halfCylinder;
+		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+		
 
 		actorsInScene.push_back(WorldActor);
 
-		
+
 	}
 		break;
 
@@ -256,6 +180,13 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		auto w = wA->GetComponent<CWorld>();
 		w->OnDestroy();
 		w->InitializeWorld(sondId);
+		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+		Vec3 spawn = w->GetPlayerSpawn();
+		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
+		spawn.y += halfCylinder;
+		spawn.print();
+		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+
 	}
 	switch (sdlEvent.type) {
 	case SDL_EVENT_KEY_UP:{

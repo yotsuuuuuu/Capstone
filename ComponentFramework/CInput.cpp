@@ -24,7 +24,7 @@ bool CInput::OnCreate()
 	auto phys = physics.lock();
 	if (!phys) return false;
 
-	//phys->SetHasGravity(false); // disable gravity for player controller for NOW until COLLISIONS
+	phys->SetHasGravity(true); // disable gravity for player controller for NOW until COLLISIONS
 	phys->SetMass(1.0f);
 	phys->SetDragCoefficient(0.3f);
 	phys->SetVelocity(MATH::Vec3(0.0f, 0.0f, 0.0f)); // reset just in case
@@ -191,8 +191,6 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	if (moveBackwardPressed) { direction -= front; }
 	if (moveLeftPressed) { direction -= right; }
 	if (moveRightPressed) { direction += right; }
-
-	auto phys = physics.lock();
 
 	//if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
 

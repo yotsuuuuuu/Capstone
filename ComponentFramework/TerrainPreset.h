@@ -92,8 +92,9 @@ struct NoiseLayerPreset
 struct TerrainPreset {
 	// can be adjusted based on desired terrain features/ song style etc (+/- layers)
 
-    int numLayers;
-    std::vector<NoiseLayerPreset> layers; // probs not needed. will stick with 3 layers
+    ActorAmount actorAmount;
+    int magicNumber1;
+    int magicNumber2;
 
     bool truncate = false;
 

@@ -9,7 +9,7 @@
 #include <array>
 using namespace MATH;
 
-struct Vertex {
+struct Vertex { // scott's vertex
     Vec3 pos;
     Vec3 normal;
     Vec2 texCoord;
@@ -167,7 +167,7 @@ struct LightConfig {
 
 
 /// A 3x3 cannot be sent to the GPU data alignment issues. 
-/// If I try to send a 3x3 yo GPU it will be bumped up to a 4x4. 
+/// If I try to send a 3x3 to GPU it will be bumped up to a 4x4. 
 /// I can fake it by storing the 3x3 in an array of 3 Vec4s as 
 /// I have mapped below. Vulkan and OpenGl are column centric - right hand rule
 /// The real reason to do this is to make room in push constant for other data.
@@ -300,14 +300,13 @@ struct DescriptorWriteInfo {
     std::vector<Sampler2D> samplers;
  };
 
-// terrain structs
-// maybe add chunks here
-
-// TODO: Replace this with scotts vertex
-struct TerrainVertex {
-    Vec3 position;
-    Vec3 normal;
-    Vec2 uv;
+struct ActorAmount {
+    int totalActors;
+    int lights;
+    int tree1;
+    int tree2;
+    int rock1;
+    int rock2;
 };
 
 struct AABB

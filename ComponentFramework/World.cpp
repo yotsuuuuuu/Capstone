@@ -1,5 +1,7 @@
-#include "World.h"
+﻿#include "World.h"
 #include "FmodController.h"
+#include "AssetManager.h"
+#include <numeric>
 
 
 void World::Initialize(TerrainPreset* t_)
@@ -24,9 +26,10 @@ void World::Initialize(int songIndex)
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();
 	
-	WORLD_SIZE = preset.pAudio.songLength / 250; // this is a really rough way to determine world size based on song length.
-
+	WORLD_SIZE = preset.pAudio.songLength / 140; // this is a really rough way to determine world size based on song length.
+	worldSeed = preset.pAudio.seed;
 	GenerateAllChunks();
+	CreateActorSpawns(preset.actorAmount);
 
 }
 
@@ -44,6 +47,83 @@ void World::OnDelete()
 
 
 
+void World::CreateActorSpawns(ActorAmount actorAmount_)
+{
+	// PLAYER SPAWN //
+	// center chunk index (0‑based)
+	int centerId = (WORLD_SIZE - 1) / 2; // center chunk
+	int center = CHUNK_SIZE / 2; // center OF chunk
+
+	auto chunk = chunkMap.find(Vec2(centerId, centerId)); // middle chunk (chunk space)
+	float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
+
+	std::cout << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
+	if (chunk->second->getMaxY() - height > 20) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
+
+	Vec2 chunkWorld = chunk->second->GetChunkPos();
+	spawnPoint = Vec3(chunkWorld.x, height + 2.0f, chunkWorld.y); // height w buffer
+
+
+	// RANDOM ACTOR PLACEMENT
+	int actorPerChunk = actorAmount_.totalActors / (WORLD_SIZE * WORLD_SIZE); // average out number of actors to chunks
+	
+
+	const int MAX_ATTEMPTS = actorPerChunk * 100;
+	int attempts = 0;
+	float minDistance = 5.0f;
+	float minDistSq = minDistance * minDistance;
+
+	for (const auto& p : chunkMap) {
+		const auto& c = p.second;
+		std::vector<Vec3> actorsInChunk;
+		Vec2 chunkPos = c->GetChunkPos();
+		auto rng = GetChunkRNG(chunkPos, worldSeed);
+		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_SIZE);
+		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_SIZE);
+
+		while (actorsInChunk.size() < actorPerChunk&& attempts < MAX_ATTEMPTS) {
+			float localX = xDist(rng);
+			float localZ = zDist(rng);
+			float worldX = chunkPos.x + localX;
+			float worldZ = chunkPos.y + localZ;
+			float y = c->GetHeightAtPosition(localX, localZ, CHUNK_WORLD_SIZE); 
+
+			Vec3 candidate(worldX, y, worldZ);
+
+			bool tooClose = false;
+
+			for (const auto& pos : actorsInChunk) {
+				float dx = candidate.x - pos.x;
+				float dz = candidate.z - pos.z;
+				if (dx * dx + dz * dz < minDistSq) {
+					tooClose = true;
+					break;
+				}
+			}
+
+			if (!tooClose) {
+				actorsInChunk.push_back(candidate);
+			}
+
+			attempts++;
+		}
+		actorlocations.insert(actorlocations.end(), actorsInChunk.begin(), actorsInChunk.end()); // add the chunk actors to the big list of locations
+	}
+
+	//engineContext.assetManager->CreateActor("")
+
+	//std::vector<size_t> shuffledIndices = GetShuffledIndices(, std::mt19937(worldSeed));
+	//size_t idx = 0;
+	//for (int i = 0; i < actorCount; ++i) {
+	//	size_t actorIndex = shuffledIndices[idx % shuffledIndices.size()];
+	//	// spawn actor using actorMap[actorIndex]
+	//	++idx;
+	//}
+
+	  
+
+}
+
 void World::GenerateAllChunks()
 {
 	chunkMap.clear();
@@ -52,9 +132,8 @@ void World::GenerateAllChunks()
 
 	vRenderer->CreateTerrainIndexBuffer(baseChunkMesh->baseIndices, chunkIndexBuffer);
 	// create grid of chunks
-	int i = 0;
 	for (int x = 0; x < WORLD_SIZE; x++) {
-		for (int y = 0; y < WORLD_SIZE; y++) {
+		for (int y = 0; y < WORLD_SIZE; y++) { // create each chunk
 
 			// it might be better to keep internal pos and world position as separate var.
 			Vec2 chunkWorldPos = Vec2((x * CHUNK_WORLD_SIZE) - WORLD_OFFSET, (y * CHUNK_WORLD_SIZE) - WORLD_OFFSET);
@@ -64,7 +143,7 @@ void World::GenerateAllChunks()
 			BuildChunkMeshData(tempChunk.get());
 
 			//chunkMap.insert({chunkWorldPos, std::move(tempChunk) });
-			i++;
+			chunkMap.insert({Vec2(x,y), std::move(tempChunk)});
 		}
 	}
 }
@@ -93,7 +172,6 @@ void World::GenerateChunkHeightmap(Chunk* chunk)
 	chunk->SetHeightmap(std::move(heightmap));
 	chunk->setMinY(minHeight);
 	chunk->setMaxY(maxHeight);
-	chunk->SetWorldPos((minHeight + maxHeight) / 2.0f); // set world pos y to the middle of the chunk height range for culling
 
 	if (minHeight < lowestPoint) lowestPoint = minHeight;
 	if (maxHeight > highestPoint) highestPoint = maxHeight;
@@ -106,17 +184,17 @@ void World::BuildChunkMeshData(Chunk* chunk)
 	vertices.reserve(baseChunkMesh->basePositions.size());
 
 	const auto& heightmap = chunk->GetHeightmap();
-	const Vec2& chunkPos = chunk->GetChunkPos();
-	const Vec3& chunkWorldPos = chunk->GetWorldPos();
+	const Vec2& chunkPos = chunk->GetChunkPos(); // WORLD SPACE
 
 	for (size_t i = 0; i < baseChunkMesh->basePositions.size(); i++) {
 		Vertex vertex;
 		Vec3 basePos = baseChunkMesh->basePositions[i]; // original position of the OG mesh
 
-		vertex.pos = Vec3( // local space position of vertex in world space, y will be adjusted by heightmap
+		vertex.pos = Vec3( // local space position of vertex , y will be adjusted by heightmap
 			basePos.x,
 			heightmap[i],
 			basePos.z); 
+
 
 		vertex.texCoord = baseChunkMesh->baseUVs[i];
 		vertex.normal = Vec3(0.0f, 1.0f, 0.0f); // temporary normal, will be calculated later
@@ -125,12 +203,6 @@ void World::BuildChunkMeshData(Chunk* chunk)
 		//vertex.normal.print("vertext Normal");
 		vertices.push_back(vertex);
 
-		//Vertex collisionVertex;
-		//collisionVertex.pos = Vec3( // WORLD space position of vertex, used for collision checking
-		//	chunkPos.x + basePos.x,
-		//	heightmap[i],
-		//	chunkPos.y + basePos.z);
-		//collisionVertices.push_back(collisionVertex);
 
 	}
 
@@ -197,10 +269,32 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 
 }
 
+uint32_t World::HashChunkCoord(int x, int y, uint32_t globalSeed)
+{
+	return x * 73856093 ^ y * 19349663 ^ globalSeed;
+}
+
+std::mt19937 World::GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed)
+{
+	int cx = static_cast<int>(chunkPos.x / CHUNK_SIZE);
+	int cy = static_cast<int>(chunkPos.y / CHUNK_SIZE);
+	uint32_t seed = HashChunkCoord(cx, cy, globalSeed);
+	return std::mt19937(seed);
+}
+
+std::vector<size_t> World::GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937& rng)
+{
+	std::vector<size_t> indices(actors.size());
+	std::iota(indices.begin(), indices.end(), 0);
+	std::shuffle(indices.begin(), indices.end(), rng);
+	return indices;
+
+}
+
 World::~World()
 {
 	chunkMap.clear();
-	//baseChunkMesh.release();
+	baseChunkMesh.release();
 	chunkRenderData.clear();
 }
 
