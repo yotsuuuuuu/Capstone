@@ -51,8 +51,10 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
         int temp = totalActors - maxActors;
         actorAmount.lights += temp;
     }
+    
+    actorAmount.totalActors = totalActors;
 
-    magicNumber1 = (int)pAudio.bassMaxSum % 64;
+    magicNumber1 = (int)pAudio.bassMaxSum % 57;
     magicNumber2 = (int)pAudio.midMaxSum % 64;
 
 	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
