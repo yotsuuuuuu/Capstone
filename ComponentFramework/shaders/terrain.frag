@@ -68,6 +68,16 @@ layout(std430, set = 0 , binding = 5) readonly restrict buffer lightSSBO
 };
 
 
+
+layout( set = 0 , binding = 7) uniform TerrainUBO
+{
+    vec4 min_max_lineWidth_edgeStrength;
+    vec4 fadeStart_fadeEnd_gridScaleX_gridScaleY;
+    vec4 maxColor;
+	vec4 minColor;
+}TData;
+
+
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 
@@ -282,20 +292,24 @@ vec4 ClusterLightsColour(vec4 ktColour, vec3 eyeDir) {
 // edgeStrength
 
 vec4 GridColor(vec4 kt) {
+	
 
-	vec2 gridScale = vec2(4,4); 
+	float lineMod = TData.min_max_lineWidth_edgeStrength.z;
+
+
+	vec2 gridScale = vec2(TData.fadeStart_fadeEnd_gridScaleX_gridScaleY.zw); 
 	vec2 grid = abs(fract(fragTexCoords * gridScale) - 0.5);
     float line = min(grid.x, grid.y);
-    float edgeWidth = max(fwidth(line) * 1.4, 0.03);
+    float edgeWidth = max(fwidth(line) * lineMod, 0.03);
     float gridLine = 1.0 - smoothstep(0.0, edgeWidth, line);
 
 
-	float minHeight = 0.0;
-	float maxHeight = 150.0;
+	float minHeight = TData.min_max_lineWidth_edgeStrength.x;
+	float maxHeight = TData.min_max_lineWidth_edgeStrength.y;
     float heightT = clamp((fragWorldPos.y - minHeight) / (maxHeight - minHeight), 0.0, 1.0);
 
-	vec4 highColor  = vec4(0, 0.5, 0.4, 1.0); 
-    vec4 lowColor = vec4(132.0/255.0, 36.0/255.0, 149.0/255.0, 1.0); 
+	vec4 highColor  = TData.maxColor;
+    vec4 lowColor = TData.minColor;
 
 	vec4 edgeColor = mix(lowColor, highColor, heightT);
     // digital edge color //rgba(132, 36, 149) //rgba(253, 216, 231)
@@ -303,11 +317,11 @@ vec4 GridColor(vec4 kt) {
 
 
 	float depth = length(fragViewPos);
-	float fadeStart = 5.0;
-	float fadeEnd   = 300.0;
+	float fadeStart = TData.fadeStart_fadeEnd_gridScaleX_gridScaleY.x;
+	float fadeEnd   = TData.fadeStart_fadeEnd_gridScaleX_gridScaleY.y;
     float depthFade = 1.0 - smoothstep(fadeStart, fadeEnd, depth);
 
-    float edgeStrength = 1.0;
+    float edgeStrength = TData.min_max_lineWidth_edgeStrength.w;
 	float glowStrength = 0.8;
 	
     // combine

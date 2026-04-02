@@ -129,11 +129,11 @@ bool Scene3::OnCreate() {
 		auto wC = std::make_shared<CWorld>(nullptr, engineContext, TerrainPreset{});
 	
 
-		wC->InitializeWorld(0);
 		//wC->InitializeWorld(1);
 		WorldActor->AddComponent<CWorld>(wC);
 		WorldActor->AddComponent<CMaterial>(mat3);
 		WorldActor->OnCreate();
+		wC->InitializeWorld(0);
 		
 
 		//actorsInScene.push_back(engineContext.assetManager->GetCamera());

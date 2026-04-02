@@ -79,6 +79,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescriptorLayoutCollection(layoutGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
     AddToDescriptorLayoutCollection(layoutGlobal, 6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
+    AddToDescriptorLayoutCollection(layoutGlobal, 7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1);
 
     std::vector<DescriptorWriteInfo> writeGlobal;
     AddToDescrisptorLayoutWrite(writeGlobal, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::PER_FRAME_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Camera->GetCameraUBO());
@@ -88,6 +89,7 @@ bool VulkanRenderer::CreateGlobalRources(EngineContext& Ecntx)
     AddToDescrisptorLayoutWrite(writeGlobal, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetClusterSSBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, DescriptorWriteInfo::Destype::STATIC_SSBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, Ecntx.lightSys->GetLightSSBO());
     AddToDescrisptorLayoutWrite(writeGlobal, 6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, { sys_UBOs.AudioGPUData });
+    AddToDescrisptorLayoutWrite(writeGlobal, 7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, DescriptorWriteInfo::Destype::STATIC_UBO, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1, { sys_UBOs.TerrainData });
     CreateGlobalDescriptionSet(layoutGlobal, writeGlobal);
     
      
@@ -117,6 +119,20 @@ void VulkanRenderer::DestroyGlobalResources()
 void VulkanRenderer::CreateSysUbos()
 {
     sys_UBOs.AudioGPUData = CreateUniformBuffer<AudioBandsUBO>();
+    // need to initilize the terrain data to some default values 
+	sys_UBOs.TerrainData = CreateUniformBuffer<TerraindataUBO>();
+    TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY = Vec4(5.0f,300.0f,4.0f,4.0f);
+    TerrainStateData.min_max_lineWidth_edgeStrength = Vec4(0.0f,150.0f,1.4f,1.0);
+    TerrainStateData.minColor = Vec4(132.0f / 255.0f, 36.0f / 255.0f, 149.0f / 255.0f, 1.0f);
+    TerrainStateData.maxColor = Vec4(0.0f, 0.5f, 0.4f, 1.0f);
+    UpdateUniformBuffer<TerraindataUBO>(TerrainStateData, sys_UBOs.TerrainData);
+}
+void VulkanRenderer::UpdateTerrainUBO()
+{
+	if (!TerrainStateDirty) return;
+
+    UpdateUniformBuffer<TerraindataUBO>(TerrainStateData, sys_UBOs.TerrainData);
+    TerrainStateDirty = false;
 }
 void VulkanRenderer::UpdateAudioUBO(const EngineContext& cntx)
 {
@@ -150,8 +166,10 @@ void VulkanRenderer::UpdateAudioUBO(const EngineContext& cntx)
 }
 void VulkanRenderer::DestroySysUbos()
 {
-    DestroyUBO({ sys_UBOs.AudioGPUData });
+    DestroyUBO({ sys_UBOs.AudioGPUData, sys_UBOs.TerrainData });
 }
+
+
 
 FrameContext VulkanRenderer::GetCurrentFrameContext()
 {
@@ -634,6 +652,7 @@ public:
             MainCamera->GetComponent<CGlobalLight>()->UpdateUBO(framecntx.inFlightIndex);
         }
         VKRNDR->UpdateAudioUBO(Ecntx);
+		VKRNDR->UpdateTerrainUBO();
         
         Ecntx.lightSys->ComputeLightClusters(framecntx.inFlightIndex);
 

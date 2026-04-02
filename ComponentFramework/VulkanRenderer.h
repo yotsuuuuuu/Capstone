@@ -444,6 +444,10 @@ private:
     void CreateGlobalShadowPipelineResources(std::string vertFile, std::string fragFile , std::shared_ptr<Component> globaLight);
    
     SystemsUBOs sys_UBOs;
+    TerraindataUBO TerrainStateData;
+	bool TerrainStateDirty = false;
+    void UpdateTerrainUBO();
+    
     void UpdateAudioUBO(const EngineContext& cntx);
 
     void CreateSysUbos();
@@ -451,6 +455,37 @@ private:
 public:
     BufferMemory GetAudioUBO() { return sys_UBOs.AudioGPUData; }
     BufferMemory GetEngineUBO() { return sys_UBOs.EngineData; }
+    
+    void UpdateTerrainMaxMinHieght(float max, float min) {
+		TerrainStateData.min_max_lineWidth_edgeStrength.x = min;
+		TerrainStateData.min_max_lineWidth_edgeStrength.y = max;
+        TerrainStateDirty = true;
+    }
+    void UpdateTerrainLineWidth(float lineWidth) {
+		TerrainStateData.min_max_lineWidth_edgeStrength.z = lineWidth;
+        TerrainStateDirty = true;
+    }
+    void UpdateTerrainGridScale(float gridScaleX, float gridScaleY) {
+		TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.z = gridScaleX;
+        TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.w = gridScaleY;
+		TerrainStateDirty = true;
+    }
+    void UpdateTerrainFade(float fadeStart, float fadeEnd) {
+
+        TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.x = fadeStart;
+        TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.y = fadeEnd;
+        TerrainStateDirty = true;
+    }
+    void UpdateTerrainMaxColor(const Vec4& maxColor) {
+		TerrainStateData.maxColor = maxColor;        
+		TerrainStateDirty = true;
+    }
+    void UpdateTerrainMinColor(const Vec4& minColor) {        
+        TerrainStateData.minColor = minColor;
+        TerrainStateDirty = true;
+    }
+    
+	const TerraindataUBO& GetTerrainStateData() { return TerrainStateData; }
 
 
 
