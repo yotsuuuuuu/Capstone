@@ -456,13 +456,17 @@ public:
     BufferMemory GetAudioUBO() { return sys_UBOs.AudioGPUData; }
     BufferMemory GetEngineUBO() { return sys_UBOs.EngineData; }
     
-    void UpdateTerrainMaxMinHieght(float max, float min) {
+    void UpdateTerrainMaxMinHieght(float min, float max) {
 		TerrainStateData.min_max_lineWidth_edgeStrength.x = min;
 		TerrainStateData.min_max_lineWidth_edgeStrength.y = max;
         TerrainStateDirty = true;
     }
     void UpdateTerrainLineWidth(float lineWidth) {
 		TerrainStateData.min_max_lineWidth_edgeStrength.z = lineWidth;
+        TerrainStateDirty = true;
+    }
+    void UpdateTerrainEdgeStrength(float Edge) {
+        TerrainStateData.min_max_lineWidth_edgeStrength.w = Edge;
         TerrainStateDirty = true;
     }
     void UpdateTerrainGridScale(float gridScaleX, float gridScaleY) {

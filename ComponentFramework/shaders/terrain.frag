@@ -312,8 +312,7 @@ vec4 GridColor(vec4 kt) {
     vec4 lowColor = TData.minColor;
 
 	vec4 edgeColor = mix(lowColor, highColor, heightT);
-    // digital edge color //rgba(132, 36, 149) //rgba(253, 216, 231)
-    //vec4 edgeColor = vec4(242.0/255.0, 61.0/255.0, 130.0/255.0,1.0); // cyan
+    
 
 
 	float depth = length(fragViewPos);

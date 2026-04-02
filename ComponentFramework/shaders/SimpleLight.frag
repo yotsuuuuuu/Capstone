@@ -40,7 +40,7 @@ void main() {
 
     vec3 color = light.color_intensity.xyz;
     int AudioIndex = int(light.outer_type_emissiveScale_audioID.w);
-    float intensityMod = (AudioIndex != -1) ? getAudioBand(AudioIndex) * 0.5 : 0.0;
+    float intensityMod = (AudioIndex != -1) ? getAudioBand(AudioIndex) * 0.25 : 0.0;
 
     float intensity = light.outer_type_emissiveScale_audioID.z + intensityMod;
     

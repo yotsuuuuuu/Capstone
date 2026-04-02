@@ -2,7 +2,6 @@
 #include "VulkanRenderer.h"
 #include "CShader.h"
 #include "CMesh.h"
-#include "imgui.h"
 #include "FmodController.h"
 
 bool CSkyBox::OnCreate()
@@ -118,14 +117,3 @@ void CSkyBox::AudioReact(EngineContext& cntx)
     push.Bloomfactor = (m_smoothed1 + m_smoothed2) * 0.5f * 3.0f ;
 }
 
-void CSkyBox::ImGui()
-{
-
-    ImGui::Begin("CSkyBox");
- 
-    ImGui::SliderFloat("Bloom Factor (0 -> 2)", &push.Bloomfactor, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-
-    ImGui::ColorPicker4("RGB Bloom Tint", (float*) &push.ColorTint, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float);
-
-    ImGui::End();
-}

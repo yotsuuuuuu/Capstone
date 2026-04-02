@@ -45,7 +45,7 @@ public:
 
 	void AudioReact(EngineContext& cntx);
 
-	void ImGui();
+	
 
 	SkyboxPush GetSkyBoxPush() { return push; }
 	void SetSkyBoxPush(SkyboxPush p) { push = p; }

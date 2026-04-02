@@ -6,6 +6,9 @@
 #include "SYS_Light.h"
 #include "FmodController.h"
 #include "VulkanRenderer.h"
+#include "AssetManager.h"
+#include "CActor.h"
+#include "CSkyBox.h"
 
 
 
@@ -72,6 +75,10 @@ void VkImGUISystem::RecordCMDBuffer(const VkCommandBuffer& cmd)
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 }
 
+
+static bool ShowSkyBoxColorEditor = false;
+static bool ShowTerrainColorEditor = false;
+
 void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContext& cntx)
 {
     if (event.type == CustomEvent::SONG_SELECTED_EVENT) {
@@ -83,6 +90,8 @@ void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContex
             switch (event.key.scancode) {
             case SDL_SCANCODE_P: {
                 ShowSongMenu = !ShowSongMenu;
+                ShowSkyBoxColorEditor = false ;
+                ShowTerrainColorEditor = false;
                 SDL_Event customEvent;
                 SDL_zero(customEvent);
                 customEvent.type = CustomEvent::AUDIO_MENU_EVENT;
@@ -121,6 +130,7 @@ void VkImGUISystem::GatherSystemData(const EngineContext& cntx)
         numberOfSongs++;
     }
 }
+
 
 void VkImGUISystem::SystemUI(const EngineContext& cntx)
 {
@@ -228,7 +238,8 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             cntx.fmodController->InitilizeSongs();
             GatherSystemData(cntx);
         }
-        ImGui::Dummy(ImVec2(child_w * 0.5f, 0));
+       
+        ImGui::Dummy(ImVec2(child_w * 0.5f, 5));
 
         if (ImGui::Button("Play", ImVec2(child_w * 0.5f, 0))) {             
             cntx.fmodController->playsong(AudioState::PLAY);
@@ -237,11 +248,20 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             
             cntx.fmodController->playsong(AudioState::PAUSE);
         }
-       
+        ImGui::Dummy(ImVec2(child_w * 0.5f, 5));
+        if (ImGui::Button("Reset Player", ImVec2(child_w * 0.5f, 0))) {
+            SDL_Event customEvent;
+            SDL_zero(customEvent);
+            customEvent.type = CustomEvent::PLAYER_RESET_EVENT;
+            customEvent.user.code = 1;
+            SDL_PushEvent(&customEvent);           
+        }      
 
 
         if (ImGui::Button("Close Menu", ImVec2(child_w * 0.5f, 0))) {
             ShowSongMenu = false;
+            ShowSkyBoxColorEditor = false;
+            ShowTerrainColorEditor = false;
             SDL_Event customEvent;
             SDL_zero(customEvent);
             customEvent.type = CustomEvent::AUDIO_MENU_EVENT;
@@ -250,10 +270,78 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         }
         ImGui::EndGroup();
         ImGui::PopStyleVar();
+        if (ImGui::TreeNode("Edit Options")) {
+            if (ImGui::BeginTable("##split", 3)) {
+                ImGui::TableNextColumn(); ImGui::Checkbox("SkyBox Edit", &ShowSkyBoxColorEditor);
+                ImGui::TableNextColumn(); ImGui::Checkbox("Terrain Edit", &ShowTerrainColorEditor);
+                ImGui::EndTable();
+            }
+
+            ImGui::TreePop();
+        }
        
         ImGui::End();
     }
+
+    if (ShowSkyBoxColorEditor) {
+		auto skyox = std::dynamic_pointer_cast<CActor>(cntx.assetManager->GetCamera())->GetComponent<CSkyBox>();
+        //skyox->ImGui();
+		auto push = skyox->GetSkyBoxPush();
+        ImGui::Begin("CSkyBox", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+        //ImGui::SliderFloat("Bloom Factor (0 -> 2)", &push.Bloomfactor, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        auto flags = ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_Float;
+        flags |= ImGuiColorEditFlags_NoSmallPreview;
+        flags |= ImGuiColorEditFlags_NoAlpha;
+        flags |= ImGuiColorEditFlags_NoSidePreview;
+        //flags |= 
+
+        if (ImGui::ColorPicker4("##RGB Bloom Tint", (float*)&push.ColorTint, flags)) {
+			skyox->SetSkyBoxPush(push);
+        }
+
+        ImGui::End();
+    }
   
+
+    if (ShowTerrainColorEditor) {
+		VulkanRenderer* vulkanRenderer = dynamic_cast<VulkanRenderer*>(cntx.renderer);
+		const TerraindataUBO& Terraindata = vulkanRenderer->GetTerrainStateData();
+        Vec4 maxColor = Terraindata.maxColor;
+		Vec4 minColor = Terraindata.minColor;
+		Vec2 MinMax = Vec2(Terraindata.min_max_lineWidth_edgeStrength.x, Terraindata.min_max_lineWidth_edgeStrength.y);
+		Vec2 fadeStartEnd = Vec2(Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.x, Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.y);
+		Vec2 gridScale = Vec2(Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.z, Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.w);
+		float lineWidth = Terraindata.min_max_lineWidth_edgeStrength.z;
+		float edgeStrength = Terraindata.min_max_lineWidth_edgeStrength.w;		
+		
+        ImGui::Begin("Terrain Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+        if(ImGui::ColorEdit3("Top Terrain Color", (float*)&maxColor, ImGuiColorEditFlags_Float)) {
+			vulkanRenderer->UpdateTerrainMaxColor(maxColor);
+        }
+        if (ImGui::ColorEdit3("Bottom Terrain Color", (float*)&minColor, ImGuiColorEditFlags_Float)) {
+			vulkanRenderer->UpdateTerrainMinColor(minColor);
+        }
+        if (ImGui::DragFloat2("Min/Max Height", (float*)&MinMax, 0.1f, -100.0f, 100.0f, "%.2f")) {
+            vulkanRenderer->UpdateTerrainMaxMinHieght(MinMax.x, MinMax.y);
+        }
+        if (ImGui::DragFloat2("Fade Start/End", (float*)&fadeStartEnd, 0.01f, 0.0f, 500.0f, "%.2f")) {
+			vulkanRenderer->UpdateTerrainFade(fadeStartEnd.x, fadeStartEnd.y);
+        }
+        if (ImGui::DragFloat2("Grid Size", (float*)&gridScale, 0.01f, 0.01f, 100.0f, "%.1f")) {
+			vulkanRenderer->UpdateTerrainGridScale(gridScale.x, gridScale.y);
+        }
+        if (ImGui::DragFloat("Line Width", &lineWidth, 0.01f, 0.0f, 10.0f, "%.2f")) {
+			vulkanRenderer->UpdateTerrainLineWidth(lineWidth);
+        }
+        if (ImGui::DragFloat("Edge Strength", &edgeStrength, 0.01f, 0.0f, 10.0f, "%.2f")) {
+			vulkanRenderer->UpdateTerrainEdgeStrength(edgeStrength);
+        }
+        ImGui::End();
+
+
+    }
 
 }
 
@@ -261,7 +349,11 @@ void VkImGUISystem::TestUI()
 {
     //ImGui::ShowDemoWindow();
     ImGuiIO& io = ImGui::GetIO();   
-    ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize| 
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoBackground);
     ImGui::Text("%.3f ms/frame (%.1f FPS) ", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();   
 

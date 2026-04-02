@@ -189,6 +189,17 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
 
 	}
+	else if (sdlEvent.type == CustomEvent::PLAYER_RESET_EVENT) {
+		auto wA = std::dynamic_pointer_cast<CActor>(world);
+		auto w = wA->GetComponent<CWorld>();
+		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+		Vec3 spawn = w->GetPlayerSpawn();
+		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();		
+		spawn.y += halfCylinder * 2.0f;
+		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
+
+	}
 	switch (sdlEvent.type) {
 	case SDL_EVENT_KEY_UP:{
 		

@@ -9,11 +9,11 @@ class CWorld : public Component {
 	TerrainPreset worldConfig;
 	Ref<Component> Shader;
 	std::vector<VkDescriptorSet> Descriptorset;
-
+	EngineContext& cntx;
 
 public:
 	CWorld(Ref<Component> parent_, EngineContext& engineContext_, const TerrainPreset& config) : Component(parent_),
-		worldConfig(config) {
+		worldConfig(config),cntx(engineContext_){
 		C_World = new World(engineContext_);
 	}
 	~CWorld();
