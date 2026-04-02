@@ -182,11 +182,18 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
     }
     SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(cntx.renderer)->getWindow(), !ShowSongMenu);
     if (ShowSongMenu) {
-        ImVec2 window_size = ImVec2(400, 250);
+        ImVec2 window_size = ImVec2(400, 280);
         ImVec2 display_size = ImGui::GetIO().DisplaySize;
         ImGui::SetNextWindowSize(window_size);
         ImGui::SetNextWindowPos(ImVec2((display_size.x - window_size.x) * 0.45f,
             (display_size.y - window_size.y) * 0.45f));
+        float  alpha = 1.0f;
+        if (ShowSkyBoxColorEditor || ShowTerrainColorEditor) {
+            alpha = 0.5f;
+            
+        }
+        ImGui::SetNextWindowBgAlpha(alpha);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
         ImGui::Begin("Pause Menu", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize );
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
         ImGuiStyle& style = ImGui::GetStyle();
@@ -280,7 +287,9 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             ImGui::TreePop();
         }
        
-        ImGui::End();
+        ImGui::End();      
+        ImGui::PopStyleVar();
+        
     }
 
     if (ShowSkyBoxColorEditor) {
@@ -315,6 +324,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
 		float lineWidth = Terraindata.min_max_lineWidth_edgeStrength.z;
 		float edgeStrength = Terraindata.min_max_lineWidth_edgeStrength.w;		
 		
+
         ImGui::Begin("Terrain Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
         if(ImGui::ColorEdit3("Top Terrain Color", (float*)&maxColor, ImGuiColorEditFlags_Float)) {
@@ -349,6 +359,13 @@ void VkImGUISystem::TestUI()
 {
     //ImGui::ShowDemoWindow();
     ImGuiIO& io = ImGui::GetIO();   
+    ImVec2 window_size = ImVec2(200, 50);
+    ImVec2 display_size = io.DisplaySize;
+    ImGui::SetNextWindowSize(window_size);
+	float widfactor = 1.0f;
+	float heifactor = 0.0f;
+    ImGui::SetNextWindowPos(ImVec2((display_size.x - window_size.x) * widfactor,
+        (display_size.y - window_size.y) * heifactor));
     ImGui::Begin("Fps", nullptr, ImGuiWindowFlags_AlwaysAutoResize| 
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoScrollbar |
