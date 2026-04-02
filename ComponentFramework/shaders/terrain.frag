@@ -290,8 +290,8 @@ vec4 GridColor(vec4 kt) {
     float gridLine = 1.0 - smoothstep(0.0, edgeWidth, line);
 
 
-	float minHeight = -10.0;
-	float maxHeight = 20.0;
+	float minHeight = 0.0;
+	float maxHeight = 150.0;
     float heightT = clamp((fragWorldPos.y - minHeight) / (maxHeight - minHeight), 0.0, 1.0);
 
 	vec4 highColor  = vec4(0, 0.5, 0.4, 1.0); 

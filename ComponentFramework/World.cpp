@@ -19,7 +19,8 @@ void World::Initialize(int songIndex)
 	vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);
 	baseChunkMesh = std::make_unique<BaseGridMesh>(GenerateMesh(CHUNK_SIZE));
 
-
+	lowestPoint = 0;
+	highestPoint = 0;
 	TerrainPreset preset;
 	std::vector<AudioBands> ab = engineContext.fmodController->AnalyzeAudioOffline(songIndex); // TODO: pass in song num
 	preset.CreateFromAudio(ab);
@@ -30,7 +31,7 @@ void World::Initialize(int songIndex)
 	worldSeed = preset.pAudio.seed;
 	GenerateAllChunks();
 	CreateActorSpawns(preset.actorAmount);
-
+	std::cout << "low Point: " << lowestPoint << " High Point: " << highestPoint << std::endl;
 }
 
 

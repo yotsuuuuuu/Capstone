@@ -96,7 +96,7 @@ bool Scene3::OnCreate() {
 			float x = (col * spacing) - offsetX;
 			float z = (row * spacing) - offsetZ;
 
-			transform->SetPosition(Vec3(x, 0.5f, z));
+			transform->SetPosition(Vec3(x, 25.5f, z));
 
 			
 			
@@ -149,9 +149,9 @@ bool Scene3::OnCreate() {
 		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
 		Vec3 spawn = wC->GetPlayerSpawn();
 		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
-		spawn.y += halfCylinder;
+		spawn.y += halfCylinder * 2.0f;
 		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
-		
+		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
 
 		actorsInScene.push_back(WorldActor);
 
@@ -183,9 +183,10 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
 		Vec3 spawn = w->GetPlayerSpawn();
 		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
-		spawn.y += halfCylinder;
+		spawn.y += halfCylinder * 2.0f;
 		spawn.print();
 		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
+		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
 
 	}
 	switch (sdlEvent.type) {

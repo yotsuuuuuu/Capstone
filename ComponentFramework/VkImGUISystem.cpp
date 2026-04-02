@@ -223,6 +223,13 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
 
         ImGui::SameLine();
         ImGui::BeginGroup();
+        if (ImGui::Button("Reload Song List", ImVec2(child_w * 0.5f, 0))) {
+            cntx.fmodController->AddSonginFile();
+            cntx.fmodController->InitilizeSongs();
+            GatherSystemData(cntx);
+        }
+        ImGui::Dummy(ImVec2(child_w * 0.5f, 0));
+
         if (ImGui::Button("Play", ImVec2(child_w * 0.5f, 0))) {             
             cntx.fmodController->playsong(AudioState::PLAY);
         }
@@ -230,7 +237,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             
             cntx.fmodController->playsong(AudioState::PAUSE);
         }
-
+       
 
 
         if (ImGui::Button("Close Menu", ImVec2(child_w * 0.5f, 0))) {
