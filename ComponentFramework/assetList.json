@@ -1,8 +1,10 @@
 {
- "Meshes": {
+  "Meshes": {
     "IcoMesh": "./meshes/SimpleIco.obj",
     "marioMesh": "./meshes/Mario.obj",
-    "sphereMesh": "./meshes/Sphere.obj"
+    "sphereMesh": "./meshes/Sphere.obj",
+    "pillarMesh": "./meshes/Pillar.obj",
+    "mushroomMesh": "./meshes/mushroom.obj"
   },
   "Shaders": {
     "main": {
@@ -27,7 +29,7 @@
     "SimpleLightShader": {
       "frag": "shaders/SimpleLight.frag.spv",
       "vert": "shaders/SimpleLight.vert.spv",
-       "binding": [ 0 ],
+      "binding": [ 0 ],
       "type": [ 1 ],
       "stage": [ 16 ],
       "pass": 1
@@ -36,7 +38,9 @@
   "Textures": {
     "DefaultTexture": "./textures/DefaultTexture.png",
     "marioMime": "./textures/mario_mime.png",
-    "marioFire": "./textures/mario_fire.png"
+    "marioFire": "./textures/mario_fire.png",
+    "pillarTexture": "./textures/Pillar.png",
+    "mushroomTexture": "./textures/Blue_Mushroom_Texture.png"
   },
 
   "Material": {
@@ -47,9 +51,21 @@
       "recieve shadow": "false"
     },
     "SimpleLightMat": {
-      "texture": ["DefaultTexture"],
+      "texture": [ "DefaultTexture" ],
       "shader": "SimpleLightShader",
       "cast shadow": "false",
+      "recieve shadow": "false"
+    },
+    "PillarMat": {
+      "texture": [ "pillarTexture" ],
+      "shader": "main",
+      "cast shadow": "true",
+      "recieve shadow": "false"
+    },
+    "MushroomMat": {
+      "texture": [ "mushroomTexture" ],
+      "shader": "main",
+      "cast shadow": "true",
       "recieve shadow": "false"
     }
   },
@@ -65,6 +81,14 @@
     "DebugSphere": {
       "Mat": "marioMat",
       "Mesh": "sphereMesh"
+    },
+    "pillar": {
+      "Mat": "PillarMat",
+      "Mesh": "pillarMesh"
+    },
+    "mushroom": {
+      "Mat": "MushroomMat",
+      "Mesh": "mushroomMesh"
     },
     "lightRed": {
       "radius": 1.0,

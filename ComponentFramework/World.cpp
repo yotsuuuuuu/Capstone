@@ -141,7 +141,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	}
 
 	engineContext.assetManager->CreateActor("light", trueLights);
-	engineContext.assetManager->CreateActor("mario", trueRock1);
+	engineContext.assetManager->CreateActor("mushroom", trueRock1);
 	engineContext.assetManager->CreateActor("mario", trueRock2);
 	engineContext.assetManager->CreateActor("mario", trueTree1);
 	engineContext.assetManager->CreateActor("mario", trueTree2);

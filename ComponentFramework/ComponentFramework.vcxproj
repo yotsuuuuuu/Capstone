@@ -258,6 +258,7 @@
     <Text Include="Graphics Game Engine_Log.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assetList.json" />
     <None Include="shaders\ClusterCompute.comp" />
     <None Include="shaders\DownSampling.frag" />
     <None Include="shaders\GlobalLight.frag" />
@@ -289,7 +290,6 @@
     <None Include="shaders\TonePass.frag" />
     <None Include="shaders\TonePass.vert" />
     <None Include="shaders\UpSampling.frag" />
-    <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

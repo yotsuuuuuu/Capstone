@@ -326,9 +326,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.json">
-      <Filter>Json</Filter>
-    </None>
     <None Include="shaders\ClusterCompute.comp">
       <Filter>Shaders\Compute</Filter>
     </None>
@@ -421,6 +418,9 @@
     </None>
     <None Include="shaders\terrain.vert">
       <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="assetList.json">
+      <Filter>Json</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
