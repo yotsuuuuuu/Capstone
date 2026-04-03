@@ -280,9 +280,9 @@ vec4 GridColor(vec4 kt) {
 
 	float lineMod = 1.4f;
 
-	vec2 gridScale = vec2(16,16); 
+	vec2 gridScale = vec2(64,64); 
 	vec2 grid = abs(fract(fragTexCoords * gridScale) - 0.5);
-    float line = min(grid.x, grid.y);
+    float line = min(grid.x, grid.y)* 1.5;
     float edgeWidth = max(fwidth(line) * lineMod, 0.03);
     float gridLine = 1.0 - smoothstep(0.0, edgeWidth, line);
 
