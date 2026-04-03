@@ -32,7 +32,7 @@ void CWorld::InitializeWorld(int songIndex)
 {
 	C_World->Initialize(songIndex);
 	float min = C_World->GetLowestPoint();
-	float max = C_World->GetHighestPoint() + C_World->GetLowestPoint() / 2.0f;
+	float max = (C_World->GetHighestPoint() + C_World->GetLowestPoint()) / 2.0f;
 	dynamic_cast<VulkanRenderer*>(cntx.renderer)->UpdateTerrainMaxMinHieght(min, max);
 }
 

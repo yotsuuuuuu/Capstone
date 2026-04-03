@@ -93,8 +93,8 @@ struct TerrainPreset {
 	// can be adjusted based on desired terrain features/ song style etc (+/- layers)
 
     ActorAmount actorAmount;
-    int magicNumber1;
-    int magicNumber2;
+    int WORLD_SIZE;
+    int magicNumber;
 
     bool truncate = false;
 

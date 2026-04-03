@@ -37,13 +37,10 @@ private:
 
 	// parameters
 	float moveSpeed = 10.0f; // units per second
-	float sprintMultiplier = 2.0f;
+	float sprintMultiplier = 1.5f;
 	float jumpStrength = 20.0f; // units per second
 	float airControl = 0.03f;
 
-	//// ground
-	//bool isGrounded = false;
-	//float groundCheckDistance = 0.1f; // distance to check for ground
 
 public:
 	// movement functions

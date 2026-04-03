@@ -193,6 +193,10 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 	if (moveLeftPressed) { direction -= right; }
 	if (moveRightPressed) { direction += right; }
 
+	if (!moveForwardPressed && !moveBackwardPressed && !moveLeftPressed && !moveRightPressed) {
+
+	}
+
 	//if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
 
 	// normalize if moving diagonally to prevent faster movement

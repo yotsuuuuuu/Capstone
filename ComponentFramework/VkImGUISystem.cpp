@@ -333,7 +333,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         if (ImGui::ColorEdit3("Bottom Terrain Color", (float*)&minColor, ImGuiColorEditFlags_Float)) {
 			vulkanRenderer->UpdateTerrainMinColor(minColor);
         }
-        if (ImGui::DragFloat2("Min/Max Height", (float*)&MinMax, 0.1f, -100.0f, 100.0f, "%.2f")) {
+        if (ImGui::DragFloat2("Min/Max Height", (float*)&MinMax, 0.1f, -100.0f, 1000.0f, "%.2f")) {
             vulkanRenderer->UpdateTerrainMaxMinHieght(MinMax.x, MinMax.y);
         }
         if (ImGui::DragFloat2("Fade Start/End", (float*)&fadeStartEnd, 0.01f, 0.0f, 500.0f, "%.2f")) {

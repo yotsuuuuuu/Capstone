@@ -20,7 +20,7 @@ void CPhysics::ApplyDragForce()
 {
 	// F = -v * dragCoefficient
 	MATH::Vec3 dragForce = -velocity * dragCoefficient;
-	ApplyForce(dragForce);
+	ApplyForce(dragForce*2.0f);
 }
 
 void CPhysics::Update(const float deltaTime)
