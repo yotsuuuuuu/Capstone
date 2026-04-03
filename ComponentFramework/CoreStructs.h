@@ -470,6 +470,7 @@ struct SongTime
 struct TerraindataUBO {
     Vec4 min_max_lineWidth_edgeStrength;
     Vec4 fadeStart_fadeEnd_gridScaleX_gridScaleY;
+    Vec4 ObjectFadeStart_ObjectFadeEnd_pad_pad;
     Vec4 maxColor;
 	Vec4 minColor;
 };

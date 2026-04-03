@@ -72,6 +72,7 @@ layout( set = 0 , binding = 7) uniform TerrainUBO
 {
     vec4 min_max_lineWidth_edgeStrength;
     vec4 fadeStart_fadeEnd_gridScaleX_gridScaleY;
+	vec4 ObjectFadeStart_ObjectFadeEnd_pad_pad;
     vec4 maxColor;
 	vec4 minColor;
 }TData;
@@ -291,8 +292,8 @@ vec4 GridColor(vec4 kt) {
 
 
 	float depth = length(fragViewPos);
-	float fadeStart = TData.fadeStart_fadeEnd_gridScaleX_gridScaleY.x;
-	float fadeEnd   = TData.fadeStart_fadeEnd_gridScaleX_gridScaleY.y;
+	float fadeStart = TData.ObjectFadeStart_ObjectFadeEnd_pad_pad.x;
+	float fadeEnd   = TData.ObjectFadeStart_ObjectFadeEnd_pad_pad.y;
     float depthFade = 1.0 - smoothstep(fadeStart, fadeEnd, depth);
 
     float edgeStrength = 0.6;

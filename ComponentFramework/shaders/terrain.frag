@@ -73,6 +73,7 @@ layout( set = 0 , binding = 7) uniform TerrainUBO
 {
     vec4 min_max_lineWidth_edgeStrength;
     vec4 fadeStart_fadeEnd_gridScaleX_gridScaleY;
+	vec4 ObjectFadeStart_ObjectFadeEnd_pad_pad;
     vec4 maxColor;
 	vec4 minColor;
 }TData;

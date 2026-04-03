@@ -274,6 +274,7 @@
     <None Include="shaders\MushroomGird.frag" />
     <None Include="shaders\phong.frag" />
     <None Include="shaders\phong.vert" />
+    <None Include="shaders\PillarGrid.frag" />
     <None Include="shaders\Sampling.vert" />
     <None Include="shaders\ShadowCheck_2.frag" />
     <None Include="shaders\ShadowCheck.frag" />
