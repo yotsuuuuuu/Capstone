@@ -264,6 +264,7 @@
     <None Include="shaders\GlobalLight.frag" />
     <None Include="shaders\GlobalLight.vert" />
     <None Include="shaders\LightCullCompute.comp" />
+    <None Include="shaders\LowPolyTreeGird.frag" />
     <None Include="shaders\MainPass.frag" />
     <None Include="shaders\MainPass.vert" />
     <None Include="shaders\MassPass_2.frag" />
