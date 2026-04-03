@@ -3,6 +3,9 @@
     "IcoMesh": "./meshes/SimpleIco.obj",
     "marioMesh": "./meshes/Mario.obj",
     "sphereMesh": "./meshes/Sphere.obj",
+    "LowPolyTree1": "./meshes/Tree1.obj",
+    "LowPolyTree2": "./meshes/Tree2.obj",
+    "LowPolyTree3": "./meshes/Tree3.obj",
     "pillarMesh": "./meshes/Pillar.obj",
     "mushroomMesh": "./meshes/mushroom.obj"
   },
@@ -21,6 +24,17 @@
     "Terrain": {
       "frag": "shaders/terrain.frag.spv",
       "vert": "shaders/terrain.vert.spv",
+      "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16 ],
+      "pass": 1
+    },
+    "LowPolyShader": {
+      "config": {
+        "cullMode": 0
+      },
+      "frag": "shaders/MushroomGird.frag.spv",
+      "vert": "shaders/MassPass_2.vert.spv",
       "binding": [ 0 ],
       "type": [ 1 ],
       "stage": [ 16 ],
@@ -53,7 +67,7 @@
 
   "Material": {
     "marioMat": {
-      "texture": ["marioMime"],
+      "texture": [ "marioMime" ],
       "shader": "main",
       "cast shadow": "true",
       "recieve shadow": "false"
@@ -62,6 +76,12 @@
       "texture": [ "DefaultTexture" ],
       "shader": "SimpleLightShader",
       "cast shadow": "false",
+      "recieve shadow": "false"
+    },
+    "LowPolyTreeMat": {
+      "texture": [ "pillarTexture" ],
+      "shader": "LowPolyShader",
+      "cast shadow": "true",
       "recieve shadow": "false"
     },
     "PillarMat": {
@@ -97,6 +117,18 @@
     "mushroom": {
       "Mat": "MushroomMat",
       "Mesh": "mushroomMesh"
+    },
+    "LowPolyTree1": {
+      "Mat": "LowPolyTreeMat",
+      "Mesh": "LowPolyTree1"
+    },
+    "LowPolyTree2": {
+      "Mat": "LowPolyTreeMat",
+      "Mesh": "LowPolyTree2"
+    },
+    "LowPolyTree3": {
+      "Mat": "LowPolyTreeMat",
+      "Mesh": "LowPolyTree3"
     },
     "lightRed": {
       "radius": 1.0,

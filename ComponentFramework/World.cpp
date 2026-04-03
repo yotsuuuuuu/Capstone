@@ -143,8 +143,8 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	engineContext.assetManager->CreateActor("light", trueLights);
 	engineContext.assetManager->CreateActor("mushroom", trueRock1);
 	engineContext.assetManager->CreateActor("pillar", trueRock2);
-	engineContext.assetManager->CreateActor("mario", trueTree1);
-	engineContext.assetManager->CreateActor("mario", trueTree2);
+	engineContext.assetManager->CreateActor("LowPolyTree1", trueTree1);
+	engineContext.assetManager->CreateActor("LowPolyTree2", trueTree2);
 
 	auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
 	auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
