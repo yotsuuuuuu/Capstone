@@ -13,18 +13,26 @@
       },
       "frag": "shaders/MassPass_2.frag.spv",
       "vert": "shaders/MassPass_2.vert.spv",
-        "binding": [ 0 ],
+      "binding": [ 0 ],
       "type": [ 1 ],
       "stage": [ 16 ],
-      "pass":  1 
+      "pass": 1
     },
     "Terrain": {
       "frag": "shaders/terrain.frag.spv",
       "vert": "shaders/terrain.vert.spv",
-        "binding": [ 0 ],
+      "binding": [ 0 ],
       "type": [ 1 ],
-      "stage": [ 16],
-      "pass": 1 
+      "stage": [ 16 ],
+      "pass": 1
+    },
+    "MushroomShader": {
+      "frag": "shaders/MushroomGird.frag.spv",
+      "vert": "shaders/MassPass_2.vert.spv",
+      "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16 ],
+      "pass": 1
     },
     "SimpleLightShader": {
       "frag": "shaders/SimpleLight.frag.spv",
@@ -64,7 +72,7 @@
     },
     "MushroomMat": {
       "texture": [ "mushroomTexture" ],
-      "shader": "main",
+      "shader": "MushroomShader",
       "cast shadow": "true",
       "recieve shadow": "false"
     }
