@@ -74,5 +74,5 @@ private:
 
 	uint32_t HashChunkCoord(int x, int y, uint32_t globalSeed);
 	std::mt19937 GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed);
-	std::vector<size_t> GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937& rng);
+	std::vector<size_t> GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937 rng);
 };

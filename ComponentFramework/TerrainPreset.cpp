@@ -32,13 +32,15 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 
     std::cout << globalHeightScale << std::endl;
 
-	int maxActors = 200;
+    int WORLD_SIZE = pAudio.songLength / 200;
+
+    int maxActors = (WORLD_SIZE * WORLD_SIZE) * 2; // 2x world size amount of actors (2 per chunk roughly)
     //int totalActors = 0;
-    actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.midHigh), 40, 140); // keep between 40-140
-    actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * 11)), 1, 12);
-    actorAmount.tree2 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * 11, 1, 12);
-    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * 11)), 1, 12);
-    actorAmount.rock2 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum + pAudio.highAvgSum * 2) * 11), 1, 12);
+    actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.lowMid), 40, maxActors / 2); // keep between 40-half max
+    actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * (maxActors / 6))), 1, maxActors / 6);
+    actorAmount.tree2 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * (maxActors / 6), 1, maxActors / 6);
+    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * (maxActors / 6))), 1, maxActors / 6);
+    actorAmount.rock2 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum + pAudio.highAvgSum * 2) * (maxActors / 6)), 1, maxActors / 6);
 
 
     int totalActors = actorAmount.lights + actorAmount.rock1 + actorAmount.rock2 + actorAmount.tree1 + actorAmount.tree2;
@@ -48,10 +50,10 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
         actorAmount.lights -= temp;
     }
     else if(totalActors < maxActors){ // if too little add to lights
-        int temp = totalActors - maxActors;
+        int temp = maxActors - totalActors;
         actorAmount.lights += temp;
     }
-    
+    totalActors = actorAmount.lights + actorAmount.rock1 + actorAmount.rock2 + actorAmount.tree1 + actorAmount.tree2;
     actorAmount.totalActors = totalActors;
 
     magicNumber1 = (int)pAudio.bassMaxSum % 57;

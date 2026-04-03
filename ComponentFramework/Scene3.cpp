@@ -40,81 +40,82 @@ bool Scene3::OnCreate() {
 		VulkanRenderer* vRenderer;
 		vRenderer = dynamic_cast<VulkanRenderer*>(engineContext.renderer);		
 		
-		auto lights = engineContext.assetManager->CreateActor("lightMagenta", 200);
-		auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
-		auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
+		//auto lights = engineContext.assetManager->CreateActor("lightMagenta", 200);
+		//auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
+		//auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
 
-		if (!LightMat->OnCreate()) {
-			Debug::Warning("LightMat Failed ", __FILE__, __LINE__);
-			return false;
-		}
-		if (!LightMesh->OnCreate()) {
-			Debug::Warning("LightMesh Failed ", __FILE__, __LINE__);
-			return false;
-		}
+		//if (!LightMat->OnCreate()) {
+		//	Debug::Warning("LightMat Failed ", __FILE__, __LINE__);
+		//	return false;
+		//}
+		//if (!LightMesh->OnCreate()) {
+		//	Debug::Warning("LightMesh Failed ", __FILE__, __LINE__);
+		//	return false;
+		//}
 
-		engineContext.assetManager->CreateActor("mario",1);
+		//engineContext.assetManager->CreateActor("mario",1);
 
 
 		auto& actorsInScene = engineContext.assetManager->GetActorsInScene();
 
 		// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
-		const float spacing = 20.0f;
-		int gridSize = static_cast<int>(std::ceil(std::sqrt(lights.size())));
+		//const float spacing = 20.0f;
+		//int gridSize = static_cast<int>(std::ceil(std::sqrt(lights.size())));
 		
-		static const Vec3 testColors[] = {
-			{1.0f, 0.0f, 0.0f},   // red
-			{0.0f, 1.0f, 0.0f},   // green
-			{0.0f, 0.0f, 1.0f},   // blue
-			{1.0f, 1.0f, 0.0f},   // yellow
-			{0.0f, 1.0f, 1.0f},   // cyan
-			{1.0f, 0.0f, 1.0f},   // magenta
-			{1.0f, 0.5f, 0.0f},   // orange
-			{0.5f, 0.0f, 1.0f},   // purple
-			{0.0f, 1.0f, 0.5f},   // spring green
-			{1.0f, 0.0f, 0.5f},   // rose
-		};
-		const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
+		//static const Vec3 testColors[] = {
+		//	{1.0f, 0.0f, 0.0f},   // red
+		//	{0.0f, 1.0f, 0.0f},   // green
+		//	{0.0f, 0.0f, 1.0f},   // blue
+		//	{1.0f, 1.0f, 0.0f},   // yellow
+		//	{0.0f, 1.0f, 1.0f},   // cyan
+		//	{1.0f, 0.0f, 1.0f},   // magenta
+		//	{1.0f, 0.5f, 0.0f},   // orange
+		//	{0.5f, 0.0f, 1.0f},   // purple
+		//	{0.0f, 1.0f, 0.5f},   // spring green
+		//	{1.0f, 0.0f, 0.5f},   // rose
+		//};
 
-		int index = 0;
-		for (auto& actor : lights)
-		{
-			auto act = std::dynamic_pointer_cast<CActor>(actor);
-			auto light = act->GetComponent<CLight>();
-			auto transform = act->GetComponent<CTransform>();
+		//const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
 
-			if (!light || !transform)
-				continue;
+		//int index = 0;
+		//for (auto& actor : lights)
+		//{
+		//	auto act = std::dynamic_pointer_cast<CActor>(actor);
+		//	auto light = act->GetComponent<CLight>();
+		//	auto transform = act->GetComponent<CTransform>();
 
-			// Calculate grid position on XZ plane
-			int row = index / gridSize;
-			int col = index % gridSize;
+		//	if (!light || !transform)
+		//		continue;
 
-			float offsetX = (gridSize - 1) * spacing * 0.5f;
-			float offsetZ = (gridSize - 1) * spacing * 0.5f;
+		//	// Calculate grid position on XZ plane
+		//	int row = index / gridSize;
+		//	int col = index % gridSize;
 
-			float x = (col * spacing) - offsetX;
-			float z = (row * spacing) - offsetZ;
+		//	float offsetX = (gridSize - 1) * spacing * 0.5f;
+		//	float offsetZ = (gridSize - 1) * spacing * 0.5f;
 
-			transform->SetPosition(Vec3(x, 25.5f, z));
+		//	float x = (col * spacing) - offsetX;
+		//	float z = (row * spacing) - offsetZ;
 
-			
-			
-			float yaw = (index * 37.0f) * RADIANS_TO_DEGREES;
-			
-			Quaternion rotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, -1.0f, 0.0f));
-			transform->SetRotation(rotation);
-			// Cycle through distinct colors
-			Vec3 color = testColors[index % colorCount];
-			light->UpdateRadius(25.0f);
-			light->UpdateAudioId(index % 10);
-			light->UpdateBloomScale(0.9f);
-			light->UpdateIntensity(2.0f);
-			light->UpdateColour(color);
-			light->UpdateLight();
+		//	transform->SetPosition(Vec3(x, 25.5f, z));
 
-			index++;
-		}
+		//	
+		//	
+		//	float yaw = (index * 37.0f) * RADIANS_TO_DEGREES;
+		//	
+		//	Quaternion rotation = QMath::angleAxisRotation(yaw, Vec3(0.0f, -1.0f, 0.0f));
+		//	transform->SetRotation(rotation);
+		//	// Cycle through distinct colors
+		//	Vec3 color = testColors[index % colorCount];
+		//	light->UpdateRadius(25.0f);
+		//	light->UpdateAudioId(index % 10);
+		//	light->UpdateBloomScale(0.9f);
+		//	light->UpdateIntensity(2.0f);
+		//	light->UpdateColour(color);
+		//	light->UpdateLight();
+
+		//	index++;
+		//}
 		//step 1.3 Materials
 
 		 std::vector<std::string> filepaths = { "./textures/rock.png" };
@@ -187,6 +188,10 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 		spawn.print();
 		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
 		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
+		auto sceneActors = engineContext.assetManager->GetActorsInScene();
+		//sceneActors.push_back(camera);
+		sceneActors.push_back(world);
+
 
 	}
 	else if (sdlEvent.type == CustomEvent::PLAYER_RESET_EVENT) {

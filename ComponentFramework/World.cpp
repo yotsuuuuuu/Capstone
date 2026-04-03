@@ -1,6 +1,8 @@
 ﻿#include "World.h"
 #include "FmodController.h"
 #include "AssetManager.h"
+#include "CLight.h"
+#include "CActor.h"
 #include <numeric>
 
 
@@ -27,7 +29,7 @@ void World::Initialize(int songIndex)
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();
 	
-	WORLD_SIZE = preset.pAudio.songLength / 140; // this is a really rough way to determine world size based on song length.
+	WORLD_SIZE = preset.pAudio.songLength / 200; // this is a really rough way to determine world size based on song length.
 	worldSeed = preset.pAudio.seed;
 	GenerateAllChunks();
 	CreateActorSpawns(preset.actorAmount);
@@ -41,9 +43,16 @@ void World::OnDelete()
 	baseChunkMesh.reset();
 	vkDeviceWaitIdle(vRenderer->getDevice());
 	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
+	engineContext.assetManager->clearActorsInScene();
+	actorlocations.clear();
+
+	chunkMap.clear();
+
 	for (const auto& c : chunkRenderData) {
 		vRenderer->DestroyTerrainVertexBuffers(c.vertexBuffer);
 	}
+	chunkRenderData.clear();
+	chunkRenderData.shrink_to_fit();
 }
 
 
@@ -69,7 +78,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	int actorPerChunk = actorAmount_.totalActors / (WORLD_SIZE * WORLD_SIZE); // average out number of actors to chunks
 	
 
-	const int MAX_ATTEMPTS = actorPerChunk * 100;
+	const int MAX_ATTEMPTS = actorPerChunk * 200;
 	int attempts = 0;
 	float minDistance = 5.0f;
 	float minDistSq = minDistance * minDistance;
@@ -87,7 +96,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 			float localZ = zDist(rng);
 			float worldX = chunkPos.x + localX;
 			float worldZ = chunkPos.y + localZ;
-			float y = c->GetHeightAtPosition(localX, localZ, CHUNK_WORLD_SIZE); 
+			float y = c->GetHeightAtPosition(localX, localZ, CHUNK_SIZE); 
 
 			Vec3 candidate(worldX, y, worldZ);
 
@@ -108,12 +117,53 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 
 			attempts++;
 		}
-		actorlocations.insert(actorlocations.end(), actorsInChunk.begin(), actorsInChunk.end()); // add the chunk actors to the big list of locations
+		actorlocations.insert(actorlocations.end(), std::make_move_iterator(actorsInChunk.begin()), std::make_move_iterator(actorsInChunk.end())); // add the chunk actors to the big list of locations
 	}
 
-	//engineContext.assetManager->CreateActor("")
+	int trueLights = ((float)actorAmount_.lights / (float)actorAmount_.totalActors) * actorlocations.size();
+	int trueRock1 = ((float)actorAmount_.rock1 / (float)actorAmount_.totalActors) * actorlocations.size();
+	int trueRock2 = ((float)actorAmount_.rock2 / (float)actorAmount_.totalActors) * actorlocations.size();
+	int trueTree1 = ((float)actorAmount_.tree1 / (float)actorAmount_.totalActors) * actorlocations.size();
+	int trueTree2 = ((float)actorAmount_.tree2 / (float)actorAmount_.totalActors) * actorlocations.size();
 
-	//std::vector<size_t> shuffledIndices = GetShuffledIndices(, std::mt19937(worldSeed));
+	int trueTotal = trueLights + trueRock1 + trueRock2 + trueTree1 + trueTree2;
+
+	if ((trueTotal) > actorlocations.size()){
+		int temp = trueTotal - actorlocations.size();
+		trueLights -= temp;
+	}
+	else if ((trueTotal) < actorlocations.size()) {
+		int temp =  actorlocations.size() - trueTotal;
+		trueLights += temp;
+	}
+
+	engineContext.assetManager->CreateActor("light", trueLights);
+	engineContext.assetManager->CreateActor("light", trueRock1);
+	engineContext.assetManager->CreateActor("light", trueRock2);
+	engineContext.assetManager->CreateActor("mario", trueTree1);
+	engineContext.assetManager->CreateActor("mario", trueTree2);
+
+	static const Vec3 testColors[] = {
+		{1.0f, 0.0f, 0.0f},   // red
+		{0.0f, 1.0f, 0.0f},   // green
+		{0.0f, 0.0f, 1.0f},   // blue
+		{1.0f, 1.0f, 0.0f},   // yellow
+		{0.0f, 1.0f, 1.0f},   // cyan
+		{1.0f, 0.0f, 1.0f},   // magenta
+		{1.0f, 0.5f, 0.0f},   // orange
+		{0.5f, 0.0f, 1.0f},   // purple
+		{0.0f, 1.0f, 0.5f},   // spring green
+		{1.0f, 0.0f, 0.5f},   // rose
+	};
+
+	auto& actorsInScene = engineContext.assetManager->GetActorsInScene();
+	std::vector<size_t> shuffledIndices = GetShuffledIndices(actorsInScene, std::mt19937(worldSeed));
+
+	const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
+	int index = 0;
+
+
+
 	//size_t idx = 0;
 	//for (int i = 0; i < actorCount; ++i) {
 	//	size_t actorIndex = shuffledIndices[idx % shuffledIndices.size()];
@@ -121,7 +171,29 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	//	++idx;
 	//}
 
-	  
+	for (auto& actor : actorsInScene) {
+
+		auto a = std::dynamic_pointer_cast<CActor>(actor);
+
+		auto light = a->GetComponent<CLight>();
+		auto transform = a->GetComponent<CTransform>();
+		if (!transform) { 
+			continue; 
+		}
+		if (light) { 
+			Vec3 color = testColors[index % colorCount];
+			light->UpdateRadius(25.0f);
+			light->UpdateAudioId(index % 10);
+			light->UpdateBloomScale(0.9f);
+			light->UpdateIntensity(2.0f);
+			light->UpdateColour(color);
+			light->UpdateLight();
+		}
+		int actorIndex = shuffledIndices[index % shuffledIndices.size()];
+		transform->SetPosition(actorlocations[actorIndex]);
+
+		index++;
+	}
 
 }
 
@@ -283,7 +355,7 @@ std::mt19937 World::GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed)
 	return std::mt19937(seed);
 }
 
-std::vector<size_t> World::GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937& rng)
+std::vector<size_t> World::GetShuffledIndices(const std::vector<std::shared_ptr<Component>>& actors, std::mt19937 rng)
 {
 	std::vector<size_t> indices(actors.size());
 	std::iota(indices.begin(), indices.end(), 0);
