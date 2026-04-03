@@ -366,7 +366,6 @@ void AssetManager::clearActorsInScene()
         actorMap[i]->OnDestroy();
     }
     actorMap.clear();
-    actorMap.resize(0);
 }
 
 Ref<Component> AssetManager::GetCamera()

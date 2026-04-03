@@ -34,7 +34,7 @@ void CPhysics::Update(const float deltaTime)
 	acceleration = MATH::Vec3(0.0f, 0.0f, 0.0f); // Reset acceleration after each update
 
 	if (hasGravity && !isGrounded){ // only apply gravity when not on the ground
-		ApplyForce(gravity*mass*3.0f);
+		ApplyForce(gravity*mass);
 	}
 	ApplyDragForce();
 

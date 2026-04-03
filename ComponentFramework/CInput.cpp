@@ -75,6 +75,7 @@ void CInput::HandleKeyboardInput(const SDL_Event& event)
 		break;
 	case SDLK_V:
 		noclip = pressed;
+		break;
 	case SDLK_SPACE:
 		jumpPressed = pressed;
 		break;

@@ -3,6 +3,8 @@
 #include "AssetManager.h"
 #include "CLight.h"
 #include "CActor.h"
+#include "CMaterial.h"
+#include "CMesh.h"
 #include <numeric>
 
 
@@ -71,14 +73,14 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	if (chunk->second->getMaxY() - height > 10) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
 
 	Vec2 chunkWorld = chunk->second->GetChunkPos();
-	spawnPoint = Vec3(chunkWorld.x, height + 2.0f, chunkWorld.y); // height w buffer
+	spawnPoint = Vec3(chunkWorld.x, height + 5.0f, chunkWorld.y); // height w buffer
 
 
 	// RANDOM ACTOR PLACEMENT
 	int actorPerChunk = actorAmount_.totalActors / (WORLD_SIZE * WORLD_SIZE); // average out number of actors to chunks
 	
 
-	const int MAX_ATTEMPTS = actorPerChunk * 200;
+	const int MAX_ATTEMPTS = actorPerChunk * 400;
 	int attempts = 0;
 	float minDistance = 5.0f;
 	float minDistSq = minDistance * minDistance;
@@ -87,7 +89,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		const auto& c = p.second;
 		std::vector<Vec3> actorsInChunk;
 		Vec2 chunkPos = c->GetChunkPos();
-		auto rng = GetChunkRNG(chunkPos, worldSeed);
+		auto rng = GetChunkRNG(chunkPos, worldSeed*7.0f);
 		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_SIZE);
 		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_SIZE);
 
@@ -98,7 +100,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 			float worldZ = chunkPos.y + localZ;
 			float y = c->GetHeightAtPosition(localX, localZ, CHUNK_SIZE); 
 
-			Vec3 candidate(worldX, y+5.0f, worldZ);
+			Vec3 candidate(worldX, y, worldZ);
 
 			bool tooClose = false;
 
@@ -139,10 +141,20 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	}
 
 	engineContext.assetManager->CreateActor("light", trueLights);
-	engineContext.assetManager->CreateActor("light", trueRock1);
-	engineContext.assetManager->CreateActor("light", trueRock2);
-	engineContext.assetManager->CreateActor("light", trueTree1);
-	engineContext.assetManager->CreateActor("light", trueTree2);
+	engineContext.assetManager->CreateActor("mario", trueRock1);
+	engineContext.assetManager->CreateActor("mario", trueRock2);
+	engineContext.assetManager->CreateActor("mario", trueTree1);
+	engineContext.assetManager->CreateActor("mario", trueTree2);
+
+	auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
+	auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
+
+	if (!LightMat->OnCreate()) {
+	Debug::Warning("LightMat Failed ", __FILE__, __LINE__);
+	}
+	if (!LightMesh->OnCreate()) {
+	Debug::Warning("LightMesh Failed ", __FILE__, __LINE__);
+	}
 
 	static const Vec3 testColors[] = {
 		{1.0f, 0.0f, 0.0f},   // red
@@ -180,6 +192,10 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		if (!transform) { 
 			continue; 
 		}
+
+		int actorIndex = shuffledIndices[idx % shuffledIndices.size()];
+		transform->SetPosition(actorlocations[actorIndex]);
+
 		if (light) { 
 			Vec3 color = testColors[index % colorCount];
 			light->UpdateRadius(25.0f);
@@ -187,11 +203,10 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 			light->UpdateBloomScale(0.9f);
 			light->UpdateIntensity(2.0f);
 			light->UpdateColour(color);
+			transform->SetPosition(transform->GetPosition() + Vec3(0.0f, 5.0f, 0.0f));
 			light->UpdateLight();
 			index++;
 		}
-		int actorIndex = shuffledIndices[idx % shuffledIndices.size()];
-		transform->SetPosition(actorlocations[actorIndex]);
 		idx++;
 
 	}
@@ -345,7 +360,7 @@ void World::CalculateNormals(std::vector<Vertex>& vertices)
 
 uint32_t World::HashChunkCoord(int x, int y, uint32_t globalSeed)
 {
-	return x * 73856093 ^ y * 19349663 ^ globalSeed;
+	return x * 73856093 ^ y * 1934966323487 ^ globalSeed;
 }
 
 std::mt19937 World::GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed)
