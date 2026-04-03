@@ -58,11 +58,6 @@ void PhysicsManager::TerrainCollision()
 
         Vec2 chunkPos = chunk.chunkPos; 
 
-        // quarter steps like mario
-		Vec3 playerDirection = playerPhysics->GetVelocity();
-		if (VMath::mag(playerDirection) < VERY_SMALL) {
-			playerDirection = Vec3(0.0f, -1.0f, 0.0f); // if player is not moving, just check downwards
-		}
 
 			// narrow phase triangle collision
 		MeshCollisionInfo mInfo = playerCollider->IntersectingMesh(chunk.vertices, chunkIndices, chunkPos);

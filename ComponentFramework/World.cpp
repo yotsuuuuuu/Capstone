@@ -31,11 +31,62 @@ void World::Initialize(int songIndex)
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();
 	
-	WORLD_SIZE = preset.pAudio.songLength / 200; // this is a really rough way to determine world size based on song length.
+	WORLD_SIZE = preset.WORLD_SIZE; 
+
 	worldSeed = preset.pAudio.seed;
 	GenerateAllChunks();
 	CreateActorSpawns(preset.actorAmount);
 	std::cout << "low Point: " << lowestPoint << " High Point: " << highestPoint << std::endl;
+
+
+	static const Vec3 testColors[] = {
+		{1.0f, 0.0f, 0.0f},   // red			//0
+		{0.0f, 1.0f, 0.0f},   // green			//1
+		{0.0f, 0.0f, 1.0f},   // blue			//2
+		{1.0f, 1.0f, 0.0f},   // yellow			//3
+		{0.0f, 1.0f, 1.0f},   // cyan			//4
+		{1.0f, 0.0f, 1.0f},   // magenta		//5
+		{1.0f, 0.5f, 0.0f},   // orange			//6
+		{0.5f, 0.0f, 1.0f},   // purple			//7
+		{0.0f, 1.0f, 0.5f},   // spring green	//8
+		{1.0f, 0.0f, 0.5f},   // rose			//9
+	};
+
+	struct colourPairs {
+		Vec3 colour1;
+		Vec3 colour2;
+	};
+	std::vector<colourPairs> pairs;
+
+	pairs.push_back(colourPairs{ testColors[2], testColors[3] }); // blue yellow
+	pairs.push_back(colourPairs{ testColors[3], testColors[0] }); // yellow red
+	pairs.push_back(colourPairs{ testColors[4], testColors[5] }); // cyan magenta
+	pairs.push_back(colourPairs{ testColors[6], testColors[2] }); // orange blue
+	//pairs.push_back(colourPairs{ testColors[7], testColors[5] }); // purple magenta
+	pairs.push_back(colourPairs{ testColors[0], testColors[2] }); // red blue
+	pairs.push_back(colourPairs{ testColors[3], testColors[7] }); // yellow purple
+	pairs.push_back(colourPairs{ testColors[8], testColors[9] }); // spring green rose
+	pairs.push_back(colourPairs{ testColors[9], testColors[4] }); // rose cyan
+	pairs.push_back(colourPairs{ testColors[9], testColors[3] }); // rose yellow
+	pairs.push_back(colourPairs{ testColors[0], testColors[5] }); // red magenta
+	pairs.push_back(colourPairs{ testColors[2], testColors[4] }); // blue cyan
+
+
+	int colourIndex = preset.magicNumber % pairs.size();
+
+	std::cout << "World - colour index: " << colourIndex << std::endl;
+	std::cout << "World - magic number: " << preset.magicNumber << std::endl;
+	if (preset.magicNumber % 2 == 0) {
+	vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour1);
+	vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour2);
+	}
+	else {
+	vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour1);
+	vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour2);
+
+	}
+
+
 }
 
 
@@ -69,7 +120,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	auto chunk = chunkMap.find(Vec2(centerId, centerId)); // middle chunk (chunk space)
 	float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
 
-	std::cout << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
+	std::cout << "World - player chunk" << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
 	if (chunk->second->getMaxY() - height > 10) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
 
 	Vec2 chunkWorld = chunk->second->GetChunkPos();
@@ -82,7 +133,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 
 	const int MAX_ATTEMPTS = actorPerChunk * 400;
 	int attempts = 0;
-	float minDistance = 5.0f;
+	float minDistance = 2.0f;
 	float minDistSq = minDistance * minDistance;
 
 	for (const auto& p : chunkMap) {
@@ -157,16 +208,16 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	}
 
 	static const Vec3 testColors[] = {
-		{1.0f, 0.0f, 0.0f},   // red
-		{0.0f, 1.0f, 0.0f},   // green
-		{0.0f, 0.0f, 1.0f},   // blue
-		{1.0f, 1.0f, 0.0f},   // yellow
-		{0.0f, 1.0f, 1.0f},   // cyan
-		{1.0f, 0.0f, 1.0f},   // magenta
-		{1.0f, 0.5f, 0.0f},   // orange
-		{0.5f, 0.0f, 1.0f},   // purple
-		{0.0f, 1.0f, 0.5f},   // spring green
-		{1.0f, 0.0f, 0.5f},   // rose
+		{1.0f, 0.0f, 0.0f},   // red			//0
+		{0.0f, 1.0f, 0.0f},   // green			//1
+		{0.0f, 0.0f, 1.0f},   // blue			//2
+		{1.0f, 1.0f, 0.0f},   // yellow			//3
+		{0.0f, 1.0f, 1.0f},   // cyan			//4
+		{1.0f, 0.0f, 1.0f},   // magenta		//5
+		{1.0f, 0.5f, 0.0f},   // orange			//6
+		{0.5f, 0.0f, 1.0f},   // purple			//7
+		{0.0f, 1.0f, 0.5f},   // spring green	//8
+		{1.0f, 0.0f, 0.5f},   // rose			//9
 	};
 
 	auto& actorsInScene = engineContext.assetManager->GetActorsInScene();
@@ -175,7 +226,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
 	int index = 0;
 
-	std::cout << "actors in scene: " << actorsInScene.size() << std::endl;
+	std::cout <<"World - " << "actors in scene: " << actorsInScene.size() << std::endl;
 
 	size_t idx = 0;
 	//for (int i = 0; i < actorCount; ++i) {
@@ -210,6 +261,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		idx++;
 
 	}
+
 
 }
 

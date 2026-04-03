@@ -6,7 +6,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 
 	// scale high frequencies to a more usable range (since they tend to be very low) and clamp to 1.0f
 	//float highScaled = std::min(pAudio.highAvgSum * 100.0f, 1.0f); 
-	float highScaled = std::min(pAudio.highAvgSum * 100.0f, 2.0f); 
+	float highScaled = std::min(pAudio.highAvgSum * 10.0f, 1.0f); 
     //float highScaled = pAudio.highAvgSum * 100.0f;
     float midScaled = std::min(pAudio.midAvgSum * 2.0f, 1.0f);
 	float bassScaled = pAudio.bassAvgSum; // bass is usually already in a good range so no need to scale much, maybe just a little
@@ -16,11 +16,11 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	//CreateErosion();
 	//CreateContinentalness();
 	
-	exponent = (highScaled * 0.8f);
-	std::cout << exponent << std::endl;
+	exponent =  1 + (highScaled*2);
+	std::cout <<"Terrain preset - exponent: " << exponent << std::endl;
 
-	float midDominance = pAudio.midAvgSum * 1.3f; 
-	float bassInfluence = pAudio.bassAvgSum / 1.6f; // if mids are significantly higher than bass, consider them dominant
+	float midDominance = pAudio.midAvgSum * 1.2f; 
+	float bassInfluence = pAudio.bassAvgSum / 1.4f; // if mids are significantly higher than bass, consider them dominant
 	bool midsDominate = midDominance > bassInfluence;
 	bool highsDominate = highScaled > 0.5f;
 
@@ -30,11 +30,11 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 
 	globalHeightScale = 3.0f + (pAudio.bassAvgSum * 10.0f); // bass can influence overall height since its usually the highest and can create more dramatic terrain with higher values
 
-    std::cout << globalHeightScale << std::endl;
+    std::cout <<"Terrain Preset - global height scale: " << globalHeightScale << std::endl;
 
-    int WORLD_SIZE = pAudio.songLength / 200;
+    WORLD_SIZE = std::clamp(20 + (pAudio.songLength / 200), 25, 32);
 
-    int maxActors = (WORLD_SIZE * WORLD_SIZE) * 2; // 2x world size amount of actors (2 per chunk roughly)
+    int maxActors = (WORLD_SIZE * WORLD_SIZE) * 2.5; // 2x world size amount of actors (2 per chunk roughly)
     //int totalActors = 0;
     actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.lowMid), 40, maxActors / 2); // keep between 40-half max
     actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * (maxActors / 6))), 1, maxActors / 6);
@@ -56,9 +56,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
     totalActors = actorAmount.lights + actorAmount.rock1 + actorAmount.rock2 + actorAmount.tree1 + actorAmount.tree2;
     actorAmount.totalActors = totalActors;
 
-    magicNumber1 = (int)pAudio.bassMaxSum % 57;
-    magicNumber2 = (int)pAudio.midMaxSum % 64;
-
+    magicNumber = (pAudio.seed/2) + (pAudio.highMaxSum * 100);
 	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
 	// TODO: (andres) continentallness heights
 	// TODO: (andres) randomize actor placement (lights, etc) ( x % worldsize, then x % chunksize)
@@ -421,7 +419,7 @@ void TerrainPreset::CreatePeaksValleys()
 	AudioBands avgBands = pAudio.avgBands;
 	peaksValleys.type = ChooseNoise(1, pAudio.highAvgSum); // avg sum cause alone they tiny 
 	peaksValleys.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	peaksValleys.frequency = 0.001f + (pAudio.highAvgSum * 0.3f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
+	peaksValleys.frequency = 0.001f + (pAudio.highAvgSum * 0.4f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
 	peaksValleys.amplitude = 0.3f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
 	peaksValleys.fractal = ChooseFractal(1, pAudio.highAvgSum); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
 	
