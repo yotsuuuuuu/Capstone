@@ -422,6 +422,7 @@
     <None Include="assetList.json">
       <Filter>Json</Filter>
     </None>
+    <None Include="shaders\MushroomGird.frag" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
