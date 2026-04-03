@@ -156,7 +156,7 @@ void main() {
 	phongContrib *= phongScale;
 	
 	phongResult += shadow * phongContrib;
-	phongResult += ClusterLightsColour(kt);
+	phongResult += ClusterLightsColour(gird_color);
 	//vec4 phongResult = vec4(max(dot(vertNormal, lightDir), 0));
 	fragColor = phongResult;
 	//fragColor = shadow * vec4(1.0,1.0,1.0,1.0);

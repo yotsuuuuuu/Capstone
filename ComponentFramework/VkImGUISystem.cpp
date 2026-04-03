@@ -320,6 +320,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
 		Vec4 minColor = Terraindata.minColor;
 		Vec2 MinMax = Vec2(Terraindata.min_max_lineWidth_edgeStrength.x, Terraindata.min_max_lineWidth_edgeStrength.y);
 		Vec2 fadeStartEnd = Vec2(Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.x, Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.y);
+        Vec2 ObjfadeStartEnd = Vec2(Terraindata.ObjectFadeStart_ObjectFadeEnd_pad_pad.x, Terraindata.ObjectFadeStart_ObjectFadeEnd_pad_pad.y);
 		Vec2 gridScale = Vec2(Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.z, Terraindata.fadeStart_fadeEnd_gridScaleX_gridScaleY.w);
 		float lineWidth = Terraindata.min_max_lineWidth_edgeStrength.z;
 		float edgeStrength = Terraindata.min_max_lineWidth_edgeStrength.w;		
@@ -336,8 +337,11 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         if (ImGui::DragFloat2("Min/Max Height", (float*)&MinMax, 0.1f, -100.0f, 100.0f, "%.2f")) {
             vulkanRenderer->UpdateTerrainMaxMinHieght(MinMax.x, MinMax.y);
         }
-        if (ImGui::DragFloat2("Fade Start/End", (float*)&fadeStartEnd, 0.01f, 0.0f, 500.0f, "%.2f")) {
-			vulkanRenderer->UpdateTerrainFade(fadeStartEnd.x, fadeStartEnd.y);
+        if (ImGui::DragFloat2("Terrain Fade Start/End", (float*)&fadeStartEnd, 0.05f, 0.0f, 500.0f, "%.2f")) {
+            vulkanRenderer->UpdateTerrainFade(fadeStartEnd.x, fadeStartEnd.y);
+        }
+        if (ImGui::DragFloat2("Object Fade Start/End", (float*)&ObjfadeStartEnd, 0.05f, 0.0f, 500.0f, "%.2f")) {
+			vulkanRenderer->UpdateObjectFade(ObjfadeStartEnd.x, ObjfadeStartEnd.y);
         }
         if (ImGui::DragFloat2("Grid Size", (float*)&gridScale, 0.01f, 0.01f, 100.0f, "%.1f")) {
 			vulkanRenderer->UpdateTerrainGridScale(gridScale.x, gridScale.y);

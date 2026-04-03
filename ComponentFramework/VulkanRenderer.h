@@ -474,6 +474,11 @@ public:
         TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.w = gridScaleY;
 		TerrainStateDirty = true;
     }
+    void UpdateObjectFade(float fadeStart, float fadeEnd) {
+        TerrainStateData.ObjectFadeStart_ObjectFadeEnd_pad_pad.x = fadeStart;
+        TerrainStateData.ObjectFadeStart_ObjectFadeEnd_pad_pad.y = fadeEnd;
+        TerrainStateDirty = true;
+	}
     void UpdateTerrainFade(float fadeStart, float fadeEnd) {
 
         TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY.x = fadeStart;
