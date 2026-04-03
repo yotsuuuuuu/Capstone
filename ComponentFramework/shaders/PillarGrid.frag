@@ -156,7 +156,7 @@ void main() {
 	phongContrib *= phongScale;
 	
 	phongResult += shadow * phongContrib;
-	phongResult += ClusterLightsColour(kt);
+	phongResult += ClusterLightsColour(gird_color);
 	//vec4 phongResult = vec4(max(dot(vertNormal, lightDir), 0));
 	fragColor = phongResult;
 	//fragColor = shadow * vec4(1.0,1.0,1.0,1.0);
@@ -280,7 +280,7 @@ vec4 GridColor(vec4 kt) {
 
 	float lineMod = 1.4f;
 
-	vec2 gridScale = vec2(12,12); 
+	vec2 gridScale = vec2(16,16); 
 	vec2 grid = abs(fract(fragTexCoords * gridScale) - 0.5);
     float line = min(grid.x, grid.y);
     float edgeWidth = max(fwidth(line) * lineMod, 0.03);
