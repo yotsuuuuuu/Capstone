@@ -28,9 +28,6 @@
       "pass": 1
     },
     "LowPolyShader": {
-      "config": {
-        "cullMode": 0
-      },
       "frag": "shaders/LowPolyTreeGird.frag.spv",
       "vert": "shaders/MassPass_2.vert.spv",
       "binding": [ 0 ],
@@ -55,6 +52,9 @@
       "pass": 1
     },
     "PillarShader": {
+      "config": {
+        "cullMode": 0
+      },
       "frag": "shaders/PillarGrid.frag.spv",
       "vert": "shaders/MassPass_2.vert.spv",
       "binding": [ 0 ],
