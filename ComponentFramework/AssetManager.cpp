@@ -358,6 +358,17 @@ std::vector<std::shared_ptr<Component>>& AssetManager::GetActorsInScene()
     return actorMap;
 }
 
+void AssetManager::clearActorsInScene()
+{
+    vkDeviceWaitIdle(dynamic_cast<VulkanRenderer*>(engineContext.renderer)->getDevice());
+    for (size_t i = 0; i < actorMap.size();i++)
+    {
+        actorMap[i]->OnDestroy();
+    }
+    actorMap.clear();
+    actorMap.resize(0);
+}
+
 Ref<Component> AssetManager::GetCamera()
 {
     return camera;

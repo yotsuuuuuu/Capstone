@@ -60,7 +60,7 @@ public:
 	bool LoadAsset(const std::string& filepath_);
 	std::vector<Ref<CActor>> CreateActor(const std::string& actorId, int amount_);
 	std::vector<Ref<Component>>& GetActorsInScene();
-	void clearActorsInScene() { actorMap.clear(); }
+	void clearActorsInScene();
 	Ref<Component> GetCamera();
 	void ScreenResizeCameraEvent(float aspectRatio);
 	Ref<CMesh> GetMesh(const std::string& id);

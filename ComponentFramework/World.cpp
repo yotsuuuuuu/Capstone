@@ -41,9 +41,9 @@ void World::OnDelete()
 {
 	delete terrainNoise;
 	baseChunkMesh.reset();
-	vkDeviceWaitIdle(vRenderer->getDevice());
+	//vkDeviceWaitIdle(vRenderer->getDevice());
 	vRenderer->DestroyIndexedMesh(chunkIndexBuffer);
-	engineContext.assetManager->clearActorsInScene();
+	//engineContext.assetManager->clearActorsInScene();
 	actorlocations.clear();
 
 	chunkMap.clear();
@@ -68,7 +68,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
 
 	std::cout << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
-	if (chunk->second->getMaxY() - height > 20) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
+	if (chunk->second->getMaxY() - height > 10) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
 
 	Vec2 chunkWorld = chunk->second->GetChunkPos();
 	spawnPoint = Vec3(chunkWorld.x, height + 2.0f, chunkWorld.y); // height w buffer
@@ -98,7 +98,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 			float worldZ = chunkPos.y + localZ;
 			float y = c->GetHeightAtPosition(localX, localZ, CHUNK_SIZE); 
 
-			Vec3 candidate(worldX, y, worldZ);
+			Vec3 candidate(worldX, y+5.0f, worldZ);
 
 			bool tooClose = false;
 
@@ -113,6 +113,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 
 			if (!tooClose) {
 				actorsInChunk.push_back(candidate);
+				//candidate.print();
 			}
 
 			attempts++;
@@ -140,8 +141,8 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	engineContext.assetManager->CreateActor("light", trueLights);
 	engineContext.assetManager->CreateActor("light", trueRock1);
 	engineContext.assetManager->CreateActor("light", trueRock2);
-	engineContext.assetManager->CreateActor("mario", trueTree1);
-	engineContext.assetManager->CreateActor("mario", trueTree2);
+	engineContext.assetManager->CreateActor("light", trueTree1);
+	engineContext.assetManager->CreateActor("light", trueTree2);
 
 	static const Vec3 testColors[] = {
 		{1.0f, 0.0f, 0.0f},   // red
@@ -162,13 +163,12 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
 	int index = 0;
 
+	std::cout << "actors in scene: " << actorsInScene.size() << std::endl;
 
-
-	//size_t idx = 0;
+	size_t idx = 0;
 	//for (int i = 0; i < actorCount; ++i) {
 	//	size_t actorIndex = shuffledIndices[idx % shuffledIndices.size()];
 	//	// spawn actor using actorMap[actorIndex]
-	//	++idx;
 	//}
 
 	for (auto& actor : actorsInScene) {
@@ -188,11 +188,12 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 			light->UpdateIntensity(2.0f);
 			light->UpdateColour(color);
 			light->UpdateLight();
+			index++;
 		}
-		int actorIndex = shuffledIndices[index % shuffledIndices.size()];
+		int actorIndex = shuffledIndices[idx % shuffledIndices.size()];
 		transform->SetPosition(actorlocations[actorIndex]);
+		idx++;
 
-		index++;
 	}
 
 }

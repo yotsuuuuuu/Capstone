@@ -58,10 +58,10 @@ bool Scene3::OnCreate() {
 
 		auto& actorsInScene = engineContext.assetManager->GetActorsInScene();
 
-		// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
+		//// Spacing = diameter (radius 1 = diameter 2) so lights dont overlap
 		//const float spacing = 20.0f;
 		//int gridSize = static_cast<int>(std::ceil(std::sqrt(lights.size())));
-		
+		//
 		//static const Vec3 testColors[] = {
 		//	{1.0f, 0.0f, 0.0f},   // red
 		//	{0.0f, 1.0f, 0.0f},   // green
@@ -74,7 +74,6 @@ bool Scene3::OnCreate() {
 		//	{0.0f, 1.0f, 0.5f},   // spring green
 		//	{1.0f, 0.0f, 0.5f},   // rose
 		//};
-
 		//const int colorCount = sizeof(testColors) / sizeof(testColors[0]);
 
 		//int index = 0;
@@ -177,21 +176,28 @@ void Scene3::HandleEvents(const SDL_Event& sdlEvent) {
 	}
 	if (sdlEvent.type == CustomEvent::SONG_SELECTED_EVENT) {
 		int sondId = (int)sdlEvent.user.code;
-		auto wA = std::dynamic_pointer_cast<CActor>(world);
+		engineContext.assetManager->clearActorsInScene();
+		
+		//Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, "./textures/rock.png", engineContext.assetManager->GetShader("Terrain"));
+		//mat3->OnCreate();
+
+		Ref<CActor> wA = std::dynamic_pointer_cast<CActor>(world);
 		auto w = wA->GetComponent<CWorld>();
-		w->OnDestroy();
+		auto mat = wA->GetComponent<CMaterial>()->OnCreate();
 		w->InitializeWorld(sondId);
+
 		auto cameraActor = std::dynamic_pointer_cast<CActor>(camera);
+
 		Vec3 spawn = w->GetPlayerSpawn();
 		float halfCylinder = cameraActor->GetComponent<CCapsuleCollider>()->GetHalfCylinder();
 		spawn.y += halfCylinder * 2.0f;
 		spawn.print();
+		
 		cameraActor->GetComponent<CPhysics>()->SetPosition(spawn);
 		cameraActor->GetComponent<CPhysics>()->SetVelocity(Vec3(0.0f, 0.0f, 0.0f));
-		auto sceneActors = engineContext.assetManager->GetActorsInScene();
-		//sceneActors.push_back(camera);
-		sceneActors.push_back(world);
-
+		
+		auto& sceneActors = engineContext.assetManager->GetActorsInScene();
+		sceneActors.push_back(wA);
 
 	}
 	else if (sdlEvent.type == CustomEvent::PLAYER_RESET_EVENT) {
