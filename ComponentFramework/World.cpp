@@ -128,12 +128,12 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 
 
 	// RANDOM ACTOR PLACEMENT
-	int actorPerChunk = actorAmount_.totalActors / (WORLD_SIZE * WORLD_SIZE); // average out number of actors to chunks
+	//int actorPerChunk = actorAmount_.totalActors / (WORLD_SIZE * WORLD_SIZE); // average out number of actors to chunks
+	int actorPerChunk = 1; // average out number of actors to chunks
 	
 
-	const int MAX_ATTEMPTS = actorPerChunk * 400;
-	int attempts = 0;
-	float minDistance = 2.0f;
+	const int MAX_ATTEMPTS = actorPerChunk * 500;
+	float minDistance = 5.0f;
 	float minDistSq = minDistance * minDistance;
 
 	for (const auto& p : chunkMap) {
@@ -141,10 +141,11 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		std::vector<Vec3> actorsInChunk;
 		Vec2 chunkPos = c->GetChunkPos();
 		auto rng = GetChunkRNG(chunkPos, worldSeed*7.0f);
-		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_SIZE);
-		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_SIZE);
+		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_WORLD_SIZE);
+		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_WORLD_SIZE);
+		int attempts = 0;
 
-		while (actorsInChunk.size() < actorPerChunk&& attempts < MAX_ATTEMPTS) {
+		while (actorsInChunk.size() < actorPerChunk && attempts < MAX_ATTEMPTS) {
 			float localX = xDist(rng);
 			float localZ = zDist(rng);
 			float worldX = chunkPos.x + localX;
@@ -195,7 +196,7 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	engineContext.assetManager->CreateActor("mushroom", trueRock1);
 	engineContext.assetManager->CreateActor("pillar", trueRock2);
 	engineContext.assetManager->CreateActor("LowPolyTree1", trueTree1);
-	engineContext.assetManager->CreateActor("LowPolyTree2", trueTree2);
+	engineContext.assetManager->CreateActor("mushroom", trueTree2);
 
 	auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
 	auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");

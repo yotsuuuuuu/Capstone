@@ -39,7 +39,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
     actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.lowMid), 40, maxActors / 2); // keep between 40-half max
     actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * (maxActors / 6))), 1, maxActors / 6);
     actorAmount.tree2 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * (maxActors / 6), 1, maxActors / 6);
-    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * (maxActors / 6))), 1, maxActors / 6);
+    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * (maxActors / 4))), 1, maxActors / 4);
     actorAmount.rock2 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum + pAudio.highAvgSum * 2) * (maxActors / 6)), 1, maxActors / 6);
 
 
