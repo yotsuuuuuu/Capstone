@@ -53,6 +53,14 @@
       "type": [ 1 ],
       "stage": [ 16 ],
       "pass": 1
+    },
+    "PillarShader": {
+      "frag": "shaders/PillarGrid.frag.spv",
+      "vert": "shaders/MassPass_2.vert.spv",
+      "binding": [ 0 ],
+      "type": [ 1 ],
+      "stage": [ 16 ],
+      "pass": 1
     }
   },
   "Textures": {
@@ -85,7 +93,7 @@
     },
     "PillarMat": {
       "texture": [ "pillarTexture" ],
-      "shader": "main",
+      "shader": "PillarShader",
       "cast shadow": "true",
       "recieve shadow": "false"
     },

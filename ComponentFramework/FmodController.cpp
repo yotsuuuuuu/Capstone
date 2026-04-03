@@ -21,7 +21,14 @@ std::string FmodController::getSongName(int songnum_)
 		char name[256];
 		sounds[songnum_]->getName(name ,256);
 		//std::cout << name << std::endl;
-		return std::string(name);
+		std::string filename = name;
+
+		size_t dotPos = filename.find_last_of('.');
+		if (dotPos != std::string::npos)
+		{
+			filename = filename.substr(0, dotPos);
+		}
+		return std::string(filename);
 	}
 	else
 	{
