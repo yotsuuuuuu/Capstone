@@ -1,5 +1,6 @@
 #include "CShader.h"
 #include "VulkanRenderer.h"
+#include "Debug.h"
 bool CShader::OnCreate()
 {
     if(isCreated)
@@ -17,6 +18,10 @@ bool CShader::OnCreate()
         std::vector<VkDescriptorSetLayout> arrDescriptorlayouts ={vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout};
         
         PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
+		std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
+        Debug::Trace(filepath, "CSHADER", __LINE__);
+        std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
+        Debug::Trace(viewportstring, "CSHADER", __LINE__);
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
       
@@ -90,6 +95,11 @@ void CShader::RecreatePipeLine()
         std::vector<VkDescriptorSetLayout> arrDescriptorlayouts = { vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout };
 
         PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
+
+        std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
+        Debug::Trace(filepath, "CSHADER", __LINE__);
+        std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
+        Debug::Trace(viewportstring, "CSHADER", __LINE__);
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
         break;

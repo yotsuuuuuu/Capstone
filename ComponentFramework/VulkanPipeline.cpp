@@ -1,5 +1,5 @@
 #include "VulkanRenderer.h"
-
+#include "Debug.h"
 PipelineInfo VulkanRenderer::CreateGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout, const char* vertFile, const char* fragFile,
     const char* tessCtrlFile, const char* tessEvalFile, const char* geomFile) {
 
