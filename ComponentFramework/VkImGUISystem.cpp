@@ -88,7 +88,7 @@ void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContex
     switch (event.type) {
         case SDL_EVENT_KEY_UP:
             switch (event.key.scancode) {
-            case SDL_SCANCODE_P: {
+            case SDL_SCANCODE_TAB: {
                 ShowSongMenu = !ShowSongMenu;
                 ShowSkyBoxColorEditor = false ;
                 ShowTerrainColorEditor = false;
@@ -177,7 +177,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             );
         }
         ImGui::Dummy(ImVec2(width, height));
-        ImGui::Text("Press P for Pause Menu");
+        ImGui::Text("Press TAB for Pause Menu");
         ImGui::End();
     }
     SDL_SetWindowRelativeMouseMode(dynamic_cast<VulkanRenderer*>(cntx.renderer)->getWindow(), !ShowSongMenu);
