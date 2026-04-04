@@ -422,7 +422,15 @@
     <None Include="assetList.json">
       <Filter>Json</Filter>
     </None>
-    <None Include="shaders\MushroomGird.frag" />
+    <None Include="shaders\LowPolyTreeGird.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\MushroomGird.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
+    <None Include="shaders\PillarGrid.frag">
+      <Filter>Shaders\CurrentShaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

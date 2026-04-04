@@ -349,7 +349,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         if (ImGui::DragFloat("Line Width", &lineWidth, 0.01f, 0.0f, 10.0f, "%.2f")) {
 			vulkanRenderer->UpdateTerrainLineWidth(lineWidth);
         }
-        if (ImGui::DragFloat("Edge Strength", &edgeStrength, 0.01f, 0.0f, 10.0f, "%.2f")) {
+        if (ImGui::DragFloat("Edge Bloom Strength", &edgeStrength, 0.01f, 0.0f, 10.0f, "%.2f")) {
 			vulkanRenderer->UpdateTerrainEdgeStrength(edgeStrength);
         }
         ImGui::End();

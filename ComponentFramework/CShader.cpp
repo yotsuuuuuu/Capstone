@@ -18,10 +18,14 @@ bool CShader::OnCreate()
         std::vector<VkDescriptorSetLayout> arrDescriptorlayouts ={vkrender->GetGlobalDescriptionSet().descriptorSetLayout,desInfo.descriptorSetLayout};
         
         PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
-		std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
+        if (config.tieToScreenResizeEvent) {
+			config.viewPortsize = vkrender->GeWindowExtents();
+        }
+        
+		/*std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
         Debug::Trace(filepath, "CSHADER", __LINE__);
         std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-        Debug::Trace(viewportstring, "CSHADER", __LINE__);
+        Debug::Trace(viewportstring, "CSHADER", __LINE__);*/
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
       
@@ -96,10 +100,14 @@ void CShader::RecreatePipeLine()
 
         PipeLineConfig config = p_config.value_or(vkrender->GetMainPassPipeLineConfig());
 
-        std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
+        if (config.tieToScreenResizeEvent) {
+            config.viewPortsize = vkrender->GeWindowExtents();
+        }
+
+      /*  std::string filepath = "Cretead Shader with vert: " + vertShaderFile + " frag: " + fragShaderFile;
         Debug::Trace(filepath, "CSHADER", __LINE__);
         std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-        Debug::Trace(viewportstring, "CSHADER", __LINE__);
+        Debug::Trace(viewportstring, "CSHADER", __LINE__);*/
         pipelineInfo = vkrender->CreateGraphicsPipeline(arrDescriptorlayouts, config, vertShaderFile,
             fragShaderFile, tesCShaderFile, tesEShaderFile, geomShaderFile);
         break;

@@ -275,6 +275,8 @@ enum BlendMode {OPAQUE,ALPHA,ADDITIVE};
     BlendMode blendMode = BlendMode::OPAQUE;
 
     bool dynamicViewport = false;
+
+    bool tieToScreenResizeEvent = true;
     //Renderpass and viewport must be set if not dynamic
 };
 

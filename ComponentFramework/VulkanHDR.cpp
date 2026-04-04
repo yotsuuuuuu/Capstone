@@ -143,9 +143,9 @@ void VulkanRenderer::CreateTonePassPipeLine(uint32_t numOfFramesInFLight)
 	config.depthTestEnable = VK_FALSE;
 	config.depthWriteEnable = VK_FALSE;
 
-	Debug::Trace("HDR TONE PIPELINE", __FILE__, __LINE__);
+	/*Debug::Trace("HDR TONE PIPELINE", __FILE__, __LINE__);
 	std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-	Debug::Trace(viewportstring, __FILE__, __LINE__);
+	Debug::Trace(viewportstring, __FILE__, __LINE__);*/
 	hdrInfo.tonePassPipeline = CreateGraphicsPipeline({ hdrInfo.tonemapDescriptors.descriptorSetLayout }, config, "./shaders/TonePass.vert.spv", "./shaders/TonePass.frag.spv");
 
 
@@ -208,18 +208,18 @@ void VulkanRenderer::CreateBloomPassPipeLines(uint32_t numOfFramesInFLight)
 	config.renderPass = hdrInfo.bloomDonwPass; 
 	config.viewPortsize = swapChainExtent; 
 
-	Debug::Trace("HDR BLOOM PIPELINE", __FILE__, __LINE__);
+	/*Debug::Trace("HDR BLOOM PIPELINE", __FILE__, __LINE__);
 	std::string viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-	Debug::Trace(viewportstring, __FILE__, __LINE__);
+	Debug::Trace(viewportstring, __FILE__, __LINE__);*/
 	hdrInfo.thresholdPipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/ThresholdSample.vert.spv", "./shaders/ThresholdSample.frag.spv");
-	 viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-	Debug::Trace(viewportstring, __FILE__, __LINE__);
+	/* viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
+	Debug::Trace(viewportstring, __FILE__, __LINE__);*/
 	hdrInfo.donwSamplePipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/Sampling.vert.spv", "./shaders/DownSampling.frag.spv");
 
 	config.renderPass = hdrInfo.bloomUpPass;
 	config.blendMode = PipeLineConfig::BlendMode::ADDITIVE;
-	 viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
-	Debug::Trace(viewportstring, __FILE__, __LINE__);
+	 /*viewportstring = "Viewport size: {" + std::to_string(config.viewPortsize.width) + "x" + std::to_string(config.viewPortsize.height) + "}";
+	Debug::Trace(viewportstring, __FILE__, __LINE__);*/
 	hdrInfo.upSamplePipeline = CreateGraphicsPipeline({ hdrInfo.bloomDescriptors.descriptorSetLayout }, config, "./shaders/Sampling.vert.spv", "./shaders/UpSampling.frag.spv");
 
 	int miplvls = static_cast<int>(hdrInfo.bloomMipLevels);
