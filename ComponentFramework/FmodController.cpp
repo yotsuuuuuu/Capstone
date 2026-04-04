@@ -18,15 +18,22 @@ std::string FmodController::getSongName(int songnum_)
 {
 	if (songnum_ >= 0 && songnum_ < nameOfsounds.size())
 	{
-		char name[256];
-		sounds[songnum_]->getName(name ,256);
+		
 		//std::cout << name << std::endl;
-		std::string filename = name;
+		std::string filename = nameOfsounds[songnum_];
 
 		size_t dotPos = filename.find_last_of('.');
 		if (dotPos != std::string::npos)
 		{
 			filename = filename.substr(0, dotPos);
+			
+		}
+
+		size_t slashPos = filename.find_last_of('/');
+		if (slashPos != std::string::npos)
+		{
+			filename = filename.substr(slashPos + 1);
+
 		}
 		return std::string(filename);
 	}
@@ -67,41 +74,11 @@ bool FmodController::AddSonginFile()
 	return true;
 }
 
-void FmodController::InitilizeSongs()
+void FmodController::playsong(int songnum_)
 {
 	FMOD::Sound* currentSound = nullptr;
 	channel->getCurrentSound(&currentSound);
-		for (int i = 0; i < sounds.size(); i++)
-		{
-			if (sounds[i] != currentSound)
-			{
-				sounds[i]->release();
-				sounds[i] = nullptr;
-			}
-		}
-	
 
-	sounds.resize(nameOfsounds.size(),nullptr);
-
-	for (size_t i = 0; i < sounds.size(); i++)
-	{
-	//	result = system->createSound(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
-		if (sounds[i] == currentSound && currentSound != nullptr)//if the soound is the one being played it skips the iteration
-			continue;
-
-
-		result = system->createStream(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
-		if (result != FMOD_OK)
-		{
-			std::cout << "FMOD error loading "
-				<< nameOfsounds[i]
-				<< ": "
-					<< std::endl;
-		}
-	}
-}
-void FmodController::playsong(int songnum_)
-{
 	bool playing = false;
 	bool stopped = false;
 	
@@ -112,7 +89,22 @@ void FmodController::playsong(int songnum_)
 	{
 		channel->stop();
 	}
-	result = system->playSound(sounds[songnum_], 0, false, &channel);
+
+
+	sounds->release();
+	sounds = nullptr;
+	
+	result = system->createStream(nameOfsounds[songnum_].c_str(), FMOD_DEFAULT, 0, &sounds);
+	
+	if (result != FMOD_OK)
+	{
+		std::cout << "FMOD error loading "
+			<< nameOfsounds[songnum_]
+			<< ": "
+				<< std::endl;
+	}
+
+	result = system->playSound(sounds, 0, false, &channel);
 	channel->setVolume(volume / 100.0f);
 	
 	FMOD::Sound* sound = nullptr;
@@ -199,7 +191,7 @@ SongTime FmodController::getTimeOfSong(int index_)
 {
 	unsigned int length;
 
-	sounds[index_]->getLength(&length, FMOD_TIMEUNIT_MS);
+	sounds->getLength(&length, FMOD_TIMEUNIT_MS);
 
 	SongTime total;
 
@@ -477,10 +469,8 @@ const AudioBands& FmodController::GetFrameAudioBand()
 
 FmodController::~FmodController()
 {
-	for (size_t i = 0; i < sounds.size(); i++)
-	{
-		sounds[i]->release();
-	}
+	
+	sounds->release();
 	for (int i = 0; i < nameOfsounds.size(); i++)
 	{
 		nameOfsounds[i].clear();

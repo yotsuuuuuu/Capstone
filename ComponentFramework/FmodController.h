@@ -9,7 +9,7 @@ class FmodController
 private:
 	FMOD::System* system;
 	FMOD::ChannelGroup* masterGroup = nullptr;
-	std::vector<FMOD::Sound*> sounds;
+	FMOD::Sound* sounds;
 	std::vector<std::string> nameOfsounds;
 	FMOD::Channel* channel = nullptr;
 	FMOD_RESULT result = FMOD_OK;
@@ -27,7 +27,6 @@ public:
 	void addSong(const std::vector<const char*>& wave_);
 	std::string getSongName(int songnum_);
 	bool AddSonginFile();
-	void InitilizeSongs();
 	void playsong(int songnum_);
 	void playsong(AudioState state_);
 	bool createSystem();

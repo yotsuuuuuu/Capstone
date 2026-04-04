@@ -100,7 +100,6 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	{
 		Debug::Error("Failed to create fmod system", __FILE__, __LINE__);
 	}
-	fmodController->InitilizeSongs();
 
 	physicsManager = new PhysicsManager();
 

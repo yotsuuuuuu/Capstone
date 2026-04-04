@@ -242,7 +242,6 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         ImGui::BeginGroup();
         if (ImGui::Button("Reload Song List", ImVec2(child_w * 0.5f, 0))) {
             cntx.fmodController->AddSonginFile();
-            cntx.fmodController->InitilizeSongs();
             GatherSystemData(cntx);
         }
        
