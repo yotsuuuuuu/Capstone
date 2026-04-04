@@ -120,6 +120,7 @@ void VkImGUISystem::EndFrame()
 
 void VkImGUISystem::GatherSystemData(const EngineContext& cntx)
 {
+    SongNameList.clear();
     int numberOfSongs = 0;
     while (true) {
         std::string  name = cntx.fmodController->getSongName(numberOfSongs);
