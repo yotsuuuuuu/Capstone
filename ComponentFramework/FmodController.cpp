@@ -69,20 +69,27 @@ bool FmodController::AddSonginFile()
 
 void FmodController::InitilizeSongs()
 {
-
-	if (sounds.size() > 0)
-	{
+	FMOD::Sound* currentSound = nullptr;
+	channel->getCurrentSound(&currentSound);
 		for (int i = 0; i < sounds.size(); i++)
 		{
-			sounds[i]->release();
+			if (sounds[i] != currentSound)
+			{
+				sounds[i]->release();
+				sounds[i] = nullptr;
+			}
 		}
-	}
+	
 
-	sounds.resize(nameOfsounds.size());
+	sounds.resize(nameOfsounds.size(),nullptr);
 
 	for (size_t i = 0; i < sounds.size(); i++)
 	{
 	//	result = system->createSound(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
+		if (sounds[i] == currentSound && currentSound != nullptr)//if the soound is the one being played it skips the iteration
+			continue;
+
+
 		result = system->createStream(nameOfsounds[i].c_str(), FMOD_DEFAULT, 0, &sounds[i]);
 		if (result != FMOD_OK)
 		{
