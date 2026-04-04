@@ -345,7 +345,7 @@ private:
 public:
 
     ImGuiContex GetImGuiContext();
-
+	VkExtent2D GeWindowExtents() { return swapChainExtent; }
 
 	//Descriptor Set Builder
     void AddToDescriptorLayoutCollection(std::vector<SingleDescriptorSetLayoutInfo>& desinfo,

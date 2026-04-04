@@ -121,8 +121,8 @@ void VulkanRenderer::CreateSysUbos()
     sys_UBOs.AudioGPUData = CreateUniformBuffer<AudioBandsUBO>();
     // need to initilize the terrain data to some default values 
 	sys_UBOs.TerrainData = CreateUniformBuffer<TerraindataUBO>();
-    TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY = Vec4(5.0f,300.0f,4.0f,4.0f);
-    TerrainStateData.min_max_lineWidth_edgeStrength = Vec4(0.0f,150.0f,1.4f,1.0);
+    TerrainStateData.fadeStart_fadeEnd_gridScaleX_gridScaleY = Vec4(5.0f,150.0f,4.0f,4.0f);
+    TerrainStateData.min_max_lineWidth_edgeStrength = Vec4(0.0f,150.0f,1.4f,0.3);
     TerrainStateData.ObjectFadeStart_ObjectFadeEnd_pad_pad = Vec4(5.0f, 100.0f,0,0);
     TerrainStateData.minColor = Vec4(132.0f / 255.0f, 36.0f / 255.0f, 149.0f / 255.0f, 1.0f);
     TerrainStateData.maxColor = Vec4(0.0f, 0.5f, 0.4f, 1.0f);
