@@ -255,6 +255,16 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
             
             cntx.fmodController->playsong(AudioState::PAUSE);
         }
+        if (ImGui::Button("Random", ImVec2(child_w * 0.5f, 0))) {
+
+			int r = std::rand() % SongNameList.size();
+			currentSongIndex = r;
+			SDL_Event customEvent;
+			SDL_zero(customEvent);
+			customEvent.type = CustomEvent::SONG_SELECTED_EVENT;
+			customEvent.user.code = (Sint32)currentSongIndex;
+			SDL_PushEvent(&customEvent);
+        }
         ImGui::Dummy(ImVec2(child_w * 0.5f, 5));
         if (ImGui::Button("Reset Player", ImVec2(child_w * 0.5f, 0))) {
             SDL_Event customEvent;
