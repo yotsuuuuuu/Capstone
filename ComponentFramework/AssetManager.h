@@ -67,6 +67,8 @@ public:
 	Ref<CMaterial> GetMat(const std::string& id);
 	Ref<CShader> GetShader(const std::string& id);
 
+	void setDefaultLightMesh(const std::string& id_);
+	void setDefaultLightMat(const std::string& id_);
 	void RecreatedPipelines();
 	
 };

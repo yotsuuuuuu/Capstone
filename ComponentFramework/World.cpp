@@ -198,16 +198,6 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	engineContext.assetManager->CreateActor("LowPolyTree1", trueTree1);
 	engineContext.assetManager->CreateActor("mushroom", trueTree2);
 
-	auto LightMat = engineContext.assetManager->GetMat("SimpleLightMat");
-	auto LightMesh = engineContext.assetManager->GetMesh("IcoMesh");
-
-	if (!LightMat->OnCreate()) {
-	Debug::Warning("LightMat Failed ", __FILE__, __LINE__);
-	}
-	if (!LightMesh->OnCreate()) {
-	Debug::Warning("LightMesh Failed ", __FILE__, __LINE__);
-	}
-
 	static const Vec3 testColors[] = {
 		{1.0f, 0.0f, 0.0f},   // red			//0
 		{0.0f, 1.0f, 0.0f},   // green			//1

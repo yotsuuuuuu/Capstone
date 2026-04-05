@@ -18,29 +18,62 @@ std::string FmodController::getSongName(int songnum_)
 {
 	if (songnum_ >= 0 && songnum_ < nameOfsounds.size())
 	{
-		
+
 		//std::cout << name << std::endl;
 		std::string filename = nameOfsounds[songnum_];
 
-		size_t dotPos = filename.find_last_of('.');
-		if (dotPos != std::string::npos)
+		size_t pos = filename.find_last_of('.');
+		if (pos != std::string::npos)
 		{
-			filename = filename.substr(0, dotPos);
-			
-		}
-
-		size_t slashPos = filename.find_last_of('/');
-		if (slashPos != std::string::npos)
-		{
-			filename = filename.substr(slashPos + 1);
+			filename = filename.substr(0, pos);
 
 		}
-		return std::string(filename);
+
+		pos = filename.find_last_of('/');
+		if (pos != std::string::npos)
+		{
+			filename = filename.substr(pos + 1);
+
+		}
+
+		for (int i = 0; i < filename.size(); i++)
+		{
+			if (filename[i] == '_')
+			{
+				filename[i] = ' ';
+			}
+			else if (filename[i] == '-')
+			{
+				filename[i] = ' ';
+			}
+			else if (filename[i] == '\\')
+			{
+				filename[i] = ' ';
+			}
+			else if (filename[i] == '.')
+			{
+				filename[i] = ' ';
+
+			}
+		}
+
+		while (true)
+		{
+			size_t pos = filename.find("  ");
+			if (pos == std::string::npos)
+				break;
+			filename.replace(pos, 2, " ");
+		}
+
+
+
+			return filename;
 	}
 	else
 	{
 		return "";
 	}
+	
 }
 bool FmodController::AddSonginFile()
 {

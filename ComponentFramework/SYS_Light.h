@@ -5,6 +5,8 @@
 
 class SYS_Light
 {
+	WeakRef<Component> mesh;
+	WeakRef<Component> mat; 
 	//TODO (Kev) Light system
 	// NEED TO ACCOUNT FOR RESIZEING OF THE SCREEN
 	BufferMemory ScreenClustersSSBO;
@@ -72,5 +74,12 @@ public:
 	std::vector< BufferMemory> GetSysUBO() { return { systemDataUBO }; }
 	std::vector< BufferMemory> GetClusterSSBO() { return { ScreenClustersSSBO }; }
 	std::vector< BufferMemory> GetLightSSBO() { return { ActiveSceneLightSSBO }; }
+
+	void SetMesh(Ref<Component> mesh_) { mesh = mesh_;}
+	void SetMat(Ref<Component> mat_) { mat = mat_;}
+
+	Ref<Component> GetMesh() { return mesh.lock(); }
+	Ref<Component> GetMat() { return mat.lock(); }
+	
 };
 

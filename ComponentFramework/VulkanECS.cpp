@@ -714,11 +714,11 @@ public:
             throw std::runtime_error("Main Camera is in valid");
         }
         //1.4 draw item for Lights
-        auto LightMat = Ecntx.assetManager->GetMat("SimpleLightMat");
-        auto LightMesh = Ecntx.assetManager->GetMesh("IcoMesh");
+        auto LightMat = std::dynamic_pointer_cast<CMaterial>(Ecntx.lightSys->GetMat());
+        auto LightMesh = std::dynamic_pointer_cast<CMesh>(Ecntx.lightSys->GetMesh());
         bool componentsareValid = false;
         DrawItem lightItem{};
-        if (LightMat && LightMesh) {           
+        if (LightMat && LightMesh && Ecntx.lightSys->GetCurrentLightCount() > 0) {
             componentsareValid = true;
             lightItem.pipeInfo = LightMat->GetPipelineInfo();
             lightItem.mesh = LightMesh->GetMesh();

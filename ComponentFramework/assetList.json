@@ -5,7 +5,8 @@
     "sphereMesh": "./meshes/Sphere.obj",
     "LowPolyTree1": "./meshes/K_tree.obj",
     "pillarMesh": "./meshes/Pillar.obj",
-    "mushroomMesh": "./meshes/mushroom.obj"
+    "mushroomMesh": "./meshes/mushroom.obj",
+    "skullMesh": "./meshes/Skull.obj"
   },
   "Shaders": {
     "main": {

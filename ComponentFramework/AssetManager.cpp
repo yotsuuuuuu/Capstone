@@ -12,6 +12,7 @@
 #include "CGlobalLight.h"
 #include "CLight.h"
 #include "Debug.h"
+#include "SYS_Light.h"
 
 using json = nlohmann::json;
 
@@ -487,4 +488,28 @@ void AssetManager::ScreenResizeCameraEvent(float aspectRatio)
     }
 }
 
+void AssetManager::setDefaultLightMesh(const std::string& id_)
+{
+	Ref<CMesh> mesh = assetMapGet<CMesh>(id_);
+    if (!mesh->OnCreate())
+    {
+        std::cout << "faild to set light mesh\n";
+        return;
+    }
+	engineContext.lightSys->SetMesh(mesh);
+    //call on create
+    //set ligfht function mesh  
+}
+void AssetManager::setDefaultLightMat(const std::string& id_)
+{
+	Ref<CMaterial> mat = assetMapGet<CMaterial>(id_);
+    if (!mat->OnCreate())
+    {
+        std::cout << "failt to set light mat\n";
+        return;
+    }
+	engineContext.lightSys->SetMat(mat);
+    //call on create
+    //set mat
+}
 
