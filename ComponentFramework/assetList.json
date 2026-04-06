@@ -4,6 +4,9 @@
     "marioMesh": "./meshes/Mario.obj",
     "sphereMesh": "./meshes/Sphere.obj",
     "LowPolyTree1": "./meshes/K_tree.obj",
+    "LowPolyTree2": "./meshes/Kay_Tree1.obj",
+    "LowPolyTree3": "./meshes/Kay_Tree2.obj",
+    "LowPolyTree4": "./meshes/Kay_Tree3.obj",
     "pillarMesh": "./meshes/Pillar.obj",
     "mushroomMesh": "./meshes/mushroom.obj",
     "skullMesh": "./meshes/Skull.obj"
@@ -70,7 +73,9 @@
     "marioFire": "./textures/mario_fire.png",
     "pillarTexture": "./textures/Pillar.png",
     "LowPolyTreeTexture": "./textures/colormap.png",
+    "LowPolyKayTreeTexture": "./textures/forest_texture.png",
     "mushroomTexture": "./textures/Blue_Mushroom_Texture.png"
+
   },
 
   "Material": {
@@ -88,6 +93,12 @@
     },
     "LowPolyTreeMat": {
       "texture": [ "LowPolyTreeTexture" ],
+      "shader": "LowPolyShader",
+      "cast shadow": "true",
+      "recieve shadow": "false"
+    },
+    "LowPolyKayTreeMat": {
+      "texture": [ "LowPolyKayTreeTexture" ],
       "shader": "LowPolyShader",
       "cast shadow": "true",
       "recieve shadow": "false"
@@ -131,12 +142,16 @@
       "Mesh": "LowPolyTree1"
     },
     "LowPolyTree2": {
-      "Mat": "LowPolyTreeMat",
-      "Mesh": "LowPolyTree1"
+      "Mat": "LowPolyKayTreeMat",
+      "Mesh": "LowPolyTree2"
     },
     "LowPolyTree3": {
-      "Mat": "LowPolyTreeMat",
-      "Mesh": "LowPolyTree1"
+      "Mat": "LowPolyKayTreeMat",
+      "Mesh": "LowPolyTree3"
+    },
+    "LowPolyTree4": {
+      "Mat": "LowPolyKayTreeMat",
+      "Mesh": "LowPolyTree4"
     },
     "lightRed": {
       "radius": 1.0,

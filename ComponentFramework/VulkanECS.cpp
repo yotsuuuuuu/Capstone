@@ -809,7 +809,7 @@ public:
 
         const auto& hdr = VKRNDR->hdrInfo;
         BloomPush push{};
-        push.bloomStrength = hdr.bloomStrength;
+        push.bloomStrength = hdr.bloomStrength * 0.5f ;
         push.bloomThreshold = hdr.bloomThreshold;
         {// Bloom 
            

@@ -194,8 +194,8 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	engineContext.assetManager->CreateActor("light", trueLights);
 	engineContext.assetManager->CreateActor("mushroom", trueRock1);
 	engineContext.assetManager->CreateActor("pillar", trueRock2);
-	engineContext.assetManager->CreateActor("LowPolyTree1", trueTree1);
-	engineContext.assetManager->CreateActor("mushroom", trueTree2);
+	engineContext.assetManager->CreateActor("LowPolyTree4", trueTree1);
+	engineContext.assetManager->CreateActor("LowPolyTree3", trueTree2);
 
 	static const Vec3 testColors[] = {
 		{1.0f, 0.0f, 0.0f},   // red			//0

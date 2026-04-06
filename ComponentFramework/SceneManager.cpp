@@ -125,8 +125,8 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 	}
 	engineContext.assetManager->LoadAsset("./assetList.json");
 	assetManager->setDefaultLightMat("SimpleLightMat");
-	assetManager->setDefaultLightMesh("marioMesh");
-	//engineContext.fmodController->AnalyzeAudioOffline(0);
+	assetManager->setDefaultLightMesh("IcoMesh");
+	
 	BuildScene(SCENE3);
 	
 	return true;
