@@ -72,7 +72,7 @@ void World::Initialize(int songIndex)
 	pairs.push_back(colourPairs{ testColors[2], testColors[4] }); // blue cyan
 
 	auto rng = GetChunkRNG(Vec2(worldSeed / 20.0f, worldSeed / 25.0f), worldSeed * 7.0f);
-	std::uniform_int_distribution<int> colourIndices(0, pairs.size());
+	std::uniform_int_distribution<int> colourIndices(0, pairs.size()-1);
 	int colourIndex = colourIndices(rng);
 
 	if (preset.magicNumber % 2 == 0) {

@@ -44,6 +44,7 @@ public:
 	Matrix4 GetProjectionMatrix() const { return projectionMatrix; }
 	Matrix4 GetViewMatrix() const { return viewMatrix; }
 
+	std::vector<MATHEX::Plane> GenerateFrustumPlane();
 
 	// input stuff
 	MATH::Vec3 GetFrontVector() const;
