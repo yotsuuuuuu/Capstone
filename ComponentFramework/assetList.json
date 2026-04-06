@@ -73,7 +73,7 @@
     "marioFire": "./textures/mario_fire.png",
     "pillarTexture": "./textures/Pillar.png",
     "LowPolyTreeTexture": "./textures/colormap.png",
-    "LowPolyKayTreeTexture": "./textures/forest_texture.png",
+    "LowPolyKayTreeTexture": "./textures/Kay_forest_texture.png",
     "mushroomTexture": "./textures/Blue_Mushroom_Texture.png"
 
   },

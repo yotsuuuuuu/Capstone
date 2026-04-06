@@ -237,6 +237,8 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		int actorIndex = shuffledIndices[idx % shuffledIndices.size()];
 		transform->SetPosition(actorlocations[actorIndex]);
 
+		transform->SetRotation(QMath::angleAxisRotation(37 * idx, Vec3(0, 1, 0)));
+
 		if (light) { 
 			Vec3 color = testColors[index % colorCount];
 			light->UpdateRadius(25.0f);
