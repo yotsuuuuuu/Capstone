@@ -51,8 +51,6 @@ public:
 	virtual void Render() const override;
 	virtual void HandleEvents(const SDL_Event &sdlEvent) override;
 
-
-	std::vector<MATHEX::Plane> GenerateFrustumPLane();
 	void FrustumCheck();
 
 

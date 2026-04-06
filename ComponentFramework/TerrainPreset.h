@@ -87,6 +87,9 @@ struct NoiseLayerPreset
 
 	WarpType domainWarp = WarpType::None; // the type of domain warping to apply to the noise, which can create more complex and interesting terrain
     float warpAmplitude = 1.0f; // controls the intensity of the domain warping
+
+    void print();
+
 };
 
 struct TerrainPreset {
@@ -120,5 +123,7 @@ struct TerrainPreset {
 	void CreateContinentalness();
 	void CreateErosion();
 	void CreatePeaksValleys();
+
+    void print();
 
 };

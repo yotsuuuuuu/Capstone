@@ -71,18 +71,17 @@ void World::Initialize(int songIndex)
 	pairs.push_back(colourPairs{ testColors[0], testColors[5] }); // red magenta
 	pairs.push_back(colourPairs{ testColors[2], testColors[4] }); // blue cyan
 
+	auto rng = GetChunkRNG(Vec2(worldSeed / 20.0f, worldSeed / 25.0f), worldSeed * 7.0f);
+	std::uniform_int_distribution<int> colourIndices(0, pairs.size());
+	int colourIndex = colourIndices(rng);
 
-	int colourIndex = preset.magicNumber % pairs.size();
-
-	std::cout << "World - colour index: " << colourIndex << std::endl;
-	std::cout << "World - magic number: " << preset.magicNumber << std::endl;
 	if (preset.magicNumber % 2 == 0) {
-	vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour1);
-	vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour2);
+		vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour1);
+		vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour2);
 	}
 	else {
-	vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour1);
-	vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour2);
+		vRenderer->UpdateTerrainMaxColor(pairs[colourIndex].colour1);
+		vRenderer->UpdateTerrainMinColor(pairs[colourIndex].colour2);
 
 	}
 

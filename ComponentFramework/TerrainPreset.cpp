@@ -475,5 +475,140 @@ void TerrainPreset::CreateContinentalness()
 
 }
 
+void TerrainPreset::print()
+{
+    std::cout << "////// TERRAIN PRESET CONFIGURATION //////" << std::endl
+        << std::endl;
+    std::cout << "World Size: " << WORLD_SIZE << std::endl;
+    std::cout << "Magic Number: " << magicNumber << std::endl;
+    std::cout << "Truncate: " << truncate << std::endl;
+    std::cout << "Global Height Scale: " << globalHeightScale << std::endl;
+    std::cout << "Exponent: " << exponent << std::endl
+        << std::endl;
+    std::cout << "/// BASE LAYER ///" << std::endl;
+    base.print();
+    std::cout << "/// PEAKS AND VALLEYS LAYER ///" << std::endl;
+    peaksValleys.print();
+    std::cout << "/// CONTINENTALNESS LAYER ///" << std::endl;
+    continentalness.print();
 
+}
 
+void NoiseLayerPreset::print()
+{
+    std::string noiseType;
+    std::string warpType;
+    std::string fractalType;
+    std::string cellularType;
+    std::string retType;
+
+    switch (type) {
+    case NoiseType::Perlin:
+        noiseType = "Perlin";
+        break;
+    case NoiseType::OpenSimplex2:
+        noiseType = "OpenSimplex2";
+        break;
+    case NoiseType::Value:
+        noiseType = "Value";
+        break;
+    case NoiseType::Cubic:
+        noiseType = "Cubic";
+        break;
+    case NoiseType::Cellular:
+        noiseType = "Cellular";
+        break;
+    }
+
+    switch (fractal) {
+    case FractalType::None:
+        fractalType = "None";
+        break;
+    case FractalType::FBm:
+        fractalType = "FBm";
+        break;
+    case FractalType::Ridged:
+        fractalType = "Ridged";
+        break;
+    case FractalType::PingPong:
+        fractalType = "PingPong";
+        break;
+    }
+
+    switch (domainWarp) {
+    case WarpType::None:
+        warpType = "None";
+        break;
+    case WarpType::OpenSimplex2:
+        warpType = "OpenSimplex2";
+        break;
+    case WarpType::BasicGrid:
+        warpType = "BasicGrid";
+        break;
+    }
+
+    switch (cellType) {
+    case CellularType::None:
+        cellularType = "None";
+        break;
+    case CellularType::Euclidian:
+        cellularType = "Euclidian";
+        break;
+    case CellularType::EuclidianSq:
+        cellularType = "EuclidianSq";
+        break;
+    case CellularType::Manhattan:
+        cellularType = "Manhattan";
+        break;
+    case CellularType::Hybrid:
+        cellularType = "Hybrid";
+        break;
+    }
+
+    switch (returnType) {
+    case ReturnType::None:
+        retType = "None";
+        break;
+    case ReturnType::Distance2:
+        retType = "Distance2";
+        break;
+    case ReturnType::Distance2Add:
+        retType = "Distance2Add";
+        break;
+    case ReturnType::Distance:
+        retType = "Distance";
+        break;
+    case ReturnType::Distance2Div:
+        retType = "Distance2Div";
+        break;
+    case ReturnType::Distance2Sub:
+        retType = "Distance2Sub";
+        break;
+    case ReturnType::Distance2Mul:
+        retType = "Distance2Mul";
+        break;
+    case ReturnType::CellValue:
+        retType = "CellValue";
+        break;
+    }
+
+    std::cout << "Seed: " << seed << std::endl;
+    std::cout << "Amplitude: " << amplitude << std::endl;
+    std::cout << "Frequency: " << frequency << std::endl;
+    std::cout << "Noise Type: " << noiseType << std::endl
+        << std::endl;
+    std::cout << "Fractal Type: " << fractalType << std::endl;
+    std::cout << "Fractal Octaves: " << fractalOctaves << std::endl;
+    std::cout << "Lacunarity: " << lacunarity << std::endl;
+    std::cout << "Gain: " << gain << std::endl;
+    std::cout << "Fractal Weighted Strength: " << fractalWeightedStrength << std::endl
+        << std::endl;
+    std::cout << "Domain Warp Type: " << warpType << std::endl;
+    std::cout << "Warp Amplitude: " << warpAmplitude << std::endl
+        << std::endl;
+    std::cout << "Cellular Type: " << cellularType << std::endl;
+    std::cout << "Cellular Return Type: " << retType << std::endl;
+    std::cout << "Cellular Jitter: " << cellularJitter << std::endl
+        << std::endl;
+
+}
