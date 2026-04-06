@@ -95,11 +95,10 @@ static void InitializeNoiseLayer(const NoiseLayerPreset& layerP, FastNoiseLite& 
 }
 
 TerrainNoise::TerrainNoise(const TerrainPreset& preset)
-    : basePreset(preset.base), continentalPreset(preset.continentalness), erosionPreset(preset.erosion), PVpreset(preset.peaksValleys)
+    : basePreset(preset.base), continentalPreset(preset.continentalness), PVpreset(preset.peaksValleys)
 {
     InitializeNoiseLayer(basePreset, baseNoise);
     InitializeNoiseLayer(continentalPreset, continentalNoise);
-    InitializeNoiseLayer(erosionPreset, erosionNoise);
     InitializeNoiseLayer(PVpreset, PVnoise);
     terrainConfig = preset;
 }
@@ -141,45 +140,6 @@ float TerrainNoise::sample(float wX, float wZ) const
 
     return h;
 }
-
-
-
-
-//float TerrainNoise::EvaluateContinental(float c) const
-//{
-//	c = std::clamp(c, 0.0f, 1.0f); // ensure c is between 0 and 1
-//
-//    float percent;
-//
-//    // continental value
-//    float cv1 = 0.2f;
-//	float cv2 = 0.5f;
-//	float cv3 = 0.8f;
-//	float cv4 = 1.0f;
-//
-//	// height value (spline value)
-//	float sv1 = 2.0f;
-//	float sv2 = 3.0f;
-//	float sv3 = 8.0f;
-//	float sv4 = 11.0f;
-//
-//    if (c <= 0.3f) {
-//        percent = c / 0.3f; // 0 to 1 as c goes from 0 to 0.3
-//        return percent * sv1; // scale to spline 1 to spline 2 
-//    }
-//    else if (c <= 0.5f) {
-//        percent = (c - 0.3f) / (0.5f - 0.3f); // 0 to 1 as c goes from 0.3 to 0.5
-//        return sv1 + percent * (sv2 - sv1); // scale to 2 to 5
-//    }
-//    else if (c <= 0.9f) {
-//        percent = (c - 0.5f) / (0.9f - 0.5f); // 0 to 1 as c goes from 0.5 to 0.9
-//        return sv2 + percent * (sv3 - sv2); // scale to 5 to 7
-//    }
-//    else {
-//        percent = (c - 0.9f) / (1.0f - 0.9f); // 0 to 1 as c goes from 0.9 to 1
-//        return sv3 + percent * (sv4 - sv3); // scale to 7 to 8
-//	}
-//}
 
 float TerrainNoise::EvaluateContinental(float c) const
 {

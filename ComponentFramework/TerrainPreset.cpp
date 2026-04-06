@@ -5,15 +5,12 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	pAudio = GetLayerValuesFromAudio(ab);
 
 	// scale high frequencies to a more usable range (since they tend to be very low) and clamp to 1.0f
-	//float highScaled = std::min(pAudio.highAvgSum * 100.0f, 1.0f); 
 	float highScaled = std::min(pAudio.highAvgSum * 10.0f, 1.0f); 
-    //float highScaled = pAudio.highAvgSum * 100.0f;
     float midScaled = std::min(pAudio.midAvgSum * 2.0f, 1.0f);
 	float bassScaled = pAudio.bassAvgSum; // bass is usually already in a good range so no need to scale much, maybe just a little
 
 	CreateBase();
 	CreatePeaksValleys();
-	//CreateErosion();
 	CreateContinentalness();
 	
 	exponent =  1 + (highScaled*2);
@@ -25,7 +22,6 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	bool highsDominate = highScaled > 0.5f;
 
 	// if mids are dominant, truncate layers for more complex terrain. 
-	//concatenate = (pAudio.midAvgSum*1.3 > pAudio.bassAvgSum/1.6f) && (pAudio.midAvgSum > pAudio.highAvgSum); 
 	truncate = midsDominate || (pAudio.midAvgSum > 0.3f && highScaled > 0.4f);
 
 	globalHeightScale = 3.0f + (pAudio.bassAvgSum * 10.0f); // bass can influence overall height since its usually the highest and can create more dramatic terrain with higher values
@@ -35,12 +31,19 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
     WORLD_SIZE = std::clamp(20 + (pAudio.songLength / 200), 25, 32);
 
     int maxActors = (WORLD_SIZE * WORLD_SIZE) * 2.5; // 2x world size amount of actors (2 per chunk roughly)
-    //int totalActors = 0;
     actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.lowMid), 40, maxActors / 2); // keep between 40-half max
-    actorAmount.tree1 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum * (maxActors / 6))), 1, maxActors / 6);
-    actorAmount.tree2 = std::clamp(static_cast<int>(1 + (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * (maxActors / 6), 1, maxActors / 6);
-    actorAmount.rock1 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum * (maxActors / 4))), 1, maxActors / 4);
-    actorAmount.rock2 = std::clamp(static_cast<int>(1 + (pAudio.midAvgSum + pAudio.highAvgSum * 2) * (maxActors / 6)), 1, maxActors / 6);
+    actorAmount.tree1 = std::clamp(static_cast<int>(1 + 
+        (pAudio.bassAvgSum * (maxActors / 6))), 
+        1, maxActors / 6);
+    actorAmount.tree2 = std::clamp(static_cast<int>(1 + 
+        (pAudio.bassAvgSum + pAudio.highAvgSum * 2)) * (maxActors / 6)
+        , 1, maxActors / 6);
+    actorAmount.rock1 = std::clamp(static_cast<int>(1 + 
+        (pAudio.midAvgSum * (maxActors / 4))), 
+        1, maxActors / 4);
+    actorAmount.rock2 = std::clamp(static_cast<int>(1 + 
+        (pAudio.midAvgSum + pAudio.highAvgSum * 2) * (maxActors / 6)), 
+        1, maxActors / 6);
 
 
     int totalActors = actorAmount.lights + actorAmount.rock1 + actorAmount.rock2 + actorAmount.tree1 + actorAmount.tree2;
@@ -57,16 +60,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
     actorAmount.totalActors = totalActors;
 
     magicNumber = (pAudio.seed/2) + (pAudio.highMaxSum * 100);
-	// TODO: (andres) concatenation (need more modifiers ex. concat can be to certain fractions instead of whole)
-	// TODO: (andres) continentallness heights
-	// TODO: (andres) randomize actor placement (lights, etc) ( x % worldsize, then x % chunksize)
 
-
-	// EROSION
-	// maybe use this layer to add some erosion-like details to the terrain, such as small ridges or valleys.
-
-	// PEAKS AND VALLEYS
-	//peaksValleys.type = NoiseType::Cubic; // any works
 }
 
 ProcessedAudio TerrainPreset::GetLayerValuesFromAudio(std::vector<AudioBands> ab)
@@ -383,9 +377,6 @@ ReturnType TerrainPreset::ChooseReturn(int layer, float value)
 }
 
 
-
-// maybe change to no arguments and make it one big call
-// value can be used to further modify things
 void TerrainPreset::CreateBase()
 {
 	// int for layer is 0 = base
@@ -436,42 +427,11 @@ void TerrainPreset::CreatePeaksValleys()
 	}
 }
 
-void TerrainPreset::CreateErosion()
-{
-
-}
 
 void TerrainPreset::CreateContinentalness()
 {
-	//AudioBands avgBands = pAudio.avgBands;
 	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum + pAudio.highAvgSum)); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
 	continentalness.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	//continentalness.frequency = 0.002f * (avgBands.sub * 0.008f); // almost lower than base
-	//continentalness.amplitude = 0.1f + (pAudio.bassAvgSum * 0.33f); 
-	//
-	////continentalness.fractal = ChooseFractal(3,pAudio.bassMaxSum * avgBands.midHigh * 0.01f);
-	//if (continentalness.fractal != FractalType::None) {
-	//	continentalness.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 1.2f); // barely any octaves 
-	//	continentalness.gain = 0.005f + (pAudio.midAvgSum * 0.05f); // keep very very very small 
-	//	continentalness.lacunarity = 1.7f + (pAudio.midAvgSum * 0.6f);
-	//	continentalness.fractalWeightedStrength = (pAudio.midAvgSum) * 0.7f; // might be useful for continental??
-	//}
-	//
-	//if (continentalness.type == NoiseType::Cellular) {
-	//	continentalness.cellType = ChooseCellular(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
-	//	continentalness.returnType = ChooseReturn(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
-	//	continentalness.cellularJitter = 0.7f + (pAudio.midAvgSum * 2.0f); // keep around 1, 
-
-	//	// complicated way to calculate a 30/2477 chance but its calculated strangely so hopefully still unpredictable
-	//	if (int((pAudio.highMaxSum * pAudio.midMaxSum * pAudio.bassMaxSum) * (pAudio.highAvgSum * 1000) - (avgBands.highHigh * 1000)) % 2477 <= 30) {
-	//		continentalness.cellularJitter = 0.0f + 10 * avgBands.highHigh; // VERY RARE hopefully
-	//	}
-	//}
-
-	//continentalness.domainWarp = ChooseWarp(3, pAudio.midAvgSum + avgBands.midMid * avgBands.bass); // randomf stuff GO !
-	//if (continentalness.domainWarp != WarpType::None) {
-	//	continentalness.warpAmplitude = 0.2f + (pAudio.midAvgSum * 0.6f); // keep low .2-.8
-	//}
 
 }
 

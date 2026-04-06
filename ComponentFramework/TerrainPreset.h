@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <vector>
 #include "CoreStructs.h"
-//#include "FmodController.h"
 
 enum class NoiseType {
 	Perlin = 0, // also creates smooth terrain, but can be a bit more "blobby" and less detailed than OpenSimplex2. good for rolling hills and gentle landscapes.
@@ -121,7 +120,6 @@ struct TerrainPreset {
 
     void CreateBase();
 	void CreateContinentalness();
-	void CreateErosion();
 	void CreatePeaksValleys();
 
     void print();
