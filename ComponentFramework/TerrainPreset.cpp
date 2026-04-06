@@ -419,7 +419,7 @@ void TerrainPreset::CreatePeaksValleys()
 	AudioBands avgBands = pAudio.avgBands;
 	peaksValleys.type = ChooseNoise(1, pAudio.highAvgSum); // avg sum cause alone they tiny 
 	peaksValleys.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	peaksValleys.frequency = 0.001f + (pAudio.highAvgSum * 0.4f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
+	peaksValleys.frequency = 0.001f + (pAudio.highAvgSum * 0.2f); // for peaks and valleys we want a bit more frequency than base to add some variation, but not too much that it becomes noisy
 	peaksValleys.amplitude = 0.3f + (pAudio.midAvgSum * 0.5f); // keep it lower than base since its just adding details on top
 	peaksValleys.fractal = ChooseFractal(1, pAudio.highAvgSum); // for peaks and valleys, pingpong and ridged can create some nice dramatic peaks
 	
@@ -444,7 +444,7 @@ void TerrainPreset::CreateErosion()
 void TerrainPreset::CreateContinentalness()
 {
 	//AudioBands avgBands = pAudio.avgBands;
-	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum * pAudio.highAvgSum )/3.0f); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
+	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum + pAudio.highAvgSum)); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
 	continentalness.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
 	//continentalness.frequency = 0.002f * (avgBands.sub * 0.008f); // almost lower than base
 	//continentalness.amplitude = 0.1f + (pAudio.bassAvgSum * 0.33f); 

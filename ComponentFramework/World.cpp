@@ -85,7 +85,7 @@ void World::Initialize(int songIndex)
 
 	}
 
-
+	preset.print();
 }
 
 
@@ -117,13 +117,13 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 	int center = CHUNK_SIZE / 2; // center OF chunk
 
 	auto chunk = chunkMap.find(Vec2(centerId, centerId)); // middle chunk (chunk space)
-	float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
+	//float height = chunk->second->GetHeightAtPosition(center, center, CHUNK_WORLD_SIZE);
 
-	std::cout << "World - player chunk" << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
-	if (chunk->second->getMaxY() - height > 10) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
+	//std::cout << "World - player chunk" << "height: " << height << " chunkMax: " << chunk->second->getMaxY() << std::endl;
+	//if (chunk->second->getMaxY() - height > 10) { height = chunk->second->getMaxY(); } // if bigger than 20 unit gap then just set to max height
 
 	Vec2 chunkWorld = chunk->second->GetChunkPos();
-	spawnPoint = Vec3(chunkWorld.x, height + 5.0f, chunkWorld.y); // height w buffer
+	spawnPoint = Vec3(chunkWorld.x, chunk->second->getMaxY() + 5.0f, chunkWorld.y); // height w buffer
 
 
 	// RANDOM ACTOR PLACEMENT
@@ -140,8 +140,8 @@ void World::CreateActorSpawns(ActorAmount actorAmount_)
 		std::vector<Vec3> actorsInChunk;
 		Vec2 chunkPos = c->GetChunkPos();
 		auto rng = GetChunkRNG(chunkPos, worldSeed*7.0f);
-		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_WORLD_SIZE);
-		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_WORLD_SIZE);
+		std::uniform_real_distribution<float> xDist(0.0f, CHUNK_SIZE);
+		std::uniform_real_distribution<float> zDist(0.0f, CHUNK_SIZE);
 		int attempts = 0;
 
 		while (actorsInChunk.size() < actorPerChunk && attempts < MAX_ATTEMPTS) {
