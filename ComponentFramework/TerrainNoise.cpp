@@ -126,9 +126,13 @@ float TerrainNoise::sample(float wX, float wZ) const
     // apply exponent (only to positive values)
     if (terrainConfig.exponent != 1.0f && h > VERY_SMALL) {
         float maxH = continentalPreset.amplitude + basePreset.amplitude + PVpreset.amplitude;
-        float t = h / maxH;
+        float t = (h + 0.02f) / maxH;
         h = std::pow(t, terrainConfig.exponent) * maxH/1.3f; // can be changed
     }
+
+   /* if (terrainConfig.exponent != 1.0f && h > VERY_SMALL) {
+        h = std::pow(h, terrainConfig.exponent);
+    }*/
 
     // apply global scale
     h *= terrainConfig.globalHeightScale;
