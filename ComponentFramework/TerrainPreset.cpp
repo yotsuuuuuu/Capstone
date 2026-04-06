@@ -14,7 +14,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 	CreateBase();
 	CreatePeaksValleys();
 	//CreateErosion();
-	//CreateContinentalness();
+	CreateContinentalness();
 	
 	exponent =  1 + (highScaled*2);
 	std::cout <<"Terrain preset - exponent: " << exponent << std::endl;
@@ -443,35 +443,35 @@ void TerrainPreset::CreateErosion()
 
 void TerrainPreset::CreateContinentalness()
 {
-	AudioBands avgBands = pAudio.avgBands;
+	//AudioBands avgBands = pAudio.avgBands;
 	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum * pAudio.highAvgSum )/3.0f); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
 	continentalness.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
-	continentalness.frequency = 0.002f * (avgBands.sub * 0.008f); // almost lower than base
-	continentalness.amplitude = 0.1f + (pAudio.bassAvgSum * 0.33f); 
-	
-	//continentalness.fractal = ChooseFractal(3,pAudio.bassMaxSum * avgBands.midHigh * 0.01f);
-	if (continentalness.fractal != FractalType::None) {
-		continentalness.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 1.2f); // barely any octaves 
-		continentalness.gain = 0.005f + (pAudio.midAvgSum * 0.05f); // keep very very very small 
-		continentalness.lacunarity = 1.7f + (pAudio.midAvgSum * 0.6f);
-		continentalness.fractalWeightedStrength = (pAudio.midAvgSum) * 0.7f; // might be useful for continental??
-	}
-	
-	if (continentalness.type == NoiseType::Cellular) {
-		continentalness.cellType = ChooseCellular(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
-		continentalness.returnType = ChooseReturn(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
-		continentalness.cellularJitter = 0.7f + (pAudio.midAvgSum * 2.0f); // keep around 1, 
+	//continentalness.frequency = 0.002f * (avgBands.sub * 0.008f); // almost lower than base
+	//continentalness.amplitude = 0.1f + (pAudio.bassAvgSum * 0.33f); 
+	//
+	////continentalness.fractal = ChooseFractal(3,pAudio.bassMaxSum * avgBands.midHigh * 0.01f);
+	//if (continentalness.fractal != FractalType::None) {
+	//	continentalness.fractalOctaves = 1 + std::round((pAudio.midAvgSum) * 1.2f); // barely any octaves 
+	//	continentalness.gain = 0.005f + (pAudio.midAvgSum * 0.05f); // keep very very very small 
+	//	continentalness.lacunarity = 1.7f + (pAudio.midAvgSum * 0.6f);
+	//	continentalness.fractalWeightedStrength = (pAudio.midAvgSum) * 0.7f; // might be useful for continental??
+	//}
+	//
+	//if (continentalness.type == NoiseType::Cellular) {
+	//	continentalness.cellType = ChooseCellular(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
+	//	continentalness.returnType = ChooseReturn(3, pAudio.midAvgSum * pAudio.highAvgSum); // mids and highs again
+	//	continentalness.cellularJitter = 0.7f + (pAudio.midAvgSum * 2.0f); // keep around 1, 
 
-		// complicated way to calculate a 30/2477 chance but its calculated strangely so hopefully still unpredictable
-		if (int((pAudio.highMaxSum * pAudio.midMaxSum * pAudio.bassMaxSum) * (pAudio.highAvgSum * 1000) - (avgBands.highHigh * 1000)) % 2477 <= 30) {
-			continentalness.cellularJitter = 0.0f + 10 * avgBands.highHigh; // VERY RARE hopefully
-		}
-	}
+	//	// complicated way to calculate a 30/2477 chance but its calculated strangely so hopefully still unpredictable
+	//	if (int((pAudio.highMaxSum * pAudio.midMaxSum * pAudio.bassMaxSum) * (pAudio.highAvgSum * 1000) - (avgBands.highHigh * 1000)) % 2477 <= 30) {
+	//		continentalness.cellularJitter = 0.0f + 10 * avgBands.highHigh; // VERY RARE hopefully
+	//	}
+	//}
 
-	continentalness.domainWarp = ChooseWarp(3, pAudio.midAvgSum + avgBands.midMid * avgBands.bass); // randomf stuff GO !
-	if (continentalness.domainWarp != WarpType::None) {
-		continentalness.warpAmplitude = 0.2f + (pAudio.midAvgSum * 0.6f); // keep low .2-.8
-	}
+	//continentalness.domainWarp = ChooseWarp(3, pAudio.midAvgSum + avgBands.midMid * avgBands.bass); // randomf stuff GO !
+	//if (continentalness.domainWarp != WarpType::None) {
+	//	continentalness.warpAmplitude = 0.2f + (pAudio.midAvgSum * 0.6f); // keep low .2-.8
+	//}
 
 }
 
