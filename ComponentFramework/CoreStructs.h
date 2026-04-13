@@ -303,12 +303,12 @@ struct DescriptorWriteInfo {
  };
 
 struct ActorAmount {
-    int totalActors;
-    int lights;
-    int tree1;
-    int tree2;
-    int rock1;
-    int rock2;
+    int totalActors = 400;
+    int lights = 200;
+    int tree1 = 50;
+    int tree2 = 50;
+    int rock1 = 50;
+    int rock2 = 50;
 };
 
 struct AABB

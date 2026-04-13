@@ -36,7 +36,7 @@ private:
 	float lowestPoint = std::numeric_limits<float>::max(); 
 	float highestPoint = std::numeric_limits<float>::min();
 
-	uint32_t worldSeed;
+	uint32_t worldSeed = 1337;
 
 	Vec3 spawnPoint;
 	std::vector<Vec3> actorlocations;

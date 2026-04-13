@@ -2,6 +2,8 @@
 
 void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 {
+    if (ab.size() <= 0) { return; } // check if no songs
+
 	pAudio = GetLayerValuesFromAudio(ab);
 
 	// scale high frequencies to a more usable range (since they tend to be very low) and clamp to 1.0f
