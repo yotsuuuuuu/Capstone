@@ -7,7 +7,6 @@
 #include "VkImGUISystem.h"
 #include "SYS_Light.h"
 #include "PhysicsManager.h"
-
 #include "Timer.h"
 #include "Scene0.h"
 #include "Scene2.h"
@@ -164,7 +163,7 @@ void SceneManager::GetEvents() {
 			return;
 		case SDL_EVENT_KEY_DOWN:
 			switch (sdlEvent.key.scancode) {
-			case SDL_SCANCODE_ESCAPE:
+			case SDL_SCANCODE_F8:
 				isRunning = false;
 				return;
 			case SDL_SCANCODE_F1:
