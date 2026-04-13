@@ -122,7 +122,7 @@ void CInput::Update(const float dt)
 	// CheckGrounded();
 
 	MATH::Vec3 movementDirection = CalculateMovementDirection();
-	float currentSpeed = moveSpeed * (sprintPressed ? sprintMultiplier : 1.0f);
+	float currentSpeed = moveSpeed * (sprintPressed && phys->IsGrounded() ? sprintMultiplier : 1.0f);
 
 	//std::cout << "Movement Direction: " << movementDirection.x << ", " << movementDirection.y << ", " << movementDirection.z << std::endl;
 
@@ -130,16 +130,15 @@ void CInput::Update(const float dt)
 	MATH::Vec3 currentVelocity = phys->GetVelocity();
 
 	if (MATH::VMath::mag(movementDirection) > VERY_SMALL) {
-
-		//currentVelocity += movementDirection * currentSpeed;
 		currentVelocity.x = movementDirection.x * currentSpeed;
-		//currentVelocity.y += movementDirection.y * jumpStrength;
 		currentVelocity.z = movementDirection.z * currentSpeed;
-		//cam->SetNeedsUpdate(true); // flag camera to update its view matrix on next update
 	}
 	else 
 	{
-		//currentVelocity = MATH::Vec3(0.0f, 0.0f, 0.0f);
+		// player decceleration
+		if (phys->IsGrounded()) {
+			currentVelocity = currentVelocity / 1.3f;
+		}
 	}
 
 	phys->SetVelocity(currentVelocity);
@@ -164,11 +163,6 @@ void CInput::UpdateCameraRotation()
 
 }
 
-//void CInput::CheckGrounded()
-//{
-//	// no floor so ignore this for now
-//	// TODO: (andres) implement raycast or collision check to set isGrounded properly. requires collisions to be implemented first
-//}
 
 MATH::Vec3 CInput::CalculateMovementDirection() const
 {
@@ -182,7 +176,6 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 
 	MATH::Vec3 up = cam->GetUpVector();
 	// commented out for now since we flying
-	if (!noclip) { front.y = 0.0f; } // ignore vertical component for movement (so we dont fly when looking up )
 
 	if (MATH::VMath::mag(front) > 0.0f) {
 		front = MATH::VMath::normalize(front);
@@ -197,13 +190,11 @@ MATH::Vec3 CInput::CalculateMovementDirection() const
 
 	}
 
-	//if (jumpPressed && phys->IsGrounded()) { phys->SetIsGrounded(false); }
 
 	// normalize if moving diagonally to prevent faster movement
 	if (MATH::VMath::mag(direction) > 0.0f) {
 		direction = MATH::VMath::normalize(direction);
 	}
-	//direction = MATH::Vec3(direction.x, 0.0f, direction.z); // ensure no vertical movement from input
 	return direction;
 
 }
