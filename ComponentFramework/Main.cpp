@@ -20,7 +20,7 @@ int main(int argc, char* args[]) {
 #endif 
 
 	
-	std::string name = { "AudioScape" };
+	std::string name = { "Audioscape" };
 	Debug::DebugInit(name + "_Log");
 	Debug::Info("Starting the GameSceneManager", __FILE__, __LINE__);
 	SceneManager* gsm = new SceneManager();
