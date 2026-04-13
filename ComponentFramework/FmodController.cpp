@@ -257,6 +257,10 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 
 	FMOD::Sound* tempsound = nullptr;
 
+	if (nameOfsounds.size() == 0)
+	{
+		return {};
+	}
 	system->createSound(nameOfsounds[songnum_].c_str(), FMOD_DEFAULT, 0, &tempsound);
 	
 	unsigned int lengthPCM = 0;//length cannot be negatice
