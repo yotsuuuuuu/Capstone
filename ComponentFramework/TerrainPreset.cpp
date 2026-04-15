@@ -30,7 +30,7 @@ void TerrainPreset::CreateFromAudio(std::vector<AudioBands> ab)
 
     std::cout <<"Terrain Preset - global height scale: " << globalHeightScale << std::endl;
 
-    WORLD_SIZE = std::clamp(20 + (pAudio.songLength / 200), 25, 32);
+    WORLD_SIZE = std::clamp(18 + (pAudio.songLength / 200), 25, 36);
 
     int maxActors = (WORLD_SIZE * WORLD_SIZE) * 2.5; // 2x world size amount of actors (2 per chunk roughly)
     actorAmount.lights = std::clamp(40 + static_cast<int>(pAudio.maxBands.lowMid), 40, maxActors / 2); // keep between 40-half max
@@ -91,7 +91,6 @@ ProcessedAudio TerrainPreset::GetLayerValuesFromAudio(std::vector<AudioBands> ab
 
 	// copy before averaging out
 	pa.maxBands = pa.avgBands; 
-	pa.maxLoudness = pa.averageLoudness; // this just becomes the song length, cause duh
 
 	// of note: bass tends to be the highest followed by mid and then high in dead last
 
@@ -433,7 +432,7 @@ void TerrainPreset::CreatePeaksValleys()
 void TerrainPreset::CreateContinentalness()
 {
 	continentalness.type = ChooseNoise(3, (pAudio.midAvgSum + pAudio.highAvgSum)); // mids and highs since they can add some variation without completely changing the overall shape of the terrain
-	continentalness.seed = pAudio.seed * (pAudio.midAvgSum + pAudio.highAvgSum + 1); // vary seed slightly for each layer
+    continentalness.seed = pAudio.seed * (pAudio.midAvgSum * pAudio.highAvgSum + (1 * pAudio.bassAvgSum)); // vary seed slightly for each layer
 
 }
 

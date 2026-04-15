@@ -51,8 +51,6 @@ struct ProcessedAudio
     AudioBands maxBands;
 
 	float averageLoudness = 0;
-	float maxLoudness = 0;
-	float tempo = 0;
 	int songLength = 0; // based on number of windows
     uint32_t seed = 0;
 

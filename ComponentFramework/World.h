@@ -59,18 +59,18 @@ public:
 
 	std::vector<uint32_t> GetChunkIndices() const { return baseChunkMesh->baseIndices; }
 
-	std::unordered_map<Vec2, std::unique_ptr<Chunk> >* GetChunkMap() { return &chunkMap; }
+	std::unordered_map<Vec2, std::unique_ptr<Chunk>>* GetChunkMap() { return &chunkMap; }
 	std::vector<TerrainChunkData>* GetChunkRenderData() { return &chunkRenderData; }
 	
-	void CreateActorSpawns(ActorAmount actorAmount_);
-
 	Vec3 GetPlayerSpawn() { return spawnPoint; }
+
 
 private:
 	void GenerateAllChunks();
 	void GenerateChunkHeightmap(Chunk* chunk);
 	void BuildChunkMeshData(Chunk* chunk);
 	void CalculateNormals(std::vector<Vertex>& vertices);
+	void CreateActorSpawns(ActorAmount actorAmount_);
 
 	uint32_t HashChunkCoord(int x, int y, uint32_t globalSeed);
 	std::mt19937 GetChunkRNG(const Vec2& chunkPos, uint32_t globalSeed);

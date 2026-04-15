@@ -214,7 +214,7 @@
   "Camera": {
     "position": [ 0, 0, -5 ],
     "rotation": [ 0, 0, 1, 0 ],
-    "fov": 70,
+    "fov": 90,
     "nearClip": 0.25,
     "farClip": 500
   },
