@@ -32,7 +32,7 @@ Before cloning, make sure the following are installed:
 | **Visual Studio 2022** | Windows only. Tested on Visual Studio 2022, should be compatible with later versions. |
 | **Vulkan SDK 1.3.296.0** | This is the specific version the project was built and tested against. It is the last version to support both 32-bit and 64-bit builds. Download it here: [LunarG Vulkan SDK](https://vulkan.lunarg.com/) |
 | **FMOD Studio API 2.03.09** | The project is configured to use FMOD's default install path. If FMOD is installed to a custom location, the include, lib and environment paths will need to be updated manually in Visual Studio under **Project Properties**. Download here: [fmod.com](https://www.fmod.com) |
-| **Audio Files** | Audioscaper ships with one free licensed track to get you started. To add your own music, place tracks in the `audio` folder in the project directory. Supported formats: **MP3, FLAC, WAV** |
+| **Audio Files** | Audioscaper ships with one Listen To My Heartbeat by Dagored. To add your own music, place tracks in the `audio` folder in the project directory. Supported formats: **MP3, FLAC, WAV** |
 
 All other dependencies are included in the repository.
 
