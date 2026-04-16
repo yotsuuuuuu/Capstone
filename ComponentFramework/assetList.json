@@ -1,15 +1,12 @@
 {
   "Meshes": {
     "IcoMesh": "./meshes/SimpleIco.obj",
-    "marioMesh": "./meshes/Mario.obj",
-    "sphereMesh": "./meshes/Sphere.obj",
     "LowPolyTree1": "./meshes/K_tree.obj",
     "LowPolyTree2": "./meshes/Kay_Tree1.obj",
     "LowPolyTree3": "./meshes/Kay_Tree2.obj",
     "LowPolyTree4": "./meshes/Kay_Tree3.obj",
     "pillarMesh": "./meshes/Pillar.obj",
-    "mushroomMesh": "./meshes/mushroom.obj",
-    "skullMesh": "./meshes/Skull.obj"
+    "mushroomMesh": "./meshes/mushroom.obj"
   },
   "Shaders": {
     "main": {
@@ -69,8 +66,6 @@
   },
   "Textures": {
     "DefaultTexture": "./textures/DefaultTexture.png",
-    "marioMime": "./textures/mario_mime.png",
-    "marioFire": "./textures/mario_fire.png",
     "pillarTexture": "./textures/Pillar.png",
     "LowPolyTreeTexture": "./textures/colormap.png",
     "LowPolyKayTreeTexture": "./textures/Kay_forest_texture.png",
@@ -79,12 +74,6 @@
   },
 
   "Material": {
-    "marioMat": {
-      "texture": [ "marioMime" ],
-      "shader": "main",
-      "cast shadow": "true",
-      "recieve shadow": "false"
-    },
     "SimpleLightMat": {
       "texture": [ "DefaultTexture" ],
       "shader": "SimpleLightShader",
@@ -117,18 +106,6 @@
     }
   },
   "Actor": {
-    "mario": {
-      "Mat": "marioMat",
-      "Mesh": "marioMesh"
-    },
-    "luigi": {
-      "Mat": "marioMat",
-      "Mesh": "marioMesh"
-    },
-    "DebugSphere": {
-      "Mat": "marioMat",
-      "Mesh": "sphereMesh"
-    },
     "pillar": {
       "Mat": "PillarMat",
       "Mesh": "pillarMesh"
