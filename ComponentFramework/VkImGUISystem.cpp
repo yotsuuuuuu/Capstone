@@ -4,7 +4,7 @@
 #include "imgui_impl_vulkan.h"
 #include "imgui_internal.h"
 #include "SYS_Light.h"
-#include "FmodController.h"
+#include "AudioManager.h"
 #include "VulkanRenderer.h"
 #include "AssetManager.h"
 #include "CActor.h"
@@ -82,8 +82,8 @@ static bool ShowTerrainColorEditor = false;
 void VkImGUISystem::ImGUIHandelEvents(const SDL_Event& event, const EngineContext& cntx)
 {
     if (event.type == CustomEvent::SONG_SELECTED_EVENT) {
-        cntx.fmodController->playsong(currentSongIndex);
-        SongLenght = cntx.fmodController->getTimeOfSong(currentSongIndex);
+        cntx.audioManager->playsong(currentSongIndex);
+        SongLenght = cntx.audioManager->getTimeOfSong(currentSongIndex);
     }
     switch (event.type) {
         case SDL_EVENT_KEY_UP:
@@ -123,7 +123,7 @@ void VkImGUISystem::GatherSystemData(const EngineContext& cntx)
     SongNameList.clear();
     int numberOfSongs = 0;
     while (true) {
-        std::string  name = cntx.fmodController->getSongName(numberOfSongs);
+        std::string  name = cntx.audioManager->getSongName(numberOfSongs);
         
         if (name.empty()) break; // stops when all the songs have been found
         
@@ -137,8 +137,8 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
 {
     // Display Audio Visualler/ Current Name Of the Song // Current time // Controllo audio // Stop and Start
 
-    const AudioBands& bands = cntx.fmodController->GetFrameAudioBand();
-    SongTime time = cntx.fmodController->getCurrentTime();
+    const AudioBands& bands = cntx.audioManager->GetFrameAudioBand();
+    SongTime time = cntx.audioManager->getCurrentTime();
     ImColor BottomColor = IM_COL32(23, 134, 134, 255);
     ImColor TopColor = IM_COL32(255, 0, 0, 255);
     std::string currentname;
@@ -231,7 +231,7 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         ImGui::PushStyleColor(ImGuiCol_SliderGrab, color);
         ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, color);
         if (ImGui::VSliderFloat("##Volume",ImVec2(20,200), &volume, 0.0f, 100.0f, "")) {
-            cntx.fmodController->Volume(volume);
+            cntx.audioManager->Volume(volume);
         }
         ImGui::PopStyleColor(2);
         ImGui::PopStyleVar();
@@ -242,18 +242,18 @@ void VkImGUISystem::SystemUI(const EngineContext& cntx)
         ImGui::SameLine();
         ImGui::BeginGroup();
         if (ImGui::Button("Reload Song List", ImVec2(child_w * 0.5f, 0))) {
-            cntx.fmodController->AddSonginFile();
+            cntx.audioManager->AddSonginFile();
             GatherSystemData(cntx);
         }
        
         ImGui::Dummy(ImVec2(child_w * 0.5f, 5));
 
         if (ImGui::Button("Play", ImVec2(child_w * 0.5f, 0))) {             
-            cntx.fmodController->playsong(AudioState::PLAY);
+            cntx.audioManager->playsong(AudioState::PLAY);
         }
         if (ImGui::Button("Pause", ImVec2(child_w * 0.5f, 0))) {
             
-            cntx.fmodController->playsong(AudioState::PAUSE);
+            cntx.audioManager->playsong(AudioState::PAUSE);
         }
         if (ImGui::Button("Random", ImVec2(child_w * 0.5f, 0))) {
 

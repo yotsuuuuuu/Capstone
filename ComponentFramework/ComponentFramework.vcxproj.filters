@@ -34,7 +34,7 @@
     <ClCompile Include="DescriptorSetBuilder.cpp">
       <Filter>Source\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="FmodController.cpp">
+    <ClCompile Include="AudioManager.cpp">
       <Filter>Source\FMOD</Filter>
     </ClCompile>
     <ClCompile Include="imgui.cpp">
@@ -198,7 +198,7 @@
     <ClInclude Include="EngineContext.h">
       <Filter>Header\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="FmodController.h">
+    <ClInclude Include="AudioManager.h">
       <Filter>Header\FMOD</Filter>
     </ClInclude>
     <ClInclude Include="imconfig.h">

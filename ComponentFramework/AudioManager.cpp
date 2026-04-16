@@ -1,20 +1,20 @@
-#include "FmodController.h"
+#include "AudioManager.h"
 #include <fftw3.h>
 #include <cmath>
 #include <filesystem>
 
-void FmodController::addSong(const char* wave_)
+void AudioManager::addSong(const char* wave_)
 {
 	nameOfsounds.push_back(wave_);
 }
-void FmodController::addSong(const std::vector<const char*>& wave_)
+void AudioManager::addSong(const std::vector<const char*>& wave_)
 {
 	for (size_t i = 0; i < wave_.size(); i++)
 	{
 		nameOfsounds.push_back(wave_[i]);
 	}
 }
-std::string FmodController::getSongName(int songnum_)
+std::string AudioManager::getSongName(int songnum_)
 {
 	if (songnum_ >= 0 && songnum_ < nameOfsounds.size())
 	{
@@ -75,7 +75,7 @@ std::string FmodController::getSongName(int songnum_)
 	}
 	
 }
-bool FmodController::AddSonginFile()
+bool AudioManager::AddSonginFile()
 {
 
 	if (nameOfsounds.size() > 0)
@@ -107,7 +107,7 @@ bool FmodController::AddSonginFile()
 	return true;
 }
 
-void FmodController::playsong(int songnum_)
+void AudioManager::playsong(int songnum_)
 {
 	FMOD::Sound* currentSound = nullptr;
 	channel->getCurrentSound(&currentSound);
@@ -150,7 +150,7 @@ void FmodController::playsong(int songnum_)
 
 	result = system->update();
 }
-void FmodController::playsong(AudioState state_)
+void AudioManager::playsong(AudioState state_)
 {
 	switch (state_)
 	{
@@ -171,7 +171,7 @@ void FmodController::playsong(AudioState state_)
 	}
 }
 
-bool FmodController::createSystem()
+bool AudioManager::createSystem()
 {
 	result = FMOD::System_Create(&system);
 	
@@ -201,7 +201,7 @@ bool FmodController::createSystem()
 }
 
 
-void FmodController::Volume(float volume_)
+void AudioManager::Volume(float volume_)
 {
 	volume = volume_;
 
@@ -220,7 +220,7 @@ void FmodController::Volume(float volume_)
 	}
 }
 
-SongTime FmodController::getTimeOfSong(int index_)
+SongTime AudioManager::getTimeOfSong(int index_)
 {
 	unsigned int length;
 
@@ -234,7 +234,7 @@ SongTime FmodController::getTimeOfSong(int index_)
 	return total;
 }
 
-SongTime FmodController::getCurrentTime()
+SongTime AudioManager::getCurrentTime()
 {
 	unsigned int positionInSong;
 
@@ -250,7 +250,7 @@ SongTime FmodController::getCurrentTime()
 
 
 
-std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
+std::vector<AudioBands> AudioManager::AnalyzeAudioOffline(int songnum_)
 {
 	//creates audio bands object
 	std::vector<AudioBands> bandHolder;
@@ -392,7 +392,7 @@ std::vector<AudioBands> FmodController::AnalyzeAudioOffline(int songnum_)
 	return bandHolder;
 }
 
-void FmodController::AnalyzeAudioOnline()
+void AudioManager::AnalyzeAudioOnline()
 {
 	bool playing = false;
 	if (channel->isPlaying(&playing))
@@ -497,14 +497,14 @@ void FmodController::AnalyzeAudioOnline()
 
 }
 
-const AudioBands& FmodController::GetFrameAudioBand()
+const AudioBands& AudioManager::GetFrameAudioBand()
 {
 	return PerframeAudioBand;
 }
 
 
 
-FmodController::~FmodController()
+AudioManager::~AudioManager()
 {
 	
 	sounds->release();

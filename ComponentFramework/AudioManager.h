@@ -4,7 +4,7 @@
 #include "CoreStructs.h"
 
 
-class FmodController
+class AudioManager
 {
 private:
 	FMOD::System* system;
@@ -22,7 +22,7 @@ private:
 
 	
 public:
-	FmodController(){};
+	AudioManager(){};
 	void addSong(const char* wave_);
 	void addSong(const std::vector<const char*>& wave_);
 	std::string getSongName(int songnum_);
@@ -38,6 +38,6 @@ public:
 	void AnalyzeAudioOnline();
 	const AudioBands& GetFrameAudioBand();
 	//system that gets the fmod sound data that fram puts it inot bands then sends it to the vulkan rednerer for the shader system. NEEDS TO GET SIZE
-	~FmodController();
+	~AudioManager();
 };
 
