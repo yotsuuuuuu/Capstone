@@ -1,7 +1,5 @@
 ![title](TigherTitleText.png)
 ---
-# Audioscape
-
 Audioscape is an interactive 3D technical demo that bridges the gap between audio and visual experience. Players are able to load any audio track of their choosing by adding it to the audio folder, freely explore the generated terrain on foot, and personalise the visual appearance of the world through a built in colour editor.
 
 The terrain is formed from the song's frequency data at the point of generation, producing a static landscape that is a physical representation of the song's sonic characteristics. Meanwhile, the lighting system reacts continuously to the beat, with lights emitting bloom that pulses in real time to the rhythm, bringing the environment to life around the player.
