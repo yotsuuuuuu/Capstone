@@ -161,10 +161,10 @@ float TerrainNoise::EvaluateContinental(float c) const
         {0.0f, 0.0f},  
         {0.2f, 0.0f}, 
         {0.3f, 1.0f},
-        {0.5f, 2.0f},
-        {0.8f, 5.0f},   
-        {0.9f, 8.0f},   
-        {1.0f, 11.0f}   
+        {0.5f, 1.0f},
+        {0.8f, 3.0f},   
+        {0.9f, 6.0f},   
+        {1.0f, 9.0f}   
     };
 
     // find which segment c falls into
@@ -176,7 +176,8 @@ float TerrainNoise::EvaluateContinental(float c) const
             float t3 = t2 * t;
 
             // hermite interpolation for smooth curves
-            float height = points[i].height * (2.0f * t3 - 3.0f * t2 + 1.0f) +
+            float height = 
+                points[i].height * (2.0f * t3 - 3.0f * t2 + 1.0f) +
                 points[i + 1].height * (-2.0f * t3 + 3.0f * t2) +
                 0.0f * (t3 - 2.0f * t2 + t) +  // tangent at start
                 0.0f * (t3 - t2);               // tangent at end
