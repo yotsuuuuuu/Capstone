@@ -1,5 +1,5 @@
 ﻿#include "World.h"
-#include "FmodController.h"
+#include "AudioManager.h"
 #include "AssetManager.h"
 #include "CLight.h"
 #include "CActor.h"
@@ -26,7 +26,7 @@ void World::Initialize(int songIndex)
 	lowestPoint = 0;
 	highestPoint = 0;
 	TerrainPreset preset;
-	std::vector<AudioBands> ab = engineContext.fmodController->AnalyzeAudioOffline(songIndex); // TODO: pass in song num
+	std::vector<AudioBands> ab = engineContext.audioManager->AnalyzeAudioOffline(songIndex); // TODO: pass in song num
 	preset.CreateFromAudio(ab);
 	terrainNoise = new TerrainNoise(preset);
 	// WorldActors worldActors = preset.DecideActors();

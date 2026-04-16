@@ -14,7 +14,7 @@
 
 using namespace MATH;
 
-class FmodController; // forward declaration
+class AudioManager; // forward declaration
 class AssetManager;
 
 class World {

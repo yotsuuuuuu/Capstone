@@ -2,7 +2,7 @@
 #include "VulkanRenderer.h"
 #include "CShader.h"
 #include "CMesh.h"
-#include "FmodController.h"
+#include "AudioManager.h"
 
 bool CSkyBox::OnCreate()
 {
@@ -108,7 +108,7 @@ PipelineInfo CSkyBox::GetPipeline()
 
 void CSkyBox::AudioReact(EngineContext& cntx)
 {
-    auto bands = cntx.fmodController->GetFrameAudioBand();
+    auto bands = cntx.audioManager->GetFrameAudioBand();
     float smoothing = 0.25f;
     m_smoothed1 += (bands.bass - m_smoothed1) * smoothing;
     m_smoothed2 += (bands.highBass - m_smoothed2) * smoothing;

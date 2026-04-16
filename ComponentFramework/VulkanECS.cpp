@@ -14,7 +14,7 @@
 #include "SYS_Light.h"
 #include "AssetManager.h"
 #include "VkImGUISystem.h"
-#include "FmodController.h"
+#include "AudioManager.h"
 #include "imgui.h"
 #include <unordered_map>
 
@@ -137,7 +137,7 @@ void VulkanRenderer::UpdateTerrainUBO()
 }
 void VulkanRenderer::UpdateAudioUBO(const EngineContext& cntx)
 {
-    const AudioBands& Bands = cntx.fmodController->GetFrameAudioBand();
+    const AudioBands& Bands = cntx.audioManager->GetFrameAudioBand();
 
     AudioBandsUBO uboData{};
 

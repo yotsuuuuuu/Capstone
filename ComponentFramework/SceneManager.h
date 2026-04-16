@@ -38,7 +38,7 @@ private:
 	EngineContext engineContext;
 	Renderer* renderer;
 	AssetManager* assetManager;
-	FmodController* fmodController;
+	AudioManager* audioManager;
 	SYS_Light* LightSystem;
 	VkImGUISystem* VKImGui;
 	PhysicsManager* physicsManager;

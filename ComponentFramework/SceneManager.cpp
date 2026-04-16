@@ -3,7 +3,7 @@
 #include "VulkanRenderer.h"
 #include "OpenGLRenderer.h"
 #include "AssetManager.h"
-#include "FmodController.h"
+#include "AudioManager.h"
 #include "VkImGUISystem.h"
 #include "SYS_Light.h"
 #include "PhysicsManager.h"
@@ -16,7 +16,7 @@
 SceneManager::SceneManager() :
 	currentScene(nullptr), timer(nullptr),
 	fps(60), isRunning(false), rendererType(RendererType::VULKAN),
-	renderer(nullptr),LightSystem(nullptr),fmodController(nullptr), assetManager(nullptr), VKImGui(nullptr){}
+	renderer(nullptr),LightSystem(nullptr), audioManager(nullptr), assetManager(nullptr), VKImGui(nullptr){}
 
 SceneManager::~SceneManager() {
 	if (currentScene) {
@@ -43,11 +43,11 @@ SceneManager::~SceneManager() {
 	renderer->OnDestroy();
 	engineContext.renderer = nullptr;
 	engineContext.assetManager = nullptr;	
-	engineContext.fmodController = nullptr;
+	engineContext.audioManager = nullptr;
 	engineContext.physicsManager = nullptr;
 
 	delete physicsManager;
-	delete fmodController;
+	delete audioManager;
 	delete renderer;
 
 	Debug::Info("Deleting the GameSceneManager", __FILE__, __LINE__);
@@ -85,24 +85,24 @@ bool SceneManager::Initialize(std::string name_, int width_, int height_) {
 		Debug::FatalError("Failed to initialize Timer object", __FILE__, __LINE__);
 		return false;
 	}
-	fmodController = new FmodController();
+	audioManager = new AudioManager();
 	LightSystem = new SYS_Light(&engineContext, 1000);
 
 	VKImGui = new VkImGUISystem();
 
 	assetManager = new AssetManager();
-	if (!fmodController->AddSonginFile())
+	if (!audioManager->AddSonginFile())
 	{
 		Debug::Error("Failed to add songs in file to the list", __FILE__, __LINE__);
 	}
-	if (!fmodController->createSystem())
+	if (!audioManager->createSystem())
 	{
 		Debug::Error("Failed to create fmod system", __FILE__, __LINE__);
 	}
 
 	physicsManager = new PhysicsManager();
 
-	engineContext.Set(*renderer, *assetManager, *fmodController, *LightSystem, *VKImGui, *physicsManager);
+	engineContext.Set(*renderer, *assetManager, *audioManager, *LightSystem, *VKImGui, *physicsManager);
 	assetManager->set(engineContext);
 	engineContext.assetManager->LoadCamera("./assetList.json");		
 
@@ -141,7 +141,7 @@ void SceneManager::Run() {
 
 		GetEvents();
 		if (currentScene && !isWindowMinimized) {
-			engineContext.fmodController->AnalyzeAudioOnline(); 
+			engineContext.audioManager->AnalyzeAudioOnline();
 			engineContext.VKImGUI->BeginFrame();
 			currentScene->Update(timer->getDeltaTime());
 			engineContext.VKImGUI->TestUI();

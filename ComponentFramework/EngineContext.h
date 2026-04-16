@@ -5,7 +5,7 @@
 
 class Renderer;
 class AssetManager;
-class FmodController;
+class AudioManager;
 class SYS_Light;
 class VkImGUISystem;
 class PhysicsManager;
@@ -14,14 +14,14 @@ struct EngineContext
 {
     Renderer* renderer = nullptr;
     AssetManager* assetManager = nullptr;
-	FmodController* fmodController = nullptr;
+	AudioManager* audioManager = nullptr;
     SYS_Light* lightSys = nullptr;
     VkImGUISystem* VKImGUI = nullptr;
 	PhysicsManager* physicsManager = nullptr;
     void Set(
         Renderer& renderer_, 
         AssetManager& assetManager_, 
-        FmodController& fmodController_,
+        AudioManager& audioManager_,
         SYS_Light& LightSys_, 
         VkImGUISystem& imgui,
 		PhysicsManager& physicsManager_
@@ -29,7 +29,7 @@ struct EngineContext
     {
         renderer = &renderer_;
         assetManager = &assetManager_;
-        fmodController = &fmodController_;
+        audioManager = &audioManager_;
         lightSys = &LightSys_;
         VKImGUI = &imgui;
 		physicsManager = &physicsManager_;
