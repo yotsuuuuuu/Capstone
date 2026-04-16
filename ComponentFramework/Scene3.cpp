@@ -46,7 +46,7 @@ bool Scene3::OnCreate() {
 
 		//step 1.3 Materials
 
-		 std::vector<std::string> filepaths = { "./textures/rock.png" };
+		std::vector<std::string> filepaths = { "./textures/DefaultTexture.png" };
 
 		Ref<CMaterial> mat3 = std::make_shared<CMaterial>(nullptr, engineContext.renderer, filepaths, engineContext.assetManager->GetShader("Terrain"));
 		mat3->OnCreate();

@@ -184,6 +184,7 @@ FractalType TerrainPreset::ChooseFractal(int layer, float value)
             FractalType::None,    // smooth, no fractal
             FractalType::FBm,     // standard fractal (good for hills)
             FractalType::PingPong // creates interesting plateaus
+            
             // [x] [x] [x] [ ]    // 3 fractals available (No Ridged)
         };
         break;
@@ -192,7 +193,7 @@ FractalType TerrainPreset::ChooseFractal(int layer, float value)
         availableFractals = {
             FractalType::None,    // some areas can be smooth
             FractalType::FBm,     // rolling hills
-            //FractalType::Ridged,  // sharp mountain peaks
+            FractalType::Ridged,  // sharp mountain peaks
             FractalType::PingPong // chaotic, rocky terrain
             // [x] [x] [x] [x]    // all 4 fractals available
         };
