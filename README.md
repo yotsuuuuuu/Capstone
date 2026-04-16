@@ -67,7 +67,7 @@ All other dependencies are included in the repository.
 | Key / Input | Action |
 |---|---|
 | W A S D | Move |
-| Mouse Movement | Look / Aim |
+| Mouse Movement | Look |
 | Space | Jump |
 | Left Shift | Run |
 | TAB | Open / Close Main Menu |
