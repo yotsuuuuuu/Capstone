@@ -1,5 +1,4 @@
 # Audioscape
-[TODO: not Done]
 
 Audioscape is an interactive 3D technical demo that bridges the gap between audio and visual experience. Players are able to load any audio track of their choosing by adding it to the audio folder, freely explore the generated terrain on foot, and personalise the visual appearance of the world through a built in colour editor.
 
@@ -41,9 +40,8 @@ All other dependencies are included in the repository.
 #### Build Instructions
 
 1. Clone the repository
-2. Download  mesh assets as they are not included in the repository. Download the zip here: **[LINK TO MESH OBJ ZIP]** and extract the contents to `meshes`.
-3. Open the Visual Studio solution file (`.sln`) in the root of the repository
-4. Set the environment paths under **Project Properties → Debugging → Environment** for your target platform:
+2. Open the Visual Studio solution file (`.sln`) in the root of the repository
+3. Set the environment paths under **Project Properties → Debugging → Environment** for your target platform:
 
    **32-bit (x86):**
    ```
@@ -58,9 +56,9 @@ All other dependencies are included in the repository.
    > [!NOTE]
    > Paths prefixed with `$(ProjectDir)` are relative to the repository root and do not need to be changed. Only the FMOD paths need to be updated if FMOD was installed to a custom location.
 
-5. Set the build configuration to **[DEBUG/RELEASE]** and platform to **[x64/x86]**
-6. Build the solution
-7. Run the project
+4. Set the build configuration to **[DEBUG/RELEASE]** and platform to **[x64/x86]**
+5. Build the solution
+6. Run the project
 
 ---
 
