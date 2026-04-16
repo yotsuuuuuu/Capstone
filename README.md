@@ -13,8 +13,6 @@ Audioscape is less a traditional game and more an audio-visual experience. The g
 
 There are two ways to get Audioscape running: downloading the installer via itch.io or cloning the repository locally.
 
----
-
 ### Option 1: itch.io / Installer
 
 1. Head to the itch.io page at [Audioscape](https://gu88.itch.io/audioscape)
@@ -22,7 +20,6 @@ There are two ways to get Audioscape running: downloading the installer via itch
 3. Run the installer and follow the on screen instructions
 4. Launch Audioscape
 
----
 
 ### Option 2: Clone from GitHub
 
@@ -35,7 +32,6 @@ Before cloning, make sure the following are installed:
 | **Visual Studio 2022** | Windows only. Tested on Visual Studio 2022, should be compatible with later versions. |
 | **Vulkan SDK 1.3.296.0** | This is the specific version the project was built and tested against. It is the last version to support both 32-bit and 64-bit builds. Download it here: [LunarG Vulkan SDK](https://vulkan.lunarg.com/) |
 | **FMOD Studio API 2.03.09** | The project is configured to use FMOD's default install path. If FMOD is installed to a custom location, the include, lib and environment paths will need to be updated manually in Visual Studio under **Project Properties**. Download here: [fmod.com](https://www.fmod.com) |
-| **Mesh OBJ Files** | The mesh assets are not included in the repository. Download the zip here: **[LINK TO MESH OBJ ZIP]** and extract the contents to `meshes` |
 | **Audio Files** | Audioscaper ships with one free licensed track to get you started. To add your own music, place tracks in the `audio` folder in the project directory. Supported formats: **MP3, FLAC, WAV** |
 
 All other dependencies are included in the repository.
@@ -45,8 +41,9 @@ All other dependencies are included in the repository.
 #### Build Instructions
 
 1. Clone the repository
-2. Open the Visual Studio solution file (`.sln`) in the root of the repository
-3. Set the environment paths under **Project Properties → Debugging → Environment** for your target platform:
+2. Download  mesh assets as they are not included in the repository. Download the zip here: **[LINK TO MESH OBJ ZIP]** and extract the contents to `meshes`.
+3. Open the Visual Studio solution file (`.sln`) in the root of the repository
+4. Set the environment paths under **Project Properties → Debugging → Environment** for your target platform:
 
    **32-bit (x86):**
    ```
@@ -61,9 +58,9 @@ All other dependencies are included in the repository.
    > [!NOTE]
    > Paths prefixed with `$(ProjectDir)` are relative to the repository root and do not need to be changed. Only the FMOD paths need to be updated if FMOD was installed to a custom location.
 
-4. Set the build configuration to **[DEBUG/RELEASE]** and platform to **[x64/x86]**
-5. Build the solution
-6. Run the project
+5. Set the build configuration to **[DEBUG/RELEASE]** and platform to **[x64/x86]**
+6. Build the solution
+7. Run the project
 
 ---
 
