@@ -73,7 +73,7 @@ All other dependencies are included in the repository.
 | Space | Jump |
 | Left Shift | Run |
 | TAB | Open / Close Main Menu |
-| ESC | Quit Application |
+| F8 | Quit Application |
 
 ---
 
