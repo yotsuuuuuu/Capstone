@@ -1,3 +1,5 @@
+![title](TigherTitleText.png)
+---
 # Audioscape
 
 Audioscape is an interactive 3D technical demo that bridges the gap between audio and visual experience. Players are able to load any audio track of their choosing by adding it to the audio folder, freely explore the generated terrain on foot, and personalise the visual appearance of the world through a built in colour editor.
