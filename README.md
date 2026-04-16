@@ -35,7 +35,7 @@ Before cloning, make sure the following are installed:
 | **Visual Studio 2022** | Windows only. Tested on Visual Studio 2022, should be compatible with later versions. |
 | **Vulkan SDK 1.3.296.0** | This is the specific version the project was built and tested against. It is the last version to support both 32-bit and 64-bit builds. Download it here: [LunarG Vulkan SDK](https://vulkan.lunarg.com/) |
 | **FMOD Studio API 2.03.09** | The project is configured to use FMOD's default install path. If FMOD is installed to a custom location, the include, lib and environment paths will need to be updated manually in Visual Studio under **Project Properties**. Download here: [fmod.com](https://www.fmod.com) |
-| **Mesh OBJ Files** | The mesh assets are not included in the repository. Download the zip here: **[LINK TO MESH OBJ ZIP]** and extract the contents to `\ComponentFramework\meshes` |
+| **Mesh OBJ Files** | The mesh assets are not included in the repository. Download the zip here: **[LINK TO MESH OBJ ZIP]** and extract the contents to `meshes` |
 | **Audio Files** | Audioscaper ships with one free licensed track to get you started. To add your own music, place tracks in the `audio` folder in the project directory. Supported formats: **MP3, FLAC, WAV** |
 
 All other dependencies are included in the repository.
